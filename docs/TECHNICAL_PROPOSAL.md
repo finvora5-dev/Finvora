@@ -344,7 +344,7 @@ The chat UI is built against this shape from day one, including citation chips, 
 ## 7. Simulator architecture
 
 ### 7.1 Rules (the same in the prototype's TypeScript and production's Python)
-- **Account:** created with a starting virtual balance (proposed **₦1,000,000**, DECISION D4). The user can reset it: the old account is archived and a new one is created, so history is never lost.
+- **Account:** created with a starting virtual balance of **₦100,000** (decided in ADR 0001). The user can reset it: the old account is archived and a new one is created, so history is never lost.
 - **Instruments:** sample NGX companies only. **Whole shares**, minimum 1. Long positions only: no short selling, no margin, no leverage.
 - **Orders:** market orders that fill immediately at the current simulated price. (Limit orders could be a Stage 2 extension.)
 - **Fees:** an optional, configurable fee schedule in basis points with a defined rounding rule, so users learn that real trades have costs. Exact NGX fee components are to be confirmed (DECISION D5). Default: on, with a simplified schedule clearly labelled "approximate".
@@ -504,6 +504,8 @@ Domain engine (W1) → simulator UI (W3) → calculator (W4). The API contract (
 ## 12. Risks, assumptions and decisions needed
 
 ### 12.1 Decisions needed before or during Week 1
+
+> **Resolved 2026-10-12.** The outcomes are recorded in [ADR 0001](adr/0001-stage-1-prototype-decisions.md), and they replace the recommendations below where they differ: D4 is ₦100,000, D6 is Premium only, D8 includes logos, D9 is founder-owned accounts, and D10 is still open.
 | # | Decision | My recommendation |
 |---|---|---|
 | **D1** | Prototype with no deployed backend (mock API in the browser, contract-first), or a real FastAPI + Postgres backend from Week 1? | **No backend for the prototype.** Zero cost, more of the 5 weeks spent on screens, and no rewrite thanks to the contract and golden tests. Trade-off: prototype state is per browser, not shared between reviewers' devices |
