@@ -5,7 +5,7 @@
 These rules apply to every screen in the prototype and in production. Reviews check new screens against them.
 
 ## 1. One clear next step
-- Each screen has **one primary action**. It is saffron, sits at the bottom in thumb reach, and stays visible (sticky) when the screen scrolls.
+- Each screen has **one primary action**. It is a solid high-contrast button (currently off-white on dark), sits at the bottom in thumb reach, and stays visible (sticky) when the screen scrolls.
 - The Home screen leads with a single **"Next for you"** card (resume a lesson, review a trade, finish setup) instead of a menu of options.
 
 ## 2. Fewer taps
