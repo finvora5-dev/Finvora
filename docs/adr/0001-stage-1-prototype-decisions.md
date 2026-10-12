@@ -34,3 +34,7 @@ The `.test` top-level domain is reserved (RFC 2606), so these addresses can neve
 - A monogram fallback (ticker initials) renders whenever a logo is missing, so no layout depends on a logo existing.
 - Logos are trademarks of their owners. A footer line on company pages reads: "Company names and logos are trademarks of their respective owners. Finvora is not affiliated with or endorsed by them. Prices shown are demo data."
 - **Before production:** confirm the logo source and usage rights, for example whether the licensed market-data provider supplies logos. This is tracked as a Stage 2 item.
+
+## Addendum (2026-10-12): sign-in and account creation
+
+The PRD lists "Simulated sign-in" and "Simulated account creation" as two screens. The prototype merges them into one passwordless flow (email, then a 6-digit code) followed by a single setup question. This follows the fewer-taps rule in [`docs/ux-principles.md`](../ux-principles.md), and both PRD journeys are still covered. This deviation is flagged to the client; a separate "Create account" screen can be added if they prefer.
