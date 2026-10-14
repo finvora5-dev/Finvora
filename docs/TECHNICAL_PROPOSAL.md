@@ -542,4 +542,6 @@ Domain engine (W1) → simulator UI (W3) → calculator (W4). The API contract (
 ---
 
 ## Next step
+> **Design review follow-ups (14 Oct 2026):** see [build-backlog.md](build-backlog.md) for plan gating, empty/offline/error states, glass fallbacks on low-end phones, and the light-mode token set.
+
 Once you approve this proposal (with answers to D1–D10), I will record the key decisions as ADRs in `docs/adr/` and start Week 1: monorepo scaffolding, CI, the domain engine with golden tests, and the landing page and dashboard.
