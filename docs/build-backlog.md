@@ -123,6 +123,118 @@ Checked against the handbook text, 22 Oct 2026. The handbook is community-writte
 - **Property-based tests** on money maths, e.g. "rounding never loses more than 1 kobo" (fast-check for TypeScript, Hypothesis for Python), alongside the golden tests.
 - **Not adopting:** Kafka, event sourcing, distributed sagas, Temporal, provider routing. (Judgement: built for real money moving at scale; overkill for Finvora unless it ever moves real money.)
 
+## B7. Duplicate detection, status verification and reconciliation (Stage 2)
+
+Patterns from the handbook (*The External World*, *Executing Money Flows*, *Observability*). Table design, job timings and thresholds are **judgement and starting values, untested**. Paystack API details are **unverified**.
+
+### Spotting duplicates
+
+**Prevent (database-enforced):**
+- `orders`: at most one **open** order per user per plan (partial unique index).
+- `payment_attempts`: unique `paystack_reference`; at most one **pending** attempt per order. "No retry while pending" is enforced by the database, not just the button.
+- `webhook_events`: unique on Paystack's event ID (or a hash of the raw body). A redelivery hits the constraint and is skipped.
+- Unlocking Premium is one conditional update (`… WHERE status = 'open'`), so two workers can't both unlock.
+
+**Detect (every few minutes):**
+- 2+ successful attempts on one order.
+- 2+ successful payments by one user for the same plan and amount within ~10 minutes, across orders.
+- Matches go to the **Duplicates** queue and trigger an automatic refund of the extra charge, recorded as a new entry.
+
+### Verifying the real status
+
+- One function, `verifyAttempt(reference)`, calls Paystack's verify endpoint from our server and maps the reply to `pending | succeeded | failed` using one tested mapping table. Unknown status, error or timeout returns `pending`.
+- Called by: checkout return, every webhook, the polling job and the admin "Re-check" button. **Nothing else changes an attempt's state.**
+- Every check is stored (time, raw response, state before and after), giving each attempt a full history.
+- Sanity checks: amount, currency (NGN), reference and customer email must match what we created. A mismatch stays pending and raises an alert.
+
+### Reconciling delays
+
+- **Polling:** pending attempts re-checked at roughly 30s, 2m, 10m, 1h, 6h. After ~24h still pending, they go to the **Stuck payments** queue and the user gets "We're still confirming your payment".
+- **Nightly reconciliation:** pull the previous day's Paystack transactions, match by reference, and store a report (counts, match rate, every break).
+
+  | Case | Action |
+  |---|---|
+  | Match, same status | OK |
+  | Paystack succeeded, ours pending or failed | Mark succeeded, unlock or refund if already paid, email the user, alert |
+  | Paystack failed, ours succeeded | Lock Premium, investigate, alert immediately |
+  | In Paystack, not in our DB | Unknown payment: investigate |
+  | Ours succeeded, missing in Paystack | Investigate |
+
+- **Match rate is tracked as an objective** (target 100%). The handbook recommends tracking reconciliation match rate as an SLO.
+- **Later:** check Paystack payouts to the bank against successful payments minus fees and refunds.
+
+### Team tools and alerts
+
+- **Admin › Payments:** search by email, order or reference; the attempt timeline with raw payloads; "Re-check with Paystack"; "Refund extra charge", which needs a second admin to approve (maker-checker). Queues: Duplicates, Stuck, Reconciliation breaks.
+- **Alerts:** any reconciliation break; match rate below 100%; pending older than 1h above a small threshold; webhook signature failures; any duplicate success.
+- Order ID and reference on every log line.
+
+### Tests
+
+Using a fake Paystack plus Paystack test mode:
+- the same webhook twice;
+- webhooks out of order;
+- a verify timeout;
+- a late success after a confirmed failure;
+- two attempts racing on one order;
+- an amount mismatch;
+- an unknown status;
+- the nightly job with one planted break of each kind.
+
+Scale (judgement): a few tables, three background jobs and one admin page. No Kafka or Temporal.
+
+## B8. Other handbook patterns to adopt
+
+Each item cites the handbook chapter it comes from; applying it to Finvora is **judgement** unless stated. Checked against the handbook text on 23 Oct 2026.
+
+### Security and access (*Security Model*, *Controls & Access*)
+- **Row-level security in Postgres/Supabase.** Users can only read their own rows, even if the API has a bug. The browser and API use an RLS-enforced connection; background jobs use a separate privileged role.
+- **Deny by default.** Every API route declares which roles may use it. A route with no declaration is blocked.
+- **Least privilege** for every service key (AI, email, Paystack, storage), scoped to what that job needs.
+- **Never log:** passwords, tokens, API keys, full card or bank numbers, or raw personal data.
+- **Correlation ID** on every request, carried through jobs and logs.
+- **Maker-checker** for sensitive admin actions: publishing AI summaries (already in the mockups), refunds, changing a user's plan, deleting data.
+- **Break-glass access:** emergency admin access is granted by someone else, logged *before* use, and expires automatically, with a review afterwards.
+
+### Change trail (*Controls & Access*)
+- Protected main branch, required review and required CI checks; nobody merges their own money or sign-in code without review.
+- Decision records in `docs/adr/` (already in place).
+- Each deployment is traceable to a commit and a pull request.
+
+### Audit and data protection (*Auditability*)
+- Audit records are append-only. Fix mistakes with a new entry; never edit or delete the original.
+- **Keep financial and audit records apart from personal data,** linked by an opaque user ID. Then a deletion request (an NDPA right, to be confirmed by the lawyer) can remove personal data without breaking payment records.
+- The handbook says financial records typically must be kept 5–7 years. **The Nigerian retention period must be confirmed by a lawyer.**
+
+### Observability (*Observability*)
+- **One canonical log line per boundary:** each API request, each Paystack call and each webhook received, with correlation ID, user, operation, amount, outcome and latency, in a defined schema.
+- Alerts are tied to financial impact (a reconciliation break beats a slow page), and alert on error-rate trends rather than single errors.
+
+### Incidents (*Incident Response*)
+- **Severity includes money at risk.** A double charge or a reconciliation drift is high severity even if the site looks healthy.
+- **A payments "off switch":** pause checkout and renewals while keeping the rest of the app working.
+- **A premortem before launching payments:** imagine it failed badly, then list the missing alerts, safeguards and tests as launch blockers.
+- Blameless postmortems for any incident that touches money.
+
+### API design (*API Design for Financial Products*)
+- **Structured errors** with `type`, `code`, `message`, `retryable`, `suggested_action` and `request_id`, so the app shows the right message and knows whether a retry is safe.
+- Correct HTTP status codes, and additive-only changes to the API.
+- Idempotency keys on any request that creates an order or attempt.
+- Rate limits on AI questions and checkout.
+
+### Testing (*Testing Patterns*)
+- **Contract tests against Paystack's API shape,** to catch it if Paystack changes their responses.
+- **Crash-and-resume tests** for the payment flow: crash after each step, resume, and check there's no double charge and nothing is stuck.
+- Golden tests for the simulator and calculator, and property-based tests for money maths (already listed in B6).
+
+### Market data (*Investments and Securities*)
+- Label which price each screen uses. Finvora uses **end-of-day closing prices** for values, and must say so ("Prices at 12 Oct close"; the mockups already do this).
+- When real data arrives, store each price with its source and timestamp, and validate impossible values (negative or zero prices, big jumps) before showing them (*Core Tenets: No Trust*).
+- Corporate actions (dividends, bonus issues, splits) must adjust historical prices in the calculator; the data provider must supply them.
+
+### Not adopting (judgement)
+US payment rails and regulation (ACH, Fedwire, Reg E, NACHA), lending, custody, settlement and tax lots, blockchain, Kafka, event sourcing, sagas, Temporal, provider routing. Finvora moves no money between users and holds no assets.
+
 ## Open decision
 
 - **Sample-price labelling.** PRD §4.1 says sample prices must be "clearly marked as demo data", but the mockups had that wording removed on request. Options: a small, consistent "Sample prices" label wherever prices show (recommended, judgement) or confirm with the client that no label is wanted.
