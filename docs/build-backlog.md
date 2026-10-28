@@ -273,6 +273,92 @@ Applies to every request that creates or changes something that matters: simulat
 - Every state change is a conditional update from a known previous state, and the code checks how many rows changed.
 - Concurrency tests run against a real Postgres (Testcontainers), not mocks.
 
+## B10. Gaps found in the 28 Oct review
+
+Found by comparing this backlog with the proposal, the ADRs, the PRD and later decisions. The proposal already covers login rate limiting, admin MFA, secrets, upload checks, AI prompt-injection defences, citation validation, backups with test restores, migrations and web hardening (§5, §6, §9), so those are not repeated. Fixes below are **judgement** unless they cite a source; legal points need the lawyer.
+
+### Sign-in: align the docs and secure the email code
+- **Conflict:** proposal §1.4 says Supabase email + password or magic link; ADR 0001's addendum decided **passwordless email + 6-digit code**. The ADR wins; update §1.4 when Stage 2 starts. (Supabase Auth's email-code support must be **verified** against its docs.)
+- Codes expire after 10 minutes and are single-use.
+- At most 5 wrong attempts per code, then a new code is required. Throttle by account and by IP.
+- Resend at most once a minute, a few times per hour.
+- **No account enumeration:** the same message whether or not the email exists ("If that email can sign in, we've sent a code").
+- Sessions: short-lived access tokens with refresh rotation (§5). Add "Sign out of all devices" in Profile.
+- Recovery: if a user loses their email, support verifies them and changes the email by hand, with maker-checker. Never by chat alone.
+- Admins: email code **plus** MFA (§5).
+
+### Minimum age
+- **Open, for the client and lawyer:** can under-18s use Finvora? It affects Premium payments and NDPA handling of children's data.
+- Until decided: sign-up asks users to confirm they are 18 or over, and Premium checkout requires it.
+
+### Market time and calendar
+- All market logic uses **Africa/Lagos (WAT)**. Store timestamps in UTC; convert at display.
+- Keep an **NGX trading calendar** (weekends and public holidays) from the data provider or a maintained table.
+- Prices are labelled with the close they belong to ("Prices at 12 Oct close"). On weekends and holidays "today's change" shows the last trading day, labelled as such.
+- The end-of-day sync runs after the provider publishes. If prices are late, keep showing the previous close, labelled, and alert.
+- The simulator's "Advance market day" skips non-trading days.
+
+### Subscriptions and receipts
+- Monthly to yearly: switch at the next renewal (judgement: simplest and safe), or prorate. **Client decision.**
+- Cancel: Premium continues to the end of the paid period (already promised in the landing-page FAQ).
+- Every successful payment emails a receipt: amount, plan, period, Paystack reference.
+- **VAT:** pricing says "including VAT". Whether Finvora must charge and show VAT is for the **client's accountant**.
+
+### AI provider data handling
+- Before choosing the provider (decision D7), confirm in writing: no training on our data, the retention period, the processing location, and that a data-processing agreement is available.
+- Send the provider only the question, the context and the retrieved report text. No email, name or payment data.
+- Record the cross-border transfer in the NDPA processing records (proposal §5 already notes cross-border transfer).
+
+### Analytics and success measures
+- Agree the Stage 1 success measures with the client (e.g. sign-up → first lesson → first practice trade on day one; Free → Premium conversion).
+- Use privacy-friendly analytics with consent where the law requires it. Never send money amounts, chat text or emails to analytics.
+
+### Out-of-date wording in the proposal
+- Proposal §1.4 ("Demo sign-in"), §5 ("demo banner") and §6.2 ("Sample source") predate the decision to remove demo wording outside the simulator. Resolve together with the **Open decision** on sample-price labelling; the code must match whichever is chosen.
+
+## Pre-launch checklist (Stage 2, real money and real users)
+
+Nothing goes live with real payments until every item is ticked and dated.
+
+**Legal and business** (client, with a Nigerian lawyer and accountant)
+- [ ] SEC Nigeria view on "education, not advice" confirmed in writing
+- [ ] NDPA: privacy notice, processing records, cross-border transfers, breach-notification process, whether a DPO is needed
+- [ ] Terms of use, privacy policy and disclaimer pages published
+- [ ] Minimum age decided
+- [ ] Data retention periods set
+- [ ] VAT position confirmed
+- [ ] Operating company in place; professional indemnity and cyber insurance considered
+- [ ] Market-data licence covers what we display
+
+**Security**
+- [ ] Threat model of sign-in, payments and admin, with findings fixed
+- [ ] Independent penetration test, with findings fixed or formally accepted
+- [ ] `/security-review` and human review completed on all money, sign-in and permission code
+- [ ] Secrets rotated from staging; production keys held only in the host's secret store
+- [ ] Admin MFA enforced; access list reviewed
+
+**Correctness**
+- [ ] All B5, B7 and B9 tests passing, including concurrency tests on real Postgres
+- [ ] Paystack status mapping verified against Paystack's current docs
+- [ ] End-to-end payment test in Paystack test mode, plus one small live payment and refund
+- [ ] Reconciliation job run against real Paystack data with a 100% match
+- [ ] AI golden evaluation set passing at the agreed thresholds
+
+**Operations**
+- [ ] Payments off switch tested
+- [ ] Alerts firing to a real person; on-call contact agreed
+- [ ] Incident plan written (who decides, who tells users and the regulator, and how fast)
+- [ ] Backup restore tested and dated
+- [ ] Premortem held and its actions closed
+
+## Definition of done (every change)
+
+- Tests cover the change. Money, sign-in, permission and payment logic has tests written from the rules in this backlog.
+- CI is green: lint, types, tests, dependency and secret scans, CodeQL.
+- Reviewed by a human; changes to money, sign-in or permissions also get `/security-review`.
+- No secrets, card data or personal data in code or logs.
+- Any judgement call is labelled, and any new decision is recorded in `docs/adr/`.
+
 ## Open decision
 
 - **Sample-price labelling.** PRD §4.1 says sample prices must be "clearly marked as demo data", but the mockups had that wording removed on request. Options: a small, consistent "Sample prices" label wherever prices show (recommended, judgement) or confirm with the client that no label is wanted.
