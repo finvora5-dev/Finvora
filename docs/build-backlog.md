@@ -219,7 +219,7 @@ Each item cites the handbook chapter it comes from; applying it to Finvora is **
 ### API design (*API Design for Financial Products*)
 - **Structured errors** with `type`, `code`, `message`, `retryable`, `suggested_action` and `request_id`, so the app shows the right message and knows whether a retry is safe.
 - Correct HTTP status codes, and additive-only changes to the API.
-- Idempotency keys on any request that creates an order or attempt.
+- Idempotency keys on every request that creates or changes something important (full rules in B9).
 - Rate limits on AI questions and checkout.
 
 ### Testing (*Testing Patterns*)
@@ -234,6 +234,44 @@ Each item cites the handbook chapter it comes from; applying it to Finvora is **
 
 ### Not adopting (judgement)
 US payment rails and regulation (ACH, Fedwire, Reg E, NACHA), lending, custody, settlement and tax lots, blockchain, Kafka, event sourcing, sagas, Temporal, provider routing. Finvora moves no money between users and holds no assets.
+
+## B9. Idempotency keys and race conditions
+
+Agreed 28 Oct 2026. The key rules follow the handbook's *Executing Money Flows › Idempotency* section (checked against the text). Applying them to Finvora, and the specific fixes, are **judgement**. Existing coverage is unchanged: simulator trades (proposal §7, §13), payments (B5, B7) and the job queue (`FOR UPDATE SKIP LOCKED`).
+
+### Idempotency key handling
+
+Applies to every request that creates or changes something that matters: simulator trades, checkout orders and attempts, refunds, plan changes, simulator resets and AI questions.
+
+1. **One key per user action.** The app generates a key when the user starts an action (e.g. "buy GTCO", "start checkout") and reuses that exact key on every retry of it. A new key only for a genuinely new action.
+2. **Scope.** Keys are unique per user **and** per operation, never global.
+3. **Claim atomically.** Insert the key row first (`INSERT … ON CONFLICT DO NOTHING` and check whether it inserted). Never check-then-insert, which is itself a race. If an identical request arrives while the first is still running, return "in progress" (HTTP 409 with `retryable: true`) instead of running it again.
+4. **Store and replay the result.** Save the response with the key. A repeat request gets the original response, not a second execution.
+5. **Errors.** Permanent errors (validation, insufficient virtual cash) are stored and replayed. Temporary errors (timeout, provider down) release the key so the same key can be retried.
+6. **Same key, different body.** Reject with a clear error; never run it.
+7. **No short expiry** on keys for money or plan changes. Keep them at least as long as the records they protect.
+8. **Tests.** A test helper that sends every mutating request twice, including at the same instant, and asserts exactly one effect.
+
+### Race conditions and fixes
+
+| Race | Fix | Test |
+|---|---|---|
+| Double-tap "Confirm" on a trade | Idempotency key + account row lock (already in proposal §7) | Two identical requests at once → one trade |
+| Two trades from two tabs that together exceed the cash | Account row lock (`SELECT … FOR UPDATE`); cash checked inside the lock | Two different buys at once → second rejected with a clear message |
+| Simulator reset while a trade is in flight | Reset takes the same account row lock | Reset + trade at once → consistent final state, never a trade on a deleted account |
+| AI free limit (10 a day) checked by two questions at once | One atomic update: `UPDATE … SET used = used + 1 WHERE user_id = … AND used < 10 RETURNING …`; no row means the limit is reached | 11 questions at once → exactly 10 answered. A failed answer gives the count back. |
+| Webhook and poller verifying the same payment at once | State changes only from pending: `… WHERE status = 'pending'`; the loser does nothing | Webhook + poll + checkout return at once → one transition, one unlock |
+| Renewal job vs the user cancelling, changing plan or paying | Lock the subscription row for every change; the job re-reads state after taking the lock | Cancel during renewal → no charge after cancel, or an automatic refund |
+| Two admins issuing the same refund | Idempotency key on the refund + maker-checker + unique refund per attempt | Two approvals at once → one refund |
+| Unlock vs downgrade (chargeback or failed renewal) at the same moment | Both go through the subscription row lock; decisions use the latest verified state | Interleaved unlock/downgrade → state matches Paystack's records |
+| Watchlist add/remove from two devices | Unique (`watchlist_id`, `company_id`) already; remove is a no-op if absent | Add twice → one item; remove twice → no error |
+
+### Rules of thumb
+
+- Enforce correctness in the **database** (constraints, row locks, conditional updates), never only in the UI or app memory.
+- Keep transactions short. Never hold a lock while calling Paystack or the AI provider: commit, call, then record the result.
+- Every state change is a conditional update from a known previous state, and the code checks how many rows changed.
+- Concurrency tests run against a real Postgres (Testcontainers), not mocks.
 
 ## Open decision
 
