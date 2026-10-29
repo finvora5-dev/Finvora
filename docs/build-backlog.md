@@ -2,6 +2,8 @@
 
 These items came out of the design review of the Stage 1 mockups (14 Oct 2026). Each one says what the mockups now show and what the code phase must do. They sit alongside the week plan in [TECHNICAL_PROPOSAL.md](TECHNICAL_PROPOSAL.md) and the rules in [ux-principles.md](ux-principles.md).
 
+> **Phase note (29 Oct 2026):** B5, B7, B9's payment parts, B10 and the Pre-launch checklist are **Phase 2**. They're recorded so nothing is lost, but they don't block the prototype. Open questions are tracked in [open-questions.md](open-questions.md): only its Phase 1 list needs answers now.
+
 ## B1. One plan value drives every locked or unlocked screen
 
 **Mockups:** Ada is a Free user everywhere. Compare and Dividends exist in two versions, *Premium member view* and *Free plan (locked)*, on mobile and desktop. Profile has a Free version (Upgrade) and a Premium version (Your plan, next payment, switch to yearly, cancel).
@@ -360,5 +362,7 @@ Nothing goes live with real payments until every item is ticked and dated.
 - Any judgement call is labelled, and any new decision is recorded in `docs/adr/`.
 
 ## Open decision
+
+(Now question 2 in [open-questions.md](open-questions.md), Phase 1.)
 
 - **Sample-price labelling.** PRD §4.1 says sample prices must be "clearly marked as demo data", but the mockups had that wording removed on request. Options: a small, consistent "Sample prices" label wherever prices show (recommended, judgement) or confirm with the client that no label is wanted.

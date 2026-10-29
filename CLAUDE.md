@@ -6,6 +6,7 @@
 - Say what you actually checked ("verified by running it", "from PRD §9") versus what you assumed.
 
 ## Project rules (decided)
+- **Phase 1 (the prototype) comes first.** Open questions live in `docs/open-questions.md`; only its Phase 1 list blocks work. Don't raise Phase 2 questions unless asked.
 - Read `docs/TECHNICAL_PROPOSAL.md`, `docs/adr/`, `docs/ux-principles.md` and `docs/build-backlog.md` before changing scope or architecture.
 - Money is integer kobo everywhere, including JSON. No floats.
 - Payments follow `docs/build-backlog.md` §B5: **a failed response is never a failed payment**; three states (pending, confirmed success, confirmed failed); only our server's direct check with Paystack decides; retries are new attempts on the same order, never a new purchase; no retry while pending.
