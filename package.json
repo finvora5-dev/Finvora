@@ -1,0 +1,11 @@
+{
+  "name": "finvora",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "dev": "npm run dev -w @finvora/web",
+    "build": "npm run build -w @finvora/web",
+    "test": "npm run test -w @finvora/engine",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
