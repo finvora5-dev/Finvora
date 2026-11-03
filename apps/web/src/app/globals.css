@@ -63,7 +63,7 @@ button { font-family: inherit; touch-action: manipulation; }
 .link-btn { min-height: 44px; border: 0; background: transparent; font: 700 15px var(--font); color: var(--link); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; padding: 0 8px; }
 .icon-btn { width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); flex: none; }
 .chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--border); background: #FFFFFF; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; font: 600 14px var(--font); text-decoration: none; cursor: pointer; }
-.chip[aria-pressed="true"], .chip-on { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+.chip[aria-pressed="true"], .chip[aria-selected="true"], .chip-on { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chips-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .tag { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--tint); color: var(--link); }

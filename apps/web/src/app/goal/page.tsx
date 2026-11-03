@@ -20,9 +20,9 @@ export default function Goal() {
           {GOALS.map((g) => <button key={g} type="button" role="radio" aria-checked={goal === g} className="option" onClick={() => setGoal(g)}>{g}</button>)}
         </div>
       </main>
-      <div className="sticky-cta">
+      <footer className="sticky-cta">
         <button type="button" className="btn" onClick={() => { update("profile", (p) => ({ ...p, goal })); router.push(read("session") ? "/" : "/sign-in/"); }}>Continue</button>
-      </div>
+      </footer>
     </div>
   );
 }

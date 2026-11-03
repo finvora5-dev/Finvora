@@ -54,7 +54,7 @@ export function Screen({ children, top, sticky, nav = true, guard = true }: { ch
       {guard && <SessionGuard />}
       {top}
       <main id="main" className={`main${sticky ? " has-sticky" : ""}`}>{children}</main>
-      {sticky && <div className="sticky-cta">{sticky}</div>}
+      {sticky && <footer className="sticky-cta">{sticky}</footer>}
       {nav && !sticky && <BottomNav />}
     </div>
   );

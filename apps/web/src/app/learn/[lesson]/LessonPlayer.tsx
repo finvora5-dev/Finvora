@@ -99,12 +99,12 @@ export function LessonPlayer({ id }: { id: string }) {
           {lesson.relatedArticles.length > 0 && <Link href={`/library/${lesson.relatedArticles[0]}/`} className="link-btn">Read more in the Library</Link>}
           {canRate && feedbackCfg.prompts.rateLesson.enabled && <button type="button" className="link-btn" onClick={() => setRating(true)}><Icon name="star" size={18} />Rate this lesson</button>}
         </main>
-        <div className="sticky-cta">
+        <footer className="sticky-cta">
           {done.passed
             ? <Link className="btn" href={nextId ? `/learn/${nextId}/` : "/learn/"}>{nextId ? "Next lesson" : "Back to Learn"}</Link>
             : <button type="button" className="btn" onClick={() => { setDone(null); setFirstTry({}); setIndex(0); update("learning", (l) => saveStep(startLesson(l, id), id, 0)); }}>Try again</button>}
           <Link href="/" className="link-btn">Home</Link>
-        </div>
+        </footer>
         {rating && <RateSheet where={`Lesson: ${lesson.title}`} onClose={() => { setRating(false); update("feedback", (f) => ({ ...f, history: { ...f.history, rateLesson: { lastShownDay: today() } } })); }} />}
       </div>
     );
@@ -115,17 +115,17 @@ export function LessonPlayer({ id }: { id: string }) {
 
   return (
     <div className="frame"><SessionGuard />
-      <div className="progress-top" style={{ position: "sticky", top: 0, background: "#FFFFFF", zIndex: 10 }}>
+      <header className="progress-top" style={{ position: "sticky", top: 0, background: "#FFFFFF", zIndex: 10 }}>
         <button type="button" className="icon-btn" aria-label="Leave lesson" onClick={() => setLeaving(true)}><Icon name="close" /></button>
         <div className="grow"><ProgressBar value={progress} label={`Step ${index + 1} of ${lesson.steps.length}`} /></div>
         <button type="button" className="icon-btn" aria-label="Ask Fin about this lesson" onClick={() => setAsking(true)}><Fin mood="happy" size={28} /></button>
         {feedbackCfg.prompts.reportMistake.enabled && <button type="button" className="icon-btn" aria-label="Report a mistake" onClick={() => setReporting(true)}><Icon name="flag" size={20} /></button>}
-      </div>
+      </header>
       <main id="main" className="main has-sticky" key={step.id}>
         <span className="eyebrow muted">{isBoss ? "Challenge · " : ""}{lesson.title} · {index + 1}/{lesson.steps.length}</span>
         <StepView step={step} answer={answer} setAnswer={setAnswer} locked={!!result} result={result} />
       </main>
-      <div className="sticky-cta" style={result ? { padding: 0, background: "none" } : undefined}>
+      <footer className="sticky-cta" style={result ? { padding: 0, background: "none" } : undefined}>
         {result ? (
           <div className={`feedback ${result.correct ? "good" : "bad"} in`} role="status" aria-live="assertive">
             <div className="row" style={{ alignItems: "flex-start" }}>
@@ -143,7 +143,7 @@ export function LessonPlayer({ id }: { id: string }) {
         ) : (
           <button type="button" className="btn" disabled={!canCheck} onClick={step.type === "info" ? next : check}>{step.type === "info" ? "Continue" : "Check"}</button>
         )}
-      </div>
+      </footer>
       {leaving && <Dialog title="Leave this lesson?" body="Your place is saved, so you can pick up from this step later." confirm="Leave lesson" cancel="Keep learning" onConfirm={() => router.push("/learn/")} onCancel={() => setLeaving(false)} />}
       {asking && <AskSheet context={{ type: "lesson", id, label: lesson.title }} onClose={() => setAsking(false)} />}
       {reporting && <ReportSheet where={`Lesson: ${lesson.title}, step ${index + 1}`} onClose={() => setReporting(false)} onSent={() => toast("Thanks. We'll check this step.")} />}

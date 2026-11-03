@@ -11,10 +11,10 @@ export default function Welcome() {
         <h1 style={{ fontSize: 30 }}>Understand money and investing, five minutes at a time.</h1>
         <p className="muted" style={{ maxWidth: 340 }}>Short lessons with Nigerian examples, a library of plain-English explanations, and a simulator to practise with virtual money.</p>
       </main>
-      <div className="sticky-cta">
+      <footer className="sticky-cta">
         <Link href="/goal/" className="btn">Get started</Link>
         <Link href="/sign-in/" className="link-btn">I already have an account</Link>
-      </div>
+      </footer>
     </div>
   );
 }

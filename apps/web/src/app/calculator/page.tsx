@@ -13,8 +13,8 @@ export default function Calculator() {
   return (
     <Screen top={<TopBar back="/markets/" title="Calculators" />}>
       <div className="chips" role="tablist" aria-label="Calculator">
-        <button type="button" role="tab" className="chip" aria-selected={tab === "history"} aria-pressed={tab === "history"} onClick={() => setTab("history")}>What if I had invested?</button>
-        <button type="button" role="tab" className="chip" aria-selected={tab === "savings"} aria-pressed={tab === "savings"} onClick={() => setTab("savings")}>Savings growth</button>
+        <button type="button" role="tab" className="chip" aria-selected={tab === "history"} onClick={() => setTab("history")}>What if I had invested?</button>
+        <button type="button" role="tab" className="chip" aria-selected={tab === "savings"} onClick={() => setTab("savings")}>Savings growth</button>
       </div>
       {tab === "history" ? <Historical /> : <Savings />}
     </Screen>
