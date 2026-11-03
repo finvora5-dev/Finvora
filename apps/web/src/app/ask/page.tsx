@@ -54,7 +54,7 @@ export default function Ask() {
       {hydrated && ask.history.length === 0 && !pending && (
         <div className="col" style={{ alignItems: "center", textAlign: "center" }}>
           <Fin mood="wave" size={96} />
-          <h1 style={{ fontSize: 22 }}>Ask me about money, investing or a company</h1>
+          <h2 className="h1" style={{ fontSize: 22 }}>Ask me about money, investing or a company</h2>
           <p className="muted small">I explain ideas in plain words with Nigerian examples. I don&apos;t tell anyone what to buy or sell.</p>
           <div className="chips" style={{ justifyContent: "center" }}>{suggestedPrompts(null).map((p) => <button key={p} type="button" className="chip" onClick={() => void send(p)}>{p}</button>)}</div>
         </div>

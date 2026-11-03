@@ -32,7 +32,7 @@ export function ArticleView({ slug }: { slug: string }) {
       {fb.prompts.reportMistake.enabled && <button type="button" className="icon-btn" aria-label="Report a mistake" onClick={() => setReporting(true)}><Icon name="flag" size={20} /></button>}
     </>} />} nav={false} sticky={<button type="button" className="btn btn-w" onClick={() => setAsking(true)}><Fin size={26} />Ask Fin about this</button>}>
       <span className="tag" style={{ alignSelf: "flex-start" }}>{a.category}</span>
-      <h1>{a.title}</h1>
+      <h2 className="h1">{a.title}</h2>
       <p style={{ fontSize: 18, fontWeight: 600 }}>{a.definition}</p>
       {a.explanation.map((p, i) => <p key={i}>{p}</p>)}
       <div className="card card-pad card-tint"><span className="eyebrow" style={{ color: "var(--link)" }}>Example</span><p>{a.example}</p></div>

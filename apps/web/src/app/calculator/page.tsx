@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { CONFIG, compound, formatNaira, historicalReturn, parseNairaToKobo } from "@finvora/domain";
 import { Screen, TopBar, Money, Change, VirtualLabel, Notice } from "@/components/ui";
+import { useEntitlements } from "@/lib/hooks";
 import { api } from "@/lib/api";
 import { update, useStore } from "@/lib/store";
 
@@ -23,8 +24,7 @@ export default function Calculator() {
 function Historical() {
   const prefs = useStore("prefs");
   const sim = useStore("sim");
-  useStore("billing");
-  const ent = api.entitlements();
+  const ent = useEntitlements();
   const [raw, setRaw] = useState(String(prefs.calcAmountKobo / 100));
   const amount = parseNairaToKobo(raw);
   const ticker = api.company(prefs.calcTicker) ? prefs.calcTicker : api.companies()[0]!.ticker;

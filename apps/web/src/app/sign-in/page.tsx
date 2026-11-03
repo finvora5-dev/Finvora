@@ -36,7 +36,7 @@ export default function SignIn() {
     <div className="frame">
       <TopBar back="/welcome/" title="Sign in" />
       <main id="main" className="main">
-        <h1>Sign in or create an account</h1>
+        <h2 className="h1">Sign in or create an account</h2>
         <p className="muted">We&apos;ll send a 6-digit code to your email. No password needed.</p>
         <form className="col" onSubmit={submit} noValidate>
           <div>

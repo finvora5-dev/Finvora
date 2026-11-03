@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CONFIG, formatNaira, type BillingPeriod } from "@finvora/domain";
 import { Screen, TopBar, Notice, Dialog, useToast } from "@/components/ui";
 import { Icon } from "@/components/Icon";
+import { useEntitlements } from "@/lib/hooks";
 import { api } from "@/lib/api";
 import { useStore } from "@/lib/store";
 
@@ -23,7 +24,7 @@ export default function Plans() {
   const billing = useStore("billing");
   const [period, setPeriod] = useState<BillingPeriod>("yearly");
   const [cancel, setCancel] = useState(false);
-  const ent = api.entitlements();
+  const ent = useEntitlements();
   const monthly = CONFIG.PLUS_PRICE_KOBO.monthly, yearly = CONFIG.PLUS_PRICE_KOBO.yearly;
   const saving = Math.round((1 - yearly / (monthly * 12)) * 100);
 
@@ -53,7 +54,7 @@ export default function Plans() {
 
   return (
     <Screen top={<TopBar back="/me/" title="Plans" />} nav={false} sticky={<><button type="button" className="btn" onClick={go}>Continue with Plus · {formatNaira(api.priceFor(period))}</button><p className="xs muted center">Simulated checkout. No card details are collected and no payment is taken.</p></>}>
-      <h1>Learn more with Plus</h1>
+      <h2 className="h1">Learn more with Plus</h2>
       <p className="muted">The Library stays free for everyone.</p>
       <div className="col" role="radiogroup" aria-label="Billing period">
         <button type="button" role="radio" aria-checked={period === "yearly"} className="option" onClick={() => setPeriod("yearly")}><span className="grow"><strong>Yearly</strong> · {formatNaira(yearly)}<br /><span className="small muted">Save about {saving}% compared with monthly</span></span></button>

@@ -47,14 +47,14 @@ export default function Checkout() {
 
   if (order.status === "confirmedSuccess") return (
     <Screen top={<TopBar title="Payment confirmed" />} nav={false} sticky={<Link href="/" className="btn">Start exploring Plus</Link>}>
-      <div className="col center pop" style={{ alignItems: "center" }}><Fin mood="proud" size={110} /><h1>You&apos;re on Plus</h1><p className="muted">We confirmed your {amount} payment. Your plan renews on {billing.sub.renewsOn}.</p></div>
+      <div className="col center pop" style={{ alignItems: "center" }}><Fin mood="proud" size={110} /><h2 className="h1">You&apos;re on Plus</h2><p className="muted">We confirmed your {amount} payment. Your plan renews on {billing.sub.renewsOn}.</p></div>
       {ref}
     </Screen>
   );
 
   if (order.status === "confirmedFailed") return (
     <Screen top={<TopBar back="/plans/" title="Payment not completed" />} nav={false} sticky={<><button type="button" className="btn" onClick={() => { const o = api.retryOrder(order.id); started.current = Date.now(); setSlow(false); setOrder(o); }}>Try again</button><Link href="/plans/" className="link-btn">Back to plans</Link></>}>
-      <div className="col center" style={{ alignItems: "center" }}><Fin mood="oops" size={96} /><h1>Payment not completed</h1><p className="muted">The payment provider confirmed this payment didn&apos;t go through. You haven&apos;t been charged. Trying again uses the same order, so you can&apos;t be charged twice.</p></div>
+      <div className="col center" style={{ alignItems: "center" }}><Fin mood="oops" size={96} /><h2 className="h1">Payment not completed</h2><p className="muted">The payment provider confirmed this payment didn&apos;t go through. You haven&apos;t been charged. Trying again uses the same order, so you can&apos;t be charged twice.</p></div>
       {ref}
     </Screen>
   );
@@ -63,7 +63,7 @@ export default function Checkout() {
     <Screen top={<TopBar title="Checking your payment" />} nav={false} sticky={offline ? <button type="button" className="btn" onClick={() => void check(order.id)} disabled={checking}>{checking ? "Checking…" : "Check again"}</button> : undefined}>
       <div className="col center" style={{ alignItems: "center" }} aria-live="polite">
         <Fin mood={offline ? "sleep" : "think"} size={96} />
-        <h1>{offline ? "You're offline" : slow ? "This is taking longer than usual" : "Checking with the payment provider"}</h1>
+        <h2 className="h1">{offline ? "You're offline" : slow ? "This is taking longer than usual" : "Checking with the payment provider"}</h2>
         <p className="muted">{offline ? "We can't check your payment right now. If you paid, it's safe: we'll confirm it when you're back online." : slow ? "Your payment may still be processing. Please don't pay again. We'll keep checking." : `Confirming your ${amount} payment. Please don't pay again or close this screen.`}</p>
         {!offline && <p className="muted" aria-hidden="true"><span className="dot">●</span> <span className="dot" style={{ animationDelay: ".2s" }}>●</span> <span className="dot" style={{ animationDelay: ".4s" }}>●</span></p>}
       </div>

@@ -25,10 +25,10 @@ export default function Daily() {
   return (
     <Screen top={<TopBar back="/" title="Daily question" />} sticky={already ? <Link href="/" className="btn">Back to Home</Link> : checked ? <Link href="/" className="btn">Done</Link> : <button type="button" className="btn" disabled={!pick} onClick={submit}>Check</button>}>
       {already ? (
-        <div className="col center" style={{ alignItems: "center" }}><Fin mood="proud" size={96} /><h1>You&apos;ve done today&apos;s question</h1><p className="muted">A new one arrives tomorrow.</p></div>
+        <div className="col center" style={{ alignItems: "center" }}><Fin mood="proud" size={96} /><h2 className="h1">You&apos;ve done today&apos;s question</h2><p className="muted">A new one arrives tomorrow.</p></div>
       ) : (
         <>
-          <h1 style={{ fontSize: 22 }} id="dq">{q.prompt}</h1>
+          <h2 className="h1" style={{ fontSize: 22 }} id="dq">{q.prompt}</h2>
           <div className="col" role="radiogroup" aria-labelledby="dq">
             {q.options.map((o) => <button key={o.id} type="button" role="radio" aria-checked={pick === o.id} disabled={checked} className={`option ${checked && pick === o.id ? (correct ? "right" : "wrong") : ""}`} onClick={() => setPick(o.id)}>{o.text}</button>)}
           </div>

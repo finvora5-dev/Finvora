@@ -26,7 +26,7 @@ export function SimCompanyView({ ticker }: { ticker: string }) {
     <Screen top={<TopBar back="/simulator/" title={c.name} />} nav={false} sticky={
       <div className="row">{holding && <button type="button" className="btn btn-w" onClick={() => setSheet("sell")}>Sell</button>}<button type="button" className="btn" onClick={() => setSheet("buy")}>Buy</button></div>
     }>
-      <div className="row"><Monogram text={c.ticker} /><div className="grow"><h1 style={{ fontSize: 22 }}>{c.name}</h1><span className="small muted">{c.ticker} · {c.sector} · made-up company</span></div></div>
+      <div className="row"><Monogram text={c.ticker} /><div className="grow"><h2 className="h1" style={{ fontSize: 22 }}>{c.name}</h2><span className="small muted">{c.ticker} · {c.sector} · made-up company</span></div></div>
       <section className="card card-pad col" style={{ gap: 8 }}>
         <div className="row between"><span style={{ fontSize: 28, fontWeight: 800 }}><Money kobo={price} /></span><VirtualLabel kind="demo" /></div>
         <span className="small"><Change kobo={price - prev} pct={percentChange(prev, price)} label="Today" /> today</span>
@@ -193,7 +193,7 @@ function TradeDone({ trade, onBack }: { trade: Trade; onBack: () => void }) {
     <Screen top={<TopBar title="Practice trade done" />} nav={false} sticky={<><Link href="/simulator/" className="btn">See your portfolio</Link><button type="button" className="link-btn" onClick={onBack}>Back to {c.name}</button></>}>
       <div className="col center pop" style={{ alignItems: "center" }}>
         <Fin mood="cheer" size={110} />
-        <h1>{trade.side === "buy" ? "You bought" : "You sold"} {trade.quantity} share{trade.quantity === 1 ? "" : "s"}</h1>
+        <h2 className="h1">{trade.side === "buy" ? "You bought" : "You sold"} {trade.quantity} share{trade.quantity === 1 ? "" : "s"}</h2>
         <p className="muted">of {c.name} at <Money kobo={trade.priceKobo} /> each.</p>
       </div>
       <section className="card card-pad">

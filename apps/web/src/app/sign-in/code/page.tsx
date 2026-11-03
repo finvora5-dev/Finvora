@@ -32,7 +32,7 @@ export default function Code() {
     <div className="frame">
       <TopBar back="/sign-in/" title="Enter code" />
       <main id="main" className="main">
-        <h1>Check your email</h1>
+        <h2 className="h1">Check your email</h2>
         <p className="muted">We sent a 6-digit code to <strong>{email || "your email"}</strong>.</p>
         {locked ? <Notice tone="warn">Too many tries. For your security, wait 15 minutes or send a new code.</Notice> : (
           <form className="col" onSubmit={submit} noValidate>

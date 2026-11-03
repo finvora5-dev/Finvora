@@ -5,15 +5,17 @@ import { levelFor, ACHIEVEMENTS } from "@finvora/engine";
 import { Screen, TopBar, ProgressBar } from "@/components/ui";
 import { Icon } from "@/components/Icon";
 import { Fin } from "@/components/Fin";
+import { useEntitlements } from "@/lib/hooks";
 import { api, today } from "@/lib/api";
-import { useStore } from "@/lib/store";
+import { useStore, useHydrated } from "@/lib/store";
 
 export default function Me() {
   const session = useStore("session");
   const learning = useStore("learning");
   const billing = useStore("billing");
   const lib = useStore("library");
-  const ent = api.entitlements();
+  const ent = useEntitlements();
+  const hydrated = useHydrated();
   const lvl = levelFor(learning.xp);
   const done = Object.values(learning.lessons).filter((l) => l.status === "complete").length;
   const earned: (keyof typeof ACHIEVEMENTS)[] = [];
@@ -24,13 +26,13 @@ export default function Me() {
 
   return (
     <Screen top={<TopBar title="Me" right={<Link href="/settings/" className="icon-btn" aria-label="Settings"><Icon name="settings" /></Link>} />}>
-      <div className="row"><Fin mood="happy" size={64} /><div className="grow"><h1 style={{ fontSize: 22 }}>{session?.name ?? "Learner"}</h1><span className="small muted">{session?.email}</span></div></div>
+      <div className="row"><Fin mood="happy" size={64} /><div className="grow"><h2 className="h1" style={{ fontSize: 22 }}>{session?.name ?? "Learner"}</h2><span className="small muted">{session?.email}</span></div></div>
       <section className="card card-pad col" style={{ gap: 8 }}>
         <div className="row between"><strong>{lvl.title}</strong><span className="small muted num">{learning.xp} XP</span></div>
         <ProgressBar value={lvl.progress} label="Level progress" />
         <div className="grid2 small">
           <div><strong className="num" style={{ fontSize: 20 }}>{done}</strong><br /><span className="muted">lessons done</span></div>
-          <div><strong className="num" style={{ fontSize: 20 }}>{streak(learning.activeDays, today())}</strong><br /><span className="muted">day streak</span></div>
+          <div><strong className="num" style={{ fontSize: 20 }}>{hydrated ? streak(learning.activeDays, today()) : 0}</strong><br /><span className="muted">day streak</span></div>
         </div>
       </section>
       <section className="col" style={{ gap: 8 }}>

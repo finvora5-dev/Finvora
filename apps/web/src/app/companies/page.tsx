@@ -23,7 +23,7 @@ export default function Companies() {
       <div className="chips-scroll" role="group" aria-label="Filter companies">
         {sectors.map((s) => <button key={s} type="button" className="chip" style={{ flex: "none" }} aria-pressed={filter === s} onClick={() => update("prefs", (p) => ({ ...p, companyFilter: s }))}>{s}{s === "Watchlist" && watch.length ? ` (${watch.length})` : ""}</button>)}
       </div>
-      <div className="row between">
+      <div className="row between wrap">
         <span className="row small muted" style={{ gap: 6 }}><VirtualLabel kind="demo" />prices</span>
         <label className="row small" style={{ gap: 6 }}>Sort
           <select className="field" style={{ minHeight: 44, width: "auto" }} value={prefs.companySort} onChange={(e) => update("prefs", (p) => ({ ...p, companySort: e.target.value as "name" | "change" }))}>

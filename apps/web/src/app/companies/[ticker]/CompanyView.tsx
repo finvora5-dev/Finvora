@@ -7,6 +7,7 @@ import { WatchButton } from "@/components/Watch";
 import { AskSheet } from "@/components/AskSheet";
 import { Fin } from "@/components/Fin";
 import { Icon } from "@/components/Icon";
+import { useEntitlements } from "@/lib/hooks";
 import { api } from "@/lib/api";
 import { update, useStore } from "@/lib/store";
 
@@ -16,9 +17,8 @@ export function CompanyView({ ticker }: { ticker: string }) {
   const c = api.company(ticker)!;
   const sim = useStore("sim");
   const prefs = useStore("prefs");
-  useStore("billing");
   const [asking, setAsking] = useState(false);
-  const ent = api.entitlements();
+  const ent = useEntitlements();
   const range = RANGES.some((r) => r.d === prefs.chartRange) ? prefs.chartRange : 30;
   const hist = api.priceHistory(ticker, sim.day, range);
   const price = hist[hist.length - 1]!;
@@ -27,7 +27,7 @@ export function CompanyView({ ticker }: { ticker: string }) {
   return (
     <Screen top={<TopBar back={true} title={c.name} right={<WatchButton ticker={ticker} name={c.name} compact />} />} nav={false}
       sticky={<button type="button" className="btn" onClick={() => setAsking(true)}><Fin size={26} />Ask Fin about {c.name}</button>}>
-      <div className="row"><Monogram text={c.ticker} /><div className="grow"><h1 style={{ fontSize: 22 }}>{c.name}</h1><span className="small muted">{c.ticker} · {c.exchange} · {c.sector}</span></div></div>
+      <div className="row"><Monogram text={c.ticker} /><div className="grow"><h2 className="h1" style={{ fontSize: 22 }}>{c.name}</h2><span className="small muted">{c.ticker} · {c.exchange} · {c.sector}</span></div></div>
 
       <section className="card card-pad col" style={{ gap: 8 }} aria-label="Price">
         <div className="row between"><span style={{ fontSize: 28, fontWeight: 800 }}><Money kobo={price} /></span><VirtualLabel kind="demo" /></div>
