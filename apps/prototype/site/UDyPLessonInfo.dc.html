@@ -77,16 +77,16 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
   
   <div style="flex: 1; width: 100%; padding: 0 48px; box-sizing: border-box; display: flex; flex-direction: column">
   <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 12px">
-    <a href="UDJourney.dc.html" class="press" aria-label="Close lesson and return to the journey" style="width: 44px; height: 44px; flex: none; margin-left: -10px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#615A6E" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
+    <a href="UPJourney.dc.html" class="press" aria-label="Close lesson and return to the journey" style="width: 44px; height: 44px; flex: none; margin-left: -10px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#615A6E" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
     <div role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1" style="flex: 1; height: 8px; border-radius: 999px; background: #E7E2F0; overflow: hidden"><div class="fill" style="--from: 0%; width: 33.3%; height: 100%; border-radius: 999px; background: #5B21B6"></div></div>
     <span style="font-size: 14px; font-weight: 700; color: #615A6E">1/3</span>
   </header>
   <main style="padding: 24px 16px 24px; display: flex; flex-direction: column; gap: 18px">
     <span class="in" style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #5B2FC9">Quick learn</span>
-    <h1 class="in" style="margin: -10px 0 0; font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em">Compound interest</h1>
-    <p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">Interest you earn on your money <strong>and</strong> on the interest you've already earned.</p>
+    <h1 class="in" style="margin: -10px 0 0; font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em">{{title}}</h1>
+    <sc-if value="{{designed}}" hint-placeholder-val="{{true}}"><p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">Interest you earn on your money <strong>and</strong> on the interest you've already earned.</p></sc-if><sc-if value="{{generic}}" hint-placeholder-val="{{false}}"><p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">{{lead}}</p></sc-if>
 
-    <section class="in" aria-label="Example" style="animation-delay: .06s; background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px 14px 10px">
+    <sc-if value="{{designed}}" hint-placeholder-val="{{true}}"><section class="in" aria-label="Example" style="animation-delay: .06s; background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px 14px 10px">
       <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px"><span style="font-weight: 800">₦50,000 at 10% a year</span><span style="font-size: 13px; color: #615A6E">growth</span></div>
       <div style="display: flex; gap: 14px; padding: 8px 4px 0; font-size: 13px; font-weight: 700">
         <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #0FA394"></span>Simple</span>
@@ -94,7 +94,8 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
         <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #7B4AF0"></span>Interest on interest</span>
       </div>
       <svg width="100%" height="230" viewBox="0 44 340 192" role="img" aria-labelledby="ch-t"><title id="ch-t">Growth of ₦50,000 at 10% a year. Simple interest adds ₦5,000 each year: ₦55,000, ₦60,000, ₦65,000. Compound interest gives ₦55,000, ₦60,500, ₦66,550, so ₦1,550 more after 3 years.</title><line x1="20" y1="210" x2="330" y2="210" stroke="#D3DEEE" stroke-width="2"></line><rect x="40" y="170" width="30" height="40" rx="6" fill="#0FA394"></rect><rect x="74" y="170" width="30" height="40" rx="6" fill="#176EEB"></rect><text x="72" y="230" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#5D6785">Year 1</text><rect x="136" y="130" width="30" height="80" rx="6" fill="#0FA394"></rect><rect x="170" y="130" width="30" height="80" rx="6" fill="#176EEB"></rect><rect x="170" y="126.0" width="30" height="8.0" rx="4" fill="#7B4AF0"></rect><text x="168" y="230" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#5D6785">Year 2</text><rect x="232" y="90" width="30" height="120" rx="6" fill="#0FA394"></rect><rect x="266" y="90" width="30" height="120" rx="6" fill="#176EEB"></rect><rect x="266" y="77.6" width="30" height="16.400000000000006" rx="4" fill="#7B4AF0"></rect><text x="264" y="230" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#5D6785">Year 3</text><text x="281" y="66" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800" fill="#5B2FC9">+₦1,550</text></svg>
-    </section>
+    </section></sc-if>
+    <sc-if value="{{generic}}" hint-placeholder-val="{{false}}"><section class="in" aria-label="Example" style="animation-delay: .06s; background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column"><span style="font-weight: 800; padding-bottom: 6px">{{exTitle}}</span><sc-for list="{{rows}}" as="r" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #F5F3F8; font-size: 15px"><span style="color: #38323F">{{r.k}}</span><strong class="num" style="text-align: right">{{r.v}}</strong></div></sc-for></section></sc-if>
 
     <div class="in" style="animation-delay: .1s; display: flex; align-items: flex-end; gap: 8px">
       <div style="width: 64px; height: 64px; flex: none"><svg width="64" height="64" viewBox="0 0 120 120" role="img" aria-label="Fin, the Finvora coin">
@@ -110,9 +111,9 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
   <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle>
   <path d="M48 70 q12 14 26 0 z" fill="#0B1F44"></path><path d="M54 76 q6 4 12 0" fill="#FF8FA3"></path>
 </svg></div>
-      <p style="position: relative; flex: 1; margin: 0 0 10px; background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px; padding: 10px 14px; font-size: 15px; font-weight: 600; line-height: 1.45">The longer you wait, the bigger the purple part grows. Starting early beats starting big.</p>
+      <p style="position: relative; flex: 1; margin: 0 0 10px; background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px; padding: 10px 14px; font-size: 15px; font-weight: 600; line-height: 1.45">{{tip}}</p>
     </div>
-    <p class="in" style="margin: -6px 0 0; font-size: 13px; color: #615A6E">Assumes 10% every year and no withdrawals.</p>
+    <sc-if value="{{designed}}" hint-placeholder-val="{{true}}"><p class="in" style="margin: -6px 0 0; font-size: 13px; color: #615A6E">Assumes 10% every year and no withdrawals.</p></sc-if>
   </main>
   <div style="margin-top: auto; position: sticky; bottom: 0; z-index: 5; padding: 12px 16px 22px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px">
     <a href="UPLessonChoice.dc.html" class="btn b-blue">Continue</a>
@@ -124,7 +125,13 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
   componentDidMount() { window.FV && window.FV.startRun(); }
-  renderVals() { return {}; }
+  G() { const F = window.FV; return F && F.lesson ? F.lesson() : null; }
+  renderVals() {
+    const L = this.G(); if (!L) return { designed: true, generic: false, title: 'Compound interest', tip: '' };
+    const c = L.c;
+    return { title: L.title, designed: L.designed, generic: !L.designed, lead: c ? c.lead : '', exTitle: c ? c.exTitle : '', rows: c ? c.rows.map((r) => ({ k: r[0], v: r[1] })) : [],
+      tip: c ? c.tip : 'The longer you wait, the bigger the purple part grows. Starting early beats starting big.' };
+  }
 }
 </script>
 </body>

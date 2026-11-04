@@ -56,9 +56,9 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
       <span style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #4C1D95">Quick question</span>
     </div>
 
-    <h1 id="q" class="in" style="margin: -6px 0 0; font-size: 24px; line-height: 1.3; font-weight: 700; letter-spacing: -0.02em">You save <span class="num">₦20,000</span> at 10% a year, compounded yearly. How much do you have after 2 years?</h1>
+    <h1 id="q" class="in" style="margin: -6px 0 0; font-size: 24px; line-height: 1.3; font-weight: 700; letter-spacing: -0.02em"><sc-if value="{{designed}}" hint-placeholder-val="{{true}}">You save <span class="num">₦20,000</span> at 10% a year, compounded yearly. How much do you have after 2 years?</sc-if><sc-if value="{{generic}}" hint-placeholder-val="{{false}}">{{qText}}</sc-if></h1>
 
-    <div class="in" aria-hidden="true" style="animation-delay: .05s; border-radius: 18px; background: #FFFFFF; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 6px">
+    <sc-if value="{{designed}}" hint-placeholder-val="{{true}}"><div class="in" aria-hidden="true" style="animation-delay: .05s; border-radius: 18px; background: #FFFFFF; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 6px">
       <span style="display: flex; flex-direction: column; align-items: flex-start"><span style="font-size: 12px; font-weight: 600; color: #615A6E">Now</span><span class="num" style="font-size: 18px; font-weight: 800">₦20,000</span></span>
       <span style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; color: #4C1D95; font-size: 12px; font-weight: 700">
         <span style="padding: 3px 8px; border-radius: 999px; background: #F1EBFB">+10%</span>
@@ -67,7 +67,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
       </span>
       <span style="display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 12px; font-weight: 600; color: #615A6E">Year 2</span><span style="font-size: 18px; font-weight: 800; color: #4C1D95">?</span></span>
     </div>
-
+</sc-if>
     <div role="group" aria-labelledby="q" style="display: flex; flex-direction: column; gap: 10px">
       <sc-for list="{{opts}}" as="o" hint-placeholder-count="4">
         <button type="button" class="opt in {{o.cls}}" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" aria-label="{{o.aria}}" style="animation-delay: {{o.delay}}; background: {{o.bg}}; border: 1.5px solid {{o.border}}; color: #0E0B14">
@@ -102,7 +102,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
           <span aria-hidden="true" style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #DCFAE6; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <h2 id="fb-right" style="margin: 0; font-size: 19px; font-weight: 700; color: #0F6B39">Correct</h2>
         </div>
-        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #38323F"><span class="num">₦20,000 × 1.1 × 1.1 = ₦24,200</span>. Year 2 earns 10% on <span class="num">₦22,000</span>, so the <span class="num">₦2,000</span> of interest earns interest too.</p>
+        <sc-if value="{{designed}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 15px; line-height: 1.55; color: #38323F"><span class="num">₦20,000 × 1.1 × 1.1 = ₦24,200</span>. Year 2 earns 10% on <span class="num">₦22,000</span>, so the <span class="num">₦2,000</span> of interest earns interest too.</p></sc-if><sc-if value="{{generic}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 16px; line-height: 1.5">{{rightText}}</p></sc-if>
         <a href="UPLessonCalc.dc.html" class="btn b-green">Continue</a>
       </section>
     </sc-if>
@@ -112,9 +112,11 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":940}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { pick: null, checked: false }; }
+  G() { const F = window.FV; return F && F.lesson ? F.lesson() : null; }
   renderVals() {
     const s = this.state;
-    const opts = [
+    const L = this.G(), c = L && L.c;
+    const opts = c ? c.opts.map((o, i) => ({ label: o[0], why: o[1], right: i === c.right })) : [
       { label: '₦22,000', why: '₦22,000 is the total after one year only. Year 2 adds another round of interest.' },
       { label: '₦24,000', why: '₦24,000 is simple interest: ₦2,000 each year on the original ₦20,000. With compounding, year 2 also earns interest on the ₦2,000 you already earned.' },
       { label: '₦24,200', right: true },
@@ -145,12 +147,13 @@ class Component extends DCLogic {
           pick: () => this.setState({ pick: i, checked: false })
         };
       }),
+      designed: !c, generic: !!c, qText: c ? c.q : '', rightText: c ? c.rightText : '',
       kThink: !s.checked, kOops: wrong, kCheer: right,
       showCheck: !s.checked, showWrong: wrong, showRight: right,
       wrongText: wrong ? picked.why : '',
       checkOff: s.pick === null,
       checkClass: s.pick === null ? 'btn b-off' : 'btn b-blue',
-      check: () => { if (s.pick !== null) { window.FV && window.FV.answer('choice', !!opts[s.pick].right); this.setState({ checked: true }); } },
+      check: () => { if (s.pick !== null) { window.FV && window.FV.answer('choice', !!opts[s.pick].right, opts[s.pick].label); this.setState({ checked: true }); } },
       retry: () => this.setState({ pick: null, checked: false })
     };
   }

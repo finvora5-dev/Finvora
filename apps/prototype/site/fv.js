@@ -241,6 +241,78 @@
     inbox: function () { return admLoad().inbox; },
     audit: function () { return admLoad().audit; }
   };
+
+  // ---- Lesson content for World 1. "interest" is the designed lesson; the other five reuse its
+  // screens with their own words. Amounts are naira; every example is made up for learning.
+  var CONTENT = {
+    money: {
+      lead: "Money does three jobs: you pay with it, you compare prices with it, and you keep value in it for later.",
+      exTitle: "Money's three jobs", rows: [["Paying ₦500 for a danfo ride", "Paying"], ["A shirt is ₦8,000, jeans are ₦12,000", "Comparing"], ["Keeping ₦20,000 for next month", "Keeping value"]],
+      tip: "The naira is Nigeria's money. ₦1 is 100 kobo.",
+      q: "Ada compares two phones by their prices in naira to see which costs less. Which job of money is she using?",
+      opts: [["Paying for things", "Paying is when money changes hands. Ada hasn't bought anything yet."], ["Comparing prices", ""], ["Keeping value for later", "Keeping value means saving money to use later. Ada is comparing, not saving."], ["Borrowing", "Borrowing isn't one of money's three jobs. Ada is using prices to compare."]], right: 1,
+      rightText: "Prices in naira give everything the same measuring stick, so you can see which phone costs less.",
+      calc: "How many kobo are in ₦25?", unit: "kobo", answer: 2500, hint: "₦1 is 100 kobo, so multiply the naira by 100.",
+      wrongs: { 25: "That's the amount in naira. Multiply by 100 to get kobo.", 250: "Close. ₦1 is 100 kobo, not 10, so multiply by 100." },
+      calcRight: "₦25 × 100 = 2,500 kobo.", calcNote: "Prices in kobo are why some prices end in .50, like ₦1.50.",
+      learned: ["Money helps you pay for things.", "Prices in naira let you compare things.", "Money can keep value for later, though inflation can shrink it."], article: "what-is-money"
+    },
+    income: {
+      lead: "Income is money coming in. Expenses are money going out. What's left over is what you can save.",
+      exTitle: "Tunde's month", rows: [["Salary (income)", "₦150,000"], ["Rent and food (expenses)", "−₦95,000"], ["Transport (expense)", "−₦25,000"], ["Left over", "₦30,000"]],
+      tip: "Writing both down for one month shows where your money really goes.",
+      q: "Which of these is an expense?",
+      opts: [["Your salary from work", "A salary is money coming in, so it's income."], ["Profit from a small shop", "Profit is money coming in, so it's income."], ["Your monthly data bundle", ""], ["A gift from your aunt", "A gift is money coming in, so it counts as income."]], right: 2,
+      rightText: "A data bundle is money going out every month, so it's an expense.",
+      calc: "Tunde earns ₦120,000 a month and spends ₦95,000. How much is left over in naira?", unit: "naira", answer: 25000, hint: "Take the expenses away from the income.",
+      wrongs: { 215000: "It looks like you added them. Left over is income minus expenses.", 95000: "That's what Tunde spends. Take it away from ₦120,000." },
+      calcRight: "₦120,000 − ₦95,000 = ₦25,000.", calcNote: "If expenses are bigger than income, the gap usually becomes debt.",
+      learned: ["Income is money coming in.", "Expenses are money going out.", "Income minus expenses is what you can save."], article: "budgeting"
+    },
+    budget: {
+      lead: "A budget is a plan for your income before you spend it. A simple guide splits it 50% needs, 30% wants and 20% savings.",
+      exTitle: "50/30/20 on ₦150,000", rows: [["Needs: rent, food, transport (50%)", "₦75,000"], ["Wants: outings, new clothes (30%)", "₦45,000"], ["Savings (20%)", "₦30,000"]],
+      tip: "It's a starting point. Change the split to fit your life.",
+      q: "Using the 50/30/20 guide, which of these is a want?",
+      opts: [["Rent", "Rent is a need: you have to pay it to have a home."], ["Electricity bill", "Electricity is a need for most homes."], ["Weekend suya with friends", ""], ["School fees", "School fees are a need if you or your children are in school."]], right: 2,
+      rightText: "Suya with friends is nice to have but not essential, so it's a want.",
+      calc: "Ada earns ₦200,000 a month. How much is 20% for savings, in naira?", unit: "naira", answer: 40000, hint: "20% is the same as one fifth. Divide by 5.",
+      wrongs: { 20000: "That's 10%. Twenty percent is double that.", 4000: "Check the zeros. 20% of ₦200,000 is a five-figure amount." },
+      calcRight: "₦200,000 × 20% = ₦40,000.", calcNote: "Saving first, before spending on wants, makes the plan easier to keep.",
+      learned: ["A budget is a plan for your income.", "50/30/20 splits it into needs, wants and savings.", "Change the split to fit your life."], article: "budgeting"
+    },
+    inflation: {
+      lead: "Inflation is when prices rise over time, so each naira buys a little less than before.",
+      exTitle: "A bag of rice", rows: [["Last year", "₦50,000"], ["This year", "₦60,000"], ["Price rise", "20%"]],
+      tip: "If your savings grow slower than prices, you can buy less with them.",
+      q: "Prices rise 20% this year and your savings earn 5%. What happens to what your savings can buy?",
+      opts: [["It goes up", "Your savings grow by 5%, but prices grow by 20%, so you can buy less."], ["It stays the same", "Prices rose faster than your savings, so it doesn't stay the same."], ["It goes down", ""], ["It doubles", "Nothing here doubles. Prices rose faster than your savings."]], right: 2,
+      rightText: "Your money grew 5% but prices grew 20%, so the same savings buy less.",
+      calc: "A ₦2,000 meal goes up 15% in a year. What does it cost now, in naira?", unit: "naira", answer: 2300, hint: "15% of ₦2,000 is ₦300. Add it to the old price.",
+      wrongs: { 300: "That's the increase. Add it to the old price of ₦2,000.", 1700: "It looks like you took the 15% away. Prices went up." },
+      calcRight: "₦2,000 + 15% = ₦2,300.", calcNote: "Inflation is usually given as a yearly percentage.",
+      learned: ["Inflation means prices rise over time.", "It lowers what each naira can buy.", "Savings growing slower than inflation lose buying power."], article: "inflation"
+    },
+    emergency: {
+      lead: "An emergency fund is money kept safe and easy to reach for surprises, like a medical bill or losing your income.",
+      exTitle: "Building a fund", rows: [["Monthly costs", "₦80,000"], ["Goal: 3 months of costs", "₦240,000"], ["Where to keep it", "Savings you can reach fast"]],
+      tip: "Many people aim for 3 to 6 months of costs, built up a little at a time.",
+      q: "Where is the best place to keep an emergency fund?",
+      opts: [["In shares that can fall", "Shares can drop just when you need the money, so they're risky for emergencies."], ["In savings you can reach quickly", ""], ["Lent to a friend", "A friend may not be able to pay it back when you need it."], ["Locked away for 2 years", "You can't reach locked money in an emergency."]], right: 1,
+      rightText: "An emergency fund needs to be safe and easy to reach, which is what savings give you.",
+      calc: "Your costs are ₦60,000 a month. How much is 3 months of emergency savings, in naira?", unit: "naira", answer: 180000, hint: "Multiply the monthly costs by 3.",
+      wrongs: { 20000: "It looks like you divided. Multiply ₦60,000 by 3.", 63000: "Multiply by 3 rather than adding 3,000." },
+      calcRight: "₦60,000 × 3 = ₦180,000.", calcNote: "Start small: even one month of costs is a good first goal.",
+      learned: ["An emergency fund is for surprises.", "Keep it safe and easy to reach.", "Aim for a few months of costs, built up over time."], article: "saving-vs-investing"
+    }
+  };
+  /** The lesson being played: the one started in this run, else the next one to do (else the designed one). */
+  function lessonNow() {
+    var s = load(), id = s.run && s.run.l;
+    var L = LESSONS.filter(function (x) { return x.id === id; })[0] || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]);
+    var i = LESSONS.indexOf(L);
+    return { id: L.id, index: i, title: L.title, min: L.min, designed: L.id === "interest", c: CONTENT[L.id] || null };
+  }
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -248,21 +320,23 @@
     level: function (xp) { return xp >= 500 ? 4 : xp >= 250 ? 3 : xp >= 100 ? 2 : 1; },
     current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
     // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
-    startRun: function () { var s = load(); s.run = { answers: {} }; save(s); },
-    answer: function (q, correct) {
-      var s = load(); if (!s.run) s.run = { answers: {} };
-      if (!(q in s.run.answers)) s.run.answers[q] = !!correct; // first try counts
+    lesson: lessonNow,
+    startRun: function () { var s = load(), L = s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]; s.run = { answers: {}, given: {}, l: L.id }; save(s); },
+    answer: function (q, correct, given) {
+      var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
+      if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
       save(s);
     },
     finishRun: function () {
       var s = load(); if (!s.run) return null;
+      var lesson = lessonNow(), given = s.run.given || {};
       var a = s.run.answers, keys = Object.keys(a), right = keys.filter(function (k) { return a[k]; }).length;
       var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
       var xp = 10 + Math.round(5 * pct / 100), wrong = keys.length - right;
       if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; }
       s.xp += xp; var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       s.run = null; save(s);
-      return { xp: xp, pct: pct, wrong: wrong, streak: streak(s.days) };
+      return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days) };
     },
     passBoss: function (score) {
       var s = load(); var passed = score >= 4;
