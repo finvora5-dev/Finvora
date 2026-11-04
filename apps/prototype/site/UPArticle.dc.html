@@ -177,7 +177,7 @@ class Component extends DCLogic {
     return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,
       example: a.example, why: a.whyItMatters, related, hasRelated: related.length > 0, saved: String(saved), saveFill: saved ? '#FFFFFF' : 'none',
       practiseHref: ({ dividend: 'UPLearnTerm', 'what-is-a-share': 'UPLearnSteps', 'saving-vs-investing': 'UPLearnCompare', 'stock-exchange': 'UPLearnMarket', 'risk-and-return': 'UPLearnMyth' }[a.slug] || 'UPJourney') + '.dc.html',
-      save: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } };
+      save: () => { const on = L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); window.fvToast && window.fvToast(on ? 'Saved to your Library' : 'Removed from Saved', { action: 'Undo', onAction: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } }); } };
   }
 }
 </script>

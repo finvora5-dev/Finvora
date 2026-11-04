@@ -132,7 +132,7 @@ class Component extends DCLogic {
     return { name: co.name, price: S.naira(P), fee: S.naira(fee), q: String(q), cost: S.naira(cost), left: over ? 'Not enough' : S.naira(CASH - cost), over, ok: !over, busy: String(this.state.busy),
       back: 'USimCompany.dc.html?t=' + co.t,
       dec: () => this.setState({ q: Math.max(1, q - 1) }), inc: () => this.setState({ q: q + 1 }), decOff: q <= 1 ? 'true' : 'false',
-      buy: () => { if (this.state.busy) return; this.setState({ busy: true }); const r = S.trade('buy', co.t, q, this.key); if (r.ok) location.href = 'USimDone.dc.html?t=' + co.t; else this.setState({ busy: false }); } };
+      buy: () => { if (this.state.busy) return; if (!S.isOpen()) { location.href = 'UMOrderClosed.dc.html?t=' + co.t + '&side=buy&q=' + q; return; } this.setState({ busy: true }); const r = S.trade('buy', co.t, q, this.key); if (r.ok) location.href = 'USimDone.dc.html?t=' + co.t; else this.setState({ busy: false }); } };
   }
 }
 </script>

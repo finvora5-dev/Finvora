@@ -93,7 +93,23 @@
       return r;
     },
     last: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".last") || "null"); } catch (e) { return null; } },
-    reset: function () { try { localStorage.removeItem(SIM_KEY); localStorage.removeItem(SIM_KEY + ".last"); } catch (e) {} }
+    reset: function () { try { localStorage.removeItem(SIM_KEY); localStorage.removeItem(SIM_KEY + ".last"); localStorage.removeItem(SIM_KEY + ".queue"); } catch (e) {} },
+    /** The practice market follows trading hours from packages/domain config (weekdays, Lagos time). */
+    isOpen: function () {
+      try { if (JSON.parse(localStorage.getItem("fv.prefs.v1") || "{}").alwaysOpen) return true; } catch (e) {}
+      var C = D().CONFIG, now = new Date(Date.now() + 3600000), day = now.getUTCDay(), hm = now.toISOString().slice(11, 16);
+      return day >= 1 && day <= 5 && hm >= C.MARKET_OPEN && hm < C.MARKET_CLOSE;
+    },
+    hours: function () { var C = D().CONFIG; return "weekdays " + C.MARKET_OPEN + " to " + C.MARKET_CLOSE + ", Lagos time"; },
+    queued: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".queue") || "[]"); } catch (e) { return []; } },
+    queue: function (side, t, qty) { var q = SIM.queued(); q.push({ side: side, t: t, qty: qty, key: "q-" + Date.now() }); try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(q)); } catch (e) {} },
+    cancelQueued: function (key) { try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(SIM.queued().filter(function (o) { return o.key !== key; }))); } catch (e) {} },
+    /** Places queued orders once the market is open. Returns how many were placed. */
+    runQueue: function () {
+      if (!SIM.isOpen()) return 0; var q = SIM.queued(), n = 0; if (!q.length) return 0;
+      q.forEach(function (o) { if (SIM.trade(o.side, o.t, o.qty, o.key).ok) n++; });
+      try { localStorage.setItem(SIM_KEY + ".queue", "[]"); } catch (e) {} return n;
+    }
   };
 
   // ---- Plan (free or Plus). Set only by the simulated checkout; read by Ask Fin and Plus features.
@@ -479,4 +495,6 @@
     reset: function () { save(fresh()); }
   };
   window.FV = FV;
+  // Queued practice orders are placed as soon as the market is open.
+  try { var placed = SIM.runQueue(); if (placed) sessionStorage.setItem("fv.flash", placed + (placed === 1 ? " queued order was" : " queued orders were") + " placed now that the market is open."); } catch (e) {}
 })();

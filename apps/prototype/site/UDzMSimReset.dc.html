@@ -110,7 +110,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
 class Component extends DCLogic {
   renderVals() {
-    return { reset: () => { if (window.FV && window.FV.SIM) window.FV.SIM.reset(); location.href = 'USimEmpty.dc.html'; } };
+    return { reset: () => { if (window.FV && window.FV.SIM) window.FV.SIM.reset(); window.fvFlash && window.fvFlash('Practice portfolio reset. You have a fresh \u20a6100,000.'); location.href = 'USimEmpty.dc.html'; } };
   }
 }
 </script>

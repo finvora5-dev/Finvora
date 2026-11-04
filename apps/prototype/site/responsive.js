@@ -27,6 +27,7 @@
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
   function fit() {
     var el = root(); if (!el) return;
+    unskeleton();
     if (!el.dataset.fvW) el.dataset.fvW = String(parseFloat(el.style.width) || 390);
     var designW = +el.dataset.fvW, vw = document.documentElement.clientWidth;
     var phoneBoard = designW < 600, wide = vw >= 600;
@@ -80,6 +81,37 @@
       svg.querySelectorAll("path, polyline, line").forEach(function (l) { if (!l.getAttribute("vector-effect")) l.setAttribute("vector-effect", "non-scaling-stroke"); });
     });
   }
+
+  // ---- App states: toast, loading skeleton, offline notice, offline support (service worker).
+  var ICON = { ok: "M5 12l5 5 9-10", info: "M12 8h.01 M11 12h1v5h1", warn: "M12 8v5 M12 16h.01" };
+  window.fvToast = function (msg, opts) {
+    opts = opts || {}; var old = document.getElementById("fv-toast"); if (old) old.remove();
+    var t = document.createElement("div"); t.id = "fv-toast"; t.className = "fv-toast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite");
+    var bg = opts.kind === "warn" ? "#B42828" : "#0E0B14";
+    t.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;width:min(358px,calc(100vw - 32px));box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;font:700 15px 'Plus Jakarta Sans',sans-serif;box-shadow:0 8px 24px rgba(16,30,70,.16);color:#FFFFFF;background:" + bg;
+    t.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="' + (ICON[opts.kind || "ok"] || ICON.ok) + '" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex:1"></span>';
+    t.querySelector("span").textContent = msg;
+    if (opts.action) { var b = document.createElement("button"); b.type = "button"; b.textContent = opts.action; b.style.cssText = "border:0;background:transparent;color:inherit;font:800 14px 'Plus Jakarta Sans',sans-serif;text-decoration:underline;cursor:pointer;min-height:44px"; b.onclick = function () { t.remove(); if (opts.onAction) opts.onAction(); }; t.appendChild(b); }
+    document.body.appendChild(t); setTimeout(function () { if (t.parentNode) t.remove(); }, opts.ms || 4000);
+  };
+  // Loading: a skeleton until the screen has drawn (the design's loading state, not a blank page).
+  function skeleton() {
+    if (document.getElementById("fv-sk") || !document.body) return;
+    var k = document.createElement("div"); k.id = "fv-sk"; k.setAttribute("role", "status"); k.setAttribute("aria-label", "Loading");
+    k.style.cssText = "position:fixed;inset:0;z-index:50;background:#FFFFFF;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px";
+    k.innerHTML = '<div class="fv-sk" style="width:55%;height:28px"></div><div class="fv-sk" style="width:80%;height:16px"></div><div class="fv-sk" style="height:120px"></div><div class="fv-sk" style="height:64px"></div><div class="fv-sk" style="height:64px"></div>';
+    document.body.appendChild(k);
+  }
+  function unskeleton() { var k = document.getElementById("fv-sk"); if (k) k.remove(); }
+  if (document.body) skeleton(); else document.addEventListener("DOMContentLoaded", skeleton);
+  setTimeout(unskeleton, 6000);
+  // A toast saved before leaving a screen shows on the next one.
+  window.fvFlash = function (msg) { try { sessionStorage.setItem("fv.flash", msg); } catch (e) {} };
+  function showFlash() { try { var m = sessionStorage.getItem("fv.flash"); if (m) { sessionStorage.removeItem("fv.flash"); setTimeout(function () { window.fvToast(m); }, 300); } } catch (e) {} }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showFlash); else showFlash();
+  window.addEventListener("offline", function () { window.fvToast("You're offline. Pages you've opened and saved articles still work.", { kind: "info", ms: 6000 }); });
+  window.addEventListener("online", function () { window.fvToast("You're back online."); });
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) { window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js").catch(function () {}); }); }
   var queued = false;
   function schedule() { if (queued) return; queued = true; requestAnimationFrame(function () { queued = false; fit(); }); }
   var mo = new MutationObserver(schedule);

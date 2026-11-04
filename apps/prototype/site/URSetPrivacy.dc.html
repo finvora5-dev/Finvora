@@ -85,7 +85,7 @@ class Component extends DCLogic {
     const P = F.ME.prefs(), K = ['analytics', 'tips', 'askImprove'], D = { analytics: true, tips: false, askImprove: true }, v = {};
     K.forEach((k, i) => { const on = k in P ? !!P[k] : D[k]; v['p' + i] = String(on); v['b' + i] = on ? '#5B21B6' : '#D3CDE0'; v['t' + i] = () => { F.ME.setPref(k, !on); this.setState({ n: this.state.n + 1 }); }; });
     v.download = (e) => { if (e && e.preventDefault) e.preventDefault(); const out = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^fv\./.test(k)) { try { out[k] = JSON.parse(localStorage.getItem(k)); } catch (x) { out[k] = localStorage.getItem(k); } } }
-      const url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })), a = document.createElement('a'); a.href = url; a.download = 'finvora-my-data.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })), a = document.createElement('a'); a.href = url; a.download = 'finvora-my-data.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); window.fvToast && window.fvToast('Downloaded your data'); };
     return v;
   }
 }

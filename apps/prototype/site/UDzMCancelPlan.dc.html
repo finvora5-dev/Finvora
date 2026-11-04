@@ -113,7 +113,7 @@ class Component extends DCLogic {
   renderVals() {
     const Pay = this.P(); if (!Pay) return {};
     const sub = window.FV.billing().sub;
-    return { until: sub.renewsOn ? Pay.date(sub.renewsOn) : 'the end of the period', cancel: () => { Pay.cancel(); location.href = 'USYourPlan.dc.html'; } };
+    return { until: sub.renewsOn ? Pay.date(sub.renewsOn) : 'the end of the period', cancel: () => { Pay.cancel(); window.fvFlash && window.fvFlash('Plus will end on ' + (sub.renewsOn ? Pay.date(sub.renewsOn) : 'the end of the period')); location.href = 'USYourPlan.dc.html'; } };
   }
 }
 </script>
