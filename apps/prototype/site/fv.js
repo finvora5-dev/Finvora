@@ -185,6 +185,42 @@
     setReminder: function (on) { var a = authLoad(); a.reminder = on ? "19:00" : null; a.asked = true; authSave(a); },
     signOut: function () { var a = authLoad(); delete a.email; delete a.pending; authSave(a); }
   };
+
+  // ---- Library: the 15 articles in packages/sample-data, saved articles, reading progress, search.
+  var LIB_KEY = "fv.lib.v1";
+  var TOPICS = [
+    { name: "Money basics", cats: ["Money basics"], blurb: "from what money does to budgeting" },
+    { name: "Investing", cats: ["Investing", "Decisions and risk"], blurb: "from first share to building a mix" },
+    { name: "Markets across Africa", cats: ["Markets", "Nigerian market"], blurb: "how exchanges and markets work" },
+    { name: "Companies and reports", cats: ["Company analysis"], blurb: "reading profit, dividends and value" }
+  ];
+  function libLoad() { try { var l = JSON.parse(localStorage.getItem(LIB_KEY) || "null"); if (l && Array.isArray(l.saved)) return l; } catch (e) {} return { saved: [], read: {}, recent: [] }; }
+  function libSave(l) { try { localStorage.setItem(LIB_KEY, JSON.stringify(l)); } catch (e) {} }
+  function arts() { return D().ARTICLES; }
+  var LIB = {
+    TOPICS: TOPICS,
+    all: arts,
+    article: function (slug) { return arts().filter(function (a) { return a.slug === slug; })[0] || null; },
+    /** The article the page is about: ?a=slug in the address, else Dividend (the designed example). */
+    current: function () { var m = /[?&]a=([\w-]+)/.exec(location.search); return LIB.article(m ? m[1] : "dividend") || LIB.article("dividend"); },
+    minutes: function (a) { var w = [a.definition, a.example, a.whyItMatters].concat(a.explanation, a.misconceptions || []).join(" ").split(/\s+/).length; return Math.max(1, Math.round(w / 60)); },
+    topicOf: function (a) { return TOPICS.filter(function (t) { return t.cats.indexOf(a.category) >= 0; })[0] || TOPICS[0]; },
+    inTopic: function (name) { var t = TOPICS.filter(function (x) { return x.name === name; })[0] || TOPICS[1]; return { topic: t, items: arts().filter(function (a) { return t.cats.indexOf(a.category) >= 0; }) }; },
+    wordOfDay: function () { var n = Math.floor((Date.now() + 3600000) / 86400000); return arts()[n % arts().length]; },
+    isSaved: function (slug) { return libLoad().saved.indexOf(slug) >= 0; },
+    toggleSave: function (slug) { var l = libLoad(), i = l.saved.indexOf(slug); if (i >= 0) l.saved.splice(i, 1); else l.saved.unshift(slug); libSave(l); return i < 0; },
+    saved: function () { return libLoad().saved.map(LIB.article).filter(Boolean); },
+    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now() }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); } },
+    reading: function () { var r = libLoad().read || {}; return Object.keys(r).filter(function (k) { return r[k].pct < 90 && LIB.article(k); }).sort(function (a, b) { return r[b].at - r[a].at; }).map(function (k) { return { a: LIB.article(k), pct: r[k].pct }; }); },
+    addRecent: function (q) { q = String(q).trim(); if (!q) return; var l = libLoad(); l.recent = [q].concat((l.recent || []).filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); })).slice(0, 5); libSave(l); },
+    recent: function () { return libLoad().recent || []; },
+    index: function () {
+      var items = arts().map(function (a) { return { kind: "article", id: a.slug, title: a.title, subtitle: "Term · " + a.category, href: "UPArticle.dc.html?a=" + a.slug, keywords: a.definition }; });
+      LESSONS.forEach(function (l, i) { items.push({ kind: "lesson", id: l.id, title: l.title, subtitle: "Lesson " + (i + 1) + " · " + l.min + " min", href: "UPJourney.dc.html", keywords: l.title }); });
+      return items;
+    },
+    search: function (q) { var idx = LIB.index(); return { results: D().search(idx, q), didYouMean: D().suggest(idx, q) }; }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -214,7 +250,7 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

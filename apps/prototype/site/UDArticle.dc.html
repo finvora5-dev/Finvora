@@ -136,22 +136,20 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     </header>
     <main style="padding: 24px 40px 40px; display: flex; flex-direction: column; gap: 24px"><section style="border-radius: 24px; background: #5B21B6; box-shadow: 0 5px 0 #3B0F7A; padding: 32px 36px; color: #FFFFFF; display: flex; align-items: center; gap: 24px; position: relative; overflow: hidden">
         <span aria-hidden="true" style="position: absolute; right: -60px; top: -90px; width: 240px; height: 240px; border-radius: 999px; background: #0F55C9; opacity: .35"></span>
-        <span style="flex: 1; display: flex; flex-direction: column; gap: 10px; position: relative"><span style="align-self: flex-start; padding: 5px 12px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 13px; font-weight: 800">Investing · Beginner</span><strong style="font-size: 44px; line-height: 1.05">Dividend</strong><span style="font-size: 16px; color: #E9E3FB">2 min read</span></span>
-        <span style="display: flex; gap: 10px; position: relative"><a href="UPSaved.dc.html" class="btn" style="width: auto; padding: 0 20px; background: #FFFFFF; color: #4C1D95; box-shadow: 0 3px 0 #C4B5FD"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4z" fill="none" stroke="#4C1D95" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Save</a><a href="UFReport.dc.html" class="btn" style="width: auto; padding: 0 20px; background: rgba(255,255,255,.16); color: #FFFFFF; box-shadow: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4 M5 4h11l-2 4 2 4H5" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Report a mistake</a></span>
+        <span style="flex: 1; display: flex; flex-direction: column; gap: 10px; position: relative"><span style="align-self: flex-start; padding: 5px 12px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 13px; font-weight: 800">{{tag}}</span><strong style="font-size: 44px; line-height: 1.05">{{title}}</strong><span style="font-size: 16px; color: #E9E3FB">{{mins}} min read</span></span>
+        <span style="display: flex; gap: 10px; position: relative"><button type="button" onClick="{{save}}" aria-pressed="{{saved}}" class="btn" style="width: auto; padding: 0 20px; background: #FFFFFF; color: #4C1D95; box-shadow: 0 3px 0 #C4B5FD; border: 0; cursor: pointer; font: inherit; font-weight: 700"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4z" fill="none" stroke="#4C1D95" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{saveLabel}}</button><a href="UFReport.dc.html" class="btn" style="width: auto; padding: 0 20px; background: rgba(255,255,255,.16); color: #FFFFFF; box-shadow: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4 M5 4h11l-2 4 2 4H5" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Report a mistake</a></span>
       </section>
       <div style="width: 100%; display: flex; flex-direction: column; gap: 24px"><div style="display: flex; flex-direction: column; gap: 20px">
-    <p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p>
+    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if>
 
     <section aria-labelledby="kt" style="background: #F8F6FC; border: 2px solid #E7E2F0; border-radius: 18px; padding: 16px 16px 14px">
       <h2 id="kt" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #4C1D95; margin-bottom: 10px">Key takeaways</h2>
-      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5">
-        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividends are usually paid as a fixed amount per share.</span></li>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5"><sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividends are usually paid as a fixed amount per share.</span></li>
         <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Not every company pays them, and they can be cut or stopped.</span></li>
-        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividend yield compares the yearly payout with the share price.</span></li>
-      </ul>
+        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividend yield compares the yearly payout with the share price.</span></li></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><sc-for list="{{points}}" as="k" hint-placeholder-count="2"><li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>{{k}}</span></li></sc-for></sc-if></ul>
     </section>
 
-    <section style="display: flex; flex-direction: column; gap: 10px">
+    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><section style="display: flex; flex-direction: column; gap: 10px">
       <h2 style="font-size: 22px">How dividends work</h2>
       <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">When a company makes a profit, it can keep the money to grow, or share some with its owners. If you own shares, you are one of those owners.</p>
       <ol style="margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; counter-reset: s">
@@ -182,12 +180,19 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
         <span class="num" style="font-size: 24px; font-weight: 800">₦1.50 ÷ ₦30 = 5%</span>
         <span style="font-size: 13px; color: #DDD6FE">If one Adire Foods share costs ₦30</span>
       </div>
+    </section></sc-if>
+    <sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">
+      <div style="background: #FFF1EC; padding: 12px 16px"><h2 id="ex" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #B42828">Example</h2></div>
+      <p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
     </section>
-
     <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 22px">Why it matters</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">{{why}}</p>
+    </section></sc-if>
+    <sc-if value="{{hasRelated}}" hint-placeholder-val="{{true}}"><section style="display: flex; flex-direction: column; gap: 10px">
       <h2 style="font-size: 18px">Related terms</h2>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px"><a href="UPArticle.dc.html" class="chip">Share</a><a href="UPArticle.dc.html" class="chip">Dividend yield</a><a href="UPArticle.dc.html" class="chip">Ex-dividend date</a><a href="UPArticle.dc.html" class="chip">Retained earnings</a></div>
-    </section>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{related}}" as="r" hint-placeholder-count="2"><a href="{{r.href}}" class="chip">{{r.title}}</a></sc-for></div>
+    </section></sc-if>
 
     <a href="UPLearnTerm.dc.html" class="press" style="background: #5B21B6; box-shadow: 0 4px 0 #3B0F7A; border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; text-decoration: none; color: #FFFFFF">
       <span style="width: 48px; height: 48px; flex: none; border-radius: 14px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4z M7 10v5c2.5 2 7.5 2 10 0v-5 M21 8v6" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
@@ -207,7 +212,23 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"feedback":{"editor":"enum","options":["on","off"],"default":"on"},"$preview":{"width":1440,"height":1720}}'>
 class Component extends DCLogic {
-  renderVals() { return { feedbackOn: (this.props.feedback || 'on') === 'on' }; }
+  L() { return window.FV && window.FV.LIB; }
+  row(a) { const L = this.L(); return { href: 'UPArticle.dc.html?a=' + a.slug, title: a.title, def: a.definition, meta: L.topicOf(a).name + ' \u00b7 ' + L.minutes(a) + ' min read' }; }
+  constructor(p) { super(p); this.state = { n: 0 }; }
+  componentDidMount() {
+    const L = this.L(); if (!L) return; const a = L.current(); L.setRead(a.slug, 1);
+    this.onScroll = () => { const h = document.documentElement, max = h.scrollHeight - h.clientHeight; L.setRead(a.slug, max > 0 ? Math.min(100, Math.round(h.scrollTop / max * 100)) : 100); };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+  }
+  componentWillUnmount() { if (this.onScroll) window.removeEventListener('scroll', this.onScroll); }
+  renderVals() {
+    const L = this.L(), fb = (this.props.feedback || 'on') === 'on'; if (!L) return { feedbackOn: fb };
+    const a = L.current(), div = a.slug === 'dividend', saved = L.isSaved(a.slug);
+    const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
+    return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,
+      example: a.example, why: a.whyItMatters, related, hasRelated: related.length > 0, saved: String(saved), saveFill: saved ? '#FFFFFF' : 'none', saveLabel: saved ? 'Saved' : 'Save',
+      save: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } };
+  }
 }
 </script>
 </body>

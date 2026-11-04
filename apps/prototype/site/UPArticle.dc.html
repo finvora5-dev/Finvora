@@ -61,13 +61,13 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <svg aria-hidden="true" width="390" height="260" viewBox="0 0 390 260" style="position: absolute; inset: 0"><circle cx="360" cy="-10" r="120" fill="#0F55C9" opacity=".6"></circle><circle cx="-20" cy="250" r="90" fill="#3D86F2" opacity=".5"></circle></svg>
     <div style="position: relative; display: flex; align-items: center; justify-content: space-between">
       <a href="UPLibrary.dc.html" class="press" aria-label="Back to Library" style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
-      <sc-if value="{{feedbackOn}}" hint-placeholder-val="{{true}}"><a href="UFReport.dc.html" aria-label="Report a mistake in this article" class="press" style="width: 44px; height: 44px; margin-left: auto; margin-right: 8px; border-radius: 12px; background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4 M5 4h11l-2 4 2 4H5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></sc-if><button type="button" aria-label="Save this article" class="press" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+      <sc-if value="{{feedbackOn}}" hint-placeholder-val="{{true}}"><a href="UFReport.dc.html" aria-label="Report a mistake in this article" class="press" style="width: 44px; height: 44px; margin-left: auto; margin-right: 8px; border-radius: 12px; background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4 M5 4h11l-2 4 2 4H5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></sc-if><button type="button" aria-label="Save this article" aria-pressed="{{saved}}" onClick="{{save}}" class="press" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" fill="{{saveFill}}" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
     </div>
     <div style="position: relative; display: flex; align-items: flex-end; gap: 8px; padding: 6px 8px 0">
       <div style="flex: 1">
-        <span style="display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 12px; font-weight: 700">Investing · Beginner</span>
-        <h1 style="font-size: 38px; line-height: 1.05; margin: 10px 0 6px; color: #FFFFFF">Dividend</h1>
-        <span style="font-size: 14px; color: #EDE9FE">2 min read</span>
+        <span style="display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 12px; font-weight: 700">{{tag}}</span>
+        <h1 style="font-size: 38px; line-height: 1.05; margin: 10px 0 6px; color: #FFFFFF">{{title}}</h1>
+        <span style="font-size: 14px; color: #EDE9FE">{{mins}} min read</span>
       </div>
       <svg width="150" height="110" viewBox="0 0 150 110" aria-hidden="true">
   <rect x="8" y="30" width="54" height="66" rx="6" fill="#0F55C9"></rect><rect x="8" y="24" width="54" height="10" rx="4" fill="#9CC3FF"></rect>
@@ -82,18 +82,16 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     </div>
   </header>
   <main style="position: relative; margin-top: -24px; background: #FFFFFF; border-radius: 24px 24px 0 0; padding: 24px 20px 28px; display: flex; flex-direction: column; gap: 24px">
-    <p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p>
+    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if>
 
     <section aria-labelledby="kt" style="background: #F8F6FC; border: 2px solid #E7E2F0; border-radius: 18px; padding: 16px 16px 14px">
       <h2 id="kt" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #4C1D95; margin-bottom: 10px">Key takeaways</h2>
-      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5">
-        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividends are usually paid as a fixed amount per share.</span></li>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5"><sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividends are usually paid as a fixed amount per share.</span></li>
         <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Not every company pays them, and they can be cut or stopped.</span></li>
-        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividend yield compares the yearly payout with the share price.</span></li>
-      </ul>
+        <li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dividend yield compares the yearly payout with the share price.</span></li></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><sc-for list="{{points}}" as="k" hint-placeholder-count="2"><li style="display: flex; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#5B21B6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>{{k}}</span></li></sc-for></sc-if></ul>
     </section>
 
-    <section style="display: flex; flex-direction: column; gap: 10px">
+    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><section style="display: flex; flex-direction: column; gap: 10px">
       <h2 style="font-size: 22px">How dividends work</h2>
       <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">When a company makes a profit, it can keep the money to grow, or share some with its owners. If you own shares, you are one of those owners.</p>
       <ol style="margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; counter-reset: s">
@@ -124,12 +122,19 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
         <span class="num" style="font-size: 24px; font-weight: 800">₦1.50 ÷ ₦30 = 5%</span>
         <span style="font-size: 13px; color: #DDD6FE">If one Adire Foods share costs ₦30</span>
       </div>
+    </section></sc-if>
+    <sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">
+      <div style="background: #FFF1EC; padding: 12px 16px"><h2 id="ex" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #B42828">Example</h2></div>
+      <p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
     </section>
-
     <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 22px">Why it matters</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">{{why}}</p>
+    </section></sc-if>
+    <sc-if value="{{hasRelated}}" hint-placeholder-val="{{true}}"><section style="display: flex; flex-direction: column; gap: 10px">
       <h2 style="font-size: 18px">Related terms</h2>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px"><a href="UPArticle.dc.html" class="chip">Share</a><a href="UPArticle.dc.html" class="chip">Dividend yield</a><a href="UPArticle.dc.html" class="chip">Ex-dividend date</a><a href="UPArticle.dc.html" class="chip">Retained earnings</a></div>
-    </section>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{related}}" as="r" hint-placeholder-count="2"><a href="{{r.href}}" class="chip">{{r.title}}</a></sc-for></div>
+    </section></sc-if>
 
     <a href="UPLearnTerm.dc.html" class="press" style="background: #5B21B6; box-shadow: 0 4px 0 #3B0F7A; border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; text-decoration: none; color: #FFFFFF">
       <span style="width: 48px; height: 48px; flex: none; border-radius: 14px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4z M7 10v5c2.5 2 7.5 2 10 0v-5 M21 8v6" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
@@ -156,7 +161,23 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"feedback":{"editor":"enum","options":["on","off"],"default":"on"},"$preview":{"width":390,"height":2150}}'>
 class Component extends DCLogic {
-  renderVals() { return { feedbackOn: (this.props.feedback || 'on') === 'on' }; }
+  L() { return window.FV && window.FV.LIB; }
+  row(a) { const L = this.L(); return { href: 'UPArticle.dc.html?a=' + a.slug, title: a.title, def: a.definition, meta: L.topicOf(a).name + ' \u00b7 ' + L.minutes(a) + ' min read' }; }
+  constructor(p) { super(p); this.state = { n: 0 }; }
+  componentDidMount() {
+    const L = this.L(); if (!L) return; const a = L.current(); L.setRead(a.slug, 1);
+    this.onScroll = () => { const h = document.documentElement, max = h.scrollHeight - h.clientHeight; L.setRead(a.slug, max > 0 ? Math.min(100, Math.round(h.scrollTop / max * 100)) : 100); };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+  }
+  componentWillUnmount() { if (this.onScroll) window.removeEventListener('scroll', this.onScroll); }
+  renderVals() {
+    const L = this.L(), fb = (this.props.feedback || 'on') === 'on'; if (!L) return { feedbackOn: fb };
+    const a = L.current(), div = a.slug === 'dividend', saved = L.isSaved(a.slug);
+    const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
+    return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,
+      example: a.example, why: a.whyItMatters, related, hasRelated: related.length > 0, saved: String(saved), saveFill: saved ? '#FFFFFF' : 'none',
+      save: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } };
+  }
 }
 </script>
 </body>
