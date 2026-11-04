@@ -6,11 +6,11 @@ body { margin: 0; min-height: 100dvh; }
 /* Tablets and desktop: the phone boards reflow to the wider screen. */
 html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F0; min-height: 100dvh !important; }
 @media (min-width: 600px) {
-  html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
+  html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"]:has(> :nth-child(3)) { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
   html.fv-wide #dc-root [style*="padding: 16px"], html.fv-wide #dc-root [style*="padding: 0 16px"] { padding-left: 32px !important; padding-right: 32px !important; }
 }
 @media (min-width: 1024px) {
-  html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: repeat(4, 1fr) !important; }
+  html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"]:has(> :nth-child(3)) { grid-template-columns: repeat(4, 1fr) !important; }
   html.fv-wide #dc-root nav[aria-label="Main"] > div { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
 

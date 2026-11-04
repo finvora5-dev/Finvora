@@ -16,6 +16,11 @@
     if (!wide) { el.style.zoom = String(vw / designW); el.style.width = designW + "px"; return; }
     el.style.zoom = "1";
     el.style.width = "100%";
+    // Line charts: stretch across the card on wide screens (the line widens, height stays).
+    el.querySelectorAll('svg[role="img"][aria-label*="Price"]').forEach(function (svg) {
+      svg.setAttribute("width", "100%"); svg.setAttribute("preserveAspectRatio", "none");
+      svg.querySelectorAll("path, polyline, line").forEach(function (l) { l.setAttribute("vector-effect", "non-scaling-stroke"); });
+    });
     // Elements drawn at the board's fixed width: stretch them, unless they hold positioned artwork.
     el.querySelectorAll("[style*='width: 390px'], [style*='width:390px']").forEach(function (n) {
       if (n === el) return;
