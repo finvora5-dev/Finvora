@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Fin the mascot</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+@keyframes kb-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes kb-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes kb-wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+@keyframes kb-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03,0.98)}}
+@keyframes kb-twinkle{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+@keyframes kb-z{0%{opacity:0;transform:translate(0,4px)}50%{opacity:1}100%{opacity:0;transform:translate(6px,-10px)}}
+@media (prefers-reduced-motion:no-preference){
+.kb-bob{animation:kb-bob 1.2s ease-in-out infinite}
+.kb-shake{animation:kb-shake .5s ease-in-out 2;transform-origin:50% 90%}
+.kb-breathe{animation:kb-breathe 3s ease-in-out infinite;transform-origin:50% 100%}
+.kb-wavearm{animation:kb-wave 1s ease-in-out infinite;transform-box:fill-box;transform-origin:10% 90%}
+.kb-tw{animation:kb-twinkle 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.kb-z{animation:kb-z 2.4s ease-out infinite}
+}
+</style>
+</helmet>
+<div style="width: {{size}}px; height: {{size}}px; display: flex; align-items: flex-end; justify-content: center">
+  <svg class="{{anim}}" width="{{size}}" height="{{size}}" viewBox="0 0 120 120" role="img" aria-label="{{label}}" style="overflow: visible">
+    <ellipse cx="60" cy="113" rx="30" ry="5" fill="#0B1F44" opacity="0.12"></ellipse>
+    <path d="{{armL}}" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path>
+    <path class="{{waveCls}}" d="{{armR}}" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path>
+    <rect x="44" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect><rect x="66" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect>
+    <circle cx="60" cy="62" r="42" fill="#0F55C9"></circle>
+    <circle cx="60" cy="58" r="42" fill="#1A73F5"></circle>
+    <circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"></circle>
+    <path d="M30 40c6-10 16-16 26-17" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.55"></path>
+    <sc-if value="{{eyesOpen}}" hint-placeholder-val="{{true}}">
+      <ellipse cx="46" cy="52" rx="9" ry="{{eyeRy}}" fill="#FFFFFF"></ellipse><ellipse cx="74" cy="52" rx="9" ry="{{eyeRy}}" fill="#FFFFFF"></ellipse>
+      <circle cx="{{pLx}}" cy="{{pY}}" r="4.6" fill="#0B1F44"></circle><circle cx="{{pRx}}" cy="{{pY}}" r="4.6" fill="#0B1F44"></circle>
+      <circle cx="{{gLx}}" cy="{{gY}}" r="1.6" fill="#FFFFFF"></circle><circle cx="{{gRx}}" cy="{{gY}}" r="1.6" fill="#FFFFFF"></circle>
+    </sc-if>
+    <sc-if value="{{eyesHappy}}" hint-placeholder-val="{{false}}">
+      <path d="M38 55 q8 -10 16 0 M66 55 q8 -10 16 0" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+    </sc-if>
+    <sc-if value="{{eyesShut}}" hint-placeholder-val="{{false}}">
+      <path d="M38 54 q8 6 16 0 M66 54 q8 6 16 0" fill="none" stroke="#0B1F44" stroke-width="4" stroke-linecap="round"></path>
+    </sc-if>
+    <path d="{{brows}}" fill="none" stroke="#0B1F44" stroke-width="4" stroke-linecap="round"></path>
+    <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity="{{blush}}"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity="{{blush}}"></circle>
+    <path d="{{mouth}}" fill="{{mouthFill}}" stroke="#0B1F44" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <sc-if value="{{tongue}}" hint-placeholder-val="{{false}}"><path d="M54 77 q6 4 12 0" fill="#FF8FA3"></path></sc-if>
+    <sc-if value="{{sparkle}}" hint-placeholder-val="{{false}}">
+      <path class="kb-tw" d="M14 22 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#9CC3FF"></path>
+      <path class="kb-tw" style="animation-delay: .5s" d="M104 14 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z" fill="#FF8A65"></path>
+      <path class="kb-tw" style="animation-delay: .9s" d="M110 46 l2 4 4 2 -4 2 -2 4 -2 -4 -4 -2 4 -2z" fill="#7B4AF0"></path>
+    </sc-if>
+    <sc-if value="{{dots}}" hint-placeholder-val="{{false}}">
+      <circle cx="96" cy="20" r="3" fill="#9CC3FF"></circle><circle cx="104" cy="11" r="4.5" fill="#9CC3FF"></circle><circle cx="114" cy="0" r="6" fill="#9CC3FF"></circle>
+    </sc-if>
+    <sc-if value="{{sweat}}" hint-placeholder-val="{{false}}"><path d="M92 30 q-6 9 0 12 q6 -3 0 -12z" fill="#7FC8FF"></path></sc-if>
+    <sc-if value="{{zzz}}" hint-placeholder-val="{{false}}">
+      <text class="kb-z" x="88" y="22" font-family="Plus Jakarta Sans, sans-serif" font-size="16" font-weight="800" fill="#9CC3FF">z</text>
+      <text class="kb-z" style="animation-delay: .8s" x="98" y="10" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#9CC3FF">z</text>
+    </sc-if>
+    <sc-if value="{{qmark}}" hint-placeholder-val="{{false}}"><text x="94" y="20" font-family="Plus Jakarta Sans, sans-serif" font-size="26" font-weight="800" fill="#7B4AF0">?</text></sc-if>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["happy","talk","wave","think","cheer","proud","oops","confused","sleep"],"default":"happy"},"size":{"editor":"int","min":40,"max":240,"default":120},"$preview":{"width":120,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mood = this.props.mood ?? 'happy';
+    const size = Number(this.props.size ?? 120);
+    const down = 'M20 66q-8 6-6 16', downR = 'M100 66q8 6 6 16', up = 'M22 52q-12-8-10-22', upR = 'M98 52q12-8 10-22';
+    const base = { eyesOpen: true, eyesHappy: false, eyesShut: false, eyeRy: 11, px: 0, py: 0, brows: '', blush: '0.7', mouth: 'M46 70q14 12 28 -2', fill: 'none', tongue: false, armL: down, armR: downR, waveCls: '', anim: 'kb-breathe', sparkle: false, dots: false, sweat: false, zzz: false, qmark: false };
+    const M = {
+      happy: { label: 'Fin, smiling' },
+      talk: { label: 'Fin, explaining', mouth: 'M48 69q12 14 26 0z', fill: '#0B1F44', tongue: true, armR: 'M98 62q14 -2 14 -16' },
+      wave: { label: 'Fin, waving hello', armR: 'M98 58q14 -10 12 -26', waveCls: 'kb-wavearm', mouth: 'M46 69q14 14 28 0z', fill: '#0B1F44', tongue: true },
+      think: { label: 'Fin, thinking', px: 2, py: -4, brows: 'M38 38 q8 -4 16 0 M66 36 q8 -6 16 -2', mouth: 'M52 74 q8 -3 16 0', armR: 'M98 70 q-6 10 -20 10', dots: true, anim: '' },
+      cheer: { label: 'Fin, cheering: correct', eyesOpen: false, eyesHappy: true, mouth: 'M44 68q16 20 32 0z', fill: '#0B1F44', tongue: true, armL: up, armR: upR, anim: 'kb-bob', sparkle: true },
+      proud: { label: 'Fin, proud: level up', eyesOpen: false, eyesHappy: true, mouth: 'M46 70q14 12 28 -2', armL: up, armR: upR, sparkle: true, blush: '1' },
+      oops: { label: 'Fin, encouraging: not quite', py: 2, eyeRy: 10, brows: 'M38 40 q8 -6 16 -2 M66 38 q8 -4 16 2', mouth: 'M54 74a6 5 0 1 0 12 0a6 5 0 1 0-12 0', fill: '#0B1F44', armL: 'M22 60q-10 2-12 12', armR: 'M98 60q10 2 12 12', sweat: true, anim: 'kb-shake' },
+      confused: { label: 'Fin, confused', px: -2, brows: 'M38 42 h16 M66 34 q8 -4 16 2', mouth: 'M48 74 q4 -4 8 0 q4 4 8 0 q4 -4 8 0', armR: 'M98 62 q12 -4 8 -16', qmark: true, anim: '' },
+      sleep: { label: 'Fin, asleep: offline', eyesOpen: false, eyesShut: true, mouth: 'M55 74 q5 3 10 0', zzz: true, blush: '0.4' }
+    };
+    const m = Object.assign({}, base, M[mood] || M.happy);
+    return {
+      size, label: m.label, anim: m.anim, waveCls: m.waveCls,
+      eyesOpen: m.eyesOpen, eyesHappy: m.eyesHappy, eyesShut: m.eyesShut, eyeRy: m.eyeRy,
+      pLx: 48 + m.px, pRx: 76 + m.px, pY: 54 + m.py, gLx: 49.5 + m.px, gRx: 77.5 + m.px, gY: 52 + m.py,
+      brows: m.brows || 'M0 0', blush: m.blush, mouth: m.mouth, mouthFill: m.fill, tongue: m.tongue,
+      armL: m.armL, armR: m.armR, sparkle: m.sparkle, dots: m.dots, sweat: m.sweat, zzz: m.zzz, qmark: m.qmark
+    };
+  }
+}
+</script>
+</body>
+</html>

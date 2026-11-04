@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora admin (purple and black): Feedback settings</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#F8F6FC;color:#0E0B14;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+a{color:#4C1D95}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
+.card{background:#FFFFFF;border:1.5px solid #E7E2F0;border-radius:18px;box-sizing:border-box}
+.muted{color:#615A6E}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#615A6E}
+.num{font-variant-numeric:tabular-nums}
+.btn{height:42px;padding:0 18px;border:0;border-radius:12px;background:#5B21B6;color:#FFFFFF;font:700 14px 'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 2px 0 #3B0F7A;box-sizing:border-box;white-space:nowrap}
+.btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:none;border:1.5px solid #E7E2F0}
+.btn:active,.press:active{transform:translateY(1px)}
+.chip{min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-sizing:border-box}
+.nav{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;text-decoration:none;color:#38323F;font-weight:600;font-size:14px}
+.nav[aria-current=page]{background:#F1EBFB;color:#4C1D95;font-weight:700}
+.sw{width:46px;height:28px;flex:none;border-radius:999px;border:0;padding:3px;cursor:pointer;display:flex;box-sizing:border-box}
+.sw span{width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tag{white-space:nowrap;display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#615A6E;padding:10px 16px;border-bottom:1.5px solid #E7E2F0}
+td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
+.field{height:42px;border-radius:12px;border:1.5px solid #E7E2F0;background:#FFFFFF;padding:0 12px;font:500 14px 'Plus Jakarta Sans',sans-serif;color:#0E0B14;box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){.btn,.press,.chip,.sw span{transition:transform .15s ease-out}}
+</style>
+</helmet>
+<div class="root" style="width: 1440px; min-height: 1000px; box-sizing: border-box; display: flex">
+  <aside style="width: 248px; flex: none; background: #FFFFFF; border-right: 1.5px solid #E7E2F0; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #5B21B6; color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center">F</span><span><strong style="display: block; font-size: 16px; line-height: 1.2">Finvora</strong><span class="muted" style="font-size: 12px">Admin</span></span></div>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px"><a href="UAOverview.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4z M14 20h6v-9h-6z M14 8h6V4h-6z M4 20h6v-3H4z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Overview</a><a href="UAContent.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z M5 16a4 4 0 0 1 4-4h10" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Content</a><a href="UAQuestions.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4 2.8c-.7.3-1 .8-1 1.5V14 M12 18h.01 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Question builder</a><a href="UAFeedbackInbox.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Feedback inbox</a><a href="UAAskKoboReview.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M8 10h.01 M16 10h.01 M8 14c2 2 6 2 8 0" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Ask Fin review</a><a href="UAFeedbackSettings.dc.html" class="nav press" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10 M18 7h2 M4 17h4 M12 17h8 M14 5v4 M8 15v4" fill="none" stroke="#4C1D95" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Feedback settings</a><a href="UAPlans.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3z M3 11h18" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Plans</a><a href="UAUsers.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21c1-4 4-6 7-6s6 2 7 6 M17 11a3 3 0 1 0 0-6 M22 20c-.5-2.5-2-4-4-4.6" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Users and payments</a><a href="UAAISummaries.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>AI summary approvals</a><a href="UAAudit.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z M9 9h6 M9 13h6 M9 17h4" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Audit log</a></nav>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E7E2F0"><span style="width: 32px; height: 32px; border-radius: 999px; background: #F1EBFB; color: #4C1D95; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">TO</span><span style="font-size: 13px"><strong style="display: block">Tobi O.</strong><span class="muted">Content editor</span></span></div>
+  </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 72px; flex: none; padding: 0 32px; display: flex; align-items: center; gap: 16px; border-bottom: 1.5px solid #E7E2F0; background: #FFFFFF">
+      <div style="flex: 1"><span class="muted" style="font-size: 13px">Settings</span><h1 style="font-size: 22px; line-height: 1.2">Feedback settings</h1></div>
+    </header>
+    <main style="padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px">
+
+      <div style="display: grid; grid-template-columns: 1fr 420px; gap: 20px; align-items: start">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <section class="card" style="overflow: hidden">
+            <div style="padding: 16px 20px 8px"><h2 style="font-size: 17px">Prompts</h2><p class="muted" style="margin: 2px 0 0; font-size: 13px">When a prompt is off, its entry point is removed from the app completely.</p></div>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-top: 1px solid #F5F3F8; background: {{r.bg}}">
+              <button type="button" class="press" onClick="{{r.pick}}" aria-pressed="{{r.sel}}" style="flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; padding: 0; cursor: pointer; font: inherit; color: #0E0B14"><strong style="display: block">{{r.title}}</strong><span class="muted" style="font-size: 13px">{{r.where}}</span></button>
+              <span class="tag" style="background: {{r.tagBg}}; color: {{r.tagFg}}">{{r.state}}</span>
+              <button type="button" class="sw" role="switch" aria-checked="{{r.on}}" aria-label="{{r.label}}" onClick="{{r.toggle}}" style="background: {{r.swBg}}; justify-content: {{r.swJ}}"><span></span></button>
+            </div>
+            </sc-for>
+          </section>
+          <section class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px">
+            <h2 style="font-size: 17px">How often</h2>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap"><span style="font-weight: 600">Show the rating prompt to 1 in</span>
+              <sc-for list="{{ns}}" as="n" hint-placeholder-count="4"><button type="button" class="chip" aria-pressed="{{n.on}}" onClick="{{n.tap}}" style="background: {{n.bg}}; color: {{n.fg}}; border-color: {{n.bd}}">{{n.label}}</button></sc-for>
+              <span class="muted">finished lessons</span></div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap"><span style="font-weight: 600">App store review: at most once every</span><span class="tag num" style="background: #F1EBFB; color: #4C1D95; height: 32px; font-size: 14px">90 days</span><span class="muted">per learner, and never twice after "Not really"</span></div>
+          </section>
+          <section class="card" style="overflow: hidden"><div style="padding: 16px 20px 6px"><h2 style="font-size: 17px">Change log</h2></div>
+            <div role="list"><sc-for list="{{log}}" as="l" hint-placeholder-count="3"><div role="listitem" style="display: grid; grid-template-columns: 140px 120px 1fr; gap: 12px; padding: 12px 20px; border-top: 1px solid #F5F3F8"><span class="muted">{{l.when}}</span><strong>{{l.who}}</strong><span>{{l.what}}</span></div></sc-for></div></section>
+        </div>
+        <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px">
+          <div style="display: flex; justify-content: space-between; align-items: center"><span class="eyebrow">Live preview</span><span class="tag" style="background: {{pTagBg}}; color: {{pTagFg}}">{{pState}}</span></div>
+          <strong>{{pTitle}}</strong><span class="muted" style="font-size: 13px; margin-top: -8px">Shows on: {{pScreen}}</span>
+          <div style="width: 328px; height: 760px; margin: 0 auto; border-radius: 30px; border: 8px solid #0E0B14; overflow: hidden; position: relative; background: #FFFFFF">
+            <sc-if value="{{pOn}}" hint-placeholder-val="{{true}}"><div style="position: absolute; left: 0; top: 0; width: 390px; height: 900px; transform: scale(.841); transform-origin: 0 0; pointer-events: none">
+              <sc-if value="{{isRate}}" hint-placeholder-val="{{true}}"><dc-import name="UFRate" hint-size="390px,900px"></dc-import></sc-if>
+              <sc-if value="{{isReport}}" hint-placeholder-val="{{false}}"><dc-import name="UFReport" hint-size="390px,900px"></dc-import></sc-if>
+              <sc-if value="{{isSuggest}}" hint-placeholder-val="{{false}}"><dc-import name="UFSuggest" hint-size="390px,900px"></dc-import></sc-if>
+              <sc-if value="{{isReview}}" hint-placeholder-val="{{false}}"><dc-import name="UFReview" hint-size="390px,900px"></dc-import></sc-if>
+            </div></sc-if>
+            <sc-if value="{{pOff}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center"><div style="width: 96px; height: 96px"><dc-import name="GKobo" mood="sleep" size="96" hint-size="96px,96px"></dc-import></div><strong>Hidden from learners</strong><span class="muted" style="font-size: 14px">The entry point on {{pScreen}} is removed while this is off.</span></div></sc-if>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { on: { rate: true, report: true, suggest: true, review: true }, sel: 'rate', n: 3, log: [
+    { when: '28 Oct, 14:02', who: 'Tobi O.', what: 'Rating prompt set to 1 in 3' },
+    { when: '21 Oct, 09:40', who: 'Amaka E.', what: 'App store review turned on' },
+    { when: '14 Oct, 16:15', who: 'Tobi O.', what: 'Suggest a topic added to Me' }] }; }
+  renderVals() {
+    const s = this.state; const P = [["rate", "Rate this lesson", "After a micro module is finished", "Lesson complete", "FRate"], ["report", "Report a mistake", "Flag in article header and footer link", "Article", "FReport"], ["suggest", "Suggest a topic", "Library card, Me row, empty search", "Library, Me, Search", "FSuggest"], ["review", "App store review", "After passing a Boss challenge", "Boss result", "FReview"]];
+    const stamp = 'Just now';
+    const cur = P.find(p => p[0] === s.sel);
+    return {
+      rows: P.map(p => { const on = s.on[p[0]]; return { title: p[1], where: p[2], label: p[1] + ' prompt', on: on ? 'true' : 'false', sel: s.sel === p[0] ? 'true' : 'false', bg: s.sel === p[0] ? '#F8F6FC' : '#FFFFFF',
+        state: on ? 'On' : 'Off', tagBg: on ? '#E1F7EA' : '#F5F3F8', tagFg: on ? '#0F6B39' : '#38323F', swBg: on ? '#5B21B6' : '#D3CDE0', swJ: on ? 'flex-end' : 'flex-start',
+        pick: () => this.setState({ sel: p[0] }),
+        toggle: () => this.setState({ sel: p[0], on: Object.assign({}, s.on, { [p[0]]: !on }), log: [{ when: stamp, who: 'Tobi O.', what: p[1] + ' turned ' + (on ? 'off' : 'on') }].concat(s.log) }) }; }),
+      ns: [2, 3, 5, 10].map(n => { const on = s.n === n; return { label: String(n), on: on ? 'true' : 'false', bg: on ? '#5B21B6' : '#FFFFFF', fg: on ? '#FFFFFF' : '#0E0B14', bd: on ? '#5B21B6' : '#E7E2F0',
+        tap: () => on ? null : this.setState({ n: n, log: [{ when: stamp, who: 'Tobi O.', what: 'Rating prompt set to 1 in ' + n }].concat(s.log) }) }; }),
+      log: s.log.slice(0, 5),
+      pTitle: cur[1], pScreen: cur[3], pOn: s.on[s.sel], pOff: !s.on[s.sel], pState: s.on[s.sel] ? 'On' : 'Off',
+      pTagBg: s.on[s.sel] ? '#E1F7EA' : '#F5F3F8', pTagFg: s.on[s.sel] ? '#0F6B39' : '#38323F',
+      isRate: s.sel === 'rate', isReport: s.sel === 'report', isSuggest: s.sel === 'suggest', isReview: s.sel === 'review'
+    };
+  }
+}
+</script>
+</body>
+</html>

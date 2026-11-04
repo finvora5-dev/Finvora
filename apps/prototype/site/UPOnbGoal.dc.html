@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Pick your goal</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#FFFFFF;color:#1C1726;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;line-height:1.5}
+a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-0.02em;color:#1C1726}
+.cap{font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.btn{width:100%;height:52px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:800 15px 'Plus Jakarta Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 #3B0F7A;box-sizing:border-box}
+.btn-o{background:#FFFFFF;color:#5B21B6;border:2px solid #E7E2F0;box-shadow:0 4px 0 #E7E2F0}
+.btn:active,.press:active{transform:translateY(4px);box-shadow:none}
+.dcard{background:#FFFFFF;border:2px solid #E7E2F0;border-radius:18px;box-shadow:0 4px 0 #E7E2F0;box-sizing:border-box;text-decoration:none;color:#1C1726}
+.muted{color:#615A6E}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@keyframes d-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes d-pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+@keyframes d-flick{0%,100%{transform:scale(1,1) rotate(0)}30%{transform:scale(1.05,1.1) rotate(-3deg)}60%{transform:scale(.97,1.03) rotate(2deg)}}
+@keyframes d-wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+@media (prefers-reduced-motion:no-preference){
+.btn,.press{transition:transform .1s ease-out,box-shadow .1s ease-out}
+.bob{animation:d-bob 3s ease-in-out infinite}
+.pop{animation:d-pop .45s cubic-bezier(.2,.8,.2,1) both}
+.flick{animation:d-flick 1.8s ease-in-out infinite;transform-origin:50% 90%}
+.wave{animation:d-wave 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:20% 90%}
+}
+</style>
+</helmet>
+<div class="root" style="width: 390px; min-height: 844px; box-sizing: border-box; display: flex; flex-direction: column">
+<header style="height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: #FFFFFF; border-bottom: 2px solid #E7E2F0"><a href="UPOnbWelcome.dc.html" class="press" aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#615A6E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><div role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1" style="flex: 1; height: 14px; border-radius: 999px; background: #E7E2F0; overflow: hidden"><div style="width: 33%; height: 100%; border-radius: 999px; background: #5B21B6; box-shadow: inset 0 -4px 0 #3B0F7A"></div></div></header>
+  <main style="padding: 20px 16px 28px; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: flex-end; gap: 8px"><div style="width: 64px; height: 64px; flex: none"><svg width="64" height="64" viewBox="0 0 120 120" role="img" aria-label="Fin, the Finvora coin">
+  <ellipse cx="60" cy="114" rx="30" ry="5" fill="#0B1F44" opacity=".12"></ellipse>
+  <path d="M20 66 q-10 6 -8 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path><path d="M100 66 q10 6 8 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path>
+  <rect x="44" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect><rect x="66" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect>
+  <circle cx="60" cy="62" r="42" fill="#0F55C9"></circle><circle cx="60" cy="58" r="42" fill="#1A73F5"></circle>
+  <circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"></circle>
+  <path d="M30 40c6-10 16-16 26-17" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".55"></path>
+  <ellipse cx="46" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse><ellipse cx="74" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse>
+  <circle cx="48" cy="54" r="4.6" fill="#0B1F44"></circle><circle cx="76" cy="54" r="4.6" fill="#0B1F44"></circle>
+  <circle cx="49.5" cy="52" r="1.6" fill="#FFFFFF"></circle><circle cx="77.5" cy="52" r="1.6" fill="#FFFFFF"></circle>
+  <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle>
+  <path d="M46 72 q14 12 30 -2" fill="none" stroke="#0B1F44" stroke-width="4" stroke-linecap="round"></path>
+</svg></div><div class="dcard" style="padding: 10px 14px; font-weight: 700; box-shadow: none">What do you want to learn first?</div></div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px"><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><rect x="6" y="8" width="60" height="36" rx="9" fill="#16A36A"></rect><rect x="6" y="14" width="60" height="8" fill="#0E7F52"></rect><circle cx="52" cy="33" r="6" fill="#FFFFFF"></circle></svg><span style="font-weight: 800; font-size: 16px">Money basics</span><span class="muted" style="font-size: 14px; margin-top: -6px">6 modules</span></a><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; border-color: #5B21B6; box-shadow: 0 4px 0 #3B0F7A; background: #F8F6FC"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><rect x="8" y="30" width="12" height="16" rx="4" fill="#9CC3FF"></rect><rect x="26" y="20" width="12" height="26" rx="4" fill="#4F95FF"></rect><rect x="44" y="8" width="12" height="38" rx="4" fill="#176EEB"></rect><path d="M8 22 l18 -10 14 6 20 -14" fill="none" stroke="#FF5C5C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 800; font-size: 16px">Investing</span><span class="muted" style="font-size: 14px; margin-top: -6px">8 modules</span></a><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><rect width="72" height="50" rx="10" fill="#FFFFFF" stroke="#D3DEEE" stroke-width="2"></rect><path d="M10 1h14v48H10a9 9 0 0 1-9-9V10a9 9 0 0 1 9-9z" fill="#008751"></path><path d="M48 1h14a9 9 0 0 1 9 9v30a9 9 0 0 1-9 9H48z" fill="#008751"></path></svg><span style="font-weight: 800; font-size: 16px">Nigerian market</span><span class="muted" style="font-size: 14px; margin-top: -6px">NGX · 6 modules</span></a><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><clipPath id="cg"><rect width="72" height="50" rx="10"></rect></clipPath><g clip-path="url(#cg)"><rect width="72" height="17" fill="#CE1126"></rect><rect y="17" width="72" height="16" fill="#FCD116"></rect><rect y="33" width="72" height="17" fill="#006B3F"></rect><path d="M36 18l2.4 5h5.4l-4.4 3.2 1.7 5.3L36 28.3l-4.5 3.2 1.7-5.3-4.4-3.2h5.4z" fill="#000000"></path></g></svg><span style="font-weight: 800; font-size: 16px">Ghana market</span><span class="muted" style="font-size: 14px; margin-top: -6px">GSE · 6 modules</span></a><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><clipPath id="ck"><rect width="72" height="50" rx="10"></rect></clipPath><g clip-path="url(#ck)"><rect width="72" height="15" fill="#000000"></rect><rect y="15" width="72" height="20" fill="#FFFFFF"></rect><rect y="18" width="72" height="14" fill="#BB0000"></rect><rect y="35" width="72" height="15" fill="#006600"></rect><ellipse cx="36" cy="25" rx="7" ry="14" fill="#BB0000" stroke="#000000" stroke-width="2"></ellipse></g></svg><span style="font-weight: 800; font-size: 16px">Kenya market</span><span class="muted" style="font-size: 14px; margin-top: -6px">NSE · 6 modules</span></a><a href="UPSignIn.dc.html" class="dcard press" style="padding: 22px 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center"><svg width="72" height="50" viewBox="0 0 72 50" aria-hidden="true"><clipPath id="cz"><rect width="72" height="50" rx="10"></rect></clipPath><g clip-path="url(#cz)"><rect width="72" height="25" fill="#E03C31"></rect><rect y="25" width="72" height="25" fill="#001489"></rect><path d="M0 0 L32 25 L0 50" fill="#FFB81C"></path><path d="M0 -6 L36 19 H72 V31 H36 L0 56" fill="none" stroke="#FFFFFF" stroke-width="16"></path><path d="M0 -6 L36 19 H72 V31 H36 L0 56" fill="none" stroke="#007749" stroke-width="10"></path><path d="M0 5 L26 25 L0 45z" fill="#000000"></path></g></svg><span style="font-weight: 800; font-size: 16px">South Africa</span><span class="muted" style="font-size: 14px; margin-top: -6px">JSE · 6 modules</span></a></div>
+  </main>
+  <div style="margin-top: auto; position: sticky; bottom: 0; padding: 12px 16px 24px; background: #FFFFFF"><a href="UPSignIn.dc.html" class="btn">Continue</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -6,7 +6,8 @@ Financial education, NGX company research and investment simulation platform.
 
 ```bash
 npm install
-npm test && npm run build      # static site in apps/web/out
+npm test                       # domain logic tests
+# The site is the canvas prototype in apps/prototype/site (open index.html via any static server)
 ```
 
 > Educational use only. Finvora does not execute trades, manage assets or provide financial advice.

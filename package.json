@@ -2,14 +2,11 @@
   "name": "finvora",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @finvora/web",
-    "build": "npm run build -w @finvora/web",
+    "build": "node -e \"require('fs').accessSync('apps/prototype/site/index.html'); console.log('Prototype site ready: apps/prototype/site')\"",
     "test": "npm run test -w @finvora/engine -w @finvora/domain",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "e2e": "node e2e/journeys.cjs"
+    "typecheck": "npm run typecheck -w @finvora/engine -w @finvora/domain -w @finvora/sample-data"
   }
 }

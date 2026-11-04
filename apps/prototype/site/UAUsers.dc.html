@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora admin (purple and black): Users and payments</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#F8F6FC;color:#0E0B14;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+a{color:#4C1D95}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
+.card{background:#FFFFFF;border:1.5px solid #E7E2F0;border-radius:18px;box-sizing:border-box}
+.muted{color:#615A6E}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#615A6E}
+.num{font-variant-numeric:tabular-nums}
+.btn{height:42px;padding:0 18px;border:0;border-radius:12px;background:#5B21B6;color:#FFFFFF;font:700 14px 'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 2px 0 #3B0F7A;box-sizing:border-box;white-space:nowrap}
+.btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:none;border:1.5px solid #E7E2F0}
+.btn:active,.press:active{transform:translateY(1px)}
+.chip{min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-sizing:border-box}
+.nav{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;text-decoration:none;color:#38323F;font-weight:600;font-size:14px}
+.nav[aria-current=page]{background:#F1EBFB;color:#4C1D95;font-weight:700}
+.sw{width:46px;height:28px;flex:none;border-radius:999px;border:0;padding:3px;cursor:pointer;display:flex;box-sizing:border-box}
+.sw span{width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tag{white-space:nowrap;display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#615A6E;padding:10px 16px;border-bottom:1.5px solid #E7E2F0}
+td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
+.field{height:42px;border-radius:12px;border:1.5px solid #E7E2F0;background:#FFFFFF;padding:0 12px;font:500 14px 'Plus Jakarta Sans',sans-serif;color:#0E0B14;box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){.btn,.press,.chip,.sw span{transition:transform .15s ease-out}}
+</style>
+</helmet>
+<div class="root" style="width: 1440px; min-height: 960px; box-sizing: border-box; display: flex">
+  <aside style="width: 248px; flex: none; background: #FFFFFF; border-right: 1.5px solid #E7E2F0; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #5B21B6; color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center">F</span><span><strong style="display: block; font-size: 16px; line-height: 1.2">Finvora</strong><span class="muted" style="font-size: 12px">Admin</span></span></div>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px"><a href="UAOverview.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4z M14 20h6v-9h-6z M14 8h6V4h-6z M4 20h6v-3H4z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Overview</a><a href="UAContent.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z M5 16a4 4 0 0 1 4-4h10" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Content</a><a href="UAQuestions.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4 2.8c-.7.3-1 .8-1 1.5V14 M12 18h.01 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Question builder</a><a href="UAFeedbackInbox.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Feedback inbox</a><a href="UAAskKoboReview.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M8 10h.01 M16 10h.01 M8 14c2 2 6 2 8 0" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Ask Fin review</a><a href="UAFeedbackSettings.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10 M18 7h2 M4 17h4 M12 17h8 M14 5v4 M8 15v4" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Feedback settings</a><a href="UAPlans.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3z M3 11h18" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Plans</a><a href="UAUsers.dc.html" class="nav press" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21c1-4 4-6 7-6s6 2 7 6 M17 11a3 3 0 1 0 0-6 M22 20c-.5-2.5-2-4-4-4.6" fill="none" stroke="#4C1D95" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Users and payments</a><a href="UAAISummaries.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>AI summary approvals</a><a href="UAAudit.dc.html" class="nav press"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z M9 9h6 M9 13h6 M9 17h4" fill="none" stroke="#615A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Audit log</a></nav>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E7E2F0"><span style="width: 32px; height: 32px; border-radius: 999px; background: #F1EBFB; color: #4C1D95; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">TO</span><span style="font-size: 13px"><strong style="display: block">Tobi O.</strong><span class="muted">Content editor</span></span></div>
+  </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 72px; flex: none; padding: 0 32px; display: flex; align-items: center; gap: 16px; border-bottom: 1.5px solid #E7E2F0; background: #FFFFFF">
+      <div style="flex: 1"><span class="muted" style="font-size: 13px">Learners and Paystack orders</span><h1 style="font-size: 22px; line-height: 1.2">Users and payments</h1></div>
+    </header>
+    <main style="padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px">
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px"><div class="card" style="padding: 18px 20px"><span class="eyebrow">Learners</span><div class="num" style="font-size: 30px; font-weight: 800; color: #0E0B14; line-height: 1.2; margin-top: 6px">9,486</div><span class="muted" style="font-size: 13px">+312 this week</span></div><div class="card" style="padding: 18px 20px"><span class="eyebrow">On Plus</span><div class="num" style="font-size: 30px; font-weight: 800; color: #4C1D95; line-height: 1.2; margin-top: 6px">574</div><span class="muted" style="font-size: 13px">6.1% of learners</span></div><div class="card" style="padding: 18px 20px"><span class="eyebrow">Pending payments</span><div class="num" style="font-size: 30px; font-weight: 800; color: #4C1D95; line-height: 1.2; margin-top: 6px">3</div><span class="muted" style="font-size: 13px">Waiting for Paystack</span></div><div class="card" style="padding: 18px 20px"><span class="eyebrow">Failed today</span><div class="num" style="font-size: 30px; font-weight: 800; color: #B42828; line-height: 1.2; margin-top: 6px">2</div><span class="muted" style="font-size: 13px">No charge taken</span></div></div>
+      <div style="display: flex; gap: 10px; align-items: center"><input class="field" style="width: 420px" placeholder="Search by email or order number"><button class="chip" type="button" style="background: #5B21B6; color: #FFFFFF; border-color: #5B21B6">All</button><button class="chip" type="button">Plus</button><button class="chip" type="button">Pending</button><button class="chip" type="button">Failed</button></div>
+      <section class="card" style="overflow: hidden"><table><tr><th>Learner</th><th>Plan</th><th>Last order</th><th>Amount</th><th>Payment</th><th></th></tr><tr><td><strong style="display:block">Ada Okafor</strong><span class="muted" style="font-size:13px">ada@example.com</span></td><td>Plus monthly</td><td class="num">FV-24117</td><td class="num">₦1,500</td><td><span class="tag" style="background: #E1F7EA; color: #0F6B39">Confirmed</span></td><td><button class="chip" type="button">View</button></td></tr><tr><td><strong style="display:block">Kwame Mensah</strong><span class="muted" style="font-size:13px">kwame@example.com</span></td><td>Plus yearly</td><td class="num">FV-24109</td><td class="num">₦15,000</td><td><span class="tag" style="background: #F1EBFB; color: #4C1D95">Pending</span></td><td><button class="chip" type="button">View</button></td></tr><tr><td><strong style="display:block">Wanjiru Kamau</strong><span class="muted" style="font-size:13px">wanjiru@example.com</span></td><td>Free</td><td class="num"></td><td class="num"></td><td><span class="muted">No payments</span></td><td><button class="chip" type="button">View</button></td></tr><tr><td><strong style="display:block">Tunde Bello</strong><span class="muted" style="font-size:13px">tunde@example.com</span></td><td>Plus monthly</td><td class="num">FV-24098</td><td class="num">₦1,500</td><td><span class="tag" style="background: #FFE6E6; color: #B42828">Failed</span></td><td><button class="chip" type="button">View</button></td></tr><tr><td><strong style="display:block">Zainab Musa</strong><span class="muted" style="font-size:13px">zainab@example.com</span></td><td>Plus monthly</td><td class="num">FV-24090</td><td class="num">₦1,500</td><td><span class="tag" style="background: #E1F7EA; color: #0F6B39">Confirmed</span></td><td><button class="chip" type="button">View</button></td></tr></table></section>
+      <p class="muted" style="margin: 0; font-size: 13px">Payment status comes only from our server's check with Paystack. Pending orders are re-checked automatically; staff can't mark a payment as paid.</p>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

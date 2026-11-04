@@ -1,5 +1,10 @@
 # Phase 1 prototype: status and reviewer guide
 
+> **Current site (4 Nov 2026): the canvas boards.** On the user's instruction, the screens I first designed myself were deleted. The deployed prototype is now the approved purple canvas boards in `apps/prototype/site`, exactly as designed and linked as on the canvas. `responsive.js` scales each board to fit folded phones, phones, tablets and desktop. Numbers on screen are the boards' sample content.
+>
+> **Next step (option B):** rebuild the key flows (lessons, simulator, Ask Fin, checkout) in code inside these exact designs, reusing the tested logic in `packages/domain`. The sections below describe the earlier web app. Its screens were removed, but its logic packages remain.
+
+
 **Updated:** 3 Nov 2026 · **Branch:** `awesome-bardeen-2pkwcl`
 
 ## What was there before this work

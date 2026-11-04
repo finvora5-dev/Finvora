@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Report a mistake</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.root{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E0B14;font-size:16px;line-height:1.5}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h2{margin:0;font-weight:800;letter-spacing:-0.02em}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
+.btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
+.link{min-height:44px;border:0;background:transparent;font:700 15px 'Plus Jakarta Sans',sans-serif;color:#615A6E;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;text-decoration:none}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.press:active,.btn:active{transform:translateY(2px)}
+.muted{color:#615A6E}
+@keyframes f-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes f-fade{from{opacity:0}to{opacity:1}}
+@keyframes f-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+.sheet{animation:f-up .3s cubic-bezier(.2,.8,.2,1)}
+.scrim{animation:f-fade .25s ease-out}
+.pop{animation:f-pop .3s ease-out}
+.btn,.press,.chip{transition:transform .12s ease-out}
+}
+</style>
+</helmet>
+<div class="root" style="position: relative; width: 390px; height: 900px; overflow: hidden; background: #FFFFFF">
+  <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0"><dc-import name="UPArticle" hint-size="390px,900px"></dc-import></div>
+  <div class="scrim" aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 24px; box-shadow: 0 -10px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 16px">
+    <span aria-hidden="true" style="align-self: center; width: 44px; height: 5px; border-radius: 999px; background: #E7E2F0"></span>
+    <sc-if value="{{form}}" hint-placeholder-val="{{true}}">
+      <div><h2 id="sh-t" style="font-size: 21px">Report a mistake</h2><p class="muted" style="margin: 2px 0 0; font-size: 14px">Dividend · Library article</p></div>
+      <div role="radiogroup" aria-label="What's wrong?" style="display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{reasons}}" as="r" hint-placeholder-count="4">
+          <button type="button" role="radio" aria-checked="{{r.on}}" onClick="{{r.tap}}" class="press" style="min-height: 52px; padding: 0 14px; border-radius: 14px; border: 2px solid {{r.border}}; background: {{r.bg}}; display: flex; align-items: center; gap: 12px; cursor: pointer; font: 600 15px 'Plus Jakarta Sans', sans-serif; color: #0E0B14; text-align: left">
+            <span style="flex: 1">{{r.label}}</span>
+            <span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid {{r.ink}}; display: flex; align-items: center; justify-content: center"><span style="width: 10px; height: 10px; border-radius: 999px; background: {{r.dot}}"></span></span>
+          </button>
+        </sc-for>
+      </div>
+      <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Tell us more <span class="muted" style="font-weight: 500">(optional)</span></span><textarea rows="3" placeholder="For example: the yield should be 5%, not 4%" style="border-radius: 14px; border: 1.5px solid #E7E2F0; padding: 12px 14px; font: 500 16px 'Plus Jakarta Sans', sans-serif; resize: none"></textarea></label>
+      <button type="button" class="{{sendCls}}" onClick="{{send}}" disabled="{{sendOff}}">Send report</button>
+      <a href="UPArticle.dc.html" class="link" style="margin-top: -10px">Cancel</a>
+    </sc-if>
+    <sc-if value="{{sent}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 8px 0 4px">
+        <div class="pop"><div style="width: 96px; height: 96px; flex: none"><dc-import name="GKobo" mood="proud" size="96" hint-size="96px,96px"></dc-import></div></div>
+        <h2 id="sh-t" style="font-size: 22px">Thank you!</h2>
+        <p class="muted" style="margin: 0; max-width: 290px">Our team will check this article. We fix confirmed mistakes quickly.</p>
+        <a href="UPArticle.dc.html" class="btn" style="margin-top: 6px">Done</a>
+      </div>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { pick: 0, sent: false }; }
+  renderVals() {
+    const s = this.state; const R = [["A number looks wrong", "M4 20h16 M6 16l4-8 4 6 4-10"], ["It's unclear or confusing", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M9.5 9a2.5 2.5 0 1 1 3 2.4c-.6.2-.5.8-.5 1.6 M12 17h.01"], ["Spelling or grammar", "M4 7h16 M4 12h10 M4 17h7"], ["Out of date", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7v5l3 2"]];
+    return {
+      form: !s.sent, sent: s.sent,
+      reasons: R.map((r, i) => { const on = s.pick === i; return { label: r[0], icon: r[1], on: on ? 'true' : 'false', border: on ? '#5B21B6' : '#E7E2F0', bg: on ? '#F8F6FC' : '#FFFFFF', ink: on ? '#5B21B6' : '#8E879A', dot: on ? '#5B21B6' : 'transparent', tap: () => this.setState({ pick: i }) }; }),
+      sendOff: s.pick === null, sendCls: s.pick === null ? 'btn btn-off' : 'btn', send: () => { if (s.pick !== null) this.setState({ sent: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

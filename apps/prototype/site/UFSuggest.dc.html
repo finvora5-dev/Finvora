@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Suggest a topic</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.root{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E0B14;font-size:16px;line-height:1.5}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h2{margin:0;font-weight:800;letter-spacing:-0.02em}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
+.btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
+.link{min-height:44px;border:0;background:transparent;font:700 15px 'Plus Jakarta Sans',sans-serif;color:#615A6E;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;text-decoration:none}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.press:active,.btn:active{transform:translateY(2px)}
+.muted{color:#615A6E}
+@keyframes f-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes f-fade{from{opacity:0}to{opacity:1}}
+@keyframes f-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+.sheet{animation:f-up .3s cubic-bezier(.2,.8,.2,1)}
+.scrim{animation:f-fade .25s ease-out}
+.pop{animation:f-pop .3s ease-out}
+.btn,.press,.chip{transition:transform .12s ease-out}
+}
+</style>
+</helmet>
+<div class="root" style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #FFFFFF">
+  <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0"><dc-import name="UPLibrary" hint-size="390px,844px"></dc-import></div>
+  <div class="scrim" aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 24px; box-shadow: 0 -10px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 16px">
+    <span aria-hidden="true" style="align-self: center; width: 44px; height: 5px; border-radius: 999px; background: #E7E2F0"></span>
+    <sc-if value="{{form}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; align-items: center; gap: 12px"><div style="width: 56px; height: 56px; flex: none"><dc-import name="GKobo" mood="think" size="56" hint-size="56px,56px"></dc-import></div><div><h2 id="sh-t" style="font-size: 21px">What should we explain next?</h2><p class="muted" style="margin: 2px 0 0; font-size: 14px">Suggest any money topic you're curious about.</p></div></div>
+      <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Your topic</span><textarea rows="2" placeholder="For example: how treasury bills work" style="border-radius: 14px; border: 1.5px solid #E7E2F0; padding: 12px 14px; font: 500 16px 'Plus Jakarta Sans', sans-serif; resize: none" value="{{typed}}" readOnly="true"></textarea></label>
+      <div style="display: flex; flex-direction: column; gap: 8px"><span class="muted" style="font-size: 13px; font-weight: 700">Others are asking for</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{pop}}" as="p" hint-placeholder-count="5">
+            <button type="button" class="chip press" aria-pressed="{{p.on}}" onClick="{{p.tap}}" style="background: {{p.bg}}; border-color: {{p.border}}; color: {{p.fg}}">{{p.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <button type="button" class="btn" onClick="{{send}}">Send suggestion</button>
+      <a href="UPLibrary.dc.html" class="link" style="margin-top: -10px">Not now</a>
+    </sc-if>
+    <sc-if value="{{sent}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 8px 0 4px">
+        <div class="pop"><div style="width: 96px; height: 96px; flex: none"><dc-import name="GKobo" mood="proud" size="96" hint-size="96px,96px"></dc-import></div></div>
+        <h2 id="sh-t" style="font-size: 22px">Thank you!</h2>
+        <p class="muted" style="margin: 0; max-width: 290px">We read every suggestion. Popular topics become new guides and lessons.</p>
+        <a href="UPLibrary.dc.html" class="btn" style="margin-top: 6px">Done</a>
+      </div>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { pick: 0, sent: false }; }
+  renderVals() {
+    const s = this.state; const P = ["How bonds work", "Saving in dollars", "Reading a bank statement", "Pension basics (RSA)", "What is an ETF?"];
+    return {
+      form: !s.sent, sent: s.sent, typed: s.pick !== null ? P[s.pick] : '',
+      pop: P.map((t, i) => { const on = s.pick === i; return { label: t, on: on ? 'true' : 'false', bg: on ? '#F1EBFB' : '#FFFFFF', border: on ? '#5B21B6' : '#E7E2F0', fg: on ? '#4C1D95' : '#0E0B14', tap: () => this.setState({ pick: on ? null : i }) }; }),
+      send: () => this.setState({ sent: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+/* Finvora prototype: makes the fixed-width canvas boards fit any screen.
+   Phone boards are 390px wide; admin boards 1440px. responsive.js scales each board
+   to the viewport (zoom), so folded phones, phones, tablets and desktops all fit. */
+html { background: #F1EBFB; }
+body { margin: 0; min-height: 100dvh; }
+#dc-root > .sc-host > :first-child { margin: 0 auto; background: #FFFFFF; }
+html.fv-phone #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F0; }

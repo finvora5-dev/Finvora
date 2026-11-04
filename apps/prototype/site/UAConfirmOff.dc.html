@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Finvora admin (purple and black): Turn off prompt?</title><script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script></head><body><x-dc><helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#FFFFFF}
+.root{background:#F8F6FC;color:#0E0B14;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+a{color:#4C1D95}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
+.card{background:#FFFFFF;border:1.5px solid #E7E2F0;border-radius:18px;box-sizing:border-box}
+.muted{color:#615A6E}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#615A6E}
+.num{font-variant-numeric:tabular-nums}
+.btn{height:42px;padding:0 18px;border:0;border-radius:12px;background:#5B21B6;color:#FFFFFF;font:700 14px 'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 2px 0 #3B0F7A;box-sizing:border-box;white-space:nowrap}
+.btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:none;border:1.5px solid #E7E2F0}
+.btn:active,.press:active{transform:translateY(1px)}
+.chip{min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-sizing:border-box}
+.nav{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;text-decoration:none;color:#38323F;font-weight:600;font-size:14px}
+.nav[aria-current=page]{background:#F1EBFB;color:#4C1D95;font-weight:700}
+.sw{width:46px;height:28px;flex:none;border-radius:999px;border:0;padding:3px;cursor:pointer;display:flex;box-sizing:border-box}
+.sw span{width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tag{white-space:nowrap;display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#615A6E;padding:10px 16px;border-bottom:1.5px solid #E7E2F0}
+td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
+.field{height:42px;border-radius:12px;border:1.5px solid #E7E2F0;background:#FFFFFF;padding:0 12px;font:500 14px 'Plus Jakarta Sans',sans-serif;color:#0E0B14;box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){.btn,.press,.chip,.sw span{transition:transform .15s ease-out}}
+</style></helmet>
+<div class="root" style="width: 1440px; min-height: 1000px; box-sizing: border-box; position: relative; overflow: hidden">
+  <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0"><dc-import name="UAFeedbackSettings" hint-size="1440px,1000px"></dc-import></div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
+  <section role="alertdialog" aria-modal="true" aria-labelledby="c-t" style="position: absolute; z-index: 2; left: 50%; top: 50%; width: 460px; transform: translate(-50%,-50%); background: #FFFFFF; border-radius: 22px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 24px 60px rgba(0,0,0,.25)">
+    <h2 id="c-t" style="font-size: 22px">Turn off "Report a mistake"?</h2>
+    <p class="muted" style="margin: 0">The flag on articles and the "Spot a mistake?" link will disappear for all learners straight away. You can turn it back on at any time.</p>
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px"><a href="UAFeedbackSettings.dc.html" class="btn btn-w">Keep it on</a><a href="UAFeedbackSettings.dc.html" class="btn" style="background: #D92B2B; box-shadow: 0 2px 0 #A51D1D">Turn off</a></div>
+  </section>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script></body></html>

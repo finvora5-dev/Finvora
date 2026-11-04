@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Meet Fin</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#FFFFFF;color:#1C1726;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;line-height:1.5}
+a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-0.02em;color:#1C1726}
+.cap{font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.btn{width:100%;height:52px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:800 15px 'Plus Jakarta Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 #3B0F7A;box-sizing:border-box}
+.btn-o{background:#FFFFFF;color:#5B21B6;border:2px solid #E7E2F0;box-shadow:0 4px 0 #E7E2F0}
+.btn:active,.press:active{transform:translateY(4px);box-shadow:none}
+.dcard{background:#FFFFFF;border:2px solid #E7E2F0;border-radius:18px;box-shadow:0 4px 0 #E7E2F0;box-sizing:border-box;text-decoration:none;color:#1C1726}
+.muted{color:#615A6E}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@keyframes d-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes d-pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+@keyframes d-flick{0%,100%{transform:scale(1,1) rotate(0)}30%{transform:scale(1.05,1.1) rotate(-3deg)}60%{transform:scale(.97,1.03) rotate(2deg)}}
+@keyframes d-wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+@media (prefers-reduced-motion:no-preference){
+.btn,.press{transition:transform .1s ease-out,box-shadow .1s ease-out}
+.bob{animation:d-bob 3s ease-in-out infinite}
+.pop{animation:d-pop .45s cubic-bezier(.2,.8,.2,1) both}
+.flick{animation:d-flick 1.8s ease-in-out infinite;transform-origin:50% 90%}
+.wave{animation:d-wave 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:20% 90%}
+}
+</style>
+</helmet>
+<div class="root" style="width: 390px; min-height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #131F2B">
+
+  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 24px">
+    <div class="pop" style="position: relative; background: #1E2E3D; border: 2px solid #34495C; color: #FFFFFF; font-weight: 700; font-size: 17px; padding: 12px 16px; border-radius: 16px">Hi there! I'm Fin.
+      <span aria-hidden="true" style="position: absolute; left: 50%; bottom: -9px; width: 14px; height: 14px; margin-left: -7px; background: #1E2E3D; border-right: 2px solid #34495C; border-bottom: 2px solid #34495C; transform: rotate(45deg)"></span></div>
+    <div class="bob" style="margin-top: 14px; width: 160px; height: 160px; position: relative">
+      <span aria-hidden="true" style="position: absolute; left: 30px; right: 30px; bottom: 2px; height: 26px; border-radius: 999px; background: #22323F"></span>
+      <div style="position: relative"><svg width="160" height="160" viewBox="0 0 120 120" role="img" aria-label="Fin, the Finvora coin">
+  <ellipse cx="60" cy="114" rx="30" ry="5" fill="#0B1F44" opacity=".12"></ellipse>
+  <path d="M20 66 q-10 6 -8 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path><path class="wave" d="M98 58 q14 -10 12 -26" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path>
+  <rect x="44" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect><rect x="66" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect>
+  <circle cx="60" cy="62" r="42" fill="#0F55C9"></circle><circle cx="60" cy="58" r="42" fill="#1A73F5"></circle>
+  <circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"></circle>
+  <path d="M30 40c6-10 16-16 26-17" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".55"></path>
+  <ellipse cx="46" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse><ellipse cx="74" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse>
+  <circle cx="48" cy="54" r="4.6" fill="#0B1F44"></circle><circle cx="76" cy="54" r="4.6" fill="#0B1F44"></circle>
+  <circle cx="49.5" cy="52" r="1.6" fill="#FFFFFF"></circle><circle cx="77.5" cy="52" r="1.6" fill="#FFFFFF"></circle>
+  <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle>
+  <path d="M48 70 q12 14 26 0 z" fill="#0B1F44"></path><path d="M54 76 q6 4 12 0" fill="#FF8FA3"></path>
+</svg></div>
+    </div>
+  </main>
+  <div style="padding: 0 24px 28px"><a href="UPOnbGoal.dc.html" class="btn">Continue</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

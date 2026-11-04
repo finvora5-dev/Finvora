@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): Email: sign-in code</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#FFFFFF;color:#0E0B14;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;line-height:1.5}
+a{color:#4C1D95}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
+.card{background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;border-radius:20px;box-sizing:border-box}
+.muted{color:#615A6E}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.num{font-variant-numeric:tabular-nums}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
+.btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:0 3px 0 #E7E2F0;border:1.5px solid #E7E2F0}
+.btn-g{background:#16884A;box-shadow:0 3px 0 #0F6B39}
+.btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
+.btn:active,.press:active{transform:translateY(2px)}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;text-decoration:none;box-sizing:border-box;cursor:pointer}
+.chip-on{background:#5B21B6;border-color:#5B21B6;color:#FFFFFF}
+.tile{width:44px;height:44px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.row{display:flex;align-items:center;gap:12px}
+.li{display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:44px;text-decoration:none;color:#0E0B14}
+.li+.li{border-top:1px solid #E7E2F0}
+.bar{height:8px;border-radius:999px;background:#E7E2F0;overflow:hidden}
+.bar>div{height:100%;border-radius:999px;background:#5B21B6}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.field{height:54px;border-radius:14px;border:1.5px solid #E7E2F0;background:#FFFFFF;padding:0 14px;font:500 16px 'Plus Jakarta Sans',sans-serif;color:#0E0B14;box-sizing:border-box;width:100%}
+@keyframes p-in{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes p-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes p-flick{0%,100%{transform:scale(1,1) rotate(0)}30%{transform:scale(1.05,1.1) rotate(-3deg)}60%{transform:scale(.97,1.03) rotate(2deg)}}
+@keyframes p-fill{from{width:0}}
+@keyframes p-burst{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1) rotate(var(--rot));opacity:0}}
+@keyframes p-dots{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+.btn,.press,.chip{transition:transform .15s ease-out}
+.in{animation:p-in .3s cubic-bezier(.2,.8,.2,1) both}
+.pop{animation:p-pop .4s cubic-bezier(.2,.8,.2,1) both}
+.flick{animation:p-flick 1.8s ease-in-out infinite;transform-origin:50% 90%}
+.fill{animation:p-fill .6s ease-out .2s both}
+.bit{animation:p-burst .9s cubic-bezier(.15,.7,.3,1) .15s both}
+.dot{animation:p-dots 1.2s ease-in-out infinite}
+}
+</style>
+<style>
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.sw{width:46px;height:28px;flex:none;border-radius:999px;border:0;padding:3px;display:flex;box-sizing:border-box}
+.sw span{width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sk{background:#DCE6F5;border-radius:10px}
+@keyframes m-sh{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+@media (prefers-reduced-motion:no-preference){.sk{animation:m-sh 1.4s ease-in-out infinite}}
+.toast{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;font-weight:700;font-size:15px;box-shadow:0 8px 24px rgba(16,30,70,.16)}
+.btn-r{background:#D92B2B;color:#FFFFFF;box-shadow:0 3px 0 #A51D1D}
+</style>
+</helmet>
+<div class="root" style="width: 640px; min-height: 820px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
+  <div style="background: #F5F3F8; padding: 24px; min-height: 760px; box-sizing: border-box">
+    <div style="font-size: 13px; color: #615A6E; margin-bottom: 10px">From: Finvora &lt;hello@finvora.app&gt; · Subject: <strong style="color: #0E0B14">Your Finvora code: 482193</strong></div>
+    <div style="max-width: 560px; margin: 0 auto; background: #FFFFFF; border-radius: 18px; overflow: hidden; border: 1.5px solid #E7E2F0">
+      <div style="background: #5B21B6; padding: 20px 24px; color: #FFFFFF; font-weight: 800; font-size: 22px; letter-spacing: -0.02em">finvora</div>
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px"><h1 style="font-size: 24px">Your sign-in code</h1><p style="margin: 0">Enter this code in the app to sign in. It works for 10 minutes.</p>
+<div class="num" style="font-size: 40px; font-weight: 800; letter-spacing: .3em; text-align: center; padding: 16px; border-radius: 14px; background: #F1EBFB; color: #4C1D95">482193</div>
+<p class="muted" style="margin: 0; font-size: 14px">Didn't ask for this? You can ignore it. Nobody can sign in without the code. Finvora will never ask you for this code by phone or chat.</p></div>
+      <div style="padding: 16px 24px; background: #F8F6FC; font-size: 12px; color: #615A6E">Finvora explains money. It never tells you what to buy or sell. You got this email because you have a Finvora account.</div>
+    </div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":640,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
