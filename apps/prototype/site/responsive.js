@@ -35,7 +35,7 @@
     html.classList.toggle("fv-desk", deskBoard && vw >= DESK);
     html.classList.toggle("fv-big", designW >= 1200 && vw >= DESK);
     fillFV(el);
-    if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; return; }
+    if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (!wide) {
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
@@ -45,11 +45,7 @@
     }
     el.style.zoom = "1";
     el.style.width = "100%";
-    // Line charts: stretch across the card on wide screens (the line widens, height stays).
-    el.querySelectorAll('svg[role="img"][aria-label*="Price"]').forEach(function (svg) {
-      svg.setAttribute("width", "100%"); svg.setAttribute("preserveAspectRatio", "none");
-      svg.querySelectorAll("path, polyline, line").forEach(function (l) { l.setAttribute("vector-effect", "non-scaling-stroke"); });
-    });
+    stretchCharts(el);
     // Elements drawn at the board's fixed width: stretch them, unless they hold positioned artwork.
     el.querySelectorAll("[style*='width: 390px'], [style*='width:390px']").forEach(function (n) {
       if (n === el) return;
@@ -66,6 +62,14 @@
     el.querySelectorAll("[data-fv-label]").forEach(function (n) {
       var k = n.getAttribute("data-fv-label"), t = k === "streak" ? "Streak: " + v.streak + (v.streak === "1" ? " day" : " days") : v.xp + " XP, " + v.levelText;
       if (n.getAttribute("aria-label") !== t) n.setAttribute("aria-label", t);
+    });
+  }
+  // Line charts: stretch across the card on wide screens (the line widens, height stays).
+  function stretchCharts(el) {
+    el.querySelectorAll('svg[role="img"][aria-label*="Price"]').forEach(function (svg) {
+      if (svg.getAttribute("width") !== "100%") svg.setAttribute("width", "100%");
+      if (svg.getAttribute("preserveAspectRatio") !== "none") svg.setAttribute("preserveAspectRatio", "none");
+      svg.querySelectorAll("path, polyline, line").forEach(function (l) { if (!l.getAttribute("vector-effect")) l.setAttribute("vector-effect", "non-scaling-stroke"); });
     });
   }
   var queued = false;

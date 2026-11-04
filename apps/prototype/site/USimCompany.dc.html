@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
 <script src="./fv.js"></script>
 </head>
 <body>
@@ -62,22 +63,40 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </style>
 </helmet>
 <div class="root" style="width: 390px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
-  <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 8px"><a href="USimMarket.dc.html" class="press" aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#0E0B14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><span style="flex: 1"></span><span class="tag" style="background: #EFE8FF; color: #5B2FC9">Made-up company</span></header>
+  <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 8px"><a href="USimMarket.dc.html" class="press" aria-label="Back to the practice market" style="width: 44px; height: 44px; margin-left: -10px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#0E0B14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><span style="flex: 1"></span><span class="tag" style="background: #EFE8FF; color: #5B2FC9">Made-up company</span></header>
   <main style="padding: 8px 16px 24px; display: flex; flex-direction: column; gap: 14px">
-    <div style="display: flex; align-items: center; gap: 12px"><span style="width: 44px; height: 44px; flex: none; border-radius: 12px; background: #5B21B6; color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">ADF</span><div><h1 style="font-size: 24px">Adire Foods</h1><span class="muted" style="font-size: 14px">Food and drink · ADF</span></div></div>
-    <div><span class="num" style="font-size: 32px; font-weight: 800">₦30.00</span> <span class="tag num" style="background: #DCFAE6; color: #0F6B39">▲ 1.8%</span></div>
-    <div class="card" style="padding: 14px"><svg width="330" height="130" viewBox="0 0 330 130" role="img" aria-label="Price rose over the last 3 months"><path d="M0,58 L30,62 L60,56 L90,60 L120,50 L150,54 L180,46 L210,48 L240,40 L270,42 L300,34 L330,30" fill="none" stroke="#176EEB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      <div style="display: flex; gap: 6px; margin-top: 8px"><span class="chip">1W</span><span class="chip">1M</span><span class="chip chip-on">3M</span><span class="chip">1Y</span></div></div>
-    <div class="card" style="overflow: hidden"><div class="li"><span style="flex: 1">You own</span><strong class="num">800 shares · ₦24,000</strong></div><div class="li"><span style="flex: 1">Dividend per share</span><strong class="num">₦1.50</strong></div><a href="UPArticle.dc.html" class="li press"><span style="flex: 1; font-weight: 700">What is a dividend?</span><span class="muted">2 min read</span></a></div>
+    <div style="display: flex; align-items: center; gap: 12px"><span style="width: 44px; height: 44px; flex: none; border-radius: 12px; background: {{c.color}}; color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">{{c.t}}</span><div><h1 style="font-size: 24px">{{c.name}}</h1><span class="muted" style="font-size: 14px">{{c.label}} · {{c.t}}</span></div></div>
+    <div><span class="num" style="font-size: 32px; font-weight: 800">{{c.price}}</span> <span class="tag num" style="background: {{c.tagBg}}; color: {{c.tagFg}}">{{c.chg}}</span></div>
+    <div class="card" style="padding: 14px"><svg width="330" height="130" viewBox="0 0 330 130" role="img" aria-label="{{chartLabel}}"><path d="{{chartPath}}" fill="none" stroke="#176EEB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <div style="display: flex; gap: 6px; margin-top: 8px"><sc-for list="{{ranges}}" as="g" hint-placeholder-count="4"><button type="button" class="{{g.cls}}" aria-pressed="{{g.on}}" onClick="{{g.tap}}">{{g.label}}</button></sc-for></div></div>
+    <div class="card" style="overflow: hidden"><div class="li"><span style="flex: 1">You own</span><strong class="num">{{own}}</strong></div><div class="li"><span style="flex: 1">Dividend per share</span><strong class="num">{{div}}</strong></div><a href="UPArticle.dc.html" class="li press"><span style="flex: 1; font-weight: 700">What is a dividend?</span><span class="muted">2 min read</span></a></div>
     <div style="display: flex; gap: 10px; align-items: flex-end"><div style="width: 56px; height: 56px; flex: none"><dc-import name="GKobo" mood="think" size="56" hint-size="56px,56px"></dc-import></div><p class="card" style="margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600">Before you buy, ask: how does this company make money?</p></div>
   </main>
-  <div style="margin-top: auto; position: sticky; bottom: 0; padding: 12px 16px 22px; background: #FFFFFF; display: grid; grid-template-columns: 1fr 1fr; gap: 10px"><a href="USimTrade.dc.html" class="btn">Buy</a><a href="USimSell.dc.html" class="btn btn-w">Sell</a></div>
+  <div style="margin-top: auto; position: sticky; bottom: 0; padding: 12px 16px 22px; background: #FFFFFF; display: grid; grid-template-columns: 1fr 1fr; gap: 10px"><a href="{{buyHref}}" class="btn">Buy</a><a href="{{sellHref}}" class="btn btn-w">Sell</a></div>
   
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  sim() { return window.FV && window.FV.SIM; }
+  row(c, extra) {
+    const S = this.sim(), ch = S.change(c.t), up = ch >= 0;
+    return Object.assign({ t: c.t, name: c.name, label: c.label, color: c.color, href: 'USimCompany.dc.html?t=' + c.t,
+      price: S.naira(S.price(c.t)), chg: (up ? '\u25b2 ' : '\u25bc ') + Math.abs(ch).toFixed(1) + '%',
+      tagBg: up ? '#DCFAE6' : '#FFE4E2', tagFg: up ? '#0F6B39' : '#B42828' }, extra || {});
+  }
+  constructor(p) { super(p); this.state = { r: '3M' }; }
+  renderVals() {
+    const S = this.sim(); if (!S) return {};
+    const co = S.current(), c = this.row(co), r = this.state.r, n = { '1W': 7, '1M': 30, '3M': 90, '1Y': 365 }[r];
+    const h = S.history(co.t, n), lo = Math.min(...h), hi = Math.max(...h), span = Math.max(1, hi - lo);
+    const chartPath = h.map((p, i) => (i ? 'L' : 'M') + (i * 330 / Math.max(1, h.length - 1)).toFixed(1) + ',' + (110 - (p - lo) / span * 90).toFixed(1)).join(' ');
+    const rose = h[h.length - 1] >= h[0], words = { '1W': 'week', '1M': 'month', '3M': '3 months', '1Y': 'year' }[r];
+    const q = S.held(co.t), ranges = ['1W', '1M', '3M', '1Y'].map((label) => ({ label, on: String(label === r), cls: label === r ? 'chip chip-on' : 'chip', tap: () => this.setState({ r: label }) }));
+    return { c, chartPath, chartLabel: 'Price ' + (rose ? 'rose' : 'fell') + ' over the last ' + words, ranges,
+      own: q ? q + (q === 1 ? ' share \u00b7 ' : ' shares \u00b7 ') + S.naira(q * S.price(co.t)) : 'None yet',
+      div: co.div ? S.naira(co.div) : 'None', buyHref: 'USimTrade.dc.html?t=' + co.t, sellHref: 'USimSell.dc.html?t=' + co.t };
+  }
 }
 </script>
 </body>

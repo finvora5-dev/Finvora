@@ -6,7 +6,7 @@ Usage: python3 build_desktop_more.py <folder with generated UDx/UDy/UDz boards> 
 import re, sys, os, json
 SRC, SITE, OUT = sys.argv[1:4]
 HEAD = '<script src="./support.js"></script>'
-INJECT = HEAD + '\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<link rel="stylesheet" href="./responsive.css">\n<script src="./responsive.js"></script>\n<script src="./fv.js"></script>'
+INJECT = HEAD + '\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<link rel="stylesheet" href="./responsive.css">\n<script src="./responsive.js"></script>\n<script src="./fvd.js"></script>\n<script src="./fv.js"></script>'
 EXTRA = {'UPArticle': 'UDArticle', 'UPOnbWelcome': 'UDWelcome', 'USimTrade': 'UDBuy'}
 def fix(s):
     if 'fv.js' not in s: s = s.replace(HEAD, INJECT, 1)

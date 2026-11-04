@@ -4,7 +4,7 @@ Usage: python3 build_desktop.py <folder with UD*.dc.html> <site folder>"""
 import re, sys, os
 SRC, SITE = sys.argv[1], sys.argv[2]
 HEAD = '<script src="./support.js"></script>'
-INJECT = HEAD + '\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<link rel="stylesheet" href="./responsive.css">\n<script src="./responsive.js"></script>\n<script src="./fv.js"></script>'
+INJECT = HEAD + '\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<link rel="stylesheet" href="./responsive.css">\n<script src="./responsive.js"></script>\n<script src="./fvd.js"></script>\n<script src="./fv.js"></script>'
 def inject(s): return s if 'fv.js' in s else s.replace(HEAD, INJECT, 1)
 def sub1(s, a, b):
     if a not in s: raise SystemExit('missing: ' + a[:70])

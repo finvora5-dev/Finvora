@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
 <script src="./fv.js"></script>
 </head>
 <body>
@@ -69,12 +70,14 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
   <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0; overflow: hidden"><dc-import name="USimHome" hint-size="390px,900px"></dc-import></div>
   <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
   <section role="alertdialog" aria-modal="true" aria-labelledby="m-t" style="position: absolute; z-index: 2; left: 20px; right: 20px; top: 50%; transform: translateY(-50%); background: #FFFFFF; border-radius: 24px; padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.25)"><div style="align-self: center"><div style="width: 88px; height: 88px; flex: none"><dc-import name="GKobo" mood="think" size="88" hint-size="88px,88px"></dc-import></div></div><h2 id="m-t" style="font-size: 21px">Start the simulator again?</h2><p class="muted" style="margin: 0">You'll get a fresh virtual ₦100,000 and your practice holdings will be cleared. Your lessons and badges stay.</p>
-<a href="USimHome.dc.html" class="btn btn-r" style="background: #D92B2B; color: #FFFFFF; box-shadow: 0 3px 0 #A51D1D; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none">Reset portfolio</a><a href="USimHome.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; color: #4C1D95">Keep my portfolio</a></section>
+<button type="button" onClick="{{reset}}" class="btn btn-r" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700; background: #D92B2B; color: #FFFFFF; box-shadow: 0 3px 0 #A51D1D; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none">Reset portfolio</button><a href="USimHome.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; color: #4C1D95">Keep my portfolio</a></section>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  renderVals() {
+    return { reset: () => { if (window.FV && window.FV.SIM) window.FV.SIM.reset(); location.href = 'USimEmpty.dc.html'; } };
+  }
 }
 </script>
 </body>

@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
 <script src="./fv.js"></script>
 </head>
 <body>
@@ -114,9 +115,10 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     </header>
     <main style="flex: 1; padding: 24px 40px 24px; display: flex; flex-direction: column; gap: 20px"><div style="display: flex; flex-direction: column; gap: 20px">
     <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: #EFE8FF; color: #5B2FC9; font-size: 13px; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 8v5 M12 16h.01" fill="none" stroke="#5B2FC9" stroke-width="2.2" stroke-linecap="round"></path></svg>Simulator: virtual ₦ and made-up companies. No real money.</div>
-    <div class="card" style="overflow: hidden"><div class="li"><span class="tag" style="background: #F1EBFB; color: #4C1D95; min-width: 64px; justify-content: center">Bought</span><span style="flex: 1"><strong style="display: block">Adire Foods</strong><span class="muted" style="font-size: 13px">10 shares · Today</span></span><strong class="num">₦300</strong></div><div class="li"><span class="tag" style="background: #F5F3F8; color: #38323F; min-width: 64px; justify-content: center">Sold</span><span style="flex: 1"><strong style="display: block">Zuri Telecom</strong><span class="muted" style="font-size: 13px">4 shares · Yesterday</span></span><strong class="num">₦91</strong></div><div class="li"><span class="tag" style="background: #F1EBFB; color: #4C1D95; min-width: 64px; justify-content: center">Bought</span><span style="flex: 1"><strong style="display: block">Okeke Motors</strong><span class="muted" style="font-size: 13px">200 shares · 28 Oct</span></span><strong class="num">₦16,200</strong></div><div class="li"><span class="tag" style="background: #DCFAE6; color: #0F6B39; min-width: 64px; justify-content: center">Dividend</span><span style="flex: 1"><strong style="display: block">Adire Foods</strong><span class="muted" style="font-size: 13px">800 shares · 20 Oct</span></span><strong class="num">₦1,200</strong></div></div>
+    <sc-if value="{{has}}" hint-placeholder-val="{{true}}"><div class="card" style="overflow: hidden"><sc-for list="{{rows}}" as="r" hint-placeholder-count="4"><div class="li"><span class="tag" style="background: {{r.bg}}; color: {{r.fg}}; min-width: 64px; justify-content: center">{{r.kind}}</span><span style="flex: 1"><strong style="display: block">{{r.name}}</strong><span class="muted" style="font-size: 13px">{{r.meta}}</span></span><strong class="num">{{r.amt}}</strong></div></sc-for></div></sc-if>
+    <sc-if value="{{none}}" hint-placeholder-val="{{false}}"><p class="card muted" style="margin: 0; padding: 14px 16px; font-size: 14px">No trades yet. Your buys and sells will show up here.</p></sc-if>
     <section class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px"><h2 style="font-size: 16px">What you practised</h2>
-      <span style="display: flex; gap: 8px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>Buying and selling shares</span><span style="display: flex; gap: 8px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>Getting a dividend</span><span class="muted" style="display: flex; gap: 8px; align-items: center"><span style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid #D3CDE0; box-sizing: border-box"></span>Spreading money across sectors</span></section>
+      <sc-for list="{{skills}}" as="k" hint-placeholder-count="3"><span class="{{k.cls}}" style="display: flex; gap: 8px; align-items: center"><sc-if value="{{k.done}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if><sc-if value="{{k.todo}}" hint-placeholder-val="{{false}}"><span style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid #D3CDE0; box-sizing: border-box"></span></sc-if>{{k.label}}</span></sc-for></section>
   </div></main>
     
   </div>
@@ -124,7 +126,24 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  sim() { return window.FV && window.FV.SIM; }
+  row(c, extra) {
+    const S = this.sim(), ch = S.change(c.t), up = ch >= 0;
+    return Object.assign({ t: c.t, name: c.name, label: c.label, color: c.color, href: 'USimCompany.dc.html?t=' + c.t,
+      price: S.naira(S.price(c.t)), chg: (up ? '\u25b2 ' : '\u25bc ') + Math.abs(ch).toFixed(1) + '%',
+      tagBg: up ? '#DCFAE6' : '#FFE4E2', tagFg: up ? '#0F6B39' : '#B42828' }, extra || {});
+  }
+  renderVals() {
+    const S = this.sim(); if (!S) return {};
+    const tr = S.account().trades.slice().reverse(), today = S.day();
+    const when = (t) => t.day === today ? 'Today' : t.day === today - 1 ? 'Yesterday' : new Date(t.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const rows = tr.map((t) => ({ kind: t.side === 'buy' ? 'Bought' : 'Sold', bg: t.side === 'buy' ? '#F1EBFB' : '#F5F3F8', fg: t.side === 'buy' ? '#4C1D95' : '#38323F',
+      name: S.company(t.ticker).name, meta: t.quantity + (t.quantity === 1 ? ' share' : ' shares') + ' \u00b7 ' + when(t), amt: S.naira(t.netKobo) }));
+    const bought = tr.some((t) => t.side === 'buy'), sold = tr.some((t) => t.side === 'sell');
+    const sectors = new Set(S.account().holdings.map((h) => S.company(h.ticker).sector)).size;
+    const skills = [['Buying shares', bought], ['Selling shares', sold], ['Spreading money across sectors', sectors >= 2]].map(([label, d]) => ({ label, done: d, todo: !d, cls: d ? '' : 'muted' }));
+    return { rows, has: rows.length > 0, none: rows.length === 0, skills };
+  }
 }
 </script>
 </body>

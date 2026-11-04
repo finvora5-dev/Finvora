@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
 <script src="./fv.js"></script>
 </head>
 <body>
@@ -64,9 +65,9 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <div class="root" style="width: 390px; min-height: 844px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
   <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 32px 24px">
     <div class="pop" style="width: 140px; height: 140px"><dc-import name="GKobo" mood="proud" size="140" hint-size="140px,140px"></dc-import></div>
-    <h1 style="font-size: 26px">You bought 10 shares</h1>
-    <p class="muted" style="margin: 0; max-width: 300px">Adire Foods at ₦30.00 each. ₦300 of virtual cash used.</p>
-    <div class="card" style="width: 100%; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px"><span class="eyebrow" style="color: #5B2FC9">What just happened</span><span style="font-size: 15px; line-height: 1.5">You now own a small part of the company. If it pays a dividend of ₦1.50, you would get ₦15 for these 10 shares.</span></div>
+    <h1 style="font-size: 26px">{{title}}</h1>
+    <p class="muted" style="margin: 0; max-width: 300px">{{line}}</p>
+    <div class="card" style="width: 100%; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px"><span class="eyebrow" style="color: #5B2FC9">What just happened</span><span style="font-size: 15px; line-height: 1.5">{{what}}</span></div>
   </main>
   <div style="padding: 12px 16px 22px; display: flex; flex-direction: column; gap: 10px"><a href="USimHome.dc.html" class="btn">Back to portfolio</a><a href="UPLessonInfo.dc.html" class="btn btn-w">Learn about dividends</a></div>
   
@@ -74,7 +75,22 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  sim() { return window.FV && window.FV.SIM; }
+  row(c, extra) {
+    const S = this.sim(), ch = S.change(c.t), up = ch >= 0;
+    return Object.assign({ t: c.t, name: c.name, label: c.label, color: c.color, href: 'USimCompany.dc.html?t=' + c.t,
+      price: S.naira(S.price(c.t)), chg: (up ? '\u25b2 ' : '\u25bc ') + Math.abs(ch).toFixed(1) + '%',
+      tagBg: up ? '#DCFAE6' : '#FFE4E2', tagFg: up ? '#0F6B39' : '#B42828' }, extra || {});
+  }
+  renderVals() {
+    const S = this.sim(); if (!S) return {};
+    const t = S.last(); if (!t) return { title: 'No trade yet', line: 'Pick a made-up company to place your first practice trade.', what: 'Nothing has changed in your portfolio.' };
+    const c = S.company(t.ticker), n = t.quantity + (t.quantity === 1 ? ' share' : ' shares');
+    if (t.side === 'buy') return { title: 'You bought ' + n, line: c.name + ' at ' + S.naira(t.priceKobo) + ' each. ' + S.naira(t.netKobo) + ' of virtual cash used, including ' + S.naira(t.feesKobo) + ' in fees.',
+      what: c.div ? 'You now own a small part of the company. If it pays a dividend of ' + S.naira(c.div) + ', you would get ' + S.naira(c.div * t.quantity) + ' for these ' + n + '.' : 'You now own a small part of the company. Its price will move as the made-up market moves.' };
+    return { title: 'You sold ' + n, line: c.name + ' at ' + S.naira(t.priceKobo) + ' each. ' + S.naira(t.netKobo) + ' of virtual cash added, after ' + S.naira(t.feesKobo) + ' in fees.',
+      what: 'Compared with what you paid, this sale ' + (t.realizedPlKobo >= 0 ? 'made ' + S.naira(t.realizedPlKobo) : 'lost ' + S.naira(-t.realizedPlKobo)) + ' after fees.' };
+  }
 }
 </script>
 </body>
