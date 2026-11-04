@@ -233,8 +233,8 @@ h1, h2, h3, .h1 { font-weight: 700; letter-spacing: -0.02em; }
   .main { padding: 28px 40px 40px; max-width: 1080px; width: 100%; margin: 0 auto; }
   .grid2 { grid-template-columns: repeat(4, 1fr); }
   .cols.two { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }
-  .sticky-cta { max-width: 1080px; width: 100%; margin: 0 auto; padding-left: 40px; padding-right: 40px; align-items: flex-end; }
-  .sticky-cta > .btn, .sticky-cta > .row { max-width: 420px; }
+  .shell .sticky-cta { max-width: 1080px; width: 100%; margin: 0 auto; padding-left: 40px; padding-right: 40px; align-items: flex-end; }
+  .shell .sticky-cta > .btn, .shell .sticky-cta > .row { max-width: 420px; }
   .toast-wrap { bottom: 28px; }
   .prose { max-width: 720px; }
 }
@@ -242,3 +242,7 @@ h1, h2, h3, .h1 { font-weight: 700; letter-spacing: -0.02em; }
 .row.between { flex-wrap: wrap; }
 .shell .frame.pane { min-width: 0; }
 @media (min-width: 1024px) { .shell .frame.pane { margin: 0; } }
+
+/* Screens outside the app shell (welcome, goal, sign-in): centred column, centred actions. */
+.frame:not(.pane) .sticky-cta { align-items: center; }
+.frame:not(.pane) .sticky-cta > .btn { max-width: 440px; }
