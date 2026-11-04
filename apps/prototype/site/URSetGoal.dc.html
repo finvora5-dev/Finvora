@@ -74,15 +74,17 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <h2 style="font-size: 17px; margin-top: 6px">Daily time</h2>
     <div role="radiogroup" aria-label="Daily time" style="display: flex; gap: 8px"><sc-for list="{{mins}}" as="m" hint-placeholder-count="4"><button type="button" role="radio" class="chip" aria-checked="{{m.on}}" onClick="{{m.tap}}" style="background: {{m.bg}}; color: {{m.fg}}">{{m.t}}</button></sc-for></div>
   </main>
-  <div style="margin-top: auto; padding: 12px 16px 22px"><a href="UPSettings.dc.html" class="btn">Save</a></div>
+  <div style="margin-top: auto; padding: 12px 16px 22px"><a href="UPSettings.dc.html" onClick="{{save}}" class="btn">Save</a></div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { g: 0, m: 1 }; }
+  constructor(p) { super(p); const A = window.FV ? window.FV.AUTH.get() : {}; const G = ['Understand money basics', 'Save better', 'Start investing', 'Understand African markets'], M = ['3 min', '5 min', '10 min', '15 min']; this.state = { g: Math.max(0, G.indexOf(A.goalText)), m: Math.max(0, M.indexOf(A.minutes || '5 min')) }; }
+  // window.FV.ME
   renderVals() {
     const G = ['Understand money basics', 'Save better', 'Start investing', 'Understand African markets'], M = ['3 min', '5 min', '10 min', '15 min'];
-    return { goals: G.map((t, i) => ({ t: t, on: i === this.state.g ? 'true' : 'false', bd: i === this.state.g ? '#5B21B6' : '#E7E2F0', bg: i === this.state.g ? '#F1EBFB' : '#FFFFFF', tap: () => this.setState({ g: i }) })),
+    const F = window.FV, save = () => { if (!F) return; const a = F.AUTH.get(); a.goalText = G[this.state.g]; a.minutes = M[this.state.m]; localStorage.setItem('fv.auth.v1', JSON.stringify(a)); };
+    return { save, goals: G.map((t, i) => ({ t: t, on: i === this.state.g ? 'true' : 'false', bd: i === this.state.g ? '#5B21B6' : '#E7E2F0', bg: i === this.state.g ? '#F1EBFB' : '#FFFFFF', tap: () => this.setState({ g: i }) })),
       mins: M.map((t, i) => ({ t: t, on: i === this.state.m ? 'true' : 'false', bg: i === this.state.m ? '#5B21B6' : '#FFFFFF', fg: i === this.state.m ? '#FFFFFF' : '#0E0B14', tap: () => this.setState({ m: i }) })) };
   }
 }

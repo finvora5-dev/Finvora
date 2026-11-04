@@ -69,16 +69,24 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <div class="root" style="width: 390px; min-height: 844px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
   <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 8px"><a href="UPSettings.dc.html" class="press" aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#0E0B14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><h1 style="font-size: 22px">Email</h1></header>
   <main style="padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 16px">
-    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Current email</span><input class="field" type="text" value="ada@example.com" readonly></label>
-    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">New email</span><input class="field" type="email" value="ada.okafor@example.com"></label>
+    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Current email</span><input class="field" type="text" value="{{cur}}" readonly></label>
+    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">New email</span><input class="field" type="email" value="{{nw}}" onInput="{{onNew}}" placeholder="name@example.com"></label><sc-if value="{{bad}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; color: #B42828; font-weight: 700; font-size: 14px">Enter a valid email address, like ada@example.com.</p></sc-if><label style="display: none"></label>
     <p class="muted" style="margin: 0; font-size: 14px">We'll send a code to your new email to confirm it. Until then, you sign in with your current email.</p>
   </main>
-  <div style="margin-top: auto; padding: 12px 16px 22px"><a href="UPSignInCode.dc.html" class="btn">Send code</a></div>
+  <div style="margin-top: auto; padding: 12px 16px 22px"><button type="button" class="btn" onClick="{{send}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Send code</button></div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  F() { return window.FV; }
+  name() { const a = this.F().AUTH.get(); return a.name || 'You'; }
+  constructor(p) { super(p); this.state = { nw: '', tried: false }; }
+  renderVals() {
+    const F = this.F(); if (!F || !F.ME) return {};
+    const A = F.AUTH, bad = this.state.tried && !A.validEmail(this.state.nw);
+    return { cur: A.get().email || 'Not signed in', nw: this.state.nw, bad, onNew: (e) => this.setState({ nw: e.target.value }),
+      send: () => { if (!A.validEmail(this.state.nw)) { this.setState({ tried: true }); return; } A.sendCode(this.state.nw, true); location.href = 'UPSignInCode.dc.html'; } };
+  }
 }
 </script>
 </body>

@@ -107,7 +107,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <nav aria-label="Main" style="display: flex; flex-direction: column; gap: 4px"><a href="UDHome.dc.html" class="dnav press" title="Home"><span class="di"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="dl">Home</span></a><a href="UDJourney.dc.html" class="dnav press" title="Learn"><span class="di"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4z M7 10v5c2.5 2 7.5 2 10 0v-5 M21 8v6" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="dl">Learn</span></a><a href="UDLibrary.dc.html" class="dnav press" title="Library"><span class="di"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z M5 16a4 4 0 0 1 4-4h10" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="dl">Library</span></a><a href="UDMarkets.dc.html" class="dnav press" title="Markets"><span class="di"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="dl">Markets</span></a><a href="UDMe.dc.html" class="dnav press" aria-current="page" title="Me"><span class="di"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="dl">Me</span></a></nav>
     <a href="UPAskKobo.dc.html" class="dnav dask press" title="Ask Fin"><span class="di" style="width: 28px; height: 28px; display: inline-flex"><dc-import name="GKobo" mood="happy" size="28" hint-size="28px,28px"></dc-import></span><span class="dl">Ask Fin</span></a>
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1.5px solid #E7E2F0">
-      <a href="UPMe.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #0E0B14; white-space: nowrap; padding-left: 4px" title="Ada"><span style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #5B21B6; color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center">A</span><span class="dl" style="font-size: 14px"><strong style="display: block">Ada</strong><span class="muted" data-fv="levelText">Level 2 learner</span></span></a>
+      <a href="UDMe.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #0E0B14; white-space: nowrap; padding-left: 4px" title="Ada"><span style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #5B21B6; color: #FFFFFF; font-weight: 800; display: flex; align-items: center; justify-content: center">A</span><span class="dl" style="font-size: 14px"><strong style="display: block">Ada</strong><span class="muted" data-fv="levelText">Level 2 learner</span></span></a>
     </div>
   </div>
   </aside>
@@ -118,17 +118,25 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
       <a href="UPSearch.dc.html" class="dstat press" style="height: 52px; width: 240px; font-weight: 500; color: #615A6E; box-shadow: none"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Search</a>
     </header>
     <main style="flex: 1; padding: 24px 40px 24px; display: flex; flex-direction: column; gap: 20px"><div style="display: flex; flex-direction: column; gap: 20px">
-    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Current email</span><input class="field" type="text" value="ada@example.com" readonly></label>
-    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">New email</span><input class="field" type="email" value="ada.okafor@example.com"></label>
+    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Current email</span><input class="field" type="text" value="{{cur}}" readonly></label>
+    <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">New email</span><input class="field" type="email" value="{{nw}}" onInput="{{onNew}}" placeholder="name@example.com"></label><sc-if value="{{bad}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; color: #B42828; font-weight: 700; font-size: 14px">Enter a valid email address, like ada@example.com.</p></sc-if><label style="display: none"></label>
     <p class="muted" style="margin: 0; font-size: 14px">We'll send a code to your new email to confirm it. Until then, you sign in with your current email.</p>
   </div></main>
-    <div style="padding: 0 40px 32px; display: flex; justify-content: flex-end"><div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px"><div style="margin-top: auto; padding: 12px 16px 22px"><a href="UPSignInCode.dc.html" class="btn">Send code</a></div></div></div>
+    <div style="padding: 0 40px 32px; display: flex; justify-content: flex-end"><div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px"><div style="margin-top: auto; padding: 12px 16px 22px"><button type="button" class="btn" onClick="{{send}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Send code</button></div></div></div>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  F() { return window.FV; }
+  name() { const a = this.F().AUTH.get(); return a.name || 'You'; }
+  constructor(p) { super(p); this.state = { nw: '', tried: false }; }
+  renderVals() {
+    const F = this.F(); if (!F || !F.ME) return {};
+    const A = F.AUTH, bad = this.state.tried && !A.validEmail(this.state.nw);
+    return { cur: A.get().email || 'Not signed in', nw: this.state.nw, bad, onNew: (e) => this.setState({ nw: e.target.value }),
+      send: () => { if (!A.validEmail(this.state.nw)) { this.setState({ tried: true }); return; } A.sendCode(this.state.nw, true); location.href = 'UPSignInCode.dc.html'; } };
+  }
 }
 </script>
 </body>

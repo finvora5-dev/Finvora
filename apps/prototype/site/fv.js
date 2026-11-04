@@ -180,7 +180,7 @@
     signedIn: function () { return !!authLoad().email; },
     setGoal: function (g) { var a = authLoad(); a.goal = g; authSave(a); },
     validEmail: function (e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || "").trim()); },
-    sendCode: function (email) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.wrong = 0; a.lockUntil = 0; authSave(a); },
+    sendCode: function (email, changing) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.wrong = 0; a.lockUntil = 0; a.changing = !!changing; authSave(a); },
     resendIn: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.sentAt || 0) + 60000 - Date.now()) / 1000)); },
     lockedFor: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.lockUntil || 0) - Date.now()) / 1000)); },
     triesLeft: function () { return Math.max(0, 3 - (authLoad().wrong || 0)); },
@@ -190,7 +190,7 @@
       if (AUTH.lockedFor() > 0) return "locked";
       if (code === "111111" || Date.now() - (a.sentAt || 0) > 600000) return "expired";
       if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) a.lockUntil = Date.now() + 900000; authSave(a); return a.wrong >= 3 ? "locked" : "wrong"; }
-      a.email = a.pending; a.name = (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0; authSave(a); return "ok";
+      var keepName = a.changing && a.name; a.email = a.pending; a.name = keepName || (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0; authSave(a); return "ok";
     },
     setBirth: function (d) { var a = authLoad(); a.birth = d; authSave(a); },
     setReminder: function (on) { var a = authLoad(); a.reminder = on ? "19:00" : null; a.asked = true; authSave(a); },
@@ -221,7 +221,7 @@
     isSaved: function (slug) { return libLoad().saved.indexOf(slug) >= 0; },
     toggleSave: function (slug) { var l = libLoad(), i = l.saved.indexOf(slug); if (i >= 0) l.saved.splice(i, 1); else l.saved.unshift(slug); libSave(l); return i < 0; },
     saved: function () { return libLoad().saved.map(LIB.article).filter(Boolean); },
-    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now() }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); } },
+    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old) { var a0 = LIB.article(slug), m0 = load(); logEvent(m0, 'article', a0 ? a0.title : slug, 'UPArticle.dc.html?a=' + slug, 0); save(m0); } if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now() }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); } },
     reading: function () { var r = libLoad().read || {}; return Object.keys(r).filter(function (k) { return r[k].pct < 90 && LIB.article(k); }).sort(function (a, b) { return r[b].at - r[a].at; }).map(function (k) { return { a: LIB.article(k), pct: r[k].pct }; }); },
     addRecent: function (q) { q = String(q).trim(); if (!q) return; var l = libLoad(); l.recent = [q].concat((l.recent || []).filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); })).slice(0, 5); libSave(l); },
     recent: function () { return libLoad().recent || []; },
@@ -329,6 +329,8 @@
   var LEVELS = [{ n: 1, name: "Money Explorer", at: 0 }, { n: 2, name: "Finance Learner", at: 100 }, { n: 3, name: "Market Explorer", at: 250 }, { n: 4, name: "Company Detective", at: 500 }, { n: 5, name: "Financial Analyst in Training", at: 900 }];
   function lvOf(xp) { var L = LEVELS[0]; LEVELS.forEach(function (x) { if (xp >= x.at) L = x; }); return L; }
   function addXp(s, n) { var before = lvOf(s.xp).n; s.xp += n; if (lvOf(s.xp).n > before) s.levelUp = lvOf(s.xp).n; }
+  // Activity log (newest first): drives History, the weekly XP chart, badges and notifications.
+  function logEvent(s, kind, title, href, xp) { s.log = [{ at: Date.now(), day: lagosDay(), kind: kind, title: title, href: href, xp: xp || 0 }].concat(s.log || []).slice(0, 200); }
   function markDay(s) { var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d); }
   var DAILY = [
     ["Which currency is used in Ghana?", ["Naira", "Cedi", "Rand", "Shilling"], 1, "Ghana uses the cedi (GH₵). Shares on the Ghana Stock Exchange are priced in cedis.", ["The naira is Nigeria's currency.", "", "The rand is South Africa's currency.", "Kenya uses the shilling."]],
@@ -370,15 +372,15 @@
     },
     seenLost: function () { var s = load(); s.lostSeen = s.days.slice().sort().pop(); save(s); },
     daily: function () { var n = Math.floor(new Date(lagosDay() + "T00:00:00Z").getTime() / 86400000); var q = DAILY[n % DAILY.length]; return { q: q[0], opts: q[1], right: q[2], explain: q[3], whys: q[4], done: load().dailyDay === lagosDay() }; },
-    dailyAnswer: function (correct) { var s = load(); if (s.dailyDay === lagosDay()) return false; s.dailyDay = lagosDay(); addXp(s, 5 + (correct ? 3 : 0)); markDay(s); save(s); return true; }, // XP rules from packages/engine: daily 5, +3 if right
+    dailyAnswer: function (correct) { var s = load(); if (s.dailyDay === lagosDay()) return false; s.dailyDay = lagosDay(); addXp(s, 5 + (correct ? 3 : 0)); markDay(s); logEvent(s, 'daily', 'Daily question', 'UPDaily.dc.html', 5 + (correct ? 3 : 0)); s.dailyCount = (s.dailyCount || 0) + 1; save(s); return true; }, // XP rules from packages/engine: daily 5, +3 if right
     startBoss: function () { var s = load(); s.boss = { i: 0, score: 0, first: {} }; save(s); },
     bossState: function () { var s = load(); return s.boss || { i: 0, score: 0, first: {} }; },
     bossAnswer: function (i, correct) { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; if (!(i in s.boss.first)) { s.boss.first[i] = !!correct; if (correct) s.boss.score++; } save(s); },
     bossNext: function () { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; s.boss.i++; save(s); return s.boss.i; },
     challenge: function (id) { return (load().challenges || {})[id] || null; },
-    finishChallenge: function (id) { var s = load(), c = CHALLENGES.filter(function (x) { return x.id === id; })[0]; s.challenges = s.challenges || {}; var first = !s.challenges[id]; if (first && c) addXp(s, c.xp); s.challenges[id] = { at: Date.now() }; markDay(s); save(s); return first ? (c ? c.xp : 0) : 0; },
+    finishChallenge: function (id) { var s = load(), c = CHALLENGES.filter(function (x) { return x.id === id; })[0]; s.challenges = s.challenges || {}; var first = !s.challenges[id]; if (first && c) addXp(s, c.xp); s.challenges[id] = { at: Date.now() }; markDay(s); logEvent(s, 'challenge', c ? c.title : 'Challenge', 'UPInflation.dc.html', first && c ? c.xp : 0); save(s); return first ? (c ? c.xp : 0) : 0; },
     micro: function (k) { return !!((load().micro || {})[k]); },
-    finishMicro: function (k) { var s = load(); s.micro = s.micro || {}; var first = !s.micro[k]; if (first) addXp(s, 15); s.micro[k] = Date.now(); markDay(s); save(s); return first ? 15 : 0; },
+    finishMicro: function (k) { var s = load(); s.micro = s.micro || {}; var first = !s.micro[k]; if (first) addXp(s, 15); s.micro[k] = Date.now(); markDay(s); logEvent(s, 'micro', MICRO[k] || 'Micro module', 'UPLearn' + k.charAt(0).toUpperCase() + k.slice(1) + '.dc.html', first ? 15 : 0); save(s); return first ? 15 : 0; },
     MICRO: MICRO
   };
 
@@ -403,6 +405,42 @@
     company: function (t) { var m = /[?&]c=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "ZB"); return MK.COMPANIES.filter(function (c) { return c.t === k; })[0] || MK.COMPANIES[0]; },
     exchange: function (t) { var m = /[?&]x=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "NGX"); return MK.EXCHANGES.filter(function (c) { return c.t === k; })[0] || MK.EXCHANGES[0]; }
   };
+
+  // ---- Me: badges (rules from packages/engine where they exist), weekly XP, history, notifications, settings.
+  var BADGES = [
+    { id: "first", title: "First step", desc: "Complete your first lesson.", ok: function (s) { return s.done >= 1; } },
+    { id: "clean", title: "Clean sheet", desc: "Every answer right first time.", ok: function (s) { return s.best.some(function (b) { return b === 100; }); } },
+    { id: "found", title: "Foundations laid", desc: "Pass the Money Foundations boss.", ok: function (s) { return !!s.bossPassed; } },
+    { id: "week", title: "A week of learning", desc: "Learn on 7 days in a row.", ok: function (s) { return Math.max(s.bestStreak || 0, streak(s.days)) >= 7; } },
+    { id: "daily", title: "Daily habit", desc: "Complete 3 daily questions.", ok: function (s) { return (s.dailyCount || 0) >= 3; } },
+    { id: "solver", title: "Problem solver", desc: "Complete 3 practical challenges.", ok: function (s) { return Object.keys(s.challenges || {}).length >= 3; } },
+    { id: "curious", title: "Curious mind", desc: "Read 5 library articles.", ok: function (s) { return Object.keys((libLoad().read) || {}).length >= 5; } },
+    { id: "back", title: "Came back stronger", desc: "Ace a lesson you found hard.", ok: function () { return false; } },
+    { id: "investor", title: "Investor's mindset", desc: "Pass the Investing boss.", ok: function () { return false; } }
+  ];
+  var PREF_KEY = "fv.prefs.v1";
+  var ME = {
+    BADGES: BADGES,
+    badges: function () { var s = load(); return BADGES.map(function (b) { return { id: b.id, title: b.title, desc: b.desc, earned: !!b.ok(s) }; }); },
+    log: function () { return load().log || []; },
+    weekXp: function () {
+      var log = load().log || [], today = new Date(lagosDay() + "T00:00:00Z"), mon = new Date(today.getTime() - ((today.getUTCDay() + 6) % 7) * 86400000), out = [];
+      for (var i = 0; i < 7; i++) { var d = iso(new Date(mon.getTime() + i * 86400000)); out.push({ d: d, xp: log.filter(function (e) { return e.day === d; }).reduce(function (n, e) { return n + (e.xp || 0); }, 0), future: d > lagosDay(), today: d === lagosDay() }); }
+      return out;
+    },
+    clearHistory: function () { var s = load(); s.log = []; save(s); },
+    prefs: function () { try { var p = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); if (p) return p; } catch (e) {} return { sound: true, reduceMotion: false }; },
+    setPref: function (k, v) { var p = ME.prefs(); p[k] = v; try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} applyPrefs(); },
+    notifications: function () {
+      var s = load(), out = [], log = s.log || [];
+      if (s.dailyDay !== lagosDay()) out.push({ title: "Today's question is ready", sub: "1 minute, +5 XP.", at: new Date(lagosDay() + "T07:00:00+01:00").getTime(), href: "UPDaily.dc.html" });
+      log.filter(function (e) { return e.kind === "boss" && e.xp; }).forEach(function (e) { out.push({ title: "New badge: Foundations laid", sub: "You passed the World 1 boss.", at: e.at, href: "UPAchievements.dc.html" }); });
+      log.filter(function (e) { return e.kind === "lesson"; }).slice(0, 3).forEach(function (e) { out.push({ title: "Lesson done: " + e.title, sub: "+" + e.xp + " XP earned.", at: e.at, href: "UPProgress.dc.html" }); });
+      return out.sort(function (a, b) { return b.at - a.at; }).slice(0, 8);
+    }
+  };
+  function applyPrefs() { try { document.documentElement.classList.toggle("fv-reduce", !!ME.prefs().reduceMotion); } catch (e) {} }
+  applyPrefs();
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -425,6 +463,7 @@
       var xp = 10 + Math.round(5 * pct / 100), wrong = keys.length - right;
       if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; }
       addXp(s, xp); var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
+      logEvent(s, 'lesson', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
       s.run = null; save(s);
       return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days) };
     },
@@ -432,9 +471,10 @@
       var s = load(); var passed = score >= 4;
       if (passed && !s.bossPassed) { s.bossPassed = true; addXp(s, 55); }
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
+      logEvent(s, 'boss', 'Boss challenge: ' + score + ' of 5', 'UPBossIntro.dc.html', passed && s.bossPassed && !s.bossLogged ? 55 : 0); if (passed) s.bossLogged = true;
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK, ME: ME,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

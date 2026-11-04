@@ -62,3 +62,6 @@ html.fv-wide #dc-root section[aria-labelledby="done-h"] > svg[width="390"] { lef
 html.fv-big #dc-root > .sc-host > :first-child { min-height: 100dvh !important; }
 html.fv-big #dc-root > .sc-host > :first-child > div > .sc-host > :first-child { width: 100% !important; }
 html.fv-big #dc-root > .sc-host > :first-child[style*="overflow: hidden"] { height: 100dvh; min-height: 0 !important; }
+
+/* Settings: Reduce motion turns animations off everywhere. */
+html.fv-reduce *, html.fv-reduce *::before, html.fv-reduce *::after { animation: none !important; transition: none !important; }

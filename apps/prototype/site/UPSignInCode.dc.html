@@ -80,7 +80,7 @@ class Component extends DCLogic {
     if (code.length < 6) return;
     const r = this.A().verify(code);
     setTimeout(() => {
-      if (r === 'ok') { const a = this.A().get(); location.href = !a.birth ? 'URAgeCheck.dc.html' : !a.asked ? 'URNotifAsk.dc.html' : 'UOHome.dc.html'; }
+      if (r === 'ok') { const a = this.A().get(); location.href = a.changing ? 'UPSettings.dc.html' : !a.birth ? 'URAgeCheck.dc.html' : !a.asked ? 'URNotifAsk.dc.html' : 'UOHome.dc.html'; }
       else location.href = 'URCodeError.dc.html?s=' + r;
     }, 250);
   }

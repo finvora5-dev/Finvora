@@ -73,3 +73,20 @@ if 'UPExchange.dc.html?x=' not in s:
         s = s[:k] + '<a href="%s" class="card press"' % href + s[k + len('<a href="UPArticle.dc.html" class="card press"'):]
     wr('UDMarkets', s)
 print('desktop markets wired')
+
+# Desktop Me: the same real values as the phone Me page.
+s = rd('UDMe')
+if '{{planLine}}' not in s:
+    s = s.replace('>A</span>', '>{{initial}}</span>').replace('>Ada</strong>', '>{{name}}</strong>')
+    s = sub1(s, '>Finvora Plus · renews 2 Dec<', '>{{planLine}}<')
+    s = s.replace('<a href="USYourPlan.dc.html"', '<a href="{{planHref}}"', 1)
+    for a, b in (('>3 of 9 earned<', '>{{badges}} of 9 earned<'), ('>1 new<', '>{{challengeLine}}<'), ('>3 articles<', '>{{savedLine}}<'), ('>2 new<', '>{{notifLine}}<')):
+        s = sub1(s, a, b)
+    m = re.search(r'\n\s*return v;\n\s*\}', s)
+    s = s[:m.start()] + """
+    if (FV && FV.ME) { const n = (FV.AUTH.get().name || 'You'), plus = FV.plan() === 'plus', sub = FV.billing().sub, saved = FV.LIB.saved().length, notes = FV.ME.notifications().length;
+      Object.assign(v, { name: n, initial: n.charAt(0).toUpperCase(), badges: FV.ME.badges().filter((b) => b.earned).length, planHref: plus ? 'USYourPlan.dc.html' : 'USPlans.dc.html',
+        planLine: plus ? 'Finvora Plus \\u00b7 ' + (sub.cancelled ? 'ends ' : 'renews ') + (sub.renewsOn ? FV.PAY.date(sub.renewsOn) : '') : 'Free \\u00b7 see what Plus adds',
+        challengeLine: FV.LOOP.challenge('inflation') ? 'All done' : '1 new', savedLine: saved ? saved + (saved === 1 ? ' article' : ' articles') : 'Nothing saved yet', notifLine: notes ? notes + ' new' : 'All caught up' }); }""" + s[m.start():]
+    wr('UDMe', s)
+print('desktop me wired')
