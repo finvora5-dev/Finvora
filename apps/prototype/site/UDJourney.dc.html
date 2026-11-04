@@ -167,6 +167,7 @@ h1,h2,h3,.h,.serif{font-weight:700!important;letter-spacing:-0.02em}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2340}}'>
 class Component extends DCLogic {
+  componentDidMount() { const LP = window.FV && window.FV.LOOP; if (!LP) return; if (LP.pendingLevelUp()) location.href = 'UPLevelUp.dc.html'; else if (LP.lostStreak() > 0) location.href = 'URStreakLost.dc.html'; }
   renderVals() {
     const FV = window.FV, st = FV ? FV.get() : { done: 0, best: [], xp: 0, bossPassed: false };
     const cur = FV ? FV.current() : null, done = st.done;

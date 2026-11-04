@@ -20,6 +20,8 @@
     return true;
   }
   if (route()) return;
+  // Remember the previous page (desktop and phone versions swap pages, which loses the browser's referrer).
+  try { window.FV_PREV = sessionStorage.getItem("fv.here") || ""; sessionStorage.setItem("fv.here", location.pathname.split("/").pop() + location.search); } catch (e) { window.FV_PREV = ""; }
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(route, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }

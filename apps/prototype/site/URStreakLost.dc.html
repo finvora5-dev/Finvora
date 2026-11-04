@@ -70,7 +70,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
   <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px">
     <div class="pop"><div style="width: 130px; height: 130px; flex: none"><dc-import name="GKobo" mood="oops" size="130" hint-size="130px,130px"></dc-import></div></div>
     <div class="num" style="font-size: 56px; font-weight: 800; color: #8E879A; line-height: 1">0</div>
-    <h1 style="font-size: 24px">Your 12-day streak ended</h1>
+    <h1 style="font-size: 24px">{{title}}</h1>
     <p class="muted" style="margin: 0; max-width: 300px">It happens. Your progress and badges are safe. One lesson today starts a new streak.</p>
     <section class="card" style="width: 100%; padding: 14px 16px; display: flex; gap: 12px; align-items: center; text-align: left"><span style="width: 44px; height: 44px; flex: none; border-radius: 12px; background: #F1EBFB; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20 M4 6l16 12 M20 6L4 18" fill="none" stroke="#4C1D95" stroke-width="2.2" stroke-linecap="round"></path></svg></span><span style="flex: 1"><strong style="display: block">Streak freeze</strong><span class="muted" style="font-size: 13px">Protects your streak for one missed day. Plus gets 2 a month.</span></span></section>
   </main>
@@ -79,7 +79,9 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  LP() { return window.FV && window.FV.LOOP; }
+  constructor(p) { super(p); const LP = window.FV && window.FV.LOOP; this.len = LP ? LP.lostStreak() : 12; if (LP) LP.seenLost(); }
+  renderVals() { return { title: this.len > 0 ? 'Your ' + this.len + '-day streak ended' : 'Your streak ended' }; }
 }
 </script>
 </body>

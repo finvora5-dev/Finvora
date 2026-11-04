@@ -22,13 +22,24 @@
     } catch (e) { return fresh(); }
   }
   function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
-  function streak(days) {
-    var set = {}; days.forEach(function (d) { set[d] = 1; });
-    var t = new Date(lagosDay() + "T00:00:00Z"), n = 0;
-    if (!set[t.toISOString().slice(0, 10)]) t = new Date(t.getTime() - 86400000);
-    while (set[t.toISOString().slice(0, 10)]) { n++; t = new Date(t.getTime() - 86400000); }
-    return n;
+  // Streak in Lagos days. One rest day a week (Monday to Sunday) keeps it going, as the Streak screen says.
+  function iso(t) { return t.toISOString().slice(0, 10); }
+  function weekOf(t) { var d = new Date(t.getTime()); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return iso(d); }
+  function runEnding(set, start, openToday) {
+    var t = new Date(start + "T00:00:00Z"), n = 0, rest = {}, restDays = [];
+    if (openToday && !set[iso(t)]) t = new Date(t.getTime() - 86400000);
+    for (var guard = 0; guard < 4000; guard++) {
+      if (set[iso(t)]) { n++; }
+      else {
+        var prev = new Date(t.getTime() - 86400000), wk = weekOf(t);
+        if (rest[wk] || !set[iso(prev)] || n === 0 && !openToday) break;
+        rest[wk] = true; restDays.push(iso(t)); n++;
+      }
+      t = new Date(t.getTime() - 86400000);
+    }
+    return { n: n, rest: restDays };
   }
+  function streak(days) { var set = {}; days.forEach(function (d) { set[d] = 1; }); return runEnding(set, lagosDay(), true).n; }
 
   // ---- Simulator: virtual money, made-up companies. Rules (fees, trades, valuation) come from
   // packages/domain via fvd.js. Prices move once a day on a fixed made-up path.
@@ -313,11 +324,68 @@
     var i = LESSONS.indexOf(L);
     return { id: L.id, index: i, title: L.title, min: L.min, designed: L.id === "interest", c: CONTENT[L.id] || null };
   }
+
+  // ---- Learning loop: levels, streak details, daily question, boss challenge, challenges, micro modules.
+  var LEVELS = [{ n: 1, name: "Money Explorer", at: 0 }, { n: 2, name: "Finance Learner", at: 100 }, { n: 3, name: "Market Explorer", at: 250 }, { n: 4, name: "Company Detective", at: 500 }, { n: 5, name: "Financial Analyst in Training", at: 900 }];
+  function lvOf(xp) { var L = LEVELS[0]; LEVELS.forEach(function (x) { if (xp >= x.at) L = x; }); return L; }
+  function addXp(s, n) { var before = lvOf(s.xp).n; s.xp += n; if (lvOf(s.xp).n > before) s.levelUp = lvOf(s.xp).n; }
+  function markDay(s) { var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d); }
+  var DAILY = [
+    ["Which currency is used in Ghana?", ["Naira", "Cedi", "Rand", "Shilling"], 1, "Ghana uses the cedi (GH₵). Shares on the Ghana Stock Exchange are priced in cedis.", ["The naira is Nigeria's currency.", "", "The rand is South Africa's currency.", "Kenya uses the shilling."]],
+    ["What is ₦1 in kobo?", ["10 kobo", "50 kobo", "100 kobo", "1,000 kobo"], 2, "₦1 is 100 kobo.", ["Too small: ₦1 is 100 kobo.", "That's half a naira.", "", "Too big: ₦1 is 100 kobo."]],
+    ["What does NGX stand for?", ["Nigerian Exchange", "National Gold Exchange", "New Growth Index", "Naira Global Exchange"], 0, "NGX is the Nigerian Exchange, where shares of listed companies are bought and sold.", ["", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange."]],
+    ["In the 50/30/20 guide, what is the 20% for?", ["Rent", "Savings", "Wants", "Food"], 1, "20% goes to savings. 50% is needs and 30% is wants.", ["Rent is a need, in the 50%.", "", "Wants are the 30%.", "Food is a need, in the 50%."]],
+    ["If prices rise faster than your savings, what happens?", ["You can buy more", "Nothing changes", "You can buy less", "Your savings double"], 2, "When prices rise faster than your savings, each naira buys less.", ["Prices rose faster, so you can buy less.", "Prices rose faster, so you can buy less.", "", "Nothing doubles here."]],
+    ["What is a dividend?", ["A loan from a bank", "Part of profit paid to shareholders", "A tax on shares", "A type of savings account"], 1, "A dividend is part of a company's profit paid to the people who own its shares.", ["That's borrowing.", "", "A dividend is a payment to owners, not a tax.", "That's a bank product."]],
+    ["Which is the safest place for an emergency fund?", ["Shares", "Savings you can reach quickly", "A friend", "A 2-year fixed deposit"], 1, "An emergency fund should be safe and easy to reach.", ["Shares can fall when you need the money.", "", "A friend may not pay it back in time.", "You can't reach locked money quickly."]],
+    ["Compound interest earns interest on...", ["Only the first amount", "The amount plus interest already earned", "Only the interest", "Nothing"], 1, "Compound interest is paid on your money and on the interest already earned.", ["That's simple interest.", "", "It earns on both the amount and the interest.", "It does earn interest."]],
+    ["Which of these is income?", ["Rent", "A salary", "A data bundle", "School fees"], 1, "A salary is money coming in, so it's income.", ["Rent is an expense.", "", "A data bundle is an expense.", "School fees are an expense."]],
+    ["Using the Rule of 72, how long does money take to double at 8% a year?", ["4 years", "8 years", "9 years", "72 years"], 2, "72 ÷ 8 = 9 years.", ["Divide 72 by 8.", "Divide 72 by 8.", "", "Divide 72 by the rate."]]
+  ];
+  var BOSS_Q = [
+    { q: "Tolu earns ₦100,000 a month. Using the 50/30/20 guide, how much is for needs?", opts: [["₦20,000", "₦20,000 is the 20% for savings."], ["₦30,000", "₦30,000 is the 30% for wants."], ["₦50,000", ""], ["₦70,000", "50% of ₦100,000 is ₦50,000."]], right: 2, explain: "Needs are 50%, so ₦100,000 × 50% = ₦50,000." },
+    { q: "Tolu's rent, food and transport come to ₦70,000 a month. Which plan builds an emergency fund fastest without missing a bill?", card: true, opts: [["Spend the ₦30,000 and save next year", "Waiting means no cushion if something goes wrong. Saving a little each month starts the fund now."], ["Save ₦20,000 a month, keep ₦10,000 for wants", ""], ["Save ₦30,000 and cut food to ₦0", "Food is a need. A plan that skips needs will not last."], ["Borrow ₦210,000 now to fill the fund", "An emergency fund built with debt adds repayments, which makes emergencies harder, not easier."]], right: 1, explain: "₦20,000 a month builds a ₦210,000 cushion, three months of needs, in about 11 months, while still leaving room for wants." },
+    { q: "Prices rise 20% this year but Tolu's ₦100,000 salary stays the same. What happens?", opts: [["Tolu can buy more", "Prices went up, so the same salary buys less."], ["Nothing changes", "Prices went up, so the same salary buys less."], ["Tolu can buy less", ""], ["Tolu's salary doubles", "The salary stays the same."]], right: 2, explain: "When prices rise and income doesn't, each naira buys less. That's inflation." },
+    { q: "Tolu saves ₦50,000 at 10% a year, compounded yearly. How much after 2 years?", opts: [["₦55,000", "That's after one year only."], ["₦60,000", "That's simple interest. Year 2 also earns on the ₦5,000 of interest."], ["₦60,500", ""], ["₦100,000", "Doubling at 10% takes about 7 years."]], right: 2, explain: "₦50,000 × 1.1 × 1.1 = ₦60,500." },
+    { q: "Tolu keeps ₦20,000 aside to use next month. Which job of money is that?", opts: [["Paying for things", "Nothing is being bought yet."], ["Comparing prices", "Tolu isn't comparing anything."], ["Keeping value for later", ""], ["Borrowing", "Borrowing isn't one of money's jobs."]], right: 2, explain: "Keeping money for later uses money as a store of value." }
+  ];
+  var CHALLENGES = [{ id: "inflation", title: "The inflation challenge", xp: 15 }];
+  var MICRO = { term: "Dividend", steps: "How a share price moves", compare: "Saving vs investing", market: "Meet the NGX", myth: "Myth or fact?" };
+  var LOOP = {
+    LEVELS: LEVELS, BOSS_Q: BOSS_Q,
+    levelInfo: function (xp) { var L = lvOf(xp), nx = LEVELS[L.n] || null; return { n: L.n, name: L.name, at: L.at, next: nx, pct: nx ? Math.round((xp - L.at) / (nx.at - L.at) * 100) : 100 }; },
+    pendingLevelUp: function () { return load().levelUp || 0; },
+    clearLevelUp: function () { var s = load(); delete s.levelUp; save(s); },
+    streakInfo: function () {
+      var s = load(), set = {}; s.days.forEach(function (d) { set[d] = 1; });
+      var r = runEnding(set, lagosDay(), true), today = new Date(lagosDay() + "T00:00:00Z"), mon = new Date(today.getTime() - ((today.getUTCDay() + 6) % 7) * 86400000), week = [];
+      for (var i = 0; i < 7; i++) { var d = iso(new Date(mon.getTime() + i * 86400000)); week.push({ d: d, learned: !!set[d], rest: r.rest.indexOf(d) >= 0, today: d === lagosDay(), future: d > lagosDay() }); }
+      return { n: r.n, week: week, restUsed: week.some(function (w) { return w.rest; }), learnedToday: !!set[lagosDay()] };
+    },
+    /** A streak that ended since the last visit: its length, once per break. */
+    lostStreak: function () {
+      var s = load(); if (!s.days.length || streak(s.days) > 0) return 0;
+      var last = s.days.slice().sort().pop(); if (s.lostSeen === last) return 0;
+      var set = {}; s.days.forEach(function (d) { set[d] = 1; }); return runEnding(set, last, false).n;
+    },
+    seenLost: function () { var s = load(); s.lostSeen = s.days.slice().sort().pop(); save(s); },
+    daily: function () { var n = Math.floor(new Date(lagosDay() + "T00:00:00Z").getTime() / 86400000); var q = DAILY[n % DAILY.length]; return { q: q[0], opts: q[1], right: q[2], explain: q[3], whys: q[4], done: load().dailyDay === lagosDay() }; },
+    dailyAnswer: function (correct) { var s = load(); if (s.dailyDay === lagosDay()) return false; s.dailyDay = lagosDay(); addXp(s, 5 + (correct ? 3 : 0)); markDay(s); save(s); return true; }, // XP rules from packages/engine: daily 5, +3 if right
+    startBoss: function () { var s = load(); s.boss = { i: 0, score: 0, first: {} }; save(s); },
+    bossState: function () { var s = load(); return s.boss || { i: 0, score: 0, first: {} }; },
+    bossAnswer: function (i, correct) { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; if (!(i in s.boss.first)) { s.boss.first[i] = !!correct; if (correct) s.boss.score++; } save(s); },
+    bossNext: function () { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; s.boss.i++; save(s); return s.boss.i; },
+    challenge: function (id) { return (load().challenges || {})[id] || null; },
+    finishChallenge: function (id) { var s = load(), c = CHALLENGES.filter(function (x) { return x.id === id; })[0]; s.challenges = s.challenges || {}; var first = !s.challenges[id]; if (first && c) addXp(s, c.xp); s.challenges[id] = { at: Date.now() }; markDay(s); save(s); return first ? (c ? c.xp : 0) : 0; },
+    micro: function (k) { return !!((load().micro || {})[k]); },
+    finishMicro: function (k) { var s = load(); s.micro = s.micro || {}; var first = !s.micro[k]; if (first) addXp(s, 15); s.micro[k] = Date.now(); markDay(s); save(s); return first ? 15 : 0; },
+    MICRO: MICRO
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
     streak: function () { return streak(load().days); },
-    level: function (xp) { return xp >= 500 ? 4 : xp >= 250 ? 3 : xp >= 100 ? 2 : 1; },
+    level: function (xp) { return xp >= 900 ? 5 : xp >= 500 ? 4 : xp >= 250 ? 3 : xp >= 100 ? 2 : 1; },
     current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
     // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
     lesson: lessonNow,
@@ -334,17 +402,17 @@
       var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
       var xp = 10 + Math.round(5 * pct / 100), wrong = keys.length - right;
       if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; }
-      s.xp += xp; var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
+      addXp(s, xp); var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       s.run = null; save(s);
       return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days) };
     },
     passBoss: function (score) {
       var s = load(); var passed = score >= 4;
-      if (passed && !s.bossPassed) { s.bossPassed = true; s.xp += 30; }
+      if (passed && !s.bossPassed) { s.bossPassed = true; addXp(s, 55); }
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

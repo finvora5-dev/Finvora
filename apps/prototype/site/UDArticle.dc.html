@@ -194,7 +194,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
       <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{related}}" as="r" hint-placeholder-count="2"><a href="{{r.href}}" class="chip">{{r.title}}</a></sc-for></div>
     </section></sc-if>
 
-    <a href="UPLearnTerm.dc.html" class="press" style="background: #5B21B6; box-shadow: 0 4px 0 #3B0F7A; border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; text-decoration: none; color: #FFFFFF">
+    <a href="{{practiseHref}}" class="press" style="background: #5B21B6; box-shadow: 0 4px 0 #3B0F7A; border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px; text-decoration: none; color: #FFFFFF">
       <span style="width: 48px; height: 48px; flex: none; border-radius: 14px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4z M7 10v5c2.5 2 7.5 2 10 0v-5 M21 8v6" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
       <span style="flex: 1"><strong style="display: block; font-size: 17px">Practise it in 1 minute</strong><span style="font-size: 14px; color: #EDE9FE">Micro module · +15 XP</span></span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
     </a>
@@ -227,6 +227,7 @@ class Component extends DCLogic {
     const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
     return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,
       example: a.example, why: a.whyItMatters, related, hasRelated: related.length > 0, saved: String(saved), saveFill: saved ? '#FFFFFF' : 'none', saveLabel: saved ? 'Saved' : 'Save',
+      practiseHref: ({ dividend: 'UPLearnTerm', 'what-is-a-share': 'UPLearnSteps', 'saving-vs-investing': 'UPLearnCompare', 'stock-exchange': 'UPLearnMarket', 'risk-and-return': 'UPLearnMyth' }[a.slug] || 'UPJourney') + '.dc.html',
       save: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } };
   }
 }
