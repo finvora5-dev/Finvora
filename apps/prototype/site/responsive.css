@@ -25,3 +25,12 @@ html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F
 @media (prefers-reduced-motion: reduce) {
   #dc-root .btn, #dc-root .chip, #dc-root .press, #dc-root button, #dc-root a.card { transition: none; }
 }
+
+/* Bottom nav bar: pinned to the bottom of the screen on every device (the boards' sticky
+   nav only stuck inside its own wrapper, so it scrolled away with the page). */
+#dc-root nav[aria-label="Main"] {
+  position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+  width: auto !important; margin: 0 auto !important; max-width: 100%;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; z-index: 30 !important;
+}
+#dc-root > .sc-host > :first-child:has(nav[aria-label="Main"]) { padding-bottom: 96px; }

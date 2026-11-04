@@ -13,7 +13,12 @@
     html.classList.toggle("fv-wide", phoneBoard && wide);
     html.style.overflowX = "hidden";
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
-    if (!wide) { el.style.zoom = String(vw / designW); el.style.width = designW + "px"; return; }
+    if (!wide) {
+      var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
+      // The pinned nav bar sits inside the zoomed board; size it to the screen.
+      el.querySelectorAll('nav[aria-label="Main"]').forEach(function (n) { n.style.setProperty("width", designW + "px", "important"); });
+      return;
+    }
     el.style.zoom = "1";
     el.style.width = "100%";
     // Line charts: stretch across the card on wide screens (the line widens, height stays).
