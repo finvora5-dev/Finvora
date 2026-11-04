@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -109,7 +110,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":940}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { pick: 1, checked: true }; }
+  constructor(props) { super(props); this.state = { pick: null, checked: false }; }
   renderVals() {
     const s = this.state;
     const opts = [
@@ -148,7 +149,7 @@ class Component extends DCLogic {
       wrongText: wrong ? picked.why : '',
       checkOff: s.pick === null,
       checkClass: s.pick === null ? 'btn b-off' : 'btn b-blue',
-      check: () => { if (s.pick !== null) this.setState({ checked: true }); },
+      check: () => { if (s.pick !== null) { window.FV && window.FV.answer('choice', !!opts[s.pick].right); this.setState({ checked: true }); } },
       retry: () => this.setState({ pick: null, checked: false })
     };
   }

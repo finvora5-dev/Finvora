@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -73,6 +74,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
+  componentDidMount() { window.FV && window.FV.passBoss(5); }
   renderVals() { return {}; }
 }
 </script>

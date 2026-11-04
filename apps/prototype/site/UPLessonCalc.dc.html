@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -133,7 +134,7 @@ h1,h2,h3,.h,.serif{font-weight:700!important;letter-spacing:-0.02em}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":980}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { val: '7', hint: false, checked: false }; }
+  constructor(props) { super(props); this.state = { val: '', hint: false, checked: false }; }
   renderVals() {
     const s = this.state;
     const n = parseFloat(String(s.val).replace(',', '.'));
@@ -174,7 +175,7 @@ class Component extends DCLogic {
       showCheck: !s.checked, showWrong: bad, showRight: good,
       wrongText,
       checkOff: empty, checkClass: empty ? 'btn b-off' : 'btn b-blue',
-      check: () => { if (!empty) this.setState({ checked: true }); },
+      check: () => { if (!empty) { window.FV && window.FV.answer('calc', ok); this.setState({ checked: true }); } },
       retry: () => this.setState({ val: '', checked: false })
     };
   }

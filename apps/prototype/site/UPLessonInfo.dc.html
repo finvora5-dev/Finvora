@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -84,6 +85,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
+  componentDidMount() { window.FV && window.FV.startRun(); }
   renderVals() { return {}; }
 }
 </script>
