@@ -54,3 +54,6 @@ html.fv-desk #dc-root .dpanel { position: fixed !important; top: 0; bottom: 0; l
   html.fv-desk #dc-root [style*="grid-template-columns: repeat(3, 1fr) 2fr"] { grid-template-columns: repeat(3, 1fr) !important; }
   html.fv-desk #dc-root [style*="grid-template-columns: repeat(3, 1fr) 2fr"] > :last-child { grid-column: 1 / -1; }
 }
+
+/* Lesson complete on wide screens: the ring and confetti stay centred behind Fin. */
+html.fv-wide #dc-root section[aria-labelledby="done-h"] > svg[width="390"] { left: 50% !important; transform: translateX(-50%); }
