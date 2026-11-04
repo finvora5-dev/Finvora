@@ -11,7 +11,7 @@ html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F
 }
 @media (min-width: 1024px) {
   html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"]:has(> :nth-child(3)) { grid-template-columns: repeat(4, 1fr) !important; }
-  html.fv-wide #dc-root nav[aria-label="Main"] > div { max-width: 640px; margin-left: auto; margin-right: auto; }
+  html.fv-wide #dc-root :not(.dpanel) > nav[aria-label="Main"] > div { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
 
 /* Keyboard-key press on every board: while held, a button sinks onto its bottom edge and the edge goes flat. */
@@ -28,9 +28,29 @@ html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F
 
 /* Bottom nav bar: pinned to the bottom of the screen on every device (the boards' sticky
    nav only stuck inside its own wrapper, so it scrolled away with the page). */
-#dc-root nav[aria-label="Main"] {
+#dc-root :not(.dpanel) > nav[aria-label="Main"] {
   position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
   width: auto !important; margin: 0 auto !important; max-width: 100%;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; z-index: 30 !important;
 }
-#dc-root > .sc-host > :first-child:has(nav[aria-label="Main"]) { padding-bottom: 96px; }
+#dc-root > .sc-host > :first-child:has(:not(.dpanel) > nav[aria-label="Main"]) { padding-bottom: 96px; }
+
+/* Desktop boards (>= 1024px): full window width, the sidebar stays in view while the page scrolls. */
+html.fv-desk #dc-root > .sc-host > :first-child { min-height: 100dvh !important; box-shadow: none; }
+html.fv-desk #dc-root .dpanel { position: fixed !important; top: 0; bottom: 0; left: 0; height: 100dvh; }
+
+/* Lesson screens on desktop: focus mode, one centred column (approved desktop lesson design). */
+@media (min-width: 1024px) {
+  html.fv-wide #dc-root > .sc-host > :first-child:not(:has(nav[aria-label="Main"])) > * { max-width: 860px; margin-left: auto !important; margin-right: auto !important; width: 100%; box-sizing: border-box; }
+  html.fv-wide #dc-root > .sc-host > :first-child:not(:has(nav[aria-label="Main"])) > header:first-child,
+  html.fv-wide #dc-root > .sc-host > :first-child:not(:has(nav[aria-label="Main"])) > div:first-child { max-width: none; }
+}
+@media (min-width: 1024px) {
+  /* Answer options in a 2 x 2 grid on desktop (approved desktop lesson design). */
+  html.fv-wide #dc-root div[role="group"][aria-labelledby="q"] { display: grid !important; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 1279px) {
+  /* Home progress row on small desktops: three stat tiles, then the level bar on its own row. */
+  html.fv-desk #dc-root [style*="grid-template-columns: repeat(3, 1fr) 2fr"] { grid-template-columns: repeat(3, 1fr) !important; }
+  html.fv-desk #dc-root [style*="grid-template-columns: repeat(3, 1fr) 2fr"] > :last-child { grid-column: 1 / -1; }
+}

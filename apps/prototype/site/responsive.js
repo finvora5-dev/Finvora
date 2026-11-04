@@ -1,8 +1,24 @@
-// Fits each canvas board to the screen.
+// Fits each canvas board to the screen, and picks the desktop or phone board for the window size.
 // Phones (< 600px): the 390px board is scaled to the screen width, so folded phones (280px) fit too.
 // Tablets and desktop (>= 600px): the board reflows to fill the whole window, with no width cap:
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
+  // Desktop (>= 1024px) uses the desktop boards; smaller screens use the phone boards.
+  var DESK = 1024;
+  var PAIRS = { UOHome: "UDHome", UPJourney: "UDJourney", UPLibrary: "UDLibrary", UPMarkets: "UDMarkets", USimHome: "UDSimulator", UPMe: "UDMe" };
+  var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
+  function route() {
+    var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
+    var name = m[1], vw = document.documentElement.clientWidth, target = null;
+    if (vw >= DESK && PAIRS[name]) target = PAIRS[name];
+    if (vw < DESK && BACK[name]) target = BACK[name];
+    if (!target) return false;
+    location.replace(location.pathname.replace(name + ".dc", target + ".dc") + location.search + location.hash);
+    return true;
+  }
+  if (route()) return;
+  var resizeTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(route, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
   function fit() {
     var el = root(); if (!el) return;
@@ -12,6 +28,9 @@
     var html = document.documentElement;
     html.classList.toggle("fv-wide", phoneBoard && wide);
     html.style.overflowX = "hidden";
+    var deskBoard = designW >= 1200 && !!el.querySelector(".dside");
+    html.classList.toggle("fv-desk", deskBoard && vw >= DESK);
+    if (deskBoard && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; return; }
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (!wide) {
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
