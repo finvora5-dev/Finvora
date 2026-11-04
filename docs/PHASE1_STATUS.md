@@ -165,6 +165,17 @@ node e2e/journeys.cjs http://127.0.0.1:8790   # end-to-end journeys (needs Playw
 | NGX trading hours | Not verified | 10:00–14:30 Lagos time, in config. There is no market-closed state yet (see below) |
 | Simulator companies | Made-up in the designs; real names in ADR D8 | Made-up in the simulator; real names in Companies, with "Demo data" prices |
 
+## Design styles
+
+- **Home** uses the mature design. It is the only option the client chose.
+- **Every other screen** uses the Playful V2 style, as on the Journey and lesson artboards:
+  - 52px buttons with a 4px key edge that presses flat;
+  - square-ish 44px chips with an 18px label.
+
+Both are defined in `apps/web/src/app/globals.css`. Home switches by adding the `.mature` class, which is set by `<Screen mature>`.
+
+Note: on the purple canvas, 91 boards (Library, Markets, Simulator, Me, Plans, admin and others) are still drawn in the mature style. The app follows the client's choice rather than those boards.
+
 ## Deviations from the documents (my judgement, worth confirming)
 
 - **Resume saves your place on every step.** Build plan §4.3 says leaving doesn't save step progress, but the Phase 1 brief requires resume. I followed the brief.

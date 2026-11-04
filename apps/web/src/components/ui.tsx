@@ -48,9 +48,9 @@ export function BottomNav() {
 }
 
 /** Screen with header, scrollable content, optional sticky primary action and bottom nav. */
-export function Screen({ children, top, sticky, nav = true, guard = true }: { children: ReactNode; top?: ReactNode; sticky?: ReactNode; nav?: boolean; guard?: boolean }) {
+export function Screen({ children, top, sticky, nav = true, guard = true, mature = false }: { children: ReactNode; top?: ReactNode; sticky?: ReactNode; nav?: boolean; guard?: boolean; mature?: boolean }) {
   return (
-    <div className="frame">
+    <div className={mature ? "frame mature" : "frame"}>
       {guard && <SessionGuard />}
       {top}
       <main id="main" className={`main${sticky ? " has-sticky" : ""}`}>{children}</main>

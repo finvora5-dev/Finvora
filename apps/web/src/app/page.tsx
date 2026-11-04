@@ -39,7 +39,7 @@ export default function Home() {
   })();
 
   return (
-    <Screen top={<TopBar logo right={<><Link href="/search/" className="icon-btn" aria-label="Search"><Icon name="search" /></Link><Link href="/me/" className="icon-btn" aria-label="Profile"><Icon name="me" /></Link></>} />}>
+    <Screen mature top={<TopBar logo right={<><Link href="/search/" className="icon-btn" aria-label="Search"><Icon name="search" /></Link><Link href="/me/" className="icon-btn" aria-label="Profile"><Icon name="me" /></Link></>} />}>
       <div>
         <span className="muted small">{new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long" })}</span>
         <h1>{greeting()}{hydrated && session ? `, ${session.name}` : ""}.</h1>

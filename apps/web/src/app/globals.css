@@ -165,17 +165,28 @@ table.t th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em
 @media (prefers-reduced-transparency: reduce) { .bottomnav, .sticky-cta { background: #FFFFFF; } }
 .h1 { font-size: 26px; line-height: 1.2; }
 
-/* Keyboard-key press: the button sinks onto its edge shadow while held.
-   Works with reduced motion too (it's a state change, not an animation). */
-.chip { box-shadow: 0 3px 0 var(--border); }
-.btn:active:not([disabled]):not([aria-disabled="true"]),
-.chip:active:not([disabled]),
-.option:active:not([disabled]),
-.card.press:active,
-a.press:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+/* ---------- Playful V2 (chosen for every screen except Home) ----------
+   Tokens copied from the UPJourney artboard: 52px buttons, 14px radius, 4px key edge
+   that presses flat; square-ish 44px chips with an 18px label and a 3px edge. */
+.btn { min-height: 52px; border-radius: 14px; font: 600 17px var(--font); box-shadow: 0 4px 0 var(--primary-edge); }
+.btn-w { background: #FFFFFF; color: var(--link); border: 1.5px solid var(--border); box-shadow: 0 4px 0 var(--border); }
+.btn-g { background: var(--success); box-shadow: 0 4px 0 var(--success-edge); }
+.btn-r { background: var(--danger); box-shadow: 0 4px 0 var(--danger-edge); }
+.btn-sm { min-height: 44px; font-size: 16px; border-radius: 14px; }
+.chip { min-height: 44px; padding: 0 12px; border-radius: 14px; font: 600 18px var(--font); box-shadow: 0 3px 0 var(--border); }
+.chip[aria-pressed="true"], .chip[aria-selected="true"], .chip-on { box-shadow: 0 3px 0 var(--primary-edge); }
+.chips-scroll .chip, .chips .chip { flex: none; }
+.option { border-radius: 14px; font: 600 17px var(--font); }
+.tag { font-size: 13px; font-weight: 800; }
+h1, h2, h3, .h1 { font-weight: 700; letter-spacing: -0.02em; }
+.btn:active:not([disabled]):not([aria-disabled="true"]) { transform: translateY(4px); box-shadow: none; }
+.chip:active:not([disabled]), .option:active:not([disabled]), .press:active, a.press:active { transform: translateY(3px); box-shadow: none; }
 .icon-btn:active:not([disabled]) { transform: translateY(2px); background: var(--tint); }
 .bottomnav a:active span { transform: translateY(2px); box-shadow: none; }
-@media (hover: hover) {
-  .btn:hover:not([disabled]) { filter: brightness(1.06); }
-  .chip:hover, .option:hover:not([disabled]) { border-color: var(--tint-border); }
-}
+
+/* ---------- Mature design (chosen for Home only) ---------- */
+.mature .btn { min-height: 54px; border-radius: 16px; font: 700 16px var(--font); box-shadow: 0 3px 0 var(--primary-edge); }
+.mature .btn-sm { min-height: 44px; }
+.mature .chip { min-height: 44px; padding: 0 14px; border-radius: 999px; font: 600 14px var(--font); box-shadow: none; }
+.mature .btn:active:not([disabled]) { transform: translateY(2px); box-shadow: 0 1px 0 var(--primary-edge); }
+.mature .chip:active, .mature a.press:active { transform: translateY(2px); }
