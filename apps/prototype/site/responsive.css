@@ -57,3 +57,8 @@ html.fv-desk #dc-root .dpanel { position: fixed !important; top: 0; bottom: 0; l
 
 /* Lesson complete on wide screens: the ring and confetti stay centred behind Fin. */
 html.fv-wide #dc-root section[aria-labelledby="done-h"] > svg[width="390"] { left: 50% !important; transform: translateX(-50%); }
+
+/* Desktop focus flows and pop-ups (>= 1024px): fill the window, no width cap. */
+html.fv-big #dc-root > .sc-host > :first-child { min-height: 100dvh !important; }
+html.fv-big #dc-root > .sc-host > :first-child > div > .sc-host > :first-child { width: 100% !important; }
+html.fv-big #dc-root > .sc-host > :first-child[style*="overflow: hidden"] { height: 100dvh; min-height: 0 !important; }

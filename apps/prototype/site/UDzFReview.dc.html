@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): UDzFReview · desktop</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+<script src="./fv.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.root{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E0B14;font-size:16px;line-height:1.5}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h2{margin:0;font-weight:800;letter-spacing:-0.02em}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
+.btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
+.link{min-height:44px;border:0;background:transparent;font:700 15px 'Plus Jakarta Sans',sans-serif;color:#615A6E;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;text-decoration:none}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.press:active,.btn:active{transform:translateY(2px)}
+.muted{color:#615A6E}
+@keyframes f-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes f-fade{from{opacity:0}to{opacity:1}}
+@keyframes f-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+.sheet{animation:f-up .3s cubic-bezier(.2,.8,.2,1)}
+.scrim{animation:f-fade .25s ease-out}
+.pop{animation:f-pop .3s ease-out}
+.btn,.press,.chip{transition:transform .12s ease-out}
+}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+</helmet>
+<div class="root" style="; width: 1440px; min-height: 960px; box-sizing: border-box; position: relative; overflow: hidden">
+  <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0"><dc-import name="UDyPBossResult" hint-size="1440px,960px"></dc-import></div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(14,11,20,.55)"></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" style="position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 520px; max-height: calc(100% - 64px); overflow: auto; background: #FFFFFF; border-radius: 28px; padding: 28px; box-shadow: 0 24px 60px rgba(14,11,20,.28); display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+    <sc-if value="{{ask}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px">
+        <div style="width: 96px; height: 96px; flex: none"><dc-import name="GKobo" mood="cheer" size="96" hint-size="96px,96px"></dc-import></div>
+        <h2 id="sh-t" style="font-size: 23px">Enjoying Finvora?</h2>
+        <p class="muted" style="margin: 0; max-width: 300px">You just finished World 1. Nice work. Would you tell us how it's going?</p>
+      </div>
+      <button type="button" class="btn" onClick="{{yes}}">Yes, I'm enjoying it</button>
+      <button type="button" class="btn" onClick="{{no}}" style="background: #FFFFFF; color: #4C1D95; border: 1.5px solid #E7E2F0; box-shadow: 0 3px 0 #E7E2F0">Not really</button>
+      <a href="UPBossResult.dc.html" class="link" style="margin-top: -6px">Ask me later</a>
+    </sc-if>
+    <sc-if value="{{store}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px">
+        <div style="width: 96px; height: 96px; flex: none"><dc-import name="GKobo" mood="proud" size="96" hint-size="96px,96px"></dc-import></div>
+        <h2 id="sh-t2" style="font-size: 22px">Glad to hear it!</h2>
+        <p class="muted" style="margin: 0; max-width: 300px">A short review in the app store helps other people find Finvora.</p>
+      </div>
+      <a href="UPBossResult.dc.html" class="btn">Rate us in the store</a>
+      <a href="UPBossResult.dc.html" class="link" style="margin-top: -6px">No thanks</a>
+    </sc-if>
+    <sc-if value="{{better}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; align-items: center; gap: 12px"><div style="width: 56px; height: 56px; flex: none"><dc-import name="GKobo" mood="oops" size="56" hint-size="56px,56px"></dc-import></div><div><h2 style="font-size: 21px">Sorry to hear that</h2><p class="muted" style="margin: 2px 0 0; font-size: 14px">What would make Finvora better for you?</p></div></div>
+      <textarea rows="3" aria-label="What would make Finvora better?" placeholder="Tell us in a sentence or two" style="border-radius: 14px; border: 1.5px solid #E7E2F0; padding: 12px 14px; font: 500 16px 'Plus Jakarta Sans', sans-serif; resize: none"></textarea>
+      <a href="UPBossResult.dc.html" class="btn">Send feedback</a>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { step: 'ask' }; }
+  renderVals() {
+    const s = this.state;
+    return { ask: s.step === 'ask', store: s.step === 'store', better: s.step === 'better',
+      yes: () => this.setState({ step: 'store' }), no: () => this.setState({ step: 'better' }) };
+  }
+}
+</script>
+</body>
+</html>

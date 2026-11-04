@@ -6,6 +6,9 @@
   // Desktop (>= 1024px) uses the desktop boards; smaller screens use the phone boards.
   var DESK = 1024;
   var PAIRS = { UOHome: "UDHome", UPJourney: "UDJourney", UPLibrary: "UDLibrary", UPMarkets: "UDMarkets", USimHome: "UDSimulator", UPMe: "UDMe" };
+  // Sub-pages, focus flows and pop-ups (approved desktop patterns A, B and C).
+  var MORE = {"UPTopic":"UDxTopic","UPSearch":"UDxSearch","UPDictionary":"UDxDictionary","UPEmptySearch":"UDxEmptySearch","UPExchange":"UDxExchange","URCompanies":"UDxRCompanies","URCompany":"UDxRCompany","URCompanyLoading":"UDxRCompanyLoading","UPChallenges":"UDxChallenges","UPInflation":"UDxInflation","USimCompany":"UDxSimCompany","USimMarket":"UDxSimMarket","USimHistory":"UDxSimHistory","USimEmpty":"UDxSimEmpty","UPAskKobo":"UDxAskKobo","UPProgress":"UDxProgress","UPAchievements":"UDxAchievements","UPHistory":"UDxHistory","UPSaved":"UDxSaved","UPNotifications":"UDxNotifications","UPSettings":"UDxSettings","URSetEmail":"UDxRSetEmail","URSetGoal":"UDxRSetGoal","URSetPrivacy":"UDxRSetPrivacy","URSetTerms":"UDxRSetTerms","URHelp":"UDxRHelp","URDeleteAccount":"UDxRDeleteAccount","USPlans":"UDxSPlans","USCompare":"UDxSCompare","USYourPlan":"UDxSYourPlan","UMEmptyHistory":"UDxMEmptyHistory","UMEmptyNotif":"UDxMEmptyNotif","UMEmptySaved":"UDxMEmptySaved","UPOnbGoal":"UDyPOnbGoal","UPSignIn":"UDyPSignIn","UPSignInCode":"UDyPSignInCode","URAgeCheck":"UDyRAgeCheck","URNotifAsk":"UDyRNotifAsk","URCodeError":"UDyRCodeError","UPDaily":"UDyPDaily","UPLevelUp":"UDyPLevelUp","UPStreak":"UDyPStreak","URStreakLost":"UDyRStreakLost","UPLessonInfo":"UDyPLessonInfo","UPLessonChoice":"UDyPLessonChoice","UPLessonCalc":"UDyPLessonCalc","UPLessonComplete":"UDyPLessonComplete","UPLearnTerm":"UDyPLearnTerm","UPLearnSteps":"UDyPLearnSteps","UPLearnCompare":"UDyPLearnCompare","UPLearnMarket":"UDyPLearnMarket","UPLearnMyth":"UDyPLearnMyth","UPLessonOrder":"UDyPLessonOrder","UPLessonMatch":"UDyPLessonMatch","UPLessonScenario":"UDyPLessonScenario","UPBossIntro":"UDyPBossIntro","UPBossQuestion":"UDyPBossQuestion","UPBossResult":"UDyPBossResult","USCheckPending":"UDySCheckPending","USCheckSuccess":"UDySCheckSuccess","USCheckFailed":"UDySCheckFailed","USCheckSlow":"UDySCheckSlow","USCheckOffline":"UDySCheckOffline","USCheckAlready":"UDySCheckAlready","USimDone":"UDySimDone","UPError":"UDyPError","UPOffline":"UDyPOffline","URDeleted":"UDyRDeleted","UFRate":"UDzFRate","UFReport":"UDzFReport","UFReview":"UDzFReview","UFSuggest":"UDzFSuggest","UMAskLimit":"UDzMAskLimit","UMCancelPlan":"UDzMCancelPlan","UMLeaveLesson":"UDzMLeaveLesson","UMLocked":"UDzMLocked","UMOrderClosed":"UDzMOrderClosed","UMSignOut":"UDzMSignOut","UMSimReset":"UDzMSimReset","USUpgrade":"UDzSUpgrade","USimSell":"UDzSimSell","UPArticle":"UDArticle","UPOnbWelcome":"UDWelcome","USimTrade":"UDBuy"};
+  Object.keys(MORE).forEach(function (k) { PAIRS[k] = MORE[k]; });
   var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
@@ -30,7 +33,9 @@
     html.style.overflowX = "hidden";
     var deskBoard = designW >= 1200 && !!el.querySelector(".dside");
     html.classList.toggle("fv-desk", deskBoard && vw >= DESK);
-    if (deskBoard && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; return; }
+    html.classList.toggle("fv-big", designW >= 1200 && vw >= DESK);
+    fillFV(el);
+    if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; return; }
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (!wide) {
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
@@ -51,6 +56,16 @@
       var art = n.querySelector("[style*='position: absolute']") || n.tagName === "svg";
       if (art) { n.style.marginLeft = "auto"; n.style.marginRight = "auto"; }
       else n.style.width = "100%";
+    });
+  }
+  // Header chips on desktop boards: the learner's real streak, XP and level.
+  function fillFV(el) {
+    var FV = window.FV; if (!FV) return;
+    var st = FV.get(), v = { streak: String(FV.streak()), xp: String(st.xp), levelText: "Level " + FV.level(st.xp) + " learner" };
+    el.querySelectorAll("[data-fv]").forEach(function (n) { var t = v[n.getAttribute("data-fv")]; if (t != null && n.textContent !== t) n.textContent = t; });
+    el.querySelectorAll("[data-fv-label]").forEach(function (n) {
+      var k = n.getAttribute("data-fv-label"), t = k === "streak" ? "Streak: " + v.streak + (v.streak === "1" ? " day" : " days") : v.xp + " XP, " + v.levelText;
+      if (n.getAttribute("aria-label") !== t) n.setAttribute("aria-label", t);
     });
   }
   var queued = false;

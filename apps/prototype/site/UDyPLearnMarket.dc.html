@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): UPLearnMarket · desktop</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+<script src="./fv.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+.btn{width:100%;height:54px;border:0;border-radius:16px;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-sizing:border-box}
+.b-blue{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.b-green{background:#16884A;color:#FFFFFF;box-shadow:0 3px 0 #0F6B39}
+.b-off{background:#E7E2F0;color:#615A6E;cursor:not-allowed}
+.btn:active,.press:active{transform:translateY(2px)}
+.opt{width:100%;min-height:64px;box-sizing:border-box;padding:0 16px;border-radius:16px;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.num{font-variant-numeric:tabular-nums}
+@keyframes c-in{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes c-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes c-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes c-pop{0%{transform:scale(1)}45%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes c-fill{from{width:var(--from)}}
+@media (prefers-reduced-motion:no-preference){
+.btn,.press,.opt{transition:transform .15s ease-out,background-color .15s ease-out,border-color .15s ease-out}
+.in{animation:c-in .3s cubic-bezier(.2,.8,.2,1) both}
+.sheet{animation:c-up .26s cubic-bezier(.2,.8,.2,1)}
+.shake{animation:c-shake .3s ease-out}
+.pop{animation:c-pop .3s ease-out}
+.fill{animation:c-fill .5s ease-out both}
+}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+</helmet>
+<div class="root" style="color: #0E0B14; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; width: 1440px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #FFFFFF">
+  
+  <div style="flex: 1; width: 100%; padding: 0 48px; box-sizing: border-box; display: flex; flex-direction: column">
+  <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 12px">
+    <a href="UDJourney.dc.html" class="press" aria-label="Close lesson and return to the journey" style="width: 44px; height: 44px; flex: none; margin-left: -10px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#615A6E" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
+    <div role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1" style="flex: 1; height: 8px; border-radius: 999px; background: #E7E2F0; overflow: hidden"><div class="fill" style="--from: 0%; width: 33.3%; height: 100%; border-radius: 999px; background: #5B21B6"></div></div>
+    <span style="font-size: 14px; font-weight: 700; color: #615A6E">1/3</span>
+  </header>
+  <main style="padding: 24px 16px 24px; display: flex; flex-direction: column; gap: 18px">
+    <span class="in" style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #5B2FC9">Quick learn</span>
+    <h1 class="in" style="margin: -10px 0 0; font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em">Meet the NGX</h1>
+    <p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">Nigeria's main stock exchange, where shares of listed companies are bought and sold.</p>
+    <section class="in" aria-label="Key facts" style="animation-delay: .06s; background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px"><div style="display: flex; align-items: center; gap: 12px"><svg width="64" height="44" viewBox="0 0 72 50" aria-hidden="true"><rect width="72" height="50" rx="10" fill="#FFFFFF" stroke="#D3DEEE" stroke-width="2"></rect><path d="M10 1h14v48H10a9 9 0 0 1-9-9V10a9 9 0 0 1 9-9z" fill="#008751"></path><path d="M48 1h14a9 9 0 0 1 9 9v30a9 9 0 0 1-9 9H48z" fill="#008751"></path></svg><div><strong style="font-size: 18px">NGX</strong><div style="font-size: 14px; color: #615A6E">Nigerian Exchange</div></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"><div style="background: #F8F6FC; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z M12 10h.01" fill="none" stroke="#4C1D95" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-size: 12px; font-weight: 700; color: #615A6E">Where</span><span style="font-size: 15px; font-weight: 800; line-height: 1.3">Lagos, Nigeria</span></div><div style="background: #F8F6FC; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6v12 M18 6v12 M6 6l12 12 M4 10h16 M4 14h16" fill="none" stroke="#4C1D95" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-size: 12px; font-weight: 700; color: #615A6E">Currency</span><span style="font-size: 15px; font-weight: 800; line-height: 1.3">Naira (₦)</span></div><div style="background: #F8F6FC; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="#4C1D95" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-size: 12px; font-weight: 700; color: #615A6E">Regulator</span><span style="font-size: 15px; font-weight: 800; line-height: 1.3">SEC Nigeria</span></div><div style="background: #F8F6FC; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3M16 3v3M4 9h16M5 6h14v14H5z" fill="none" stroke="#4C1D95" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-size: 12px; font-weight: 700; color: #615A6E">Trades on</span><span style="font-size: 15px; font-weight: 800; line-height: 1.3">Weekdays, not public holidays</span></div></div></section>
+    <div class="in" style="animation-delay: .1s; display: flex; align-items: flex-end; gap: 8px">
+      <div style="width: 64px; height: 64px; flex: none"><svg width="64" height="64" viewBox="0 0 120 120" role="img" aria-label="Fin, the Finvora coin">
+  <ellipse cx="60" cy="114" rx="30" ry="5" fill="#0B1F44" opacity=".12"></ellipse>
+  <path d="M20 66 q-10 6 -8 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path><path d="M100 66 q10 6 8 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"></path>
+  <rect x="44" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect><rect x="66" y="96" width="10" height="14" rx="5" fill="#0F55C9"></rect>
+  <circle cx="60" cy="62" r="42" fill="#0F55C9"></circle><circle cx="60" cy="58" r="42" fill="#1A73F5"></circle>
+  <circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"></circle>
+  <path d="M30 40c6-10 16-16 26-17" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".55"></path>
+  <ellipse cx="46" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse><ellipse cx="74" cy="52" rx="9" ry="11" fill="#FFFFFF"></ellipse>
+  <circle cx="48" cy="54" r="4.6" fill="#0B1F44"></circle><circle cx="76" cy="54" r="4.6" fill="#0B1F44"></circle>
+  <circle cx="49.5" cy="52" r="1.6" fill="#FFFFFF"></circle><circle cx="77.5" cy="52" r="1.6" fill="#FFFFFF"></circle>
+  <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle>
+  <path d="M48 70 q12 14 26 0 z" fill="#0B1F44"></path><path d="M54 76 q6 4 12 0" fill="#FF8FA3"></path>
+</svg></div>
+      <p style="flex: 1; margin: 0 0 10px; background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px; padding: 10px 14px; font-size: 15px; font-weight: 600; line-height: 1.45">It was called the Nigerian Stock Exchange until 2021.</p>
+    </div>
+    <p class="in" style="margin: -6px 0 0; font-size: 13px; color: #615A6E">Check the exchange's own website for current trading hours.</p>
+  </main>
+  <div style="margin-top: auto; position: sticky; bottom: 0; z-index: 5; padding: 12px 16px 22px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px">
+    <a href="UPLessonChoice.dc.html" class="btn b-blue">Continue</a>
+    <a href="UPAskKobo.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #4C1D95; text-decoration: none">Explain it differently</a>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

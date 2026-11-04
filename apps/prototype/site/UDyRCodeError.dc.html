@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finvora (purple and black): URCodeError · desktop</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+<script src="./fv.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+.root{background:#FFFFFF;color:#0E0B14;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;line-height:1.5}
+a{color:#4C1D95}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
+.card{background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;border-radius:20px;box-sizing:border-box}
+.muted{color:#615A6E}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.num{font-variant-numeric:tabular-nums}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
+.btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:0 3px 0 #E7E2F0;border:1.5px solid #E7E2F0}
+.btn-g{background:#16884A;box-shadow:0 3px 0 #0F6B39}
+.btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
+.btn:active,.press:active{transform:translateY(2px)}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;text-decoration:none;box-sizing:border-box;cursor:pointer}
+.chip-on{background:#5B21B6;border-color:#5B21B6;color:#FFFFFF}
+.tile{width:44px;height:44px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.row{display:flex;align-items:center;gap:12px}
+.li{display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:44px;text-decoration:none;color:#0E0B14}
+.li+.li{border-top:1px solid #E7E2F0}
+.bar{height:8px;border-radius:999px;background:#E7E2F0;overflow:hidden}
+.bar>div{height:100%;border-radius:999px;background:#5B21B6}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.field{height:54px;border-radius:14px;border:1.5px solid #E7E2F0;background:#FFFFFF;padding:0 14px;font:500 16px 'Plus Jakarta Sans',sans-serif;color:#0E0B14;box-sizing:border-box;width:100%}
+@keyframes p-in{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes p-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes p-flick{0%,100%{transform:scale(1,1) rotate(0)}30%{transform:scale(1.05,1.1) rotate(-3deg)}60%{transform:scale(.97,1.03) rotate(2deg)}}
+@keyframes p-fill{from{width:0}}
+@keyframes p-burst{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1) rotate(var(--rot));opacity:0}}
+@keyframes p-dots{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+.btn,.press,.chip{transition:transform .15s ease-out}
+.in{animation:p-in .3s cubic-bezier(.2,.8,.2,1) both}
+.pop{animation:p-pop .4s cubic-bezier(.2,.8,.2,1) both}
+.flick{animation:p-flick 1.8s ease-in-out infinite;transform-origin:50% 90%}
+.fill{animation:p-fill .6s ease-out .2s both}
+.bit{animation:p-burst .9s cubic-bezier(.15,.7,.3,1) .15s both}
+.dot{animation:p-dots 1.2s ease-in-out infinite}
+}
+</style>
+<style>
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.sw{width:46px;height:28px;flex:none;border-radius:999px;border:0;padding:3px;display:flex;box-sizing:border-box}
+.sw span{width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sk{background:#DCE6F5;border-radius:10px}
+@keyframes m-sh{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+@media (prefers-reduced-motion:no-preference){.sk{animation:m-sh 1.4s ease-in-out infinite}}
+.toast{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;font-weight:700;font-size:15px;box-shadow:0 8px 24px rgba(16,30,70,.16)}
+.btn-r{background:#D92B2B;color:#FFFFFF;box-shadow:0 3px 0 #A51D1D}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+<style>
+.dside{width:88px;flex:none;position:relative;align-self:stretch;z-index:20}
+.dpanel{position:absolute;left:0;top:0;bottom:0;width:88px;overflow:hidden;background:#FFFFFF;border-right:1.5px solid #E7E2F0;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;transition:width .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.dside:hover .dpanel,.dside:focus-within .dpanel{width:264px;box-shadow:12px 0 32px rgba(14,11,20,.12)}
+.dl{opacity:0;transition:opacity .15s;white-space:nowrap}
+.dside:hover .dl,.dside:focus-within .dl{opacity:1;transition-delay:.06s}
+.dnav{display:flex;align-items:center;gap:14px;height:52px;padding:0 14px;border-radius:16px;text-decoration:none;color:#38323F;font-weight:700;font-size:16px;white-space:nowrap}
+.di{flex:none;display:inline-flex;width:28px;justify-content:center}
+.dask{margin-top:18px;background:#F1EBFB;color:#4C1D95;border:1.5px solid #C4B5FD;box-shadow:0 3px 0 #C4B5FD}
+.dnav:not([aria-current="page"]):not(.dask):hover{background:#F1EBFB;color:#4C1D95}
+.dnav:not([aria-current="page"]):not(.dask):hover svg path{stroke:#4C1D95}
+.dask:hover{background:#E9E0FB;border-color:#A78BFA}
+.dnav[aria-current="page"]:hover{background:#4C1D95}
+@media (prefers-reduced-motion:reduce){.dpanel,.dl{transition:none}}
+.dnav[aria-current="page"]{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
+.dstat{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #E7E2F0;box-shadow:0 3px 0 #E7E2F0;font-weight:800;font-size:16px;color:#0E0B14;text-decoration:none}
+</style>
+</helmet>
+<div class="root" style="; width: 1440px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #FFFFFF">
+  
+  <div style="flex: 1; width: 100%; padding: 0 48px; box-sizing: border-box; display: flex; flex-direction: column">
+  <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 8px"><a href="UPSignIn.dc.html" class="press" aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#0E0B14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><h1 style="font-size: 22px">Enter your code</h1></header>
+  <main style="padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 16px">
+    <div role="tablist" aria-label="Preview state" style="display: flex; gap: 6px; flex-wrap: wrap"><sc-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" class="chip" aria-selected="{{t.on}}" onClick="{{t.tap}}" style="background: {{t.bg}}; color: {{t.fg}}; border-color: #E7E2F0">{{t.t}}</button></sc-for></div>
+    <p class="muted" style="margin: 0">We sent a 6-digit code to <strong style="color: #0E0B14">ada@example.com</strong></p>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px"><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">4</span><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">8</span><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">2</span><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">1</span><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">9</span><span class="num" style="height: 56px; border-radius: 14px; border: 2px solid {{bd}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800">3</span></div>
+    <div role="alert" style="display: flex; gap: 10px; align-items: flex-start; background: #FFE4E2; color: #B42828; border-radius: 14px; padding: 12px 14px; font-weight: 700; font-size: 15px"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M12 8v5 M12 16h.01 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="#B42828" stroke-width="2.4" stroke-linecap="round"></path></svg><span>{{msg}} <sc-if value="{{hasTries}}" hint-placeholder-val="{{true}}"><span style="font-weight: 600">({{tries}})</span></sc-if></span></div>
+    <sc-if value="{{open}}" hint-placeholder-val="{{true}}"><a href="UPSignInCode.dc.html" class="btn">Send a new code</a><span class="muted" style="font-size: 14px; text-align: center">You can resend in 0:42</span></sc-if>
+    <sc-if value="{{lock}}" hint-placeholder-val="{{false}}"><span class="btn btn-off" aria-disabled="true">Try again in 15:00</span></sc-if>
+    <a href="UPSignIn.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; color: #4C1D95">Use a different email</a>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { s: 0 }; }
+  renderVals() {
+    const S = [
+      { tab: 'Wrong code', msg: "That code doesn't match. Check the email and try again.", tries: '2 tries left', bd: '#F04438', lock: false },
+      { tab: 'Expired', msg: 'This code has expired. Codes last 10 minutes. We can send a new one.', tries: '', bd: '#F04438', lock: false },
+      { tab: 'Too many tries', msg: 'Too many wrong codes. For your safety, wait 15 minutes or request a new code.', tries: '', bd: '#F04438', lock: true }];
+    const c = S[this.state.s];
+    return { tabs: S.map((x, i) => ({ t: x.tab, on: i === this.state.s ? 'true' : 'false', bg: i === this.state.s ? '#5B21B6' : '#FFFFFF', fg: i === this.state.s ? '#FFFFFF' : '#0E0B14', tap: () => this.setState({ s: i }) })),
+      msg: c.msg, tries: c.tries, hasTries: !!c.tries, bd: c.bd, lock: c.lock, open: !c.lock };
+  }
+}
+</script>
+</body>
+</html>
