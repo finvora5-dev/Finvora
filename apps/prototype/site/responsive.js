@@ -37,14 +37,20 @@
     fillFV(el);
     if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
+    if (designW < 300) { el.style.zoom = "1"; el.style.margin = "0 auto"; return; } // small component boards (Fin) stay actual size
     if (!wide) {
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
+      // Pop-ups: the page behind fills the screen exactly, so the sheet sits on the bottom edge.
+      var dlg = el.querySelector(':scope > [role="dialog"], :scope > [role="alertdialog"]');
+      if (dlg) { el.style.setProperty("height", Math.max(window.innerHeight / z, dlg.offsetHeight + 24) + "px", "important"); el.style.setProperty("min-height", "0", "important"); el.style.overflow = "hidden"; }
       // The pinned nav bar sits inside the zoomed board; size it to the screen.
       el.querySelectorAll('nav[aria-label="Main"]').forEach(function (n) { n.style.setProperty("width", designW + "px", "important"); });
       return;
     }
     el.style.zoom = "1";
     el.style.width = "100%";
+    var dlgW = el.querySelector(':scope > [role="dialog"], :scope > [role="alertdialog"]');
+    if (dlgW) { el.style.setProperty("height", Math.max(window.innerHeight, dlgW.offsetHeight + 24) + "px", "important"); el.style.setProperty("min-height", "0", "important"); el.style.overflow = "hidden"; }
     stretchCharts(el);
     // Elements drawn at the board's fixed width: stretch them, unless they hold positioned artwork.
     el.querySelectorAll("[style*='width: 390px'], [style*='width:390px']").forEach(function (n) {
