@@ -29,6 +29,7 @@ export function CompanyView({ ticker }: { ticker: string }) {
       sticky={<button type="button" className="btn" onClick={() => setAsking(true)}><Fin size={26} />Ask Fin about {c.name}</button>}>
       <div className="row"><Monogram text={c.ticker} /><div className="grow"><h2 className="h1" style={{ fontSize: 22 }}>{c.name}</h2><span className="small muted">{c.ticker} · {c.exchange} · {c.sector}</span></div></div>
 
+      <div className="cols two">
       <section className="card card-pad col" style={{ gap: 8 }} aria-label="Price">
         <div className="row between"><span style={{ fontSize: 28, fontWeight: 800 }}><Money kobo={price} /></span><VirtualLabel kind="demo" /></div>
         <span className="small"><Change kobo={price - prev} pct={percentChange(prev, price)} label="Today" /> today</span>
@@ -37,8 +38,8 @@ export function CompanyView({ ticker }: { ticker: string }) {
         <p className="xs muted">Demo prices for learning. They are not live or real market quotes.</p>
       </section>
 
-      <section className="col" style={{ gap: 6 }}><h2>About</h2><p>{c.about}</p></section>
-      <section className="card card-pad card-tint col" style={{ gap: 6 }}><h2>How it makes money</h2><p>{c.howItMakesMoney}</p></section>
+      <div className="col"><section className="col" style={{ gap: 6 }}><h2>About</h2><p>{c.about}</p></section><section className="card card-pad card-tint col" style={{ gap: 6 }}><h2>How it makes money</h2><p>{c.howItMakesMoney}</p></section></div>
+      </div>
 
       <section className="col" style={{ gap: 8 }}>
         <h2>Learn the ideas behind this page</h2>

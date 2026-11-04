@@ -34,7 +34,7 @@ export default function Companies() {
       {rows.length === 0 ? (
         <Empty title="Your watchlist is empty" body="Tap the star on any company to keep it here." mood="think" action={<button type="button" className="btn btn-w btn-sm" onClick={() => update("prefs", (p) => ({ ...p, companyFilter: "All" }))}>Browse all companies</button>} />
       ) : (
-        <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {rows.map(({ c, p, pct }) => (
             <li key={c.ticker} className="row" style={{ paddingRight: 6, borderTop: "1px solid var(--border)" }}>
               <Link href={`/companies/${c.ticker}/`} className="li grow" style={{ borderTop: 0 }}>

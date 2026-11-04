@@ -45,14 +45,15 @@ export default function Home() {
         <h1>{greeting()}{hydrated && session ? `, ${session.name}` : ""}.</h1>
       </div>
 
-      {hydrated && (
+      <div className="cols two">
+      {hydrated ? (
         <Link href={card.href} className="card card-pad card-tint press in col" style={{ textDecoration: "none", color: "inherit", gap: 10 }} aria-label={`${card.eyebrow}: ${card.title}. ${card.cta}`}>
           <div className="row"><span className="tile" style={{ background: "#FFFFFF" }}><Icon name={card.icon} /></span><div className="grow"><span className="eyebrow" style={{ color: "var(--link)" }}>{card.eyebrow}</span><h2>{card.title}</h2></div></div>
           <p className="muted small">{card.body}</p>
           {"progress" in card && card.progress !== undefined && <ProgressBar value={card.progress} label="Lesson progress" />}
           <span className="btn" aria-hidden="true">{card.cta}</span>
         </Link>
-      )}
+      ) : <div />}
 
       <section className="card card-pad col" aria-labelledby="ask-h" style={{ gap: 10 }}>
         <div className="row"><Fin mood="happy" size={32} /><h2 id="ask-h" style={{ fontSize: 17 }}>Ask Fin</h2></div>
@@ -62,6 +63,7 @@ export default function Home() {
         </form>
         <div className="chips">{["What is a dividend?", "Why is inflation high?", "What is a P/E ratio?"].map((p) => <Link key={p} href={`/ask/?q=${encodeURIComponent(p)}`} className="chip">{p}</Link>)}</div>
       </section>
+      </div>
 
       {hydrated && (
         <div className="row small muted" style={{ gap: 16 }}>

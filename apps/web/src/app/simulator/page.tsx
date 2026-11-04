@@ -22,6 +22,7 @@ export default function SimHome() {
     <Screen top={<TopBar back="/markets/" title="Simulator" right={<Link href="/simulator/history/" className="icon-btn" aria-label="Trade history"><Icon name="history" /></Link>} />}>
       <Notice icon="info">Practice only. You&apos;re using virtual money on made-up companies with demo prices. Nothing here is a real trade, and virtual gains or losses aren&apos;t real returns.</Notice>
 
+      <div className="cols two">
       <section className="card card-pad col" style={{ gap: 6 }} aria-label="Portfolio value">
         <div className="row between"><span className="small muted">Portfolio value</span><VirtualLabel kind="virtual" /></div>
         <span style={{ fontSize: 30, fontWeight: 800, lineHeight: 1.1 }}><Money kobo={v.totalKobo} /></span>
@@ -44,7 +45,7 @@ export default function SimHome() {
             <p className="small muted">Pick a company below and try buying with a small amount, like ₦5,000.</p>
           </div>
         ) : (
-          <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {v.positions.map((p) => {
               const co = api.simCompany(p.ticker)!;
               return (
@@ -59,9 +60,11 @@ export default function SimHome() {
         )}
       </section>
 
+      </div>
+
       <section className="col" style={{ gap: 8 }} aria-labelledby="mkt-h">
         <div className="row between"><h2 id="mkt-h">Practice market</h2><VirtualLabel kind="demo" /></div>
-        <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {api.simCompanies().map((c) => {
             const p = api.priceOn(c.ticker, sim.day), prev = api.priceOn(c.ticker, sim.day - 1);
             return (

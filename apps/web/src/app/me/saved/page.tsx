@@ -15,7 +15,7 @@ export default function Saved() {
   return (
     <Screen top={<TopBar back="/me/" title="Saved articles" />}>
       {lib.saved.length === 0 ? <Empty title="Nothing saved yet" body="Tap the bookmark on any article to keep it here." action={<Link href="/library/" className="btn btn-sm">Browse the Library</Link>} /> : (
-        <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {lib.saved.map((s) => { const a = api.article(s); if (!a) return null; return (
             <li key={s} className="row" style={{ paddingRight: 6 }}>
               <Link href={`/library/${s}/`} className="li grow"><span className="grow"><strong style={{ display: "block" }}>{a.title}</strong><span className="small muted">{a.category}</span></span></Link>

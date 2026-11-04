@@ -38,7 +38,7 @@ export default function Search() {
       ) : (
         <>
           <p className="small muted" role="status">{results.length} result{results.length === 1 ? "" : "s"}</p>
-          <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {results.map((r) => (
               <li key={r.kind + r.id}><Link href={r.href} className="li"><span className="tile"><Icon name={r.kind === "company" ? "company" : r.kind === "lesson" ? "learn" : "library"} size={20} /></span><span className="grow"><strong style={{ display: "block" }}>{r.title}</strong><span className="small muted">{KIND[r.kind]} · {r.subtitle}</span></span></Link></li>
             ))}

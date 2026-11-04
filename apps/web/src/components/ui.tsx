@@ -47,15 +47,36 @@ export function BottomNav() {
   );
 }
 
+/** Desktop sidebar (≥1024px). The bottom nav is used below that width. */
+export function SideNav() {
+  const path = usePathname() ?? "/";
+  const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href) || (href === "/markets/" && (path.startsWith("/companies") || path.startsWith("/simulator") || path.startsWith("/calculator"))) || (href === "/me/" && (path.startsWith("/settings") || path.startsWith("/plans"))));
+  return (
+    <nav className="sidenav" aria-label="Main">
+      <div className="row" style={{ padding: "4px 8px 18px" }}><span className="logo" aria-hidden="true">F</span><strong style={{ letterSpacing: ".08em" }}>FINVORA</strong></div>
+      {NAV.map((n) => (
+        <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className="press">
+          <Icon name={n.icon} size={22} stroke={2.1} />{n.label}
+        </Link>
+      ))}
+      <Link href="/search/" className="press" aria-current={path.startsWith("/search") ? "page" : undefined}><Icon name="search" size={22} stroke={2.1} />Search</Link>
+      <Link href="/ask/" className="press" aria-current={path.startsWith("/ask") ? "page" : undefined}><Fin size={24} />Ask Fin</Link>
+    </nav>
+  );
+}
+
 /** Screen with header, scrollable content, optional sticky primary action and bottom nav. */
 export function Screen({ children, top, sticky, nav = true, guard = true, mature = false }: { children: ReactNode; top?: ReactNode; sticky?: ReactNode; nav?: boolean; guard?: boolean; mature?: boolean }) {
   return (
-    <div className={mature ? "frame mature" : "frame"}>
+    <div className={mature ? "shell mature" : "shell"}>
       {guard && <SessionGuard />}
-      {top}
-      <main id="main" className={`main${sticky ? " has-sticky" : ""}`}>{children}</main>
-      {sticky && <footer className="sticky-cta">{sticky}</footer>}
-      {nav && !sticky && <BottomNav />}
+      <SideNav />
+      <div className="frame pane">
+        {top}
+        <main id="main" className={`main${sticky ? " has-sticky" : ""}`}>{children}</main>
+        {sticky && <footer className="sticky-cta">{sticky}</footer>}
+        {nav && !sticky && <BottomNav />}
+      </div>
     </div>
   );
 }

@@ -25,7 +25,7 @@ export default function Library() {
       <div className="chips-scroll" role="group" aria-label="Filter by topic">
         {["All", ...api.topics()].map((t) => <button key={t} type="button" className="chip" style={{ flex: "none" }} aria-pressed={topic === t} onClick={() => update("prefs", (p) => ({ ...p, libraryTopic: t }))}>{t}</button>)}
       </div>
-      <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+      <ul className="card rlist" style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {list.map((a) => (
           <li key={a.slug}><Link href={`/library/${a.slug}/`} className="li"><span className="grow"><strong style={{ display: "block" }}>{a.title}</strong><span className="small muted">{a.category}</span></span><Icon name="chevron" size={20} /></Link></li>
         ))}
