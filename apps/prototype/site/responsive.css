@@ -13,3 +13,15 @@ html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1.5px #E7E2F
   html.fv-wide #dc-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: repeat(4, 1fr) !important; }
   html.fv-wide #dc-root nav[aria-label="Main"] > div { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
+
+/* Keyboard-key press on every board: while held, a button sinks onto its bottom edge and the edge goes flat. */
+#dc-root .btn, #dc-root .chip, #dc-root .press, #dc-root button, #dc-root a.card {
+  transition: transform .08s ease-out, box-shadow .08s ease-out;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+#dc-root .btn:active:not([disabled]):not(.b-off):not(.btn-off) { transform: translateY(4px) !important; box-shadow: none !important; }
+#dc-root .chip:active, #dc-root .press:active, #dc-root a.card:active,
+#dc-root button:not(.btn):not([disabled]):active { transform: translateY(3px) !important; box-shadow: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  #dc-root .btn, #dc-root .chip, #dc-root .press, #dc-root button, #dc-root a.card { transition: none; }
+}
