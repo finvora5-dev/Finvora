@@ -1,9 +1,9 @@
 // Fits each canvas board to the screen.
 // Phones (< 600px): the 390px board is scaled to the screen width, so folded phones (280px) fit too.
-// Tablets and desktop (>= 600px): the board reflows to the available width (up to 1080px):
+// Tablets and desktop (>= 600px): the board reflows to the available width (up to 1440px):
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
-  var MAX = 1080;
+  var MAX = 1440;
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
   function fit() {
     var el = root(); if (!el) return;
