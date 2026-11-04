@@ -381,6 +381,28 @@
     finishMicro: function (k) { var s = load(); s.micro = s.micro || {}; var first = !s.micro[k]; if (first) addXp(s, 15); s.micro[k] = Date.now(); markDay(s); save(s); return first ? 15 : 0; },
     MICRO: MICRO
   };
+
+  // ---- Markets: real African companies and exchanges, described in plain words. No live prices or figures.
+  // Facts here are general knowledge for learning; check each exchange's own site before relying on them.
+  var MK = {
+    COMPANIES: [
+      { t: "ZB", name: "Zenith Bank", tag: "Banking", country: "Nigeria", line: "Banking · NGX: ZENITHBANK", color: "#7B4AF0", how: "It lends money at a higher rate than it pays savers. The gap is its main income. It also earns fees on transfers and cards.", bank: true, learn: "price-to-earnings" },
+      { t: "DC", name: "Dangote Cement", tag: "Building materials", country: "Nigeria", line: "Building materials · NGX: DANGCEM", color: "#E8361C", how: "It sells cement to builders, governments and distributors, from plants in Nigeria and other African countries.", learn: "market-capitalisation" },
+      { t: "MTN", name: "MTN Nigeria", tag: "Telecoms", country: "Nigeria", line: "Telecoms · NGX: MTNN", color: "#4C1D95", how: "Mostly from people paying for airtime and data, plus mobile money and other digital services.", learn: "revenue-and-profit" },
+      { t: "NN", name: "Nestlé Nigeria", tag: "Food and drink", country: "Nigeria", line: "Food and drink · NGX: NESTLE", color: "#5B21B6", how: "It makes packaged foods and drinks and sells them through shops and distributors across Nigeria.", learn: "revenue-and-profit" },
+      { t: "SC", name: "Safaricom", tag: "Telecoms", country: "Kenya", line: "Telecoms · NSE Kenya: SCOM", color: "#0FA394", how: "Kenya's biggest mobile network. It earns from calls and data, and from M-Pesa, its mobile money service, which charges small fees on transfers and payments.", learn: "revenue-and-profit" },
+      { t: "MG", name: "MTN Ghana", tag: "Telecoms", country: "Ghana", line: "Telecoms · GSE: MTNGH", color: "#0B6A60", how: "Ghana's biggest mobile network. It earns from calls and data, and from MoMo, its mobile money service.", learn: "revenue-and-profit" }
+    ],
+    EXCHANGES: [
+      { t: "NGX", name: "Nigerian Exchange", where: "Lagos · prices in naira (₦)", sub: "Lagos, Nigeria · Naira (₦)", about: "Nigeria's main stock exchange, where shares of listed companies are bought and sold. It was known as the Nigerian Stock Exchange until 2021.", currency: "Naira (₦)", regulator: "SEC Nigeria", micro: true },
+      { t: "JSE", name: "Johannesburg Stock Exchange", where: "Johannesburg · prices in rand (R)", sub: "South Africa · Rand (R)", about: "South Africa's main stock exchange and the largest in Africa. It started in 1887, during the gold rush.", currency: "Rand (R)", regulator: "FSCA (South Africa)" },
+      { t: "NSE", name: "Nairobi Securities Exchange", where: "Nairobi · prices in shillings (KSh)", sub: "Kenya · Shilling (KSh)", about: "Kenya's stock exchange. It was called the Nairobi Stock Exchange until 2011. Safaricom is one of its best-known companies.", currency: "Kenyan shilling (KSh)", regulator: "Capital Markets Authority (Kenya)" },
+      { t: "GSE", name: "Ghana Stock Exchange", where: "Accra · prices in cedis (GH₵)", sub: "Accra, Ghana · Cedi (GH₵)", about: "Ghana's stock exchange, where shares of companies like MTN Ghana are bought and sold.", currency: "Cedi (GH₵)", regulator: "SEC Ghana" },
+      { t: "BRVM", name: "BRVM", where: "Abidjan · prices in CFA francs", sub: "Abidjan, Côte d'Ivoire · CFA franc", about: "A regional stock exchange shared by 8 West African countries that use the CFA franc, including Côte d'Ivoire, Senegal and Mali.", currency: "West African CFA franc", regulator: "AMF-UMOA (regional)" }
+    ],
+    company: function (t) { var m = /[?&]c=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "ZB"); return MK.COMPANIES.filter(function (c) { return c.t === k; })[0] || MK.COMPANIES[0]; },
+    exchange: function (t) { var m = /[?&]x=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "NGX"); return MK.EXCHANGES.filter(function (c) { return c.t === k; })[0] || MK.EXCHANGES[0]; }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -412,7 +434,7 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

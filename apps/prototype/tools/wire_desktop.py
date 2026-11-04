@@ -61,3 +61,15 @@ if '{{wTitle}}' not in s:
   }''' + s[m.end():]
     wr('UDLibrary', s)
 print('desktop wired')
+
+# Desktop Markets: each exchange card opens its own page; the guides open real content.
+s = rd('UDMarkets')
+if 'UPExchange.dc.html?x=' not in s:
+    for t in ('NGX', 'JSE', 'NSE', 'GSE', 'BRVM'):
+        k = s.index('<a href="UPExchange.dc.html" class="card press"')
+        s = s[:k] + '<a href="UPExchange.dc.html?x=%s" class="card press"' % t + s[k + len('<a href="UPExchange.dc.html" class="card press"'):]
+    for title, href in (('What a stock exchange does', 'UPArticle.dc.html?a=stock-exchange'), ('How to read a share price', 'UPLearnSteps.dc.html'), ('What moves a share price', 'UPArticle.dc.html?a=what-is-a-share')):
+        j = s.index(title); k = s.rindex('<a href="UPArticle.dc.html" class="card press"', 0, j)
+        s = s[:k] + '<a href="%s" class="card press"' % href + s[k + len('<a href="UPArticle.dc.html" class="card press"'):]
+    wr('UDMarkets', s)
+print('desktop markets wired')
