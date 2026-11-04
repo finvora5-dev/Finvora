@@ -1,0 +1,10 @@
+// Cloudflare Workers static-assets deploy for the Phase 1 prototype (no server code, no secrets).
+// Build first: npm install && npm run build  ->  apps/web/out
+{
+  "name": "finvora",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./apps/web/out",
+    "not_found_handling": "404-page"
+  }
+}
