@@ -1,9 +1,8 @@
 // Fits each canvas board to the screen.
 // Phones (< 600px): the 390px board is scaled to the screen width, so folded phones (280px) fit too.
-// Tablets and desktop (>= 600px): the board reflows to the available width (up to 1920px):
+// Tablets and desktop (>= 600px): the board reflows to fill the whole window, with no width cap:
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
-  var MAX = 1920;
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
   function fit() {
     var el = root(); if (!el) return;
@@ -16,7 +15,7 @@
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (!wide) { el.style.zoom = String(vw / designW); el.style.width = designW + "px"; return; }
     el.style.zoom = "1";
-    el.style.width = "min(100%, " + MAX + "px)";
+    el.style.width = "100%";
     // Elements drawn at the board's fixed width: stretch them, unless they hold positioned artwork.
     el.querySelectorAll("[style*='width: 390px'], [style*='width:390px']").forEach(function (n) {
       if (n === el) return;
