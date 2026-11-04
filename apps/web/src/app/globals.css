@@ -153,8 +153,7 @@ table.t th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em
 @keyframes kb-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
 @keyframes kb-breathe { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.03, .98) } }
 @media (prefers-reduced-motion: no-preference) {
-  .btn, .chip, .option, .press { transition: transform .15s ease-out; }
-  .btn:active, .press:active, .option:active { transform: translateY(2px); }
+  .btn, .chip, .option, .press, .icon-btn { transition: transform .08s ease-out, box-shadow .08s ease-out; }
   .in { animation: p-in .3s cubic-bezier(.2,.8,.2,1) both; }
   .sheet { animation: p-up .28s cubic-bezier(.2,.8,.2,1); }
   .pop { animation: p-pop .4s cubic-bezier(.2,.8,.2,1) both; }
@@ -165,3 +164,18 @@ table.t th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em
 }
 @media (prefers-reduced-transparency: reduce) { .bottomnav, .sticky-cta { background: #FFFFFF; } }
 .h1 { font-size: 26px; line-height: 1.2; }
+
+/* Keyboard-key press: the button sinks onto its edge shadow while held.
+   Works with reduced motion too (it's a state change, not an animation). */
+.chip { box-shadow: 0 3px 0 var(--border); }
+.btn:active:not([disabled]):not([aria-disabled="true"]),
+.chip:active:not([disabled]),
+.option:active:not([disabled]),
+.card.press:active,
+a.press:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+.icon-btn:active:not([disabled]) { transform: translateY(2px); background: var(--tint); }
+.bottomnav a:active span { transform: translateY(2px); box-shadow: none; }
+@media (hover: hover) {
+  .btn:hover:not([disabled]) { filter: brightness(1.06); }
+  .chip:hover, .option:hover:not([disabled]) { border-color: var(--tint-border); }
+}
