@@ -84,6 +84,40 @@
     last: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".last") || "null"); } catch (e) { return null; } },
     reset: function () { try { localStorage.removeItem(SIM_KEY); localStorage.removeItem(SIM_KEY + ".last"); } catch (e) {} }
   };
+
+  // ---- Plan (free or Plus). Set only by the simulated checkout; read by Ask Fin and Plus features.
+  var BILL_KEY = "fv.billing.v1";
+  function billLoad() {
+    try { var b = JSON.parse(localStorage.getItem(BILL_KEY) || "null"); if (b && b.sub && Array.isArray(b.orders)) return b; } catch (e) {}
+    return { sub: { plan: "free" }, orders: [] };
+  }
+  function billSave(b) { try { localStorage.setItem(BILL_KEY, JSON.stringify(b)); } catch (e) {} }
+  function plan() { return D().effectivePlan(billLoad().sub, lagosDay()); }
+
+  // ---- Ask Fin: scripted answers and refusals from packages/domain, free daily limit, saved chat.
+  var ASK_KEY = "fv.ask.v1";
+  function askLoad() {
+    try { var a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); if (a && Array.isArray(a.msgs)) return a; } catch (e) {}
+    return { usage: null, msgs: [] };
+  }
+  function askSave(a) { try { localStorage.setItem(ASK_KEY, JSON.stringify(a)); } catch (e) {} }
+  var ASK = {
+    status: function () { return D().canAsk(askLoad().usage, lagosDay(), D().entitlements(plan()).askFinDailyLimit); },
+    limit: function () { return D().entitlements(plan()).askFinDailyLimit; },
+    messages: function () { return askLoad().msgs; },
+    suggestions: function () { return D().suggestedPrompts(null); },
+    /** Answers one question, or returns null when today's free questions are used up. */
+    ask: function (q) {
+      q = String(q || "").trim(); if (!q) return null;
+      if (!ASK.status().allowed) return null;
+      var title = function (slug) { var a = D().ARTICLES.filter(function (x) { return x.slug === slug; })[0]; return a && a.title; };
+      var r = D().answerQuestion(q, null, D().SCRIPTED_ANSWERS, title);
+      var a = askLoad(); a.usage = D().recordAsk(a.usage, lagosDay());
+      a.msgs = a.msgs.concat([{ q: q, r: r, at: new Date().toISOString() }]).slice(-30); askSave(a);
+      return r;
+    },
+    clear: function () { var a = askLoad(); a.msgs = []; askSave(a); }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -113,7 +147,8 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM,
+    SIM: SIM, ASK: ASK,
+    plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };
   window.FV = FV;

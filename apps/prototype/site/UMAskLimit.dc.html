@@ -69,13 +69,13 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <div class="root" style="width: 390px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
   <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0; overflow: hidden"><dc-import name="UPAskKobo" hint-size="390px,900px"></dc-import></div>
   <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
-  <section role="dialog" aria-modal="true" aria-labelledby="m-t" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 24px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,.18)"><span aria-hidden="true" style="width: 40px; height: 5px; border-radius: 999px; background: #E7E2F0; align-self: center"></span><div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 64px; flex: none"><dc-import name="GKobo" mood="sleep" size="64" hint-size="64px,64px"></dc-import></div><div><h2 id="m-t" style="font-size: 21px">That's 5 questions today</h2><p class="muted" style="margin: 2px 0 0; font-size: 14px">Free gives you 5 Ask Fin questions a day. More tomorrow at midnight.</p></div></div>
+  <section role="dialog" aria-modal="true" aria-labelledby="m-t" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 24px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,.18)"><span aria-hidden="true" style="width: 40px; height: 5px; border-radius: 999px; background: #E7E2F0; align-self: center"></span><div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 64px; flex: none"><dc-import name="GKobo" mood="sleep" size="64" hint-size="64px,64px"></dc-import></div><div><h2 id="m-t" style="font-size: 21px">That's {{n}} questions today</h2><p class="muted" style="margin: 2px 0 0; font-size: 14px">Free gives you {{n}} Ask Fin questions a day. More tomorrow at midnight.</p></div></div>
 <a href="UPLibrary.dc.html" class="btn btn-w">Look it up in the Library</a><a href="USPlans.dc.html" class="btn">Get unlimited with Plus</a></section>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  renderVals() { const A = window.FV && window.FV.ASK; return { n: String((A && A.limit()) || 5) }; }
 }
 </script>
 </body>

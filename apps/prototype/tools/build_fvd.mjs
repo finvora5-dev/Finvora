@@ -1,12 +1,15 @@
 // Builds apps/prototype/site/fvd.js: the tested rules in packages/domain (simulator, Ask Fin,
 // checkout, money) as one browser script, exposed as window.FVD. No bundler needed.
-// Usage: npx tsc -p packages/domain/tsconfig.json --noEmit false --outDir <tmp> && node build_fvd.mjs <tmp> <site>
+// Also includes the scripted Ask Fin answers and Library article list from packages/sample-data.
+// Usage: compile packages/domain to <dom> and packages/sample-data to <sd> with tsc (--noEmit false --outDir), then
+//        node build_fvd.mjs <dom> <site> <sd>
 import fs from "node:fs"; import path from "node:path";
-const [src, site] = process.argv.slice(2);
-const order = ["config", "money", "market", "simulator", "entitlements", "askfin", "checkout", "calculator", "search"];
+const [src, site, sd] = process.argv.slice(2);
+const order = ["config", "money", "market", "simulator", "entitlements", "askfin", "checkout", "calculator", "search", "sd:askfin", "sd:library"];
 let body = "", names = [];
 for (const m of order) {
-  let s = fs.readFileSync(path.join(src, m + ".js"), "utf8");
+  const [dir, file] = m.startsWith("sd:") ? [sd, m.slice(3)] : [src, m];
+  let s = fs.readFileSync(path.join(dir, file + ".js"), "utf8");
   s = s.replace(/^import .*$/gm, "");
   s = s.replace(/^export (const|function|let|class) (\w+)/gm, (_, k, n) => { names.push(n); return k + " " + n; });
   if (/^export /m.test(s)) throw new Error("unhandled export in " + m);
