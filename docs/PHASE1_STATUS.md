@@ -217,4 +217,10 @@ Not built, by design:
 - real payments;
 - production monitoring.
 
+Also Phase 2 (raised 4 Nov 2026 while reviewing the prototype):
+- real user accounts, with progress synced across devices (the prototype keeps everything in one browser);
+- real Paystack payments confirmed by our server;
+- reminders and notifications that actually send;
+- analytics, error monitoring and admin roles with a real staff sign-in.
+
 The `FinvoraApi` boundary and `packages/domain` are where those plug in.
