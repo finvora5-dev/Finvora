@@ -109,13 +109,14 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <p class="muted" style="margin: 0; max-width: 300px">One short reminder a day to keep your streak. No spam, and you can change it any time in Settings.</p>
     <div class="card" style="width: 100%; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; text-align: left"><span><strong style="display: block">Remind me at</strong><span class="muted" style="font-size: 13px">Lagos time</span></span><span class="chip chip-on num">7:00 pm</span></div>
   </main>
-  <div style="padding: 12px 16px 22px; display: flex; flex-direction: column; gap: 6px"><a href="UDHome.dc.html" class="btn">Turn on reminders</a><a href="UDHome.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; color: #4C1D95">Not now</a></div>
+  <div style="padding: 12px 16px 22px; display: flex; flex-direction: column; gap: 6px"><button type="button" class="btn" onClick="{{yes}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Turn on reminders</button><a href="UOHome.dc.html" onClick="{{no}}" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; color: #4C1D95">Not now</a></div>
 </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  A() { return window.FV && window.FV.AUTH; }
+  renderVals() { const A = this.A(); return { yes: () => { if (A) A.setReminder(true); location.href = 'UOHome.dc.html'; }, no: () => { if (A) A.setReminder(false); } }; }
 }
 </script>
 </body>

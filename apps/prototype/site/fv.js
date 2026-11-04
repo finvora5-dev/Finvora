@@ -158,6 +158,33 @@
     renewsOn: function (period) { return D().addPeriod(lagosDay(), period); },
     date: function (day) { return new Date(day + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
   };
+
+  // ---- Sign-in (simulated, no email is sent). Any 6 digits sign you in, except the reviewer
+  // codes 000000 (wrong) and 111111 (expired). Three wrong codes lock the form for 15 minutes.
+  var AUTH_KEY = "fv.auth.v1";
+  function authLoad() { try { var a = JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); if (a && typeof a === "object") return a; } catch (e) {} return {}; }
+  function authSave(a) { try { localStorage.setItem(AUTH_KEY, JSON.stringify(a)); } catch (e) {} }
+  var AUTH = {
+    get: authLoad,
+    signedIn: function () { return !!authLoad().email; },
+    setGoal: function (g) { var a = authLoad(); a.goal = g; authSave(a); },
+    validEmail: function (e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || "").trim()); },
+    sendCode: function (email) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.wrong = 0; a.lockUntil = 0; authSave(a); },
+    resendIn: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.sentAt || 0) + 60000 - Date.now()) / 1000)); },
+    lockedFor: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.lockUntil || 0) - Date.now()) / 1000)); },
+    triesLeft: function () { return Math.max(0, 3 - (authLoad().wrong || 0)); },
+    /** "ok", "wrong", "expired" or "locked". */
+    verify: function (code) {
+      var a = authLoad();
+      if (AUTH.lockedFor() > 0) return "locked";
+      if (code === "111111" || Date.now() - (a.sentAt || 0) > 600000) return "expired";
+      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) a.lockUntil = Date.now() + 900000; authSave(a); return a.wrong >= 3 ? "locked" : "wrong"; }
+      a.email = a.pending; a.name = (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0; authSave(a); return "ok";
+    },
+    setBirth: function (d) { var a = authLoad(); a.birth = d; authSave(a); },
+    setReminder: function (on) { var a = authLoad(); a.reminder = on ? "19:00" : null; a.asked = true; authSave(a); },
+    signOut: function () { var a = authLoad(); delete a.email; delete a.pending; authSave(a); }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -187,7 +214,7 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };
