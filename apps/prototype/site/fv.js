@@ -221,6 +221,26 @@
     },
     search: function (q) { var idx = LIB.index(); return { results: D().search(idx, q), didYouMean: D().suggest(idx, q) }; }
   };
+
+  // ---- Admin (a demonstration in this browser, not real staff access): feedback prompt settings,
+  // the feedback inbox and an append-only audit log of admin changes.
+  var ADM_KEY = "fv.admin.v1";
+  function admLoad() { try { var a = JSON.parse(localStorage.getItem(ADM_KEY) || "null"); if (a && a.on) return a; } catch (e) {} return { on: { rate: true, report: true, suggest: true, review: true }, n: 3, audit: [], inbox: [], rates: 0 }; }
+  function admSave(a) { try { localStorage.setItem(ADM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function stamp() { return new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).replace(",", ","); }
+  var ADMIN = {
+    settings: admLoad,
+    on: function (k) { return admLoad().on[k] !== false; },
+    /** Rating prompt shows on 1 in N finished lessons. */
+    showRate: function () { var a = admLoad(); return a.on.rate !== false && (load().done % Math.max(1, a.n || 1) === 0); },
+    log: function (area, what) { var a = admLoad(); a.audit.unshift({ when: stamp(), who: "You (admin)", area: area, what: what }); admSave(a); },
+    set: function (k, on) { var a = admLoad(); a.on[k] = on; admSave(a); },
+    setN: function (n) { var a = admLoad(); a.n = n; admSave(a); },
+    submit: function (kind, where, what, note) { var a = admLoad(); a.inbox.unshift({ id: "fb-" + Date.now(), kind: kind, where: where, what: what, note: note || "", at: Date.now(), done: false }); admSave(a); },
+    markDone: function (id) { var a = admLoad(); a.inbox.forEach(function (x) { if (x.id === id) x.done = true; }); admSave(a); },
+    inbox: function () { return admLoad().inbox; },
+    audit: function () { return admLoad().audit; }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -250,7 +270,7 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB,
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

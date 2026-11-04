@@ -110,7 +110,7 @@ class Component extends DCLogic {
   row(a) { const L = this.L(); return { href: 'UPArticle.dc.html?a=' + a.slug, title: a.title, def: a.definition, meta: L.topicOf(a).name + ' \u00b7 ' + L.minutes(a) + ' min read' }; }
   constructor(p) { super(p); this.state = { q: '' }; }
   renderVals() {
-    const L = this.L(), fb = (this.props.feedback || 'on') === 'on'; if (!L) return { feedbackOn: fb };
+    const L = this.L(), fb = (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('suggest')); if (!L) return { feedbackOn: fb };
     const w = L.wordOfDay(), v = { feedbackOn: fb, q: this.state.q, wHref: 'UPArticle.dc.html?a=' + w.slug, wTitle: w.title, wDef: w.definition,
       onQ: (e) => this.setState({ q: e.target.value }), onKey: (e) => { if (e.key === 'Enter' && this.state.q.trim()) location.href = 'UPSearch.dc.html?q=' + encodeURIComponent(this.state.q.trim()); } };
     const reading = L.reading().slice(0, 2).map((x) => ({ href: 'UPArticle.dc.html?a=' + x.a.slug, title: x.a.title, meta: L.topicOf(x.a).name + ' \u00b7 ' + L.minutes(x.a) + ' min', pct: String(x.pct) }));

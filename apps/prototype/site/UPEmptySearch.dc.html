@@ -85,7 +85,7 @@ class Component extends DCLogic {
   constructor(p) { super(p); const m = /[?&]q=([^&]*)/.exec(location.search); this.q0 = m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : ''; this.state = { q: this.q0 }; }
   L() { return window.FV && window.FV.LIB; }
   renderVals() {
-    const L = this.L(), fb = (this.props.feedback || 'on') === 'on'; if (!L) return { feedbackOn: fb };
+    const L = this.L(), fb = (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('suggest')); if (!L) return { feedbackOn: fb };
     const dym = this.q0 ? L.search(this.q0).didYouMean : null;
     return { feedbackOn: fb, q: this.state.q, q0: this.q0, dym: dym || '', hasDym: !!dym, dymHref: 'UPSearch.dc.html?q=' + encodeURIComponent(dym || ''),
       hint: 'Check the spelling, or try a shorter word.' + (dym ? ' Did you mean ' + dym + '?' : ''),

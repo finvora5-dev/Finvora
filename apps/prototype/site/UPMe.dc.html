@@ -86,7 +86,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"feedback":{"editor":"enum","options":["on","off"],"default":"on"},"$preview":{"width":390,"height":1040}}'>
 class Component extends DCLogic {
-  renderVals() { return { feedbackOn: (this.props.feedback || 'on') === 'on' }; }
+  renderVals() { return { feedbackOn: (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('suggest')) }; }
 }
 </script>
 </body>

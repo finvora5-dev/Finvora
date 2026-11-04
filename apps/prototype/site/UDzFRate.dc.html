@@ -95,7 +95,7 @@ h2{margin:0;font-weight:800;letter-spacing:-0.02em}
         <div class="pop"><div style="width: 96px; height: 96px; flex: none"><dc-import name="GKobo" mood="proud" size="96" hint-size="96px,96px"></dc-import></div></div>
         <h2 id="sh-t" style="font-size: 22px">Thank you!</h2>
         <p class="muted" style="margin: 0; max-width: 290px">Your rating helps us make lessons clearer for everyone.</p>
-        <a href="UDJourney.dc.html" class="btn" style="margin-top: 6px">Done</a>
+        <a href="UPJourney.dc.html" class="btn" style="margin-top: 6px">Done</a>
       </div>
     </sc-if>
   </section>
@@ -112,7 +112,7 @@ class Component extends DCLogic {
       stars: [1,2,3,4,5].map(n => ({ label: n + ' star' + (n > 1 ? 's' : ''), checked: s.r === n ? 'true' : 'false', fill: n <= s.r ? '#FBBF24' : '#FFFFFF', stroke: n <= s.r ? '#F59E0B' : '#D3CDE0', cls: n === s.r ? 'pop' : '', tap: () => this.setState({ r: n }) })),
       ratingText: words[s.r] || 'Tap a star',
       tags: T.map((t, i) => { const on = s.tags.includes(i); return { label: t, on: on ? 'true' : 'false', bg: on ? '#F1EBFB' : '#FFFFFF', border: on ? '#5B21B6' : '#E7E2F0', fg: on ? '#4C1D95' : '#0E0B14', tap: () => this.setState({ tags: on ? s.tags.filter(x => x !== i) : s.tags.concat([i]) }) }; }),
-      sendOff: !s.r, sendCls: s.r ? 'btn' : 'btn btn-off', send: () => { if (s.r) this.setState({ sent: true }); }
+      sendOff: !s.r, sendCls: s.r ? 'btn' : 'btn btn-off', send: () => { if (s.r) { if (window.FV && window.FV.ADMIN) window.FV.ADMIN.submit('Rate ' + s.r + '\u2605', 'Lesson', (s.tags || []).map((i) => T[i]).join(', ') || words[s.r]); this.setState({ sent: true }); } }
     };
   }
 }

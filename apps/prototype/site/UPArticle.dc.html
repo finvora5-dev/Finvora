@@ -171,7 +171,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { if (this.onScroll) window.removeEventListener('scroll', this.onScroll); }
   renderVals() {
-    const L = this.L(), fb = (this.props.feedback || 'on') === 'on'; if (!L) return { feedbackOn: fb };
+    const L = this.L(), fb = (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('report')); if (!L) return { feedbackOn: fb };
     const a = L.current(), div = a.slug === 'dividend', saved = L.isSaved(a.slug);
     const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
     return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,

@@ -73,7 +73,7 @@ class Component extends DCLogic {
     return {
       form: !s.sent, sent: s.sent, typed: s.pick !== null ? P[s.pick] : '',
       pop: P.map((t, i) => { const on = s.pick === i; return { label: t, on: on ? 'true' : 'false', bg: on ? '#F1EBFB' : '#FFFFFF', border: on ? '#5B21B6' : '#E7E2F0', fg: on ? '#4C1D95' : '#0E0B14', tap: () => this.setState({ pick: on ? null : i }) }; }),
-      send: () => this.setState({ sent: true })
+      send: () => { if (window.FV && window.FV.ADMIN) window.FV.ADMIN.submit('Suggest', 'Library', P[s.pick] || 'A topic'); this.setState({ sent: true }); }
     };
   }
 }

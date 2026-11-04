@@ -74,7 +74,7 @@ class Component extends DCLogic {
     return {
       form: !s.sent, sent: s.sent,
       reasons: R.map((r, i) => { const on = s.pick === i; return { label: r[0], icon: r[1], on: on ? 'true' : 'false', border: on ? '#5B21B6' : '#E7E2F0', bg: on ? '#F8F6FC' : '#FFFFFF', ink: on ? '#5B21B6' : '#8E879A', dot: on ? '#5B21B6' : 'transparent', tap: () => this.setState({ pick: i }) }; }),
-      sendOff: s.pick === null, sendCls: s.pick === null ? 'btn btn-off' : 'btn', send: () => { if (s.pick !== null) this.setState({ sent: true }); }
+      sendOff: s.pick === null, sendCls: s.pick === null ? 'btn btn-off' : 'btn', send: () => { if (s.pick !== null) { if (window.FV && window.FV.ADMIN) window.FV.ADMIN.submit('Report', window.FV.LIB ? window.FV.LIB.current().title : 'Article', R[s.pick][0]); this.setState({ sent: true }); } }
     };
   }
 }

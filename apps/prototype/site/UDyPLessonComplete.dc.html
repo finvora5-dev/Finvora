@@ -232,7 +232,7 @@ class Component extends DCLogic {
   renderVals() {
     const open = this.state.showReview;
     return {
-      feedbackOn: (this.props.feedback || 'on') === 'on',
+      feedbackOn: (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.showRate()),
       xp: this.state.xp,
       streak: String(this.state.streak),
       dayWord: this.state.streak === 1 ? 'day' : 'days',

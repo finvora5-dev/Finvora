@@ -17,12 +17,14 @@ if '{{tag}}</span><strong style="font-size: 44px' not in s:
     a = s.index('<a href="UPSaved.dc.html" class="btn"'); b = s.index('</a>', a) + 4
     inner = s[s.index('>', a) + 1:b - 4].replace('Save', '{{saveLabel}}')
     s = s[:a] + '<button type="button" onClick="{{save}}" aria-pressed="{{saved}}" class="btn" style="width: auto; padding: 0 20px; background: #FFFFFF; color: #4C1D95; box-shadow: 0 3px 0 #C4B5FD; border: 0; cursor: pointer; font: inherit; font-weight: 700">' + inner + '</button>' + s[b:]
+    a = s.index('<a href="UFReport.dc.html" class="btn"'); b = s.index('</a>', a) + 4
+    s = s[:a] + '<sc-if value="{{feedbackOn}}" hint-placeholder-val="{{true}}">' + s[a:b] + '</sc-if>' + s[b:]
     s = sub1(s, "saveFill: saved ? '#FFFFFF' : 'none',", "saveFill: saved ? '#FFFFFF' : 'none', saveLabel: saved ? 'Saved' : 'Save',")
     wr('UDArticle', s)
 
 # Main desktop Library page.
 s = rd('UDLibrary')
-if 'window.FV && window.FV.LIB' not in s:
+if '{{wTitle}}' not in s:
     k = s.rindex('<a href="UPArticle.dc.html" class="press"', 0, s.index('>Word of the day<'))
     s = s[:k] + '<a href="{{wHref}}" class="press"' + s[k + len('<a href="UPArticle.dc.html" class="press"'):]
     s = sub1(s, 'margin: 8px 0">Dividend</strong><span style="font-size: 18px; color: #D9D3E3">Part of a company\'s profit paid to its shareholders.</span>', 'margin: 8px 0">{{wTitle}}</strong><span style="font-size: 18px; color: #D9D3E3">{{wDef}}</span>')

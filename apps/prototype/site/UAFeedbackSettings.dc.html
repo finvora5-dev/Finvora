@@ -94,10 +94,10 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { on: { rate: true, report: true, suggest: true, review: true }, sel: 'rate', n: 3, log: [
+  constructor(p) { super(p); const A = window.FV && window.FV.ADMIN, st = A ? A.settings() : null; this.state = { on: st ? Object.assign({}, st.on) : { rate: true, report: true, suggest: true, review: true }, sel: 'rate', n: st ? st.n : 3, log: (A ? A.audit().filter((x) => x.area === 'Feedback settings').map((x) => ({ when: x.when, who: x.who, what: x.what })) : []).concat([
     { when: '28 Oct, 14:02', who: 'Tobi O.', what: 'Rating prompt set to 1 in 3' },
     { when: '21 Oct, 09:40', who: 'Amaka E.', what: 'App store review turned on' },
-    { when: '14 Oct, 16:15', who: 'Tobi O.', what: 'Suggest a topic added to Me' }] }; }
+    { when: '14 Oct, 16:15', who: 'Tobi O.', what: 'Suggest a topic added to Me' }]) }; }
   renderVals() {
     const s = this.state; const P = [["rate", "Rate this lesson", "After a micro module is finished", "Lesson complete", "FRate"], ["report", "Report a mistake", "Flag in article header and footer link", "Article", "FReport"], ["suggest", "Suggest a topic", "Library card, Me row, empty search", "Library, Me, Search", "FSuggest"], ["review", "App store review", "After passing a Boss challenge", "Boss result", "FReview"]];
     const stamp = 'Just now';
@@ -106,9 +106,9 @@ class Component extends DCLogic {
       rows: P.map(p => { const on = s.on[p[0]]; return { title: p[1], where: p[2], label: p[1] + ' prompt', on: on ? 'true' : 'false', sel: s.sel === p[0] ? 'true' : 'false', bg: s.sel === p[0] ? '#F8F6FC' : '#FFFFFF',
         state: on ? 'On' : 'Off', tagBg: on ? '#E1F7EA' : '#F5F3F8', tagFg: on ? '#0F6B39' : '#38323F', swBg: on ? '#5B21B6' : '#D3CDE0', swJ: on ? 'flex-end' : 'flex-start',
         pick: () => this.setState({ sel: p[0] }),
-        toggle: () => this.setState({ sel: p[0], on: Object.assign({}, s.on, { [p[0]]: !on }), log: [{ when: stamp, who: 'Tobi O.', what: p[1] + ' turned ' + (on ? 'off' : 'on') }].concat(s.log) }) }; }),
+        toggle: () => { if (window.FV && window.FV.ADMIN) { window.FV.ADMIN.set(p[0], !on); window.FV.ADMIN.log('Feedback settings', p[1] + ' turned ' + (on ? 'off' : 'on')); } this.setState({ sel: p[0], on: Object.assign({}, s.on, { [p[0]]: !on }), log: [{ when: stamp, who: 'You (admin)', what: p[1] + ' turned ' + (on ? 'off' : 'on') }].concat(s.log) }); } }; }),
       ns: [2, 3, 5, 10].map(n => { const on = s.n === n; return { label: String(n), on: on ? 'true' : 'false', bg: on ? '#5B21B6' : '#FFFFFF', fg: on ? '#FFFFFF' : '#0E0B14', bd: on ? '#5B21B6' : '#E7E2F0',
-        tap: () => on ? null : this.setState({ n: n, log: [{ when: stamp, who: 'Tobi O.', what: 'Rating prompt set to 1 in ' + n }].concat(s.log) }) }; }),
+        tap: () => { if (on) return; if (window.FV && window.FV.ADMIN) { window.FV.ADMIN.setN(n); window.FV.ADMIN.log('Feedback settings', 'Rating prompt set to 1 in ' + n); } this.setState({ n: n, log: [{ when: stamp, who: 'You (admin)', what: 'Rating prompt set to 1 in ' + n }].concat(s.log) }); } }; }),
       log: s.log.slice(0, 5),
       pTitle: cur[1], pScreen: cur[3], pOn: s.on[s.sel], pOff: !s.on[s.sel], pState: s.on[s.sel] ? 'On' : 'Off',
       pTagBg: s.on[s.sel] ? '#E1F7EA' : '#F5F3F8', pTagFg: s.on[s.sel] ? '#0F6B39' : '#38323F',
