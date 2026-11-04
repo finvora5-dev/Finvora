@@ -69,13 +69,18 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <div class="root" style="width: 390px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
   <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; isolation: isolate; z-index: 0; overflow: hidden"><dc-import name="USYourPlan" hint-size="390px,900px"></dc-import></div>
   <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: rgba(12,20,40,.5)"></div>
-  <section role="alertdialog" aria-modal="true" aria-labelledby="m-t" style="position: absolute; z-index: 2; left: 20px; right: 20px; top: 50%; transform: translateY(-50%); background: #FFFFFF; border-radius: 24px; padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.25)"><div style="align-self: center"><div style="width: 88px; height: 88px; flex: none"><dc-import name="GKobo" mood="confused" size="88" hint-size="88px,88px"></dc-import></div></div><h2 id="m-t" style="font-size: 21px">Cancel Finvora Plus?</h2><p class="muted" style="margin: 0">Plus stays on until 2 Dec 2026. After that you go back to Free and keep all your progress.</p>
-<a href="USYourPlan.dc.html" class="btn">Keep Plus</a><a href="UMToasts.dc.html" class="btn btn-w" style="color: #B42828">Cancel at end of period</a></section>
+  <section role="alertdialog" aria-modal="true" aria-labelledby="m-t" style="position: absolute; z-index: 2; left: 20px; right: 20px; top: 50%; transform: translateY(-50%); background: #FFFFFF; border-radius: 24px; padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.25)"><div style="align-self: center"><div style="width: 88px; height: 88px; flex: none"><dc-import name="GKobo" mood="confused" size="88" hint-size="88px,88px"></dc-import></div></div><h2 id="m-t" style="font-size: 21px">Cancel Finvora Plus?</h2><p class="muted" style="margin: 0">Plus stays on until {{until}}. After that you go back to Free and keep all your progress.</p>
+<a href="USYourPlan.dc.html" class="btn">Keep Plus</a><button type="button" onClick="{{cancel}}" class="btn btn-w" style="width: 100%; cursor: pointer; font: inherit; font-weight: 700; color: #B42828">Cancel at end of period</button></section>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  P() { return window.FV && window.FV.PAY; }
+  renderVals() {
+    const Pay = this.P(); if (!Pay) return {};
+    const sub = window.FV.billing().sub;
+    return { until: sub.renewsOn ? Pay.date(sub.renewsOn) : 'the end of the period', cancel: () => { Pay.cancel(); location.href = 'USYourPlan.dc.html'; } };
+  }
 }
 </script>
 </body>

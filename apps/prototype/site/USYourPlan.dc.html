@@ -67,19 +67,18 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
   <main style="padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 14px">
     <section style="background: #5B21B6; color: #FFFFFF; border-radius: 22px; padding: 20px; box-shadow: 0 4px 0 #3B0F7A; display: flex; flex-direction: column; gap: 6px">
       <span style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #EDE9FE">Current plan</span>
-      <strong style="font-size: 26px">Finvora Plus</strong><span class="num" style="color: #EDE9FE">₦1,500 a month · renews 2 Dec 2026</span></section>
+      <strong style="font-size: 26px">Finvora Plus</strong><span class="num" style="color: #EDE9FE">{{headline}}</span></section>
     <div class="card" style="overflow: hidden">
-      <div class="li"><span style="flex: 1">Payment method</span><span class="muted">Card ending 4081</span></div>
-      <div class="li"><span style="flex: 1">Billing period</span><span class="muted">Monthly</span></div>
-      <a href="USPlans.dc.html" class="li press"><span style="flex: 1; font-weight: 700">Switch to yearly</span><span class="tag" style="background: #DCFAE6; color: #0F6B39">Save ₦3,000</span></a>
+      <div class="li"><span style="flex: 1">Payment method</span><span class="muted">Paystack</span></div>
+      <div class="li"><span style="flex: 1">Billing period</span><span class="muted">{{period}}</span></div>
+      <sc-if value="{{monthly}}" hint-placeholder-val="{{true}}"><a href="USPlans.dc.html?p=yearly" class="li press"><span style="flex: 1; font-weight: 700">Switch to yearly</span><span class="tag" style="background: #DCFAE6; color: #0F6B39">Save {{save}}</span></a></sc-if>
     </div>
     <div class="card" style="overflow: hidden">
       <div style="padding: 14px 16px 6px"><h2 style="font-size: 16px">Payments</h2></div>
-      <div class="li"><span style="flex: 1">2 Nov 2026</span><span class="num" style="font-weight: 700">₦1,500</span><span class="tag" style="background: #DCFAE6; color: #0F6B39">Paid</span></div>
-      <div class="li"><span style="flex: 1">2 Oct 2026</span><span class="num" style="font-weight: 700">₦1,500</span><span class="tag" style="background: #DCFAE6; color: #0F6B39">Paid</span></div>
+      <sc-for list="{{pays}}" as="x" hint-placeholder-count="1"><div class="li"><span style="flex: 1">{{x.day}}</span><span class="num" style="font-weight: 700">{{x.amt}}</span><span class="tag" style="background: #DCFAE6; color: #0F6B39">Paid</span></div></sc-for>
     </div>
-    <a href="UMCancelPlan.dc.html" class="btn btn-w" style="color: #B42828">Cancel Plus</a>
-    <p class="muted" style="margin: 0; font-size: 13px; text-align: center">If you cancel, Plus stays on until 2 Dec 2026. Your progress is kept.</p>
+    <sc-if value="{{active}}" hint-placeholder-val="{{true}}"><a href="UMCancelPlan.dc.html" class="btn btn-w" style="color: #B42828">Cancel Plus</a></sc-if><sc-if value="{{cancelled}}" hint-placeholder-val="{{false}}"><button type="button" class="btn" onClick="{{resume}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Keep Plus</button></sc-if>
+    <p class="muted" style="margin: 0; font-size: 13px; text-align: center">{{note}}</p>
   </main>
   <div style="margin-top: auto"><nav aria-label="Main" style="position: sticky; bottom: 0; z-index: 10; width: 390px; box-sizing: border-box; padding: 8px 12px 16px; background: linear-gradient(rgba(255,255,255,0), #FFFFFF 40%)">
   <div style="height: 64px; border-radius: 22px; background: #FFFFFF; border: 1px solid #E7E2F0; box-shadow: 0 8px 24px rgba(16,30,70,.12); display: flex; align-items: center; justify-content: space-around; padding: 0 4px">
@@ -94,7 +93,19 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  P() { return window.FV && window.FV.PAY; }
+  constructor(p) { super(p); this.state = { n: 0 }; }
+  componentDidMount() { if (window.FV && window.FV.plan() !== 'plus' && /USYourPlan|UDxSYourPlan/.test(location.pathname)) location.replace('USPlans.dc.html'); }
+  renderVals() {
+    const Pay = this.P(); if (!Pay) return {};
+    const b = window.FV.billing(), sub = b.sub, per = sub.period || 'monthly', naira = window.FV.SIM.naira, until = sub.renewsOn ? Pay.date(sub.renewsOn) : '';
+    const pays = b.orders.filter((o) => o.status === 'confirmedSuccess').map((o) => ({ day: Pay.date(o.updatedAt.slice(0, 10)), amt: naira(o.amountKobo) }));
+    return { headline: naira(Pay.PRICE[per]) + (per === 'yearly' ? ' a year' : ' a month') + (sub.cancelled ? ' \u00b7 ends ' : ' \u00b7 renews ') + until,
+      period: per === 'yearly' ? 'Yearly' : 'Monthly', monthly: per === 'monthly' && !sub.cancelled, save: naira(Pay.PRICE.monthly * 12 - Pay.PRICE.yearly), pays,
+      active: !sub.cancelled, cancelled: !!sub.cancelled,
+      note: sub.cancelled ? 'Plus is cancelled. It stays on until ' + until + ', then you go back to Free. Your progress is kept.' : 'If you cancel, Plus stays on until ' + until + '. Your progress is kept.',
+      resume: () => { Pay.resume(); this.setState({ n: this.state.n + 1 }); } };
+  }
 }
 </script>
 </body>

@@ -118,6 +118,46 @@
     },
     clear: function () { var a = askLoad(); a.msgs = []; askSave(a); }
   };
+
+  // ---- Simulated checkout (build-backlog B5). No card details, no real payment. Order rules come
+  // from packages/domain: one order per purchase, retries reuse it, only our "server check" decides.
+  // Reviewers can pick the next check result by opening a plan page with ?outcome=failed|slow|offline.
+  var PRICE = { monthly: 150000, yearly: 1500000 }; // the designs' figures; the client hasn't set prices yet
+  var PAY = {
+    PRICE: PRICE,
+    order: function (id) { return billLoad().orders.filter(function (o) { return o.id === id; })[0] || null; },
+    orderNo: function (o) { return o ? "FV-" + o.id.slice(-5).toUpperCase() : ""; },
+    current: function () { var m = /[?&]o=([\w-]+)/.exec(location.search); return m ? PAY.order(m[1]) : null; },
+    remember: function () { var m = /[?&]outcome=(success|failed|slow|offline)/.exec(location.search); if (m) try { localStorage.setItem("fv.checkout.next", m[1]); } catch (e) {} },
+    /** Starts a purchase, or returns what already exists (Plus, or an order still being checked). */
+    start: function (period) {
+      var b = billLoad(), can = D().canStartPurchase(b.sub, b.orders);
+      if (!can.ok) return can;
+      var o = D().createOrder("ord-" + Date.now().toString(36), period, PRICE[period], new Date().toISOString());
+      b.orders = [o].concat(b.orders); billSave(b); return { ok: true, orderId: o.id };
+    },
+    /** Our server's check with the payment provider (simulated). Returns the order after the check. */
+    check: function (id, slowAlready) {
+      var next = "success"; try { next = localStorage.getItem("fv.checkout.next") || "success"; } catch (e) {}
+      var result = next === "slow" ? (slowAlready ? "success" : "pending") : next;
+      if (next !== "slow" || slowAlready) try { localStorage.removeItem("fv.checkout.next"); } catch (e) {}
+      var b = billLoad(), o = b.orders.filter(function (x) { return x.id === id; })[0]; if (!o) return null;
+      if (result === "offline") return { order: o, offline: true };
+      var n = D().applyCheck(o, result, new Date().toISOString());
+      if (n.status === "confirmedSuccess" && o.status !== "confirmedSuccess") b.sub = { plan: "plus", period: o.period, renewsOn: D().addPeriod(lagosDay(), o.period) };
+      b.orders = b.orders.map(function (x) { return x.id === id ? n : x; }); billSave(b);
+      return { order: n, offline: false };
+    },
+    retry: function (id) {
+      var b = billLoad(), o = b.orders.filter(function (x) { return x.id === id; })[0];
+      if (!o || o.status !== "confirmedFailed") return o;
+      var n = D().retry(o, new Date().toISOString()); b.orders = b.orders.map(function (x) { return x.id === id ? n : x; }); billSave(b); return n;
+    },
+    cancel: function () { var b = billLoad(); b.sub.cancelled = true; billSave(b); },
+    resume: function () { var b = billLoad(); b.sub.cancelled = false; billSave(b); },
+    renewsOn: function (period) { return D().addPeriod(lagosDay(), period); },
+    date: function (day) { return new Date(day + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  };
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -147,7 +187,7 @@
       var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       save(s); return passed;
     },
-    SIM: SIM, ASK: ASK,
+    SIM: SIM, ASK: ASK, PAY: PAY,
     plan: plan, billing: billLoad, saveBilling: billSave,
     reset: function () { save(fresh()); }
   };

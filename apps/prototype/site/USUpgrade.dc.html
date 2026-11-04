@@ -69,20 +69,34 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <span aria-hidden="true" style="width: 40px; height: 5px; border-radius: 999px; background: #E7E2F0; align-self: center"></span>
     <h2 id="up-t" style="font-size: 21px">Confirm your plan</h2>
     <div style="border: 1.5px solid #E7E2F0; border-radius: 16px; overflow: hidden">
-      <div style="display: flex; justify-content: space-between; padding: 14px 16px"><span>Finvora Plus, monthly</span><strong class="num">₦1,500</strong></div>
-      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-top: 1px solid #E7E2F0"><span class="muted">Renews</span><span>2 Dec 2026</span></div>
-      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-top: 1px solid #E7E2F0; background: #F8F6FC"><strong>Due today</strong><strong class="num">₦1,500</strong></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px"><span>Finvora Plus, {{period}}</span><strong class="num">{{price}}</strong></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-top: 1px solid #E7E2F0"><span class="muted">Renews</span><span>{{renews}}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-top: 1px solid #E7E2F0; background: #F8F6FC"><strong>Due today</strong><strong class="num">{{price}}</strong></div>
     </div>
     <p class="muted" style="margin: 0; font-size: 13px">You pay securely with Paystack by card, bank transfer or USSD. You can cancel any time; Plus stays on until the end of the period.</p>
-    <a href="USCheckPending.dc.html" class="btn">Pay ₦1,500</a>
-    <a href="USPlans.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; margin-top: -6px">Not now</a>
+    <button type="button" class="btn" onClick="{{pay}}" aria-disabled="{{busy}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Pay {{price}}</button>
+    <a href="{{backHref}}" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; text-decoration: none; margin-top: -6px">Not now</a>
   </section>
   
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  P() { return window.FV && window.FV.PAY; }
+  constructor(p) { super(p); this.state = { busy: false }; }
+  componentDidMount() { if (this.P()) this.P().remember(); }
+  renderVals() {
+    const Pay = this.P(); if (!Pay) return {};
+    const per = /[?&]p=yearly/.test(location.search) ? 'yearly' : 'monthly', naira = window.FV.SIM.naira;
+    return { period: per, price: naira(Pay.PRICE[per]), renews: Pay.date(Pay.renewsOn(per)), busy: String(this.state.busy), backHref: 'USPlans.dc.html?p=' + per,
+      pay: () => {
+        if (this.state.busy) return; this.setState({ busy: true });
+        const r = Pay.start(per);
+        if (r.ok) location.href = 'USCheckPending.dc.html?o=' + r.orderId;
+        else if (r.reason === 'pending') location.href = 'USCheckPending.dc.html?o=' + r.orderId;
+        else location.href = 'USCheckAlready.dc.html';
+      } };
+  }
 }
 </script>
 </body>
