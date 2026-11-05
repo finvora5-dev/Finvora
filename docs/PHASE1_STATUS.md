@@ -222,5 +222,6 @@ Also Phase 2 (raised 4 Nov 2026 while reviewing the prototype):
 - real Paystack payments confirmed by our server;
 - reminders and notifications that actually send;
 - analytics, error monitoring and admin roles with a real staff sign-in.
+- **RAG-based Ask Fin:** requirements and the Phase 1 status check are in [phase2-ai-rag.md](phase2-ai-rag.md).
 
 The `FinvoraApi` boundary and `packages/domain` are where those plug in.
