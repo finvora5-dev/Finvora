@@ -28,6 +28,5 @@ These don't block Phase 1. The related build rules stay in `build-backlog.md` (B
 | Which 30–50 companies, metrics and reports at launch | Client | PRD §9 |
 | VAT on Premium and receipts | Client's accountant | B10 |
 | Operating company and insurance | Client | Pre-launch checklist |
-| Learn content: approve the paths, the ten-lesson pilot and who reviews lessons (subject expert) | Client | [phase2-learn-content-brief.md](phase2-learn-content-brief.md) |
 | SEC Nigeria "education, not advice"; NDPA duties; retention periods | Lawyer | Pre-launch checklist |
 | Analytics tool and consent | Client + developer | B10 |

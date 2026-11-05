@@ -222,6 +222,5 @@ Also Phase 2 (raised 4 Nov 2026 while reviewing the prototype):
 - real Paystack payments confirmed by our server;
 - reminders and notifications that actually send;
 - analytics, error monitoring and admin roles with a real staff sign-in.
-- **Learn content quality:** structured learning paths, a ten-lesson researched pilot, source references and an expert review process. Full brief, with corrections to its assumptions, in [phase2-learn-content-brief.md](phase2-learn-content-brief.md).
 
 The `FinvoraApi` boundary and `packages/domain` are where those plug in.
