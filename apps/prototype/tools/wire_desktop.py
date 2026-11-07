@@ -90,3 +90,11 @@ if '{{planLine}}' not in s:
         challengeLine: FV.LOOP.challenge('inflation') ? 'All done' : '1 new', savedLine: saved ? saved + (saved === 1 ? ' article' : ' articles') : 'Nothing saved yet', notifLine: notes ? notes + ' new' : 'All caught up' }); }""" + s[m.start():]
     wr('UDMe', s)
 print('desktop me wired')
+
+# Desktop article breadcrumb: the article you're reading.
+s = rd('UDArticle')
+if '{{crumbHref}}' not in s:
+    s = sub1(s, '<a href="UPTopic.dc.html" style="color: #4C1D95; font-weight: 700; text-decoration: none">Investing</a> / Dividend</nav>', '<a href="{{crumbHref}}" style="color: #4C1D95; font-weight: 700; text-decoration: none">{{tag}}</a> / {{title}}</nav>')
+    s = sub1(s, "    return { ...deepVals, deepOn: !!dp,", "    return { crumbHref: 'UPTopic.dc.html?t=' + encodeURIComponent(L.topicOf(a).name), ...deepVals, deepOn: !!dp,")
+    wr('UDArticle', s)
+print('desktop article breadcrumb wired')

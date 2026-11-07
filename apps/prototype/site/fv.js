@@ -230,7 +230,7 @@
     article: function (slug) { return arts().filter(function (a) { return a.slug === slug; })[0] || null; },
     /** The article the page is about: ?a=slug in the address, else Dividend (the designed example). */
     current: function () { var m = /[?&]a=([\w-]+)/.exec(location.search); return LIB.article(m ? m[1] : "dividend") || LIB.article("dividend"); },
-    minutes: function (a) { var w = [a.definition, a.example, a.whyItMatters].concat(a.explanation, a.misconceptions || []).join(" ").split(/\s+/).length; return Math.max(1, Math.round(w / 60)); },
+    minutes: function (a) { var w = [a.definition, a.example, a.whyItMatters, a.deep ? JSON.stringify(a.deep).replace(/["{}\[\],:]/g, " ") : ""].concat(a.explanation, a.misconceptions || []).join(" ").split(/\s+/).length; return Math.max(1, Math.round(w / 120)); },
     topicOf: function (a) { return TOPICS.filter(function (t) { return t.cats.indexOf(a.category) >= 0; })[0] || TOPICS[0]; },
     inTopic: function (name) { var t = TOPICS.filter(function (x) { return x.name === name; })[0] || TOPICS[1]; return { topic: t, items: arts().filter(function (a) { return t.cats.indexOf(a.category) >= 0; }) }; },
     wordOfDay: function () { var n = Math.floor((Date.now() + 3600000) / 86400000); return arts()[n % arts().length]; },

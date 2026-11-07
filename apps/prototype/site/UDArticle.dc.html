@@ -129,7 +129,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
   <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
     <header style="padding: 28px 40px 0; display: flex; align-items: center; gap: 12px">
       <a href="UDLibrary.dc.html" class="card press" aria-label="Back to Library" style="width: 52px; height: 52px; flex: none; display: flex; align-items: center; justify-content: center; box-shadow: none"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="#0E0B14" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
-      <nav aria-label="Breadcrumb" style="flex: 1; min-width: 0; font-size: 15px; color: #615A6E"><a href="UDLibrary.dc.html" style="color: #4C1D95; font-weight: 700; text-decoration: none">Library</a> / <a href="UPTopic.dc.html" style="color: #4C1D95; font-weight: 700; text-decoration: none">Investing</a> / Dividend</nav>
+      <nav aria-label="Breadcrumb" style="flex: 1; min-width: 0; font-size: 15px; color: #615A6E"><a href="UDLibrary.dc.html" style="color: #4C1D95; font-weight: 700; text-decoration: none">Library</a> / <a href="{{crumbHref}}" style="color: #4C1D95; font-weight: 700; text-decoration: none">{{tag}}</a> / {{title}}</nav>
       <a href="UPProgress.dc.html" class="dstat press" style="height: 52px" aria-label="Streak" data-fv-label="streak"><svg class="a-flicker" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="fireJourney" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9A3C"></stop><stop offset="0.6" stop-color="#FF5A1F"></stop><stop offset="1" stop-color="#E8361C"></stop></linearGradient></defs><path d="M12.5 1.5c1 4.5 6.8 6.3 6.8 12.6a7.3 7.3 0 0 1-14.6 0c0-3.6 1.9-5.5 3.1-7.8.4 2.3 1.5 3.6 2.7 4.2C12.4 7.8 13.2 4.8 12.5 1.5z" fill="url(#fireJourney)"></path><path d="M12 12.6c1.7 1.5 3.2 2.6 3.2 4.7a3.2 3.2 0 0 1-6.4 0c0-1.7 1.3-2.8 3.2-4.7z" fill="#FFC27A"></path></svg><span data-fv="streak">5</span></a>
       <a href="UPProgress.dc.html" class="dstat press" style="height: 52px" aria-label="XP" data-fv-label="xp"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2L4.5 13.6h6.3L9.6 22l10-12.4h-6.4z" fill="#5B21B6" stroke="#3B0F7A" stroke-width="1.4" stroke-linejoin="round"></path></svg><span data-fv="xp">160</span></a>
       <a href="UPSearch.dc.html" class="card press" style="height: 52px; width: 260px; display: flex; align-items: center; gap: 10px; padding: 0 16px; text-decoration: none; color: #615A6E; box-shadow: none; white-space: nowrap; overflow: hidden"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4" fill="none" stroke="#615A6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Search</a>
@@ -140,7 +140,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
         <span style="display: flex; gap: 10px; position: relative"><button type="button" onClick="{{save}}" aria-pressed="{{saved}}" class="btn" style="width: auto; padding: 0 20px; background: #FFFFFF; color: #4C1D95; box-shadow: 0 3px 0 #C4B5FD; border: 0; cursor: pointer; font: inherit; font-weight: 700"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4z" fill="none" stroke="#4C1D95" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{saveLabel}}</button><sc-if value="{{feedbackOn}}" hint-placeholder-val="{{true}}"><a href="UFReport.dc.html" class="btn" style="width: auto; padding: 0 20px; background: rgba(255,255,255,.16); color: #FFFFFF; box-shadow: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4 M5 4h11l-2 4 2 4H5" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Report a mistake</a></sc-if></span>
       </section>
       <div style="width: 100%; display: flex; flex-direction: column; gap: 24px"><div style="display: flex; flex-direction: column; gap: 20px">
-    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if>
+    <sc-if value="{{isDiv}}" hint-placeholder-val="{{true}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">A <span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">dividend</span> is part of a company's profit that it pays to the people who own its shares.</p></sc-if><sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if><sc-if value="{{deepOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{lead0}}<span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">{{lead1}}</span>{{lead2}}</p></sc-if>
 
     <section aria-labelledby="kt" style="background: #F8F6FC; border: 2px solid #E7E2F0; border-radius: 18px; padding: 16px 16px 14px">
       <h2 id="kt" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #4C1D95; margin-bottom: 10px">Key takeaways</h2>
@@ -181,10 +181,37 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
         <span style="font-size: 13px; color: #DDD6FE">If one Adire Foods share costs ₦30</span>
       </div>
     </section></sc-if>
-    <sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">
+    <sc-if value="{{deepOn}}" hint-placeholder-val="{{false}}"><section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 22px">{{howTitle}}</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">{{howIntro}}</p>
+      <ol style="margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px"><sc-for list="{{howSteps}}" as="st" hint-placeholder-count="3"><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 16px; line-height: 1.55"><span style="width: 28px; height: 28px; flex: none; border-radius: 999px; background: #5B21B6; color: #FFFFFF; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center">{{st.n}}</span>{{st.t}}</li></sc-for></ol>
+    </section>
+    <section aria-labelledby="exd" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">
+      <div style="background: #FFF1EC; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between"><h2 id="exd" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #B42828">African example</h2><span style="font-size: 12px; font-weight: 700; color: #615A6E">Made-up figures</span></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+        <p style="margin: 0; font-size: 16px; line-height: 1.55">{{exLine}}</p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 15px"><sc-for list="{{exRows}}" as="r" hint-placeholder-count="3"><tr><td style="padding: 8px 0; color: #615A6E; border-bottom: 1px solid #F5F3F8">{{r.k}}</td><td class="num" style="padding: 8px 0; text-align: right; font-weight: 700; border-bottom: 1px solid #F5F3F8">{{r.v}}</td></tr></sc-for></table>
+        <span style="font-size: 13px; color: #615A6E">{{exNote}}</span>
+      </div>
+    </section>
+    <sc-if value="{{hasFormula}}" hint-placeholder-val="{{true}}"><section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 22px">{{fTitle}}</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">{{fIntro}}</p>
+      <div style="background: #0E0B14; color: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; text-align: center">
+        <span style="font-size: 15px; color: #DDD6FE">{{fRule}}</span>
+        <span class="num" style="font-size: 24px; font-weight: 800">{{fCalc}}</span>
+        <span style="font-size: 13px; color: #DDD6FE">{{fNote}}</span>
+      </div>
+    </section></sc-if>
+    <sc-if value="{{hasMistake}}" hint-placeholder-val="{{true}}"><section aria-labelledby="myth" style="background: #F8F6FC; border: 2px solid #E7E2F0; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+      <h2 id="myth" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #4C1D95">Common mistake</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.5; font-weight: 700">“{{mMyth}}”</p>
+      <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #1C1726">{{mFact}}</p>
+    </section></sc-if></sc-if>
+    <sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">
       <div style="background: #FFF1EC; padding: 12px 16px"><h2 id="ex" style="font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #B42828">Example</h2></div>
       <p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
-    </section>
+    </section></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}">
     <section style="display: flex; flex-direction: column; gap: 10px">
       <h2 style="font-size: 22px">Why it matters</h2>
       <p style="margin: 0; font-size: 17px; line-height: 1.7; color: #1C1726">{{why}}</p>
@@ -225,7 +252,11 @@ class Component extends DCLogic {
     const L = this.L(), fb = (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('report')); if (!L) return { feedbackOn: fb };
     const a = L.current(), div = a.slug === 'dividend', saved = L.isSaved(a.slug);
     const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
-    return { feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: a.explanation,
+    const dp = !div && a.deep, f = dp && a.deep.formula, m = dp && a.deep.mistake;
+    const deepVals = dp ? { lead0: a.deep.lead[0], lead1: a.deep.lead[1], lead2: a.deep.lead[2], howTitle: a.deep.how.title, howIntro: a.deep.how.intro, howSteps: a.deep.how.steps.map((t, i) => ({ n: String(i + 1), t })),
+      exLine: a.deep.example.line, exRows: a.deep.example.rows.map((r) => ({ k: r[0], v: r[1] })), exNote: a.deep.example.note, hasFormula: !!f, fTitle: f ? f.title : '', fIntro: f ? f.intro : '', fRule: f ? f.rule : '', fCalc: f ? f.calc : '', fNote: f ? f.note : '',
+      hasMistake: !!m, mMyth: m ? m.myth : '', mFact: m ? m.fact : '' } : {};
+    return { crumbHref: 'UPTopic.dc.html?t=' + encodeURIComponent(L.topicOf(a).name), ...deepVals, deepOn: !!dp, plainOn: !div && !dp, feedbackOn: fb, tag: L.topicOf(a).name, title: a.title, mins: String(L.minutes(a)), isDiv: div, notDiv: !div, definition: a.definition, points: dp ? a.deep.takeaways : a.explanation,
       example: a.example, why: a.whyItMatters, related, hasRelated: related.length > 0, saved: String(saved), saveFill: saved ? '#FFFFFF' : 'none', saveLabel: saved ? 'Saved' : 'Save',
       practiseHref: ({ dividend: 'UPLearnTerm', 'what-is-a-share': 'UPLearnSteps', 'saving-vs-investing': 'UPLearnCompare', 'stock-exchange': 'UPLearnMarket', 'risk-and-return': 'UPLearnMyth' }[a.slug] || 'UPJourney') + '.dc.html',
       save: () => { const on = L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); window.fvToast && window.fvToast(on ? 'Saved to your Library' : 'Removed from Saved', { action: 'Undo', onAction: () => { L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); } }); } };
