@@ -204,8 +204,8 @@ class Component extends DCLogic {
     const nxt = F && F.LESSONS && done < 6 ? F.LESSONS[done] : null, lib = F && F.LIB, slug = c ? c.article : 'compound-interest', art = lib && lib.article(slug);
     const D = { choice: { q: 'You save \u20a620,000 at 10% a year, compounded yearly. How much after 2 years?', right: '\u20a624,200', why: '\u20a624,000 is what simple interest gives: \u20a62,000 a year on the original \u20a620,000. With compounding, year 1 takes you to \u20a622,000, and year 2 earns 10% of \u20a622,000, which is \u20a62,200. So \u20a622,000 + \u20a62,200 = \u20a624,200.' },
       calc: { q: 'Rule of 72: roughly how many years does money take to double at 12% a year?', right: '6 years', why: 'Divide 72 by the yearly rate: 72 \u00f7 12 = 6 years.' } };
-    if (c) { const ro = c.opts[c.right]; D.choice = { q: c.q, right: ro[0], why: c.rightText }; D.calc = { q: c.calc, right: c.answer.toLocaleString('en-NG') + ' ' + c.unit, why: c.calcRight + ' ' + c.calcNote }; }
-    const ans = r ? r.answers : { choice: false, calc: true }, miss = ['choice', 'calc'].filter((k) => k in ans && !ans[k])[0] || 'choice', given = (r && r.given && r.given[miss]) || (L && !c ? '\u20a624,000' : '');
+    if (c) { const ro = c.opts[c.right]; D.choice = { q: c.q, right: ro[0], why: c.rightText }; if (c.order) D.order = { q: c.order.q, right: c.order.items.map((x) => x[0]).join(', '), why: c.order.right.join(' ') }; if (c.scenario) { const so = c.scenario.opts.find((o) => o.right); D.scenario = { q: c.scenario.q, right: so.name + ': ' + so.access, why: so.why }; } D.calc = { q: c.calc, right: c.answer.toLocaleString('en-NG') + ' ' + c.unit, why: c.calcRight + ' ' + c.calcNote }; }
+    const ans = r ? r.answers : { choice: false, calc: true }, keysAll = ['choice', 'order', 'scenario', 'calc'].filter((k) => k in ans), miss = keysAll.filter((k) => !ans[k])[0] || 'choice', given = (r && r.given && r.given[miss]) || (L && !c ? '\u20a624,000' : '');
     const WHY = c ? Object.fromEntries(c.opts.map((o) => [o[0], o[1]])) : { '\u20a622,000': '\u20a622,000 is the total after one year only. Year 2 adds another round of interest.', '\u20a640,000': '\u20a640,000 doubles the money. At 10% a year that takes about 7 years, not 2.' };
     if (miss === 'choice' && WHY[given]) D.choice.why = WHY[given] + ' ' + (c ? c.rightText : 'With compounding, year 2 earns 10% of \u20a622,000, so \u20a622,000 + \u20a62,200 = \u20a624,200.');
     const xpNow = st.xp || 0, lv = F ? F.level(xpNow) : 1, T = [0, 100, 250, 500, 900], nx = T[lv] || 900, pv = T[lv - 1] || 0;
@@ -215,7 +215,7 @@ class Component extends DCLogic {
     return { ...xpVals, lessonTitle: L ? L.title : 'Simple and compound interest', designed: !c, accPct: String(pct), accDash: (188.5 * pct / 100).toFixed(1), accText: right + ' of ' + total + ' right first try',
       learned: learned.map((t, i) => ({ n: String(i + 1), t })), doneN: String(done), segs: [0, 1, 2, 3, 4, 5].map((i) => (i < done ? '#5B21B6' : '#E7E2F0')),
       nextTitle: nxt ? nxt.title : 'The \u20a6100,000 plan', nextMeta: nxt ? 'Next lesson \u00b7 about ' + nxt.min + ' min' : 'Boss challenge \u00b7 pass with 4 of 5',
-      revN: miss === 'choice' ? '1' : '2', revOf: '2', revQ: D[miss].q, revGiven: given, revRight: D[miss].right, revWhy: D[miss].why,
+      revN: String(Math.max(1, keysAll.indexOf(miss) + 1)), revOf: String(Math.max(2, keysAll.length)), revQ: D[miss].q, revGiven: given, revRight: D[miss].right, revWhy: D[miss].why,
       readHref: 'UPArticle.dc.html?a=' + slug, readTitle: art ? art.title : 'Compound interest' };
   }
   renderVals() {

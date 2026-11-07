@@ -318,7 +318,21 @@
       calc: "A ₦2,000 meal goes up 15% in a year. What does it cost now, in naira?", unit: "naira", answer: 2300, hint: "15% of ₦2,000 is ₦300. Add it to the old price.",
       wrongs: { 300: "That's the increase. Add it to the old price of ₦2,000.", 1700: "It looks like you took the 15% away. Prices went up." },
       calcRight: "₦2,000 + 15% = ₦2,300.", calcNote: "Inflation is usually given as a yearly percentage.",
-      learned: ["Inflation means prices rise over time.", "It lowers what each naira can buy.", "Savings growing slower than inflation lose buying power."], article: "inflation"
+      learned: ["Inflation means prices rise over time.", "It lowers what each naira can buy.", "Savings growing slower than inflation lose buying power."], article: "inflation",
+      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      compare: { title: "Cash vs savings when prices rise", lead: "In a year when prices rise 20%, here is what happens to ₦100,000.",
+        a: { name: "Cash at home", items: ["Stays ₦100,000", "Buys about ₦83,333 of today's goods", "Loses about a sixth of its buying power", "Earns no interest"] },
+        b: { name: "Savings at 10% a year", items: ["Grows to ₦110,000", "Buys about ₦91,667 of today's goods", "Still loses some buying power", "Loses much less than cash"] },
+        tip: "To keep up, your money has to grow at least as fast as prices." },
+      order: { q: "Prices rise 20% this year. Start with ₦100,000. Order these from least to most buying power after one year.",
+        items: [["Keep it as cash", "No interest", "Buys ₦83,333"], ["Savings at 10% a year", "Grows to ₦110,000", "Buys ₦91,667"], ["Savings at 25% a year", "Grows to ₦125,000", "Buys ₦104,167"]], start: [0, 2, 1],
+        wrong: "Buying power depends on how fast your money grows compared with prices. Cash doesn't grow at all, so it buys the least. The faster it grows, the more it buys. Move the items and check again.",
+        right: ["Cash: buys ₦83,333 of today's goods (₦100,000 ÷ 1.2).", "10%: buys ₦91,667 (₦110,000 ÷ 1.2).", "25%: buys ₦104,167 (₦125,000 ÷ 1.2). It beat inflation."],
+        note: "Made-up rates. Assumes prices rise exactly 20% and ignores tax and fees.", ends: ["Least buying power", "Most buying power"] },
+      scenario: { q: "Where should Ada keep ₦50,000 for a year?", say: ["I have ", "₦50,000", ". Prices are rising about ", "15%", " a year."],
+        opts: [{ name: "Option A", rate: "0% a year", access: "Cash at home", why: "Cash at home earns nothing. After a year of 15% price rises, ₦50,000 buys only about ₦43,478 of today's goods." },
+               { name: "Option B", rate: "12% a year", access: "Savings, withdraw any time", right: true, why: "Ada's money grows to ₦56,000. With prices up 15%, that buys about ₦48,696 of today's goods. She still loses a little, but far less than with cash." }],
+        note: "Both options are made up for this lesson. Rates are fixed; tax and fees are ignored." }
     },
     emergency: {
       lead: "An emergency fund is money kept safe and easy to reach for surprises, like a medical bill or losing your income.",
@@ -457,6 +471,18 @@
   };
   function applyPrefs() { try { document.documentElement.classList.toggle("fv-reduce", !!ME.prefs().reduceMotion); } catch (e) {} }
   applyPrefs();
+
+  // ---- Lesson steps: each lesson lists its screens; every screen links to the next one.
+  var STEP_BOARD = { info: "UPLessonInfo", compare: "UPLearnCompare", term: "UPLearnTerm", steps: "UPLearnSteps", market: "UPLearnMarket", myth: "UPLearnMyth", choice: "UPLessonChoice", order: "UPLessonOrder", match: "UPLessonMatch", scenario: "UPLessonScenario", calc: "UPLessonCalc" };
+  /** True when a screen is being played inside a lesson (not on its own as a micro module). */
+  function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
+  function flowVals(kind) {
+    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
+    if (i < 0) i = 0;
+    var nx = f[i + 1], total = f.length;
+    return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
+      fText: "Step " + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : "UPLessonComplete.dc.html" };
+  }
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
@@ -464,7 +490,7 @@
     level: function (xp) { return xp >= 900 ? 5 : xp >= 500 ? 4 : xp >= 250 ? 3 : xp >= 100 ? 2 : 1; },
     current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
     // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
-    lesson: lessonNow,
+    lesson: lessonNow, flowVals: flowVals, inLesson: inLesson,
     startRun: function () { var s = load(), L = s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]; s.run = { answers: {}, given: {}, l: L.id }; save(s); },
     answer: function (q, correct, given) {
       var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
