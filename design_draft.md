@@ -88,6 +88,18 @@ New tested functions in `packages/domain/src/learning.ts`, so the rules carry in
 *   **History** names reviews "Lesson review".
 *   **Me, Achievements:** the "Came back stronger" badge unlocks when a lesson's misses are all fixed.
 
+## Alternatives Considered
+
+*   **Keep full replay only.** Rejected: it makes a learner repeat what they already know, which does not serve relearning or interview preparation.
+*   **A separate quick refresher of explainer steps.** Rejected by author (D16): full replay already covers it.
+*   **Spaced repetition ("still remembered days later").** Rejected by author (D16): too much for a prototype.
+*   **Pay the +5 bonus every time all misses are fixed.** Rejected: a learner could miss on purpose, then fix, to farm XP. Once per lesson, ever, rewards real improvement only.
+*   **Let reviews raise the best score.** Rejected: a review plays only a few steps, so its percentage is not comparable with a full lesson.
+*   **Count each part of an order or match step as its own miss.** Rejected: steps are answered as one action, and the lesson already scores them as one.
+*   **Keep the rules in the app's glue code (`fv.js`).** Rejected: untested, and they would not carry into Phase 2.
+*   **Go straight to the review from the journey, with a replay link inside.** Rejected by author: a small sheet with both choices is clearer.
+*   **Name it "Practise my mistakes".** Rejected by author (D16): "Review what I missed" reads as less of a telling-off.
+
 ## Open Questions
 
 *   None for this part.
