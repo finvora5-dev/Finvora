@@ -100,6 +100,50 @@ New tested functions in `packages/domain/src/learning.ts`, so the rules carry in
 *   **Go straight to the review from the journey, with a replay link inside.** Rejected by author: a small sheet with both choices is clearer.
 *   **Name it "Practise my mistakes".** Rejected by author (D16): "Review what I missed" reads as less of a telling-off.
 
+## Detailed Implementation
+
+Five steps, in order; each ends with its checks. Paths are from the repository root. No production code is written in this design.
+
+### Step 1: Rules and tests (domain package)
+
+*   `packages/domain/src/learning.ts`: add `recordMisses(misses, lessonId, answers, given)`, `planReview(flow, missesForLesson)`, `applyReview(missesForLesson, answers)` (returns remaining misses, how many were fixed, whether the last one was fixed) and `reviewReward(fixedBefore, lastFixed)` (5 XP only when the last miss is fixed for the first time). Pure functions, no storage.
+*   `packages/domain/src/index.ts`: already exports `learning`; no change unless the new functions need listing.
+*   `packages/engine/src/rules.ts`: no change; `XP.improvement` (5) and `XP.lessonPractice` (2) are used as they are.
+*   `packages/domain/src/domain.test.ts`: tests for: a first-try wrong step is recorded with its answer; a right step in a full replay clears its miss; a review plan lists missed steps in lesson order and skips steps without answers; a review clears right steps and keeps wrong ones; the bonus pays 5 once when the last miss is fixed and 0 afterwards; two reviews on one Lagos day pay the 2 XP practice reward once.
+*   `apps/prototype/tools/build_fvd.mjs`: add `learning` to the compiled module list if it is not there; re-run to rebuild `apps/prototype/site/fvd.js`.
+*   **Checks:** `npm test`, `npm run typecheck`.
+
+### Step 2: Browser state (`fv.js`)
+
+*   `apps/prototype/site/fv.js`:
+    *   `finishRun`: after a first attempt or full replay, call `recordMisses` and save `progress.misses`. After a review, call `applyReview`, save the remaining misses, and pay `reviewReward` into XP and the log; set `progress.fixed[lessonId]` when the bonus is paid. Return what the end screen needs: fixed, remaining, bonus, lesson.
+    *   `startRun`: `?review=1` together with `?l=<lesson id>` starts a review of that lesson's missed steps (only for a finished lesson with misses; otherwise it falls back to a full replay).
+    *   `flowVals`: in a review, the step list is the review plan, so progress reads "Step 1 of 2" and Continue goes to the next missed step; after the last one it goes to `UPReviewDone.dc.html`.
+    *   New `LOOP.missCount(lessonId)` for the entry points.
+    *   Achievements: the "back" badge ("Came back stronger") turns on when any lesson has `progress.fixed` set.
+    *   History: log reviews with the kind `review`.
+*   **Checks:** a node script loads `fvd.js` and `fv.js` with seeded storage and runs a lesson with one wrong step, then a review that fixes it: misses go 1 to 0, XP rises by 2 + 5, a second review the same day pays nothing.
+
+### Step 3: Screens
+
+*   `apps/prototype/tools/build_review.py` (new): builds `apps/prototype/site/UPReviewDone.dc.html`, the review end screen, from the same template and motion code as `build_celebrate.py` (Fin's power-up, the badge, the XP roll-up, reduced-motion fallback). Two states: all fixed, and some left.
+*   `apps/prototype/tools/wire_replay.py`: on `UPJourney.dc.html` and `UDJourney.dc.html`, a finished lesson with misses opens a small sheet ("Review what I missed (N)", "Replay the whole lesson") instead of going straight to the replay; lessons without misses keep going straight to the replay. On `UPLessonComplete.dc.html` and `UDyPLessonComplete.dc.html`, add a "Review what I missed (N)" button when the lesson has misses. On `UPHistory.dc.html` and `UDxHistory.dc.html`, name the `review` kind "Lesson review".
+*   `apps/prototype/site/responsive.js`: no change expected; the "in a row" label and halfway cheer already read the run and the progress bar.
+*   **Checks:** screenshots of the sheet, the summary button and both end-screen states at 280, 390, 820 and 1440 pixels; `wire_a11y.py` and axe-core show no new issues.
+
+### Step 4: Mock-up gate
+
+*   Before Step 3 is built, a mock-up of the journey sheet, the summary button and the two end-screen states is shown to the owner for approval, per the owner's rule for new screens and animation.
+
+### Step 5: Rebuild, regression and docs
+
+*   `apps/prototype/tools/README.md`: add `build_review.py` after `build_celebrate.py`.
+*   `apps/prototype/site/sw.js`: regenerated last.
+*   `docs/open-questions.md`: mark D8, D14 and D16 as built.
+*   `docs/PHASE1_STATUS.md`: describe Review what I missed under Learning.
+*   `docs/designs/SITEMAP.md`: add this design.
+*   **Checks:** the full regression (all six lessons, celebration, in-lesson cheers, replay, Library, daily loop, Me, Ask Fin, checkout, simulator, admin, emails, Part 1 checks) passes at 390 and 1440 with no page errors; a new review walk-through passes: miss a step, review it, fix it, see the end screen, see the badge unlocked, see no second bonus.
+
 ## Open Questions
 
 *   None for this part.
