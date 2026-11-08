@@ -1,16 +1,16 @@
 # Review what I missed (Part 2 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Draft
+*   **Status:** Approved (by the author, section by section, 8 Nov 2026)
 *   **Date:** 2026-11-08
 
 --------------------------------------------------------------------------------
 
 ## Overview
 
-Learners replay lessons to relearn what they did not understand, or to refresh before something like a job interview (owner, 8 Nov). Today a replay plays the whole 7-step lesson again. This design turns replay into **Review what I missed**: the learner practises only the questions they got wrong, and fixing them all is rewarded (D8, D14 and D16 in [docs/open-questions.md](docs/open-questions.md)). Full replay stays as a small secondary option.
+Learners replay lessons to relearn what they did not understand, or to refresh before something like a job interview (owner, 8 Nov). Today a replay plays the whole 7-step lesson again. This design turns replay into **Review what I missed**: the learner practises only the questions they got wrong, and fixing them all is rewarded (D8, D14 and D16 in [docs/open-questions.md](../open-questions.md)). Full replay stays as a small secondary option.
 
-It builds on Part 1 ([prototype-settings-labels-storage.md](docs/designs/prototype-settings-labels-storage.md)), whose storage upgrade already added an empty missed-questions record to every learner's progress.
+It builds on Part 1 ([prototype-settings-labels-storage.md](prototype-settings-labels-storage.md)), whose storage upgrade already added an empty missed-questions record to every learner's progress.
 
 ## The Problem
 
