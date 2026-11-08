@@ -136,6 +136,56 @@ flowchart LR
 *   **An in-app text-size control instead.** Rejected: it does not follow the phone's own setting, which is what D15 asks for.
 *   **Leave text size out entirely.** Rejected by author: D15 brought it back into Phase 1.
 
+## Detailed Implementation
+
+Work happens in five steps, in this order. Each step ends with the checks listed under it; nothing moves on while a check fails. All paths are from the repository root. No production code is written in this design.
+
+### Step 1: Shared values and tests (domain package)
+
+*   `packages/domain/src/config.ts`: set the Plus prices to 599900 (monthly) and 6598900 (yearly) kobo; turn off the placeholder flag; replace the "PENDING" notes on the price, the Ask Fin limit (5) and the market hours with references to D1, D2 and D3. Add a small list of label texts used by the app ("Practice Market", "Example answer from the Finvora Library", "Made-up figures", "No money is taken. This is a practice checkout.") so every screen uses the same words.
+*   `packages/domain/src/market.ts` (new): pure functions for market time in Lagos time: is the market open at a given moment, the next opening time, and the number of trading days between two dates. Pure functions so they can be tested and carried into Phase 2.
+*   `packages/domain/src/index.ts` (or the package's export file): export the new market functions and label list.
+*   `packages/domain/src/domain.test.ts`: tests for: prices equal 599900 and 6598900; yearly equals 11 times monthly; the free Ask Fin limit equals 5; Friday 14:29 Lagos is open, 14:30 is closed, Saturday and Sunday are closed; the next opening after Friday 15:00 is Monday 10:00; trading days skip weekends; a phone set to another time zone gets the same answers. Existing tests that used 250000 are updated.
+*   `packages/domain/src/money.ts`, `packages/sample-data/src/admin.ts`, `packages/sample-data/src/library.ts`: checked for old Plus price figures. Figures that are lesson examples (not Plus prices) stay unchanged; only Plus price figures change.
+*   `apps/prototype/tools/build_fvd.mjs`: unchanged; re-run to compile the domain package into `apps/prototype/site/fvd.js`.
+*   **Checks:** `npm test` and `npm run typecheck` pass.
+
+### Step 2: Browser state, storage upgrade and prices (`fv.js`)
+
+*   `apps/prototype/site/fv.js`:
+    *   Prices: remove the local price figures; checkout and the admin plans defaults read the config prices. Orders keep their own amount, so receipts show what was paid.
+    *   Storage upgrade: one schema version key (`fv.schema`, value 2) and an upgrade step that runs once before anything reads storage. Upgrade 1 to 2: drop saved admin prices equal to the old defaults (150000, 1500000, 250000, 2500000); add an empty missed-questions record to progress (used in Part 2); keep every other field.
+    *   Market: use the new domain functions for open, closed and next opening; count simulator price days in trading days, so weekends no longer move prices; keep the existing order queue.
+    *   Labels: expose the label list to screens.
+*   **Checks:** a fresh browser and a browser seeded with old data (old admin prices, old progress, old billing) both load without errors; progress and holdings are unchanged after the upgrade.
+
+### Step 3: Screens (wiring scripts)
+
+*   `apps/prototype/tools/wire_settings.py` (new): patches the screens for this part, and can be re-run safely:
+    *   **Prices:** replace written price figures with values filled in from `fv.js` on `apps/prototype/site/USPlans.dc.html`, `UDxSPlans.dc.html`, `USCompare.dc.html`, `UDxSCompare.dc.html`, `USUpgrade.dc.html`, `UDzSUpgrade.dc.html`, `UAPlans.dc.html` and `UAUsers.dc.html`. Add "No money is taken. This is a practice checkout." to `USPlans`, `UDxSPlans` and the checkout screens (`USCheck*`, `UDySCheck*`).
+    *   **Closed market:** on `USimTrade.dc.html`, `UDBuy.dc.html`, `USimSell.dc.html`, `UDzSimSell.dc.html`, `UMOrderClosed.dc.html` and `UDzMOrderClosed.dc.html`, show "Practice Market closed. Opens [day time] Lagos time." with "Queue this order" and "Do a lesson while you wait" (to the next lesson).
+    *   **Practice Market:** the entrance line on `USimHome.dc.html` and `UDSimulator.dc.html`; the small Practice Market icon beside the title on `USimCompany`, `UDxSimCompany`, `USimMarket`, `UDxSimMarket`, `USimHistory`, `UDxSimHistory`, `USimTrade` and `UDBuy`.
+    *   **Ask Fin:** the "Example answer from the Finvora Library" label, linked to the cited article, on every answer in `UPAskKobo.dc.html` and `UDxAskKobo.dc.html`.
+*   `apps/prototype/tools/wire_pay.py`, `wire_admin_more.py`, `wire_emails.py`: remove the price figures they write, so a rebuild cannot bring old prices back. The receipt email (`UREmailReceipt.dc.html`) keeps showing the order's own amount.
+*   `apps/prototype/site/responsive.css`: the shared label style (icon plus text, at least 4.5:1 contrast) and the closed-market notice style.
+*   **Checks:** a search for "₦1,500", "₦15,000", "₦2,500" and "₦25,000" across `apps/prototype/site` and `apps/prototype/tools` finds only lesson examples; `wire_a11y.py` and axe-core report no new issues.
+
+### Step 4: Updates and phone text size
+
+*   `apps/prototype/tools/build_sw.py`: the generated offline cache takes over as soon as it is installed, and its network requests skip the browser's short-term cache.
+*   `apps/prototype/site/responsive.js`:
+    *   after a new offline-cache version takes over, show "Finvora was updated." once;
+    *   on the lesson path (`UPLessonInfo`, `UPLearnMyth`, `UPLearnCompare`, `UPLessonChoice`, `UPLessonOrder`, `UPLessonMatch`, `UPLessonScenario`, `UPLessonCalc`, `UPCelebrate`, `UPLessonComplete`), read the phone's preferred text size and, when it is larger than normal, lay the screen out at a narrower design width before scaling.
+*   **Checks:** a browser holding the previous version shows the new prices on its next load; lesson screens at 280, 390 and 430 pixels wide, with text at 100%, 150% and 200%, show no overlap and no sideways scrolling; one check on a real Android phone with large text.
+
+### Step 5: Rebuild, regression and docs
+
+*   `apps/prototype/tools/README.md`: add `wire_settings.py` to the build order (after `wire_reviewer.py`, before `wire_a11y.py` and `build_sw.py`).
+*   `apps/prototype/site/sw.js`: regenerated last by `build_sw.py`.
+*   `docs/open-questions.md`: mark D1, D2, D3, D5, D12, D15 and D17 as built (for this part's share of them).
+*   `docs/PHASE1_STATUS.md`: replace the description of the removed Next.js app with the current prototype, the decisions D1 to D21, and the known limits (Reviewer tools open to everyone, browser-only storage).
+*   **Checks:** the full regression suite (lesson walk-through for all six lessons, Library, daily loop, Ask Fin, checkout, sign-in, Me, simulator, admin, emails, celebration) passes at 390 and 1440 pixels with no page errors; screenshots of every changed screen at 280, 390, 820 and 1440 pixels are reviewed; the live site serves the new offline-cache version after deploy.
+
 ## Open Questions
 
 *   None for this part. New questions found while planning the implementation will be added here.
