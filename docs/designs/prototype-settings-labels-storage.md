@@ -29,7 +29,7 @@ The proposed solution sets one source for each setting, adds a clear closed-mark
 *   **One price everywhere.** Every screen, checkout, receipt email and admin page shows ₦5,999 a month and ₦65,989 a year, from a single source in the tested domain config, in a clean browser and in a browser that has old saved prices.
 *   **Ask Fin limit of 5 a day** from the same single source (D2), with its tests checking the value 5 directly.
 *   **No tester is ever stuck on market hours.** When the market is closed, the tester sees when it opens (Lagos time), can queue a practice order for the open, and is offered a lesson. Prices move only on trading days (D12).
-*   **Simulated content is always recognisable** without breaking the experience: the Practice Market has one clear entrance line and a small icon on its screens, Ask Fin answers carry "Example answer from the Finvora Library" with a link, and checkout says "No money is taken" (D5, D17).
+*   **Simulated content is always recognisable** without breaking the experience: the Practice Market has one clear entrance line and a small icon on its screens, Ask Fin answers carry "Example answer from the Finvora Library" with a link (D5, D17).
 *   **Stored data upgrades safely.** Existing testers keep their progress after the update; new fields get sensible defaults; corrupt or old data never crashes a screen.
 *   **Returning testers get the new version** on their next visit at the latest, without clearing anything themselves.
 *   **The lesson path follows the phone's text size** (D15) without breaking layout at 280px to 430px wide.
@@ -46,6 +46,7 @@ The proposed solution sets one source for each setting, adds a clear closed-mark
 ## Decisions Made in Drafting
 
 *   **Holidays:** the practice market treats every weekday as a trading day. No public-holiday calendar in Phase 1.
+*   **No checkout disclaimer:** the owner removed the "No money is taken" line from the mock-up (8 Nov).
 *   **Old orders:** a tester who bought Plus at an old price keeps that order; their receipt and plan screen show the price they paid.
 
 ## Technical Plan (Architecture)
@@ -81,7 +82,6 @@ flowchart LR
 *   One shared label component: a small icon plus short text, at least 4.5:1 contrast, read by screen readers. Its wording lives in one list so every screen says the same thing.
 *   **Practice Market:** the simulator's made-up companies are presented as "Practice Market". Its home screen opens with one line: "Practice Market: made-up companies, virtual naira, no money at risk." Company, trade and history screens show the small Practice Market icon beside the title.
 *   **Ask Fin:** every answer, decline and "no figures" reply carries "Example answer from the Finvora Library", linked to the article it came from when there is one. Part 3 changes how answers are found; this part adds the label.
-*   **Checkout:** the plans and checkout screens show "No money is taken. This is a practice checkout."
 *   Real NGX companies on the Markets screens show descriptions only, no figures, so they need no label.
 
 ### 4. Stored data that upgrades safely
@@ -142,7 +142,7 @@ Work happens in five steps, in this order. Each step ends with the checks listed
 
 ### Step 1: Shared values and tests (domain package)
 
-*   `packages/domain/src/config.ts`: set the Plus prices to 599900 (monthly) and 6598900 (yearly) kobo; turn off the placeholder flag; replace the "PENDING" notes on the price, the Ask Fin limit (5) and the market hours with references to D1, D2 and D3. Add a small list of label texts used by the app ("Practice Market", "Example answer from the Finvora Library", "Made-up figures", "No money is taken. This is a practice checkout.") so every screen uses the same words.
+*   `packages/domain/src/config.ts`: set the Plus prices to 599900 (monthly) and 6598900 (yearly) kobo; turn off the placeholder flag; replace the "PENDING" notes on the price, the Ask Fin limit (5) and the market hours with references to D1, D2 and D3. Add a small list of label texts used by the app ("Practice Market", "Example answer from the Finvora Library", "Made-up figures") so every screen uses the same words.
 *   `packages/domain/src/market.ts` (new): pure functions for market time in Lagos time: is the market open at a given moment, the next opening time, and the number of trading days between two dates. Pure functions so they can be tested and carried into Phase 2.
 *   `packages/domain/src/index.ts` (or the package's export file): export the new market functions and label list.
 *   `packages/domain/src/domain.test.ts`: tests for: prices equal 599900 and 6598900; yearly equals 11 times monthly; the free Ask Fin limit equals 5; Friday 14:29 Lagos is open, 14:30 is closed, Saturday and Sunday are closed; the next opening after Friday 15:00 is Monday 10:00; trading days skip weekends; a phone set to another time zone gets the same answers. Existing tests that used 250000 are updated.
@@ -162,7 +162,7 @@ Work happens in five steps, in this order. Each step ends with the checks listed
 ### Step 3: Screens (wiring scripts)
 
 *   `apps/prototype/tools/wire_settings.py` (new): patches the screens for this part, and can be re-run safely:
-    *   **Prices:** replace written price figures with values filled in from `fv.js` on `apps/prototype/site/USPlans.dc.html`, `UDxSPlans.dc.html`, `USCompare.dc.html`, `UDxSCompare.dc.html`, `USUpgrade.dc.html`, `UDzSUpgrade.dc.html`, `UAPlans.dc.html` and `UAUsers.dc.html`. Add "No money is taken. This is a practice checkout." to `USPlans`, `UDxSPlans` and the checkout screens (`USCheck*`, `UDySCheck*`).
+    *   **Prices:** replace written price figures with values filled in from `fv.js` on `apps/prototype/site/USPlans.dc.html`, `UDxSPlans.dc.html`, `USCompare.dc.html`, `UDxSCompare.dc.html`, `USUpgrade.dc.html`, `UDzSUpgrade.dc.html`, `UAPlans.dc.html` and `UAUsers.dc.html`. Fix the yearly tag to "1 month free".
     *   **Closed market:** on `USimTrade.dc.html`, `UDBuy.dc.html`, `USimSell.dc.html`, `UDzSimSell.dc.html`, `UMOrderClosed.dc.html` and `UDzMOrderClosed.dc.html`, show "Practice Market closed. Opens [day time] Lagos time." with "Queue this order" and "Do a lesson while you wait" (to the next lesson).
     *   **Practice Market:** the entrance line on `USimHome.dc.html` and `UDSimulator.dc.html`; the small Practice Market icon beside the title on `USimCompany`, `UDxSimCompany`, `USimMarket`, `UDxSimMarket`, `USimHistory`, `UDxSimHistory`, `USimTrade` and `UDBuy`.
     *   **Ask Fin:** the "Example answer from the Finvora Library" label, linked to the cited article, on every answer in `UPAskKobo.dc.html` and `UDxAskKobo.dc.html`.
