@@ -152,9 +152,9 @@
     ask: function (q) {
       q = String(q || "").trim(); if (!q) return null;
       if (!ASK.status().allowed) return null;
-      var title = function (slug) { var a = D().ARTICLES.filter(function (x) { return x.slug === slug; })[0]; return a && a.title; };
-      var r = D().answerQuestion(q, null, D().SCRIPTED_ANSWERS, title);
-      var a = askLoad(); a.usage = D().recordAsk(a.usage, lagosDay());
+      // Design Part 3: answers come from hand-written answers, the Library as this browser shows it, and company data.
+      var r = D().answerQuestion(q, null, { scripts: D().SCRIPTED_ANSWERS, articles: LIB.all(), companies: D().askCompanies() });
+      var a = askLoad(); if (D().countsTowardLimit(r.kind)) a.usage = D().recordAsk(a.usage, lagosDay());
       a.msgs = a.msgs.concat([{ q: q, r: r, at: new Date().toISOString() }]).slice(-30); askSave(a);
       return r;
     },
@@ -243,7 +243,7 @@
   function arts() {
     var a = admLoad(), list = D().ARTICLES.map(function (x) { var e = a.edits[x.slug]; return e && e.pub ? applyEdit(x, e.pub) : x; });
     a.fresh.forEach(function (f) { if (f.status !== "Published") return; var t = TOPICS.filter(function (z) { return z.name === f.form.topic; })[0] || TOPICS[0];
-      list.push({ slug: f.id, title: f.form.title, category: t.cats[0], definition: f.form.definition, explanation: [f.form.howIntro], example: "", whyItMatters: "", misconceptions: [], related: [] }); });
+      list.push({ slug: f.id, title: f.form.title, category: t.cats[0], definition: f.form.definition, explanation: [f.form.howIntro], example: "", whyItMatters: "", misconceptions: [], related: [], keywords: String(f.form.askWords || "").split(",").map(function (w) { return w.trim(); }).filter(Boolean) }); });
     return list; }
   var LIB = {
     TOPICS: TOPICS,
@@ -352,7 +352,7 @@
     // Ask Fin review: learners' answers that Fin refused or couldn't answer in this browser, then older flags.
     reviewQueue: function () {
       var a = admLoad(), items = [];
-      askLoad().msgs.forEach(function (m) { if (m.r && m.r.kind !== "answer") items.push({ id: "m-" + m.at, q: m.q, a: m.r.answer || "", tag: m.r.kind === "refusal" ? "Asks for a pick" : "No answer", at: Date.parse(m.at) || Date.now(), mine: true, kind: m.r.kind }); });
+      askLoad().msgs.forEach(function (m) { if (m.r && m.r.kind !== "answer") items.push({ id: "m-" + m.at, q: m.q, a: m.r.answer || "", tag: ({ refusal: "Asks for a pick", decline: "Off topic", didyoumean: "Unsure" })[m.r.kind] || "No answer", at: Date.parse(m.at) || Date.now(), mine: true, kind: m.r.kind }); });
       items.reverse();
       return items.concat(REVIEW_SEED).filter(function (x) { return !a.review[x.id]; });
     },
@@ -381,6 +381,7 @@
   ];
   function applyEdit(x, p) {
     if (!p || !p.title) return x; var y = Object.assign({}, x, { title: p.title, definition: p.definition });
+    var aw = String(p.askWords || "").split(",").map(function (w) { return w.trim(); }).filter(Boolean); if (aw.length) y.keywords = (x.keywords || []).concat(aw);
     if (x.deep && x.deep.how) {
       y.deep = Object.assign({}, x.deep, { how: Object.assign({}, x.deep.how, { title: p.howTitle, intro: p.howIntro }) });
       if (p.definition !== x.definition) { var d = p.definition, i = d.toLowerCase().indexOf(String(p.title).toLowerCase().replace(/s$/, "")), n = i >= 0 ? (/^\w+/.exec(d.slice(i)) || [""])[0] : "";

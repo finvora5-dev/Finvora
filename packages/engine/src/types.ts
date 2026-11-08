@@ -163,6 +163,8 @@ export interface Article {
   sources?: { label: string; url?: string }[];
   /** Full article sections, as in the designed Dividend article. Optional while articles are being expanded. */
   deep?: ArticleDeep;
+  /** Everyday words learners might use for this topic; Ask Fin scores them like the definition. */
+  keywords?: string[];
 }
 
 export interface ArticleDeep {

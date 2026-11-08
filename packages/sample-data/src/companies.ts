@@ -44,3 +44,18 @@ export const SIM_COMPANIES: SimCompany[] = [
   { ticker: "ARWC", name: "Arewa Cement", sector: "Industrial goods", blurb: "A made-up cement maker.", basePriceKobo: 2900_00, volatility: 0.012, learnSlug: "market-capitalisation" },
   { ticker: "DLTA", name: "Delta Logistics", sector: "Services", blurb: "A made-up delivery company.", basePriceKobo: 410_00, volatility: 0.028, learnSlug: "diversification" },
 ];
+
+/** Short names learners type, for Ask Fin (design Part 3). Kept specific so ordinary words don't match. */
+export const ASK_ALIASES: Record<string, string[]> = {
+  MTNN: ["MTN"], DANGCEM: ["Dangote"], ZENITHBANK: ["Zenith"], GTCO: ["GTBank", "GT Bank", "GTB", "Guaranty Trust"], NESTLE: ["Nestle"],
+  AIRTELAFRI: ["Airtel"], SEPLAT: ["Seplat"], NB: [],
+  LGFD: ["Lagoon"], SVNT: ["Savanna"], OKBK: ["Okeke"], NSOL: ["NaijaSol"], ARWC: ["Arewa"], DLTA: [],
+};
+
+/** Both company lists in the shape Ask Fin reads. */
+export function askCompanies(): import("@finvora/domain").AskCompany[] {
+  return [
+    ...COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.about, howItMakesMoney: c.howItMakesMoney, slug: c.learnSlugs[0], madeUp: false })),
+    ...SIM_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.blurb, slug: c.learnSlug, madeUp: true })),
+  ];
+}

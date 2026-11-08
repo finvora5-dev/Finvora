@@ -35,6 +35,18 @@ const LABELS = {
     EXAMPLE_ANSWER: "Example answer from the Finvora Library",
     MADE_UP_FIGURES: "Made-up figures",
 };
+/** Ask Fin word lists and score bands (design Part 3, docs/designs/ask-fin-grounded-answers.md). */
+const ASK = {
+    /** Score bands, 0 to 1. At or above HIGH: answer. Between: "Did you mean". Below LOW: not enough information or decline. Tuned on askfin.cases.ts. */
+    SCORE_HIGH: 0.26,
+    SCORE_LOW: 0.22,
+    /** A hand-written answer's score is multiplied by this, so common questions keep their tuned wording. */
+    SCRIPT_BOOST: 1.1,
+    FINANCE_WORDS: ["money", "naira", "kobo", "save", "saving", "savings", "invest", "investment", "investor", "stock", "dividend", "profit", "loss", "inflation", "bank", "budget", "market", "ngx", "loan", "debt", "price", "income", "salary", "spend", "tax", "pension", "fund", "bond", "bill", "treasury", "fee", "cost", "return", "risk", "scam", "crypto", "bitcoin", "capital", "revenue", "earning", "earnings", "asset", "wealth", "rich", "afford", "pay", "cash", "credit", "rent", "economy", "exchange", "broker", "portfolio", "expensive", "costly", "cheap", "finance", "financial", "company", "business", "dollar"],
+    STOP_WORDS: ["a", "an", "the", "is", "are", "was", "were", "be", "been", "am", "do", "does", "did", "i", "me", "my", "you", "your", "we", "our", "it", "its", "this", "that", "these", "those", "what", "which", "who", "whom", "how", "why", "when", "where", "can", "could", "should", "would", "will", "of", "to", "in", "on", "for", "with", "at", "by", "from", "about", "as", "and", "or", "but", "if", "so", "than", "then", "there", "here", "tell", "explain", "mean", "means", "meaning", "please", "work", "works", "get", "some", "any", "all", "much", "many", "more", "most", "very", "just", "like", "kind", "thing", "things", "know", "want", "need", "fin", "hi", "hello", "hey", "thanks", "ok", "okay", "something", "everything", "keep", "go", "going", "up", "down", "now", "these", "days", "day", "use", "used", "make", "makes", "making", "last", "year", "years", "yearly", "ago"],
+    /** Words left whole by the ending trimmer. */
+    KEEP_WORDS: ["trading", "savings", "earnings", "news", "less", "always", "series", "business", "bus", "tax", "loss", "process"],
+};
 
 // ---- money
 
@@ -325,44 +337,155 @@ function entitlements(plan) {
 }
 
 // ---- askfin
-// Scripted Ask Fin (build plan §4.4). Same response shape as the Phase 2 AI.
-// Citations only ever point to our own Library articles that exist; never invented.
+// Ask Fin (design Part 3, docs/designs/ask-fin-grounded-answers.md). Same reply shape as the Phase 2 AI.
+// Every answer is built from approved text: hand-written answers, Library articles and company data.
+// Citations only ever point to articles that exist; nothing is invented.
+
+
+/** Only a real answer uses up a free question (owner decision, 8 Nov 2026). */
+function countsTowardLimit(kind) {
+    return kind === "answer";
+}
 const ADVICE = /\b(should i (buy|sell|invest)|which (stock|share|company) (should|to)|what (stock|share)s? (should|to) (buy|sell)|buy or sell|is it a good (time|buy)|tell me (what|which) to (buy|sell)|recommend (a|some)? ?(stock|share)s?|best (stock|share)s? to buy)\b/i;
 function isAdviceRequest(q) {
     return ADVICE.test(q);
 }
-function tokens(s) {
-    return s.toLowerCase().replace(/[^a-z0-9₦%\s-]/g, " ").split(/\s+/).filter((w) => w.length > 2);
+const STOP = new Set(ASK.STOP_WORDS);
+const KEEP = new Set(ASK.KEEP_WORDS);
+const FINANCE = new Set(ASK.FINANCE_WORDS.map((w) => stem(w)));
+/** Trims plural and "-ing" endings so "dividends" matches "dividend". */
+function stem(w) {
+    if (KEEP.has(w))
+        return w;
+    if (w.length > 4 && w.endsWith("ies"))
+        return w.slice(0, -3) + "y";
+    if (w.length > 5 && w.endsWith("ing"))
+        return w.slice(0, -3);
+    if (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") && !w.endsWith("us"))
+        return w.slice(0, -1);
+    return w;
 }
-function answerQuestion(question, context, scripts, articleTitle) {
+/** Question or text to scoring words: normalised, common words dropped, endings trimmed. */
+function askWords(s) {
+    return normalise(s).split(" ").filter((w) => w && !STOP.has(w)).map(stem).filter((w) => w.length > 1);
+}
+function articleDoc(a) {
+    const rest = [...(a.explanation || []), a.example || "", a.whyItMatters || "", ...(a.misconceptions || []), a.deep?.how?.intro || "", ...(a.deep?.how?.steps || [])].join(" ");
+    return { kind: "article", id: a.slug, fields: [[new Set(askWords(a.title)), 3], [new Set(askWords(a.definition || "")), 2], [new Set(askWords((a.keywords || []).join(" "))), 2], [new Set(askWords(rest)), 1]] };
+}
+function scriptDoc(s) {
+    return { kind: "script", id: s.id, fields: [[new Set(askWords(s.keywords.join(" "))), 3], [new Set(askWords(s.answer)), 1]] };
+}
+/** Scores every hand-written answer and article against the question, best first. Scores run 0 to 1. */
+function scoreAll(question, sources) {
+    const words = [...new Set(askWords(question))];
+    const docs = [...sources.scripts.map(scriptDoc), ...sources.articles.map(articleDoc)];
+    const N = docs.length;
+    if (!words.length || !N)
+        return [];
+    const best = (d, w) => d.fields.reduce((m, [set, pts]) => (set.has(w) && pts > m ? pts : m), 0);
+    const idf = (w) => { const df = docs.filter((d) => best(d, w) > 0).length; return df ? Math.log(1 + N / df) : 0; };
+    const weights = words.map(idf);
+    const max = words.length * 3 * Math.log(1 + N);
+    return docs.map((d) => {
+        const raw = words.reduce((sum, w, i) => sum + best(d, w) * (weights[i] ?? 0), 0) / max;
+        return { kind: d.kind, id: d.id, score: d.kind === "script" ? raw * ASK.SCRIPT_BOOST : raw };
+    }).sort((a, b) => b.score - a.score);
+}
+function findCompanies(question, companies) {
+    const n = " " + normalise(question) + " ";
+    return companies.filter((c) => {
+        const names = [c.name, ...(c.askAliases || [])].map((x) => normalise(x)).filter(Boolean);
+        if (names.some((x) => n.includes(" " + x + " ")))
+            return true;
+        const t = c.ticker;
+        return t.length > 3 ? n.includes(" " + t.toLowerCase() + " ") : new RegExp("\\b" + t + "\\b").test(question);
+    });
+}
+/** "What is a share?" stays as it is; "Revenue and profit" becomes "What is revenue and profit?". */
+function askAbout(title) {
+    if (title.endsWith("?"))
+        return title;
+    return "What is " + (/^[A-Z][a-z]/.test(title) ? title.charAt(0).toLowerCase() + title.slice(1) : title) + "?";
+}
+function firstSentence(s) {
+    const i = s.indexOf(". ");
+    return i < 0 ? s : s.slice(0, i + 1);
+}
+function fromArticle(a, all) {
+    const parts = [a.definition || "", a.explanation && a.explanation[0] ? firstSentence(a.explanation[0]) : "", a.example || ""].map((x) => x.trim()).filter(Boolean);
+    const related = (a.related || []).map((slug) => all.find((x) => x.slug === slug)).filter((x) => !!x).slice(0, 2);
+    return { kind: "answer", answer: parts.join(" "), citations: [{ articleSlug: a.slug, title: a.title }], followUps: related.map((r) => askAbout(r.title)) };
+}
+const INSUFFICIENT = "I don't have a Library article on that yet. Try searching the Library, or ask in a different way, for example \"What is inflation?\".";
+const DECLINE = "I only help with money, saving and investing. Try asking about budgeting, inflation or how shares work.";
+function answerQuestion(question, context, sources) {
     const q = question.trim();
+    const titleOf = (slug) => sources.articles.find((a) => a.slug === slug)?.title;
+    const cite = (slugs) => slugs.flatMap((slug) => { const t = titleOf(slug); return t ? [{ articleSlug: slug, title: t }] : []; });
+    const starters = ["What is inflation?", "What is a share?", "How does compound interest work?"];
+    // 1. Too short.
+    if (normalise(q).replace(/ /g, "").length < 2)
+        return { kind: "insufficient", answer: INSUFFICIENT, citations: [], followUps: starters };
+    // 2. Advice.
     if (isAdviceRequest(q)) {
         return {
             kind: "refusal",
             answer: "I can't tell you what to buy or sell. That depends on your money, goals and risk, and Finvora is for learning, not advice. I can explain how to judge a company yourself, for example what profit, dividends and price-to-earnings tell you.",
-            citations: cite(["what-is-a-share", "price-to-earnings"], articleTitle),
+            citations: cite(["what-is-a-share", "price-to-earnings"]),
             followUps: ["How do I read a company's profit?", "What is a dividend?"],
         };
     }
-    const words = new Set([...tokens(q), ...(context ? tokens(context.label) : [])]);
-    let best = null;
-    for (const s of scripts) {
-        const score = s.keywords.reduce((n, k) => n + (k.split(" ").every((part) => words.has(part) || q.toLowerCase().includes(k)) ? 1 : 0), 0);
-        if (score > 0 && (!best || score > best.score))
-            best = { s, score };
+    // 3. Company: what it does, how it makes money, and the Library explanation of what was asked.
+    let named = findCompanies(q, sources.companies);
+    if (!named.length && context && context.type === "company")
+        named = sources.companies.filter((c) => c.ticker === context.id);
+    if (named.length) {
+        let rest = q;
+        for (const c of named)
+            for (const x of [c.name, c.ticker, ...(c.askAliases || [])])
+                rest = rest.replace(new RegExp(x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+        const top = scoreAll(rest, { scripts: [], articles: sources.articles })[0];
+        const howItEarns = /\b(make|makes|making|earn|earns)\b/i.test(rest);
+        const art = !howItEarns && top && top.score >= ASK.SCORE_LOW ? sources.articles.find((a) => a.slug === top.id) : sources.articles.find((a) => a.slug === named[0].slug);
+        const lower = (x) => x.charAt(0).toLowerCase() + x.slice(1);
+        const about = named.map((c) => [
+            /^(A|An) /.test(c.about) ? c.name + " is " + lower(c.about) : c.name + " " + lower(c.about),
+            c.howItMakesMoney ? "How it makes money: " + lower(c.howItMakesMoney) : "",
+            c.madeUp ? "Its prices in the Practice Market are made up for practice." : "",
+        ].filter(Boolean).join(" "));
+        const parts = [...about, !howItEarns && art && art.definition ? art.title.replace(/\?$/, "") + ": " + lower(art.definition) : ""].filter(Boolean);
+        return { kind: "answer", answer: parts.join(" "), citations: art ? [{ articleSlug: art.slug, title: art.title }] : [], followUps: art ? fromArticle(art, sources.articles).followUps : starters };
     }
-    if (!best) {
-        return {
-            kind: "insufficient",
-            answer: "I don't have a good answer for that yet. Try searching the Library, or ask in a different way, for example \"What is inflation?\".",
-            citations: [],
-            followUps: ["What is inflation?", "What is a share?", "How does compound interest work?"],
-        };
+    // 4. Score hand-written answers and articles together.
+    const ranked = scoreAll(q, sources);
+    const top = ranked[0];
+    if (top && top.score >= ASK.SCORE_HIGH) {
+        if (top.kind === "script") {
+            const s = sources.scripts.find((x) => x.id === top.id);
+            return { kind: "answer", answer: s.answer, citations: cite(s.articleSlugs), followUps: s.followUps };
+        }
+        return fromArticle(sources.articles.find((a) => a.slug === top.id), sources.articles);
     }
-    return { kind: "answer", answer: best.s.answer, citations: cite(best.s.articleSlugs, articleTitle), followUps: best.s.followUps };
-}
-function cite(slugs, title) {
-    return slugs.flatMap((slug) => { const t = title(slug); return t ? [{ articleSlug: slug, title: t }] : []; });
+    if (top && top.score >= ASK.SCORE_LOW) {
+        const slugs = [];
+        for (const r of ranked) {
+            const ids = r.kind === "article" ? [r.id] : sources.scripts.find((x) => x.id === r.id).articleSlugs;
+            for (const id of ids)
+                if (titleOf(id) && !slugs.includes(id))
+                    slugs.push(id);
+            if (slugs.length >= 2)
+                break;
+        }
+        const choices = cite(slugs.slice(0, 2));
+        if (choices.length)
+            return { kind: "didyoumean", answer: "I'm not sure I understood. Did you mean one of these?", citations: [], followUps: [], choices };
+    }
+    // 5. Below the bands: finance words mean we lack an article; otherwise it is off topic.
+    const finance = askWords(q).some((w) => FINANCE.has(w));
+    return finance
+        ? { kind: "insufficient", answer: INSUFFICIENT, citations: [], followUps: starters }
+        : { kind: "decline", answer: DECLINE, citations: [], followUps: starters };
 }
 /** Suggested prompts for the current screen (build plan §4.4). */
 function suggestedPrompts(ctx) {
@@ -524,10 +647,10 @@ const SCRIPTED_ANSWERS = [
     { id: "risk", keywords: ["risk", "risky", "safe", "scam"], answer: "Risk is the chance an investment loses value. Options that might grow more can usually also fall more. Be very careful with anything that promises high returns with no risk: that is a common sign of a scam.", articleSlugs: ["risk-and-return", "diversification"], followUps: ["What is diversification?", "What are treasury bills?"] },
     { id: "diversify", keywords: ["diversification", "diversify", "spread"], answer: "Diversification means spreading money across different investments, for example several companies in different sectors, so one bad result hurts less. It lowers risk but doesn't remove it.", articleSlugs: ["diversification"], followUps: ["What is risk and return?"] },
     { id: "tbills", keywords: ["treasury", "t-bills", "tbills", "bills"], answer: "Treasury bills are short-term loans to the government, usually for 91, 182 or 364 days, that pay a fixed return. They are considered low risk, which is why they usually pay less than riskier investments can.", articleSlugs: ["treasury-bills"], followUps: ["What is risk and return?"] },
-    { id: "budget", keywords: ["budget", "budgeting", "save money", "saving"], answer: "A budget is a plan for your money. A simple guide is about 50% needs, 30% wants and 20% savings, adjusted to your life. On ₦150,000 a month, 20% is ₦30,000.", articleSlugs: ["budgeting", "saving-vs-investing"], followUps: ["Saving vs investing?", "What is an emergency fund?"] },
+    { id: "budget", keywords: ["budget", "budgeting", "saving"], answer: "A budget is a plan for your money. A simple guide is about 50% needs, 30% wants and 20% savings, adjusted to your life. On ₦150,000 a month, 20% is ₦30,000.", articleSlugs: ["budgeting", "saving-vs-investing"], followUps: ["Saving vs investing?", "What is an emergency fund?"] },
     { id: "saving-vs-investing", keywords: ["saving vs investing", "investing", "save or invest"], answer: "Saving keeps money safe and easy to reach for near-term needs, like an emergency fund. Investing puts money to work for possible growth over years, for example by owning shares, but it can also fall. Many people do both: savings for the short term, investments for long-term goals.", articleSlugs: ["saving-vs-investing", "risk-and-return"], followUps: ["What is an emergency fund?", "What is risk and return?"] },
     { id: "emergency", keywords: ["emergency"], answer: "An emergency fund is money kept safe and easy to reach for surprises, like a medical bill. Many people aim for a few months of costs, kept in savings rather than investments that can fall.", articleSlugs: ["saving-vs-investing"], followUps: ["How do I budget?"] },
-    { id: "revenue", keywords: ["revenue", "profit", "make money", "makes money", "how does"], answer: "Revenue is money a company takes in from sales. Profit is what's left after paying costs. A company can have big revenue and still make a loss, so profit tells you more about whether the business is doing well. The company page also explains how each company earns its revenue.", articleSlugs: ["revenue-and-profit"], followUps: ["What is a P/E ratio?", "What is a dividend?"] },
+    { id: "revenue", keywords: ["revenue", "profit"], answer: "Revenue is money a company takes in from sales. Profit is what's left after paying costs. A company can have big revenue and still make a loss, so profit tells you more about whether the business is doing well. The company page also explains how each company earns its revenue.", articleSlugs: ["revenue-and-profit"], followUps: ["What is a P/E ratio?", "What is a dividend?"] },
     { id: "mcap", keywords: ["market cap", "capitalisation", "capitalization"], answer: "Market capitalisation is a company's share price times its number of shares. It shows how big the market thinks the company is. 1 billion shares at ₦100 is a ₦100 billion market cap.", articleSlugs: ["market-capitalisation"], followUps: ["What is a share?"] },
     { id: "fees", keywords: ["fee", "fees", "charges", "commission"], answer: "When you buy or sell shares, brokers and the exchange charge fees. They reduce your return, especially on small or frequent trades. In the Finvora simulator, fees are an approximation so you can see the effect.", articleSlugs: ["fees-and-costs"], followUps: ["How does the simulator work?"] },
     { id: "simulator", keywords: ["simulator", "virtual", "practice"], answer: "The simulator lets you practise buying and selling with virtual money (₦100,000 to start) on made-up companies with demo prices. Nothing is real: no money moves, and virtual gains or losses aren't real returns.", articleSlugs: ["what-is-a-share", "fees-and-costs"], followUps: ["What is a share?", "What are trading fees?"] },
@@ -538,14 +661,14 @@ const SCRIPTED_ANSWERS = [
 // ---- sd:library
 const a = (x) => ({ misconceptions: [], related: [], ...x });
 const ARTICLES = [
-    a({ slug: "what-is-money", title: "What is money?", category: "Money basics", definition: "Anything people accept to pay for things, compare prices and keep value.", explanation: ["Money does three jobs: medium of exchange, unit of account and store of value.", "The naira is Nigeria's money, issued by the Central Bank of Nigeria."], example: "Paying ₦500 for a danfo ride uses money as a medium of exchange.", whyItMatters: "Knowing what money does helps you see why inflation hurts savings.", related: ["inflation"], lessonIds: ["what-is-money"], deep: {
+    a({ keywords: ["cash", "currency", "naira", "kobo"], slug: "what-is-money", title: "What is money?", category: "Money basics", definition: "Anything people accept to pay for things, compare prices and keep value.", explanation: ["Money does three jobs: medium of exchange, unit of account and store of value.", "The naira is Nigeria's money, issued by the Central Bank of Nigeria."], example: "Paying ₦500 for a danfo ride uses money as a medium of exchange.", whyItMatters: "Knowing what money does helps you see why inflation hurts savings.", related: ["inflation"], lessonIds: ["what-is-money"], deep: {
             lead: ["", "Money", " is anything people accept to pay for things, compare prices and keep value for later."],
             takeaways: ["Money does three jobs: paying, comparing and keeping value.", "The naira is Nigeria's money. It is issued by the Central Bank of Nigeria.", "Money in a bank account or mobile wallet does the same jobs as notes and coins."],
             how: { "title": "Money's three jobs", "intro": "Without money, people would have to swap goods directly, which is slow and awkward. Money makes trade easy.", "steps": ["Paying: you hand over money and get goods or services in return.", "Comparing: prices in naira let you see which things cost more or less.", "Keeping value: you can hold money today and spend it later."] },
             example: { "line": "Funmi plans her week in Lagos.", "rows": [["Bus fare to work (paying)", "₦500"], ["Cheaper rice brand (comparing)", "₦2,000 less"], ["Put aside for next month (keeping)", "₦5,000"]], "note": "₦1 is 100 kobo, so ₦500 is 50,000 kobo." },
             mistake: { "myth": "Money keeps its value forever.", "fact": "Prices tend to rise over time, so the same amount of money usually buys a little less each year. That's inflation." }
         } }),
-    a({ slug: "inflation", title: "Inflation", category: "Money basics", definition: "The general rise in prices over time, which lowers what each naira can buy.", explanation: ["Inflation is usually given as a yearly percentage.", "If inflation is 20%, something that cost ₦1,000 a year ago costs about ₦1,200 now."], example: "If a bag of rice goes from ₦50,000 to ₦60,000 in a year, its price rose 20%.", whyItMatters: "Savings that grow slower than inflation lose buying power.", misconceptions: ["A bigger account balance always means you are richer. Not if prices rose faster."], related: ["what-is-money", "saving-vs-investing"], lessonIds: ["inflation"], deep: {
+    a({ keywords: ["expensive", "costly", "prices rise", "prices going up", "cost of living", "price increase"], slug: "inflation", title: "Inflation", category: "Money basics", definition: "The general rise in prices over time, which lowers what each naira can buy.", explanation: ["Inflation is usually given as a yearly percentage.", "If inflation is 20%, something that cost ₦1,000 a year ago costs about ₦1,200 now."], example: "If a bag of rice goes from ₦50,000 to ₦60,000 in a year, its price rose 20%.", whyItMatters: "Savings that grow slower than inflation lose buying power.", misconceptions: ["A bigger account balance always means you are richer. Not if prices rose faster."], related: ["what-is-money", "saving-vs-investing"], lessonIds: ["inflation"], deep: {
             lead: ["", "Inflation", " is the general rise in prices over time, so each naira buys a little less than before."],
             takeaways: ["Inflation is usually given as a yearly percentage.", "In Nigeria, the National Bureau of Statistics publishes the official inflation rate every month.", "If your money grows slower than prices, it loses buying power."],
             how: { title: "How inflation is measured", intro: "Prices change all the time. Inflation measures how much they rise on average, across many everyday things people buy.", steps: ["Statisticians track the prices of a basket of common goods and services, such as food, transport and rent.", "They compare what the basket costs now with what it cost a year ago.", "The percentage rise is the inflation rate. 20% means the same basket costs 20% more."] },
@@ -553,14 +676,14 @@ const ARTICLES = [
             formula: { title: "Buying power", intro: "To see what money is worth in today's prices, divide it by 1 plus the inflation rate.", rule: "Amount \u00f7 (1 + inflation) = buying power", calc: "\u20a6100,000 \u00f7 1.2 = \u20a683,333", note: "After one year of 20% inflation" },
             mistake: { myth: "If my savings balance goes up, I'm getting richer.", fact: "Only if it grows faster than prices. \u20a6100,000 growing to \u20a6105,000 in a year of 20% inflation buys less than before." }
         } }),
-    a({ slug: "saving-vs-investing", title: "Saving vs investing", category: "Money basics", definition: "Saving keeps money safe for near-term needs; investing puts money to work for possible growth over years.", explanation: ["Savings accounts are low risk and easy to reach.", "Investments like shares can grow more but can also fall."], example: "An emergency fund sits in savings; money for 10 years from now might be invested.", whyItMatters: "Using the right one for each goal reduces stress and risk.", related: ["risk-and-return", "what-is-a-share"], lessonIds: ["saving-vs-investing"], deep: {
+    a({ keywords: ["save", "saving", "savings", "invest", "investing", "emergency fund"], slug: "saving-vs-investing", title: "Saving vs investing", category: "Money basics", definition: "Saving keeps money safe for near-term needs; investing puts money to work for possible growth over years.", explanation: ["Savings accounts are low risk and easy to reach.", "Investments like shares can grow more but can also fall."], example: "An emergency fund sits in savings; money for 10 years from now might be invested.", whyItMatters: "Using the right one for each goal reduces stress and risk.", related: ["risk-and-return", "what-is-a-share"], lessonIds: ["saving-vs-investing"], deep: {
             lead: ["", "Saving", " keeps money safe for near-term needs; investing puts money to work for possible growth over years."],
             takeaways: ["Savings are low risk and easy to reach.", "Investments like shares can grow more, but they can also fall.", "Match each pot of money to when you'll need it."],
             how: { "title": "How to choose between them", "intro": "The key question is when you'll need the money, and whether you could cope if its value fell for a while.", "steps": ["Money for the next few months, or for emergencies, usually belongs in savings.", "Money you won't need for years can be invested, if you understand the risks.", "Many people do both: savings first, then investing what's left."] },
             example: { "line": "Kunle has two goals.", "rows": [["Rent due in 3 months", "Savings"], ["Emergency fund", "Savings"], ["Money for 10 years from now", "Could invest"]], "note": "Made-up example. Not personal advice." },
             mistake: { "myth": "Investing is just saving that earns more.", "fact": "Investments can lose value. Saving protects the amount; investing accepts some risk for the chance of more growth." }
         } }),
-    a({ slug: "compound-interest", title: "Compound interest", category: "Investing", definition: "Earning returns on your original money and on returns already earned.", explanation: ["Each period's interest is added, so the next period earns on a bigger amount.", "Time is the biggest driver."], example: "₦100,000 at 10% a year: ₦110,000 after a year, ₦121,000 after two.", whyItMatters: "Starting early lets compounding work longer.", related: ["saving-vs-investing"], lessonIds: ["compound-interest"], deep: {
+    a({ keywords: ["interest", "grow", "growth", "start early"], slug: "compound-interest", title: "Compound interest", category: "Investing", definition: "Earning returns on your original money and on returns already earned.", explanation: ["Each period's interest is added, so the next period earns on a bigger amount.", "Time is the biggest driver."], example: "₦100,000 at 10% a year: ₦110,000 after a year, ₦121,000 after two.", whyItMatters: "Starting early lets compounding work longer.", related: ["saving-vs-investing"], lessonIds: ["compound-interest"], deep: {
             lead: ["", "Compound interest", " means earning a return on your money and on the returns you've already earned."],
             takeaways: ["Each period's interest is added to your balance.", "The next period earns interest on the bigger total.", "Time does most of the work, so starting early helps."],
             how: { "title": "How compounding works", "intro": "With simple interest you only earn on the amount you put in. With compound interest, your interest starts earning interest too.", "steps": ["You put in an amount, called the principal.", "At the end of the period, interest is added to it.", "Next period, interest is worked out on the new, larger balance."] },
@@ -568,42 +691,42 @@ const ARTICLES = [
             formula: { "title": "The compound growth formula", "intro": "Multiply by 1 plus the rate, once for each year.", "rule": "Amount × (1 + rate)ⁿ = future value", "calc": "₦100,000 × 1.1³ = ₦133,100", "note": "10% a year for 3 years" },
             mistake: { "myth": "A higher rate always beats starting early.", "fact": "Time matters a lot. Money that compounds for longer can end up ahead even at a lower rate." }
         } }),
-    a({ slug: "risk-and-return", title: "Risk and return", category: "Decisions and risk", definition: "The idea that investments with higher possible returns usually carry a higher chance of loss.", explanation: ["Low-risk options like treasury bills usually pay less.", "Shares can rise or fall a lot."], example: "A scheme promising 50% a month with no risk is a warning sign.", whyItMatters: "It helps you spot scams and set realistic expectations.", related: ["diversification"], lessonIds: ["risk-and-return"], deep: {
+    a({ keywords: ["risky", "safe", "scam", "lose money", "ponzi"], slug: "risk-and-return", title: "Risk and return", category: "Decisions and risk", definition: "The idea that investments with higher possible returns usually carry a higher chance of loss.", explanation: ["Low-risk options like treasury bills usually pay less.", "Shares can rise or fall a lot."], example: "A scheme promising 50% a month with no risk is a warning sign.", whyItMatters: "It helps you spot scams and set realistic expectations.", related: ["diversification"], lessonIds: ["risk-and-return"], deep: {
             lead: ["", "Risk and return", " go together: investments that could earn more usually carry a bigger chance of losing money."],
             takeaways: ["Low-risk options usually pay less.", "Higher possible returns come with a higher chance of loss.", "A promise of high returns with no risk is a warning sign."],
             how: { "title": "How to think about risk", "intro": "Risk is the chance that what you get back is less than you expected, or less than you put in.", "steps": ["Ask what you could lose, not just what you could gain.", "Compare the return with safer options like savings or treasury bills.", "Only take risks with money you won't need soon."] },
             example: { "line": "Three made-up offers for ₦100,000.", "rows": [["Savings account", "Low risk, small return"], ["Shares", "Can rise or fall a lot"], ["\"50% a month, guaranteed\"", "Warning sign"]], "note": "Real investments can't guarantee high returns." },
             mistake: { "myth": "If something is popular, it must be safe.", "fact": "Popularity isn't safety. Check who runs it, whether it's regulated, and how it makes money." }
         } }),
-    a({ slug: "diversification", title: "Diversification", category: "Decisions and risk", definition: "Spreading money across different investments so one bad result hurts less.", explanation: ["Owning shares in several companies and sectors spreads risk.", "It lowers risk but does not remove it."], example: "Instead of only bank shares, someone might hold banks, telecoms and consumer goods.", whyItMatters: "It protects you from one company's bad year.", related: ["risk-and-return"], deep: {
+    a({ keywords: ["spread", "eggs in one basket", "mix"], slug: "diversification", title: "Diversification", category: "Decisions and risk", definition: "Spreading money across different investments so one bad result hurts less.", explanation: ["Owning shares in several companies and sectors spreads risk.", "It lowers risk but does not remove it."], example: "Instead of only bank shares, someone might hold banks, telecoms and consumer goods.", whyItMatters: "It protects you from one company's bad year.", related: ["risk-and-return"], deep: {
             lead: ["", "Diversification", " means spreading money across different investments so one bad result hurts less."],
             takeaways: ["Owning several companies and sectors spreads risk.", "It lowers risk but doesn't remove it.", "Putting everything in one company is the opposite of diversifying."],
             how: { "title": "How diversification works", "intro": "Different companies and sectors have good and bad years at different times. Spreading out smooths the ride.", "steps": ["Spread across several companies, not just one.", "Spread across sectors, like banking, telecoms and consumer goods.", "Keep some money in safer options too."] },
             example: { "line": "Two made-up portfolios of ₦300,000 when one bank has a bad year and falls 30%.", "rows": [["All in that bank", "Loses ₦90,000"], ["Spread across 3 sectors", "Loses ₦30,000"]], "note": "In the spread portfolio, only the ₦100,000 in the bank falls 30%." },
             mistake: { "myth": "Owning five bank shares is diversified.", "fact": "They're all in one sector, so bad news for banks can hit all five at once." }
         } }),
-    a({ slug: "budgeting", title: "Budgeting", category: "Money basics", definition: "A plan for how you'll use your income.", explanation: ["A simple guide is 50% needs, 30% wants, 20% savings.", "Change the split to fit your life."], example: "On ₦150,000 a month, 20% savings is ₦30,000.", whyItMatters: "A budget makes saving and investing possible.", lessonIds: ["budgeting"], deep: {
+    a({ keywords: ["budget", "spending", "salary", "plan my money", "monthly"], slug: "budgeting", title: "Budgeting", category: "Money basics", definition: "A plan for how you'll use your income.", explanation: ["A simple guide is 50% needs, 30% wants, 20% savings.", "Change the split to fit your life."], example: "On ₦150,000 a month, 20% savings is ₦30,000.", whyItMatters: "A budget makes saving and investing possible.", lessonIds: ["budgeting"], deep: {
             lead: ["A ", "budget", " is a plan for how you'll use your income before you spend it."],
             takeaways: ["A simple guide is 50% needs, 30% wants, 20% savings.", "Change the split to fit your life.", "A budget makes saving and investing possible."],
             how: { "title": "How to make a budget", "intro": "A budget doesn't need special tools. A notebook or phone note works.", "steps": ["Write down your monthly income.", "List your spending as needs and wants.", "Decide how much to save first, then plan the rest."] },
             example: { "line": "Ada earns ₦150,000 a month and uses 50/30/20.", "rows": [["Needs (50%)", "₦75,000"], ["Wants (30%)", "₦45,000"], ["Savings (20%)", "₦30,000"]], "note": "₦75,000 + ₦45,000 + ₦30,000 = ₦150,000." },
             mistake: { "myth": "Budgets are only for people who earn a lot.", "fact": "A budget helps most when money is tight, because every naira has a job." }
         } }),
-    a({ slug: "what-is-a-share", title: "What is a share?", category: "Investing", definition: "A small piece of ownership in a company.", explanation: ["Owning a share means you own part of the company.", "Share prices change as people buy and sell."], example: "If a company has 1,000,000 shares and you own 1,000, you own 0.1% of it.", whyItMatters: "Shares are the main way people invest in companies.", related: ["stock-exchange", "dividend"], deep: {
+    a({ keywords: ["shares", "stock", "stocks", "own a company", "ownership", "shareholder"], slug: "what-is-a-share", title: "What is a share?", category: "Investing", definition: "A small piece of ownership in a company.", explanation: ["Owning a share means you own part of the company.", "Share prices change as people buy and sell."], example: "If a company has 1,000,000 shares and you own 1,000, you own 0.1% of it.", whyItMatters: "Shares are the main way people invest in companies.", related: ["stock-exchange", "dividend"], deep: {
             lead: ["A ", "share", " is a small piece of ownership in a company."],
             takeaways: ["Owning a share means you own part of the company.", "Share prices change as people buy and sell.", "Some companies pay part of their profit to shareholders as dividends."],
             how: { "title": "How shares work", "intro": "Companies split their ownership into many equal parts called shares, and some sell them to the public.", "steps": ["A company lists its shares on a stock exchange.", "People buy and sell those shares through licensed stockbrokers.", "The price moves with demand: more buyers push it up, more sellers push it down."] },
             example: { "line": "Made-up Adire Foods has 1,000,000 shares.", "rows": [["Shares you own", "1,000"], ["Total shares", "1,000,000"], ["Your ownership", "0.1%"]], "note": "1,000 ÷ 1,000,000 = 0.1%." },
             mistake: { "myth": "A share price going up means the company made more profit.", "fact": "Prices move on what people expect and on supply and demand, not only on today's profit." }
         } }),
-    a({ slug: "stock-exchange", title: "Stock exchange", category: "Nigerian market", definition: "A market where shares of listed companies are bought and sold.", explanation: ["In Nigeria, the main exchange is the Nigerian Exchange (NGX) in Lagos.", "You buy and sell through a licensed stockbroker."], example: "Large Nigerian companies in banking, telecoms and cement are listed on the NGX.", whyItMatters: "Knowing how the market works makes company news easier to follow.", related: ["what-is-a-share"], deep: {
+    a({ keywords: ["NGX", "exchange", "broker", "stockbroker", "trade shares", "buy shares"], slug: "stock-exchange", title: "Stock exchange", category: "Nigerian market", definition: "A market where shares of listed companies are bought and sold.", explanation: ["In Nigeria, the main exchange is the Nigerian Exchange (NGX) in Lagos.", "You buy and sell through a licensed stockbroker."], example: "Large Nigerian companies in banking, telecoms and cement are listed on the NGX.", whyItMatters: "Knowing how the market works makes company news easier to follow.", related: ["what-is-a-share"], deep: {
             lead: ["A ", "stock exchange", " is a market where shares of listed companies are bought and sold."],
             takeaways: ["Nigeria's main stock exchange is the Nigerian Exchange (NGX) in Lagos.", "You buy and sell through a licensed stockbroker, not directly.", "Prices change during trading as orders meet."],
             how: { "title": "How an exchange works", "intro": "An exchange brings buyers and sellers together under rules, so trades are fair and recorded.", "steps": ["A company meets the exchange's rules and lists its shares.", "Investors send buy and sell orders through their stockbrokers.", "When a buy order meets a sell order at the same price, a trade happens."] },
             example: { "line": "A made-up trade on a practice market.", "rows": [["Seller asks", "₦30.00"], ["Buyer offers", "₦30.00"], ["Shares traded", "500"], ["Trade value", "₦15,000"]], "note": "500 × ₦30 = ₦15,000, before broker fees." },
             mistake: { "myth": "You can buy shares straight from the exchange's website.", "fact": "In Nigeria you trade through a licensed stockbroker, who places orders for you." }
         } }),
-    a({ slug: "dividend", title: "Dividend", category: "Company analysis", definition: "A share of a company's profit paid to shareholders.", explanation: ["Not every company pays dividends.", "Dividends are usually paid per share."], example: "If a company pays ₦2 per share and you own 500 shares, you receive ₦1,000 (before any tax).", whyItMatters: "Dividends are one way investors earn from shares, besides price changes.", related: ["what-is-a-share", "price-to-earnings"], deep: {
+    a({ keywords: ["dividends", "payout", "paid to shareholders"], slug: "dividend", title: "Dividend", category: "Company analysis", definition: "A share of a company's profit paid to shareholders.", explanation: ["Not every company pays dividends.", "Dividends are usually paid per share."], example: "If a company pays ₦2 per share and you own 500 shares, you receive ₦1,000 (before any tax).", whyItMatters: "Dividends are one way investors earn from shares, besides price changes.", related: ["what-is-a-share", "price-to-earnings"], deep: {
             lead: ["A ", "dividend", " is part of a company's profit that it pays to the people who own its shares."],
             takeaways: ["Dividends are usually paid as a fixed amount per share.", "Not every company pays them, and they can be cut or stopped.", "Dividend yield compares the yearly payout with the share price."],
             how: { "title": "How dividends work", "intro": "When a company makes a profit, it can keep the money to grow, or share some with its owners. If you own shares, you are one of those owners.", "steps": ["The company's board decides how much to pay per share.", "It sets a cut-off date. You must own the shares before it to qualify.", "The money is paid to shareholders, usually into a bank account."] },
@@ -611,7 +734,7 @@ const ARTICLES = [
             formula: { "title": "Dividend yield", "intro": "Yield shows how big the payout is compared with the share price.", "rule": "Dividend ÷ Share price = Yield", "calc": "₦1.50 ÷ ₦30 = 5%", "note": "If one Adire Foods share costs ₦30" },
             mistake: { "myth": "A company that paid a dividend last year will pay one this year.", "fact": "Dividends aren't promised. A company can cut or stop them if profits fall." }
         } }),
-    a({ slug: "price-to-earnings", title: "Price-to-earnings (P/E) ratio", category: "Company analysis", definition: "The share price divided by the profit per share.", explanation: ["It shows how much investors pay for each naira of profit.", "Compare P/E with similar companies, not across very different industries."], example: "A ₦100 share with ₦10 profit per share has a P/E of 10.", whyItMatters: "It's a quick way to see if a share looks expensive or cheap relative to profit.", related: ["revenue-and-profit"], deep: {
+    a({ keywords: ["PE", "P/E", "valuation", "cheap", "overpriced"], slug: "price-to-earnings", title: "Price-to-earnings (P/E) ratio", category: "Company analysis", definition: "The share price divided by the profit per share.", explanation: ["It shows how much investors pay for each naira of profit.", "Compare P/E with similar companies, not across very different industries."], example: "A ₦100 share with ₦10 profit per share has a P/E of 10.", whyItMatters: "It's a quick way to see if a share looks expensive or cheap relative to profit.", related: ["revenue-and-profit"], deep: {
             lead: ["The ", "P/E ratio", " is the share price divided by the profit per share."],
             takeaways: ["It shows how much investors pay for each naira of profit.", "Compare P/E with similar companies, not across very different industries.", "A low P/E isn't automatically a bargain."],
             how: { "title": "How to work out P/E", "intro": "You need two numbers: the share price, and the company's profit for one share (earnings per share).", "steps": ["Find the share price.", "Find the profit per share for the latest year.", "Divide the price by the profit per share."] },
@@ -619,7 +742,7 @@ const ARTICLES = [
             formula: { "title": "The P/E formula", "intro": "Price per share divided by profit per share.", "rule": "Share price ÷ Profit per share = P/E", "calc": "₦100 ÷ ₦10 = 10", "note": "A made-up company" },
             mistake: { "myth": "A lower P/E always means a better buy.", "fact": "A low P/E can mean the market expects profits to fall. It's a starting point for questions, not an answer." }
         } }),
-    a({ slug: "revenue-and-profit", title: "Revenue and profit", category: "Company analysis", definition: "Revenue is money a company takes in from sales; profit is what's left after costs.", explanation: ["A company can have high revenue and still make a loss.", "Profit is also called earnings or net income."], example: "A bakery sells ₦1,000,000 of bread (revenue) and spends ₦800,000 (costs): profit is ₦200,000.", whyItMatters: "Profit shows whether a business is actually making money.", related: ["price-to-earnings"], deep: {
+    a({ keywords: ["profit", "revenue", "sales", "loss", "earnings", "income"], slug: "revenue-and-profit", title: "Revenue and profit", category: "Company analysis", definition: "Revenue is money a company takes in from sales; profit is what's left after costs.", explanation: ["A company can have high revenue and still make a loss.", "Profit is also called earnings or net income."], example: "A bakery sells ₦1,000,000 of bread (revenue) and spends ₦800,000 (costs): profit is ₦200,000.", whyItMatters: "Profit shows whether a business is actually making money.", related: ["price-to-earnings"], deep: {
             lead: ["", "Revenue", " is money a company takes in from sales; profit is what's left after all its costs."],
             takeaways: ["A company can have high revenue and still make a loss.", "Profit is also called earnings or net income.", "Profit, not revenue, shows whether a business really makes money."],
             how: { "title": "From revenue to profit", "intro": "A company's results usually start with revenue at the top and end with profit at the bottom.", "steps": ["Start with revenue: everything earned from sales.", "Take away costs: materials, salaries, rent, interest and tax.", "What's left is profit. If costs are bigger, it's a loss."] },
@@ -627,14 +750,14 @@ const ARTICLES = [
             formula: { "title": "Profit margin", "intro": "The share of each naira of sales that the company keeps as profit.", "rule": "Profit ÷ Revenue = Profit margin", "calc": "₦200,000 ÷ ₦1,000,000 = 20%", "note": "The made-up bakery" },
             mistake: { "myth": "A company with growing sales is doing well.", "fact": "Not if its costs grow faster. Check profit too." }
         } }),
-    a({ slug: "treasury-bills", title: "Treasury bills", category: "Nigerian market", definition: "Short-term loans to the government that pay a fixed return.", explanation: ["They usually last 91, 182 or 364 days.", "They are considered low risk."], example: "Some Nigerians use treasury bills for money they need within a year.", whyItMatters: "They are a common low-risk option to compare with shares.", related: ["risk-and-return"], deep: {
+    a({ keywords: ["t-bills", "tbills", "government", "CBN", "fixed return"], slug: "treasury-bills", title: "Treasury bills", category: "Nigerian market", definition: "Short-term loans to the government that pay a fixed return.", explanation: ["They usually last 91, 182 or 364 days.", "They are considered low risk."], example: "Some Nigerians use treasury bills for money they need within a year.", whyItMatters: "They are a common low-risk option to compare with shares.", related: ["risk-and-return"], deep: {
             lead: ["", "Treasury bills", " are short-term loans to the government that pay a set return."],
             takeaways: ["In Nigeria they usually last 91, 182 or 364 days.", "They're sold below their face value; you get the full face value at the end.", "They're considered low risk."],
             how: { "title": "How treasury bills work", "intro": "The government borrows for a short time by selling bills. The Central Bank of Nigeria runs the sales on the government's behalf.", "steps": ["You pay less than the bill's face value today.", "You wait until the bill matures.", "You receive the full face value. The difference is your return."] },
             example: { "line": "A made-up 364-day bill.", "rows": [["Face value", "₦100,000"], ["Price you pay", "₦90,000"], ["Your return", "₦10,000"]], "note": "₦100,000 − ₦90,000 = ₦10,000. Real prices change at each sale." },
             mistake: { "myth": "Treasury bills can never lose value in real terms.", "fact": "If inflation is higher than the bill's return, your money still buys less when it pays back." }
         } }),
-    a({ slug: "market-capitalisation", title: "Market capitalisation", category: "Markets", definition: "The total value of a company's shares: share price × number of shares.", explanation: ["It's how big the market thinks a company is.", "Large-cap companies are usually more established."], example: "1 billion shares at ₦100 each = ₦100 billion market cap.", whyItMatters: "It helps compare company sizes.", related: ["what-is-a-share"], deep: {
+    a({ keywords: ["market cap", "company size", "value of a company", "worth"], slug: "market-capitalisation", title: "Market capitalisation", category: "Markets", definition: "The total value of a company's shares: share price × number of shares.", explanation: ["It's how big the market thinks a company is.", "Large-cap companies are usually more established."], example: "1 billion shares at ₦100 each = ₦100 billion market cap.", whyItMatters: "It helps compare company sizes.", related: ["what-is-a-share"], deep: {
             lead: ["", "Market capitalisation", " is the total value of a company's shares: share price × number of shares."],
             takeaways: ["It's how big the market thinks a company is.", "It changes every time the share price changes.", "Large companies are often more established, but not always safer."],
             how: { "title": "How to work it out", "intro": "You need the share price and the total number of shares the company has issued.", "steps": ["Find the share price.", "Find the number of shares issued.", "Multiply them together."] },
@@ -642,7 +765,7 @@ const ARTICLES = [
             formula: { "title": "The market cap formula", "intro": "Price multiplied by the number of shares.", "rule": "Share price × Number of shares = Market cap", "calc": "₦100 × 1 billion = ₦100 billion", "note": "A made-up company" },
             mistake: { "myth": "A higher share price means a bigger company.", "fact": "Not on its own. A ₦10 share with many more shares in issue can be a bigger company than a ₦100 share." }
         } }),
-    a({ slug: "fees-and-costs", title: "Trading fees", category: "Investing", definition: "Charges paid when you buy or sell shares.", explanation: ["Brokers and the exchange charge fees on each trade.", "Fees reduce your return, especially on small or frequent trades."], example: "A 1.5% fee on a ₦10,000 trade is ₦150.", whyItMatters: "Counting fees helps you see your true cost.", related: ["what-is-a-share"], deep: {
+    a({ keywords: ["fees", "charges", "commission", "broker fee", "trading"], slug: "fees-and-costs", title: "Trading fees", category: "Investing", definition: "Charges paid when you buy or sell shares.", explanation: ["Brokers and the exchange charge fees on each trade.", "Fees reduce your return, especially on small or frequent trades."], example: "A 1.5% fee on a ₦10,000 trade is ₦150.", whyItMatters: "Counting fees helps you see your true cost.", related: ["what-is-a-share"], deep: {
             lead: ["", "Trading fees", " are charges you pay when you buy or sell shares."],
             takeaways: ["Brokers and the market charge fees on each trade.", "Fees reduce your return, especially on small or frequent trades.", "Check the total cost before you trade."],
             how: { "title": "How fees affect you", "intro": "Fees are usually a percentage of the trade, sometimes with a minimum amount.", "steps": ["Find the fee rate and any minimum charge.", "Work out the fee for the size of your trade.", "Add it to the cost of buying, or take it from what you get when selling."] },
@@ -653,5 +776,41 @@ const ARTICLES = [
 ];
 const TOPICS = ["Money basics", "Investing", "Markets", "Nigerian market", "Company analysis", "Decisions and risk"];
 
-window.FVD = { NAIRA, CONFIG, LABELS, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, REVIEW_XP, recordMisses, planReview, applyReview, reviewReward, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, isAdviceRequest, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS };
+// ---- sd:companies
+// Companies: real names and tickers (ADR 0001 D8) with plain-language descriptions only.
+// No real financial figures are stated. Every price in the app is synthetic "Demo data".
+// Simulator companies are made up (build plan §10 #5), so no real price is ever implied.
+const COMPANIES = [
+    { ticker: "MTNN", name: "MTN Nigeria", sector: "Telecoms", exchange: "NGX", about: "A mobile network company offering calls, data and mobile money services.", howItMakesMoney: "Mostly from people paying for airtime and data, plus fintech and other digital services.", learnSlugs: ["revenue-and-profit", "dividend"], demoBasePriceKobo: 22000_00, paysDividends: true },
+    { ticker: "DANGCEM", name: "Dangote Cement", sector: "Industrial goods", exchange: "NGX", about: "A cement maker with plants in Nigeria and other African countries.", howItMakesMoney: "Selling cement to builders, governments and distributors.", learnSlugs: ["market-capitalisation", "revenue-and-profit"], demoBasePriceKobo: 45000_00, paysDividends: true },
+    { ticker: "ZENITHBANK", name: "Zenith Bank", sector: "Banking", exchange: "NGX", about: "A commercial bank serving individuals and businesses.", howItMakesMoney: "Interest on loans, plus fees for transfers, cards and other services.", learnSlugs: ["price-to-earnings", "dividend"], demoBasePriceKobo: 4500_00, paysDividends: true },
+    { ticker: "GTCO", name: "Guaranty Trust Holding Co.", sector: "Banking", exchange: "NGX", about: "A financial group whose main business is GTBank.", howItMakesMoney: "Interest on loans and fees on banking services.", learnSlugs: ["price-to-earnings"], demoBasePriceKobo: 5500_00, paysDividends: true },
+    { ticker: "NESTLE", name: "Nestlé Nigeria", sector: "Consumer goods", exchange: "NGX", about: "Makes food and drinks sold across Nigeria.", howItMakesMoney: "Selling packaged foods and beverages through shops and distributors.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 90000_00, paysDividends: true },
+    { ticker: "AIRTELAFRI", name: "Airtel Africa", sector: "Telecoms", exchange: "NGX", about: "A mobile network operator in several African countries.", howItMakesMoney: "Airtime, data and mobile money across its markets.", learnSlugs: ["diversification"], demoBasePriceKobo: 200000_00, paysDividends: true },
+    { ticker: "SEPLAT", name: "Seplat Energy", sector: "Oil and gas", exchange: "NGX", about: "An energy company producing oil and gas in Nigeria.", howItMakesMoney: "Selling crude oil and natural gas.", learnSlugs: ["risk-and-return"], demoBasePriceKobo: 500000_00, paysDividends: true },
+    { ticker: "NB", name: "Nigerian Breweries", sector: "Consumer goods", exchange: "NGX", about: "Brews and sells beers and soft drinks.", howItMakesMoney: "Selling drinks through distributors, bars and shops.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 3500_00, paysDividends: true },
+];
+const SIM_COMPANIES = [
+    { ticker: "LGFD", name: "Lagoon Foods", sector: "Consumer goods", blurb: "A made-up food company that sells noodles and snacks.", basePriceKobo: 1250_00, volatility: 0.015, learnSlug: "revenue-and-profit" },
+    { ticker: "SVNT", name: "Savanna Telecom", sector: "Telecoms", blurb: "A made-up mobile network selling data bundles.", basePriceKobo: 3400_00, volatility: 0.018, learnSlug: "dividend" },
+    { ticker: "OKBK", name: "Okeke Bank", sector: "Banking", blurb: "A made-up bank that earns interest on loans.", basePriceKobo: 820_00, volatility: 0.022, learnSlug: "price-to-earnings" },
+    { ticker: "NSOL", name: "NaijaSol Power", sector: "Energy", blurb: "A made-up solar company. Its price moves more than most.", basePriceKobo: 560_00, volatility: 0.035, learnSlug: "risk-and-return" },
+    { ticker: "ARWC", name: "Arewa Cement", sector: "Industrial goods", blurb: "A made-up cement maker.", basePriceKobo: 2900_00, volatility: 0.012, learnSlug: "market-capitalisation" },
+    { ticker: "DLTA", name: "Delta Logistics", sector: "Services", blurb: "A made-up delivery company.", basePriceKobo: 410_00, volatility: 0.028, learnSlug: "diversification" },
+];
+/** Short names learners type, for Ask Fin (design Part 3). Kept specific so ordinary words don't match. */
+const ASK_ALIASES = {
+    MTNN: ["MTN"], DANGCEM: ["Dangote"], ZENITHBANK: ["Zenith"], GTCO: ["GTBank", "GT Bank", "GTB", "Guaranty Trust"], NESTLE: ["Nestle"],
+    AIRTELAFRI: ["Airtel"], SEPLAT: ["Seplat"], NB: [],
+    LGFD: ["Lagoon"], SVNT: ["Savanna"], OKBK: ["Okeke"], NSOL: ["NaijaSol"], ARWC: ["Arewa"], DLTA: [],
+};
+/** Both company lists in the shape Ask Fin reads. */
+function askCompanies() {
+    return [
+        ...COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.about, howItMakesMoney: c.howItMakesMoney, slug: c.learnSlugs[0], madeUp: false })),
+        ...SIM_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.blurb, slug: c.learnSlug, madeUp: true })),
+    ];
+}
+
+window.FVD = { NAIRA, CONFIG, LABELS, ASK, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, REVIEW_XP, recordMisses, planReview, applyReview, reviewReward, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, countsTowardLimit, isAdviceRequest, stem, askWords, scoreAll, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS, COMPANIES, SIM_COMPANIES, ASK_ALIASES, askCompanies };
 })();

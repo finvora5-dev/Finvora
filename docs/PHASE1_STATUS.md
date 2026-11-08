@@ -38,7 +38,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 
 *   **Learning:** World 1 with six 7-step lessons (explainer, myth or compare, question, order, match, scenario, calculation), a boss challenge, daily question, micro modules, challenges, XP, five levels, streak with a weekly rest day, badges. **Review what I missed:** questions answered wrong on the first try are kept per lesson; tapping a finished lesson offers a review of just those, a miss clears when answered right, and fixing them all gives +5 XP once per lesson and the "Came back stronger" badge. Full replay stays. Inside lessons: a "3 in a row" label and Fin's halfway cheer. After a lesson: a learning receipt, the streak fire dial (first activity of the day) and a "new high" level chart (when a level is crossed), then the summary.
 *   **Library:** 15 articles with takeaways, how it works, an African example with made-up figures and common mistakes; search; saved articles; dictionary. Reading an article to the end earns 3 XP once.
-*   **Ask Fin:** scripted answers, refusal of buy or sell advice, a free limit of 5 questions a day, links only to real Library articles, every answer labelled "Example answer from the Finvora Library".
+*   **Ask Fin** (design Part 3): answers every money question from hand-written answers, Library articles (including admin-published ones) and company descriptions, never with invented figures; refuses buy or sell advice; declines off-topic questions; "Did you mean" for near misses; only real answers use up the 5 free a day, then Ask Fin closes until tomorrow; admin "Ask words" help Fin find articles; 40 test questions. Client note: `docs/ask-fin-phase1-note.md`.
 *   **Practice Market (simulator):** made-up companies and virtual naira, amount-first buying, approximate fees, real NGX hours (weekdays 10:00 to 14:30 Lagos time) with a closed sheet that shows the next opening time and offers to queue the order or do a lesson. Prices move once per trading day.
 *   **Plans and checkout:** Plus at ₦5,999 a month or ₦65,989 a year (one month free); simulated checkout with pending, confirmed success and confirmed failed states; receipt email preview.
 *   **Admin (browser-only demonstration):** staff sign-in, overview, content editor, daily-question builder, Ask Fin review, AI summary approvals, users and payments, plan prices, feedback, audit log.
@@ -60,7 +60,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   Reviewer tools are open to everyone (D21).
 *   Admin checks run in the browser and are not real security.
 *   Text size follows the phone setting on the lesson path only so far; other screens rely on pinch zoom.
-*   Ask Fin matches about 19 scripted answers by keyword. It does not yet search the Library text (Part 3).
+*   Ask Fin matches words, not meaning, so unusual phrasing may get "Did you mean". No company figures until the Mansa API (Phase 2).
 *   Market hours ignore public holidays.
 *   Lesson and article content was written for the prototype and needs review by a finance educator.
 

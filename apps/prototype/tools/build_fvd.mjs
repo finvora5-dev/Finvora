@@ -5,7 +5,7 @@
 //        node build_fvd.mjs <dom> <site> <sd>
 import fs from "node:fs"; import path from "node:path";
 const [src, site, sd] = process.argv.slice(2);
-const order = ["config", "money", "market", "markethours", "review", "simulator", "entitlements", "askfin", "checkout", "calculator", "search", "sd:askfin", "sd:library"];
+const order = ["config", "money", "market", "markethours", "review", "simulator", "entitlements", "askfin", "checkout", "calculator", "search", "sd:askfin", "sd:library", "sd:companies"];
 let body = "", names = [];
 for (const m of order) {
   const [dir, file] = m.startsWith("sd:") ? [sd, m.slice(3)] : [src, m];

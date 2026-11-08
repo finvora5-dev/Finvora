@@ -34,3 +34,16 @@ export const LABELS = {
   EXAMPLE_ANSWER: "Example answer from the Finvora Library",
   MADE_UP_FIGURES: "Made-up figures",
 } as const;
+
+/** Ask Fin word lists and score bands (design Part 3, docs/designs/ask-fin-grounded-answers.md). */
+export const ASK = {
+  /** Score bands, 0 to 1. At or above HIGH: answer. Between: "Did you mean". Below LOW: not enough information or decline. Tuned on askfin.cases.ts. */
+  SCORE_HIGH: 0.26,
+  SCORE_LOW: 0.22,
+  /** A hand-written answer's score is multiplied by this, so common questions keep their tuned wording. */
+  SCRIPT_BOOST: 1.1,
+  FINANCE_WORDS: ["money", "naira", "kobo", "save", "saving", "savings", "invest", "investment", "investor", "stock", "dividend", "profit", "loss", "inflation", "bank", "budget", "market", "ngx", "loan", "debt", "price", "income", "salary", "spend", "tax", "pension", "fund", "bond", "bill", "treasury", "fee", "cost", "return", "risk", "scam", "crypto", "bitcoin", "capital", "revenue", "earning", "earnings", "asset", "wealth", "rich", "afford", "pay", "cash", "credit", "rent", "economy", "exchange", "broker", "portfolio", "expensive", "costly", "cheap", "finance", "financial", "company", "business", "dollar"],
+  STOP_WORDS: ["a", "an", "the", "is", "are", "was", "were", "be", "been", "am", "do", "does", "did", "i", "me", "my", "you", "your", "we", "our", "it", "its", "this", "that", "these", "those", "what", "which", "who", "whom", "how", "why", "when", "where", "can", "could", "should", "would", "will", "of", "to", "in", "on", "for", "with", "at", "by", "from", "about", "as", "and", "or", "but", "if", "so", "than", "then", "there", "here", "tell", "explain", "mean", "means", "meaning", "please", "work", "works", "get", "some", "any", "all", "much", "many", "more", "most", "very", "just", "like", "kind", "thing", "things", "know", "want", "need", "fin", "hi", "hello", "hey", "thanks", "ok", "okay", "something", "everything", "keep", "go", "going", "up", "down", "now", "these", "days", "day", "use", "used", "make", "makes", "making", "last", "year", "years", "yearly", "ago"],
+  /** Words left whole by the ending trimmer. */
+  KEEP_WORDS: ["trading", "savings", "earnings", "news", "less", "always", "series", "business", "bus", "tax", "loss", "process"],
+} as const;

@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   CONFIG, feeFor, quoteByAmount, newAccount, executeTrade, valuePortfolio, replay, formatNaira, parseNairaToKobo,
   entitlements, nextForYou, emptyLearning, startLesson, completeLesson, streak, isUnlocked,
-  answerQuestion, isAdviceRequest, canAsk, recordAsk, suggestedPrompts,
+  answerQuestion, isAdviceRequest, canAsk, recordAsk, suggestedPrompts, scoreAll, countsTowardLimit, ASK, type AskSources,
   createOrder, applyCheck, retry, canStartPurchase, effectivePlan, addPeriod,
   historicalReturn, compound, parseStored, serialise, isObject, search, suggest, shouldShow, DEFAULT_PROMPTS, priceSeries,
   type TradeRequest,
 } from "./index";
+import { ASK_CASES } from "./askfin.cases";
+import { SCRIPTED_ANSWERS, ARTICLES, askCompanies } from "../../sample-data/src/index";
 
 const N = 100; // kobo per naira
 const fees = { bps: 150, minKobo: 50 * N };
@@ -169,21 +171,45 @@ describe("learning and Next for you", () => {
   });
 });
 
-describe("Ask Fin (scripted)", () => {
-  const scripts = [{ id: "infl", keywords: ["inflation"], answer: "Inflation is…", articleSlugs: ["inflation", "missing"], followUps: [] }];
-  const title = (s: string) => (s === "inflation" ? "Inflation" : s === "what-is-a-share" ? "What is a share?" : undefined);
-  it("refuses buy/sell advice", () => {
-    expect(isAdviceRequest("Should I buy MTN shares?")).toBe(true);
-    expect(answerQuestion("which stock should I buy", null, scripts, title).kind).toBe("refusal");
+describe("Ask Fin (grounded answers, design Part 3)", () => {
+  const sources = { scripts: SCRIPTED_ANSWERS, articles: ARTICLES, companies: askCompanies() };
+  const run = (q: string, src: AskSources = sources) => answerQuestion(q, null, src);
+  const idOf = (q: string, r: ReturnType<typeof run>) => {
+    if (r.kind !== "answer") return undefined;
+    const s = SCRIPTED_ANSWERS.find((x) => x.answer === r.answer);
+    return s ? s.id : r.citations[0]?.articleSlug;
+  };
+  for (const c of ASK_CASES) {
+    it(`${c.set}: "${c.q}" gives ${c.expect}${c.id ? " from " + c.id : ""}`, () => {
+      const r = run(c.q);
+      expect(r.kind).toBe(c.expect);
+      if (c.id) expect([idOf(c.q, r), ...r.citations.map((x) => x.articleSlug)]).toContain(c.id);
+    });
+  }
+  it("keeps a gap between in-scope and off-topic scores", () => {
+    const top = (q: string) => scoreAll(q, sources)[0]?.score ?? 0;
+    const inScope = ASK_CASES.filter((c) => c.set === "tune" && c.expect === "answer" && !/Zenith|MTN|GTBank|Okeke|Dangote|Airtel/.test(c.q)).map((c) => top(c.q));
+    const off = ASK_CASES.filter((c) => c.set === "tune" && c.expect === "decline").map((c) => top(c.q));
+    expect(Math.min(...inScope)).toBeGreaterThanOrEqual(ASK.SCORE_HIGH + 0.03);
+    expect(Math.max(...off)).toBeLessThanOrEqual(ASK.SCORE_LOW - 0.03);
+  });
+  it("still gives the held-out results with one more article published", () => {
+    const extra = { slug: "x-new", title: "Pension basics", definition: "Money saved for when you stop working.", explanation: ["You and your employer pay in each month."] };
+    const more = { ...sources, articles: [...ARTICLES, extra] };
+    for (const c of ASK_CASES.filter((x) => x.set === "held")) expect(run(c.q, more).kind).toBe(c.expect);
+  });
+  it("only cites articles that exist and never gives figures for companies", () => {
+    for (const c of ASK_CASES) for (const cit of run(c.q).citations) expect(ARTICLES.some((a) => a.slug === cit.articleSlug)).toBe(true);
+    expect(run("What was Zenith Bank's profit last year?").answer).not.toMatch(/₦|\d/);
+  });
+  it("offers 'did you mean' for near matches", () => {
+    const r = run("tell me about growth");
+    if (r.kind === "didyoumean") expect(r.choices?.length).toBeGreaterThan(0);
+  });
+  it("only real answers use up a free question", () => {
+    expect(countsTowardLimit("answer")).toBe(true);
+    for (const k of ["didyoumean", "insufficient", "decline", "refusal"] as const) expect(countsTowardLimit(k)).toBe(false);
     expect(isAdviceRequest("What is a share?")).toBe(false);
-  });
-  it("only cites articles that exist", () => {
-    const r = answerQuestion("what is inflation", null, scripts, title);
-    expect(r.kind).toBe("answer");
-    expect(r.citations).toEqual([{ articleSlug: "inflation", title: "Inflation" }]);
-  });
-  it("says when it has no answer", () => {
-    expect(answerQuestion("tell me about volcanoes", null, scripts, title)).toMatchObject({ kind: "insufficient", citations: [] });
   });
   it("counts daily usage per Lagos day", () => {
     let u = recordAsk(undefined, "d1");
