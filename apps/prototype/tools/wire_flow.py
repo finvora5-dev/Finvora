@@ -108,3 +108,18 @@ if MARK not in s:
     """
     wr('UPLearnMyth', wrap_render(s, 'myth', extra))
     print('myth wired')
+
+# Match the pairs: the lesson's four words, scored on the first try (no wrong taps).
+s = rd('UPLessonMatch')
+if MARK not in s:
+    s = progress(s)
+    s = sub1(s, '>These four words are the building blocks of every interest calculation.</p>', '>{{mDone}}</p>')
+    s = sub1(s, '<a href="UPLessonCalc.dc.html" class="btn b-green">Continue</a>', '<a href="{{nextHref}}" class="btn b-green">Continue</a>')
+    s = sub1(s, "this.state = { sel: null, done: [], miss: null, last: null };", "this.state = { sel: null, done: [], miss: null, last: null, misses: 0 };")
+    s = sub1(s, "    const T = ['Principal', 'Interest rate', 'Compounding', 'Time horizon'];\n    const M = [{ k: 2, t: 'Earning interest on past interest' }, { k: 0, t: 'The money you start with' }, { k: 3, t: 'How long the money stays invested' }, { k: 1, t: 'The % paid per year' }];",
+        "    const LS = window.FV && window.FV.lesson ? window.FV.lesson() : null, MC = LS && LS.c && LS.c.match;\n    const T = MC ? MC.terms : ['Principal', 'Interest rate', 'Compounding', 'Time horizon'];\n    const M = MC ? [2, 0, 3, 1].map((k) => ({ k: k, t: MC.means[k] })) : [{ k: 2, t: 'Earning interest on past interest' }, { k: 0, t: 'The money you start with' }, { k: 3, t: 'How long the money stays invested' }, { k: 1, t: 'The % paid per year' }];")
+    s = sub1(s, "if (m.k === s.sel) this.setState({ done: s.done.concat([m.k]), last: m.k, sel: null, miss: null }); else this.setState({ miss: j });",
+        "if (m.k === s.sel) { const nd = s.done.concat([m.k]); if (nd.length === 4 && window.FV) window.FV.answer('match', s.misses === 0, s.misses ? s.misses + ' wrong taps' : 'All matched first time'); this.setState({ done: nd, last: m.k, sel: null, miss: null }); } else this.setState({ miss: j, misses: s.misses + 1 });")
+    s = sub1(s, "      showRight: all\n", "      showRight: all, mDone: MC ? MC.done : 'These four words are the building blocks of every interest calculation.'\n")
+    wr('UPLessonMatch', wrap_render(s, 'match'))
+    print('match wired')

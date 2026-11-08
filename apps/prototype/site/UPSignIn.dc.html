@@ -67,7 +67,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <div><h1 style="font-size: 28px">Save your progress</h1><p class="muted" style="margin: 6px 0 0">Enter your email and we'll send a 6-digit code. No password to remember.</p></div>
     <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 14px">Email address</span><input class="field" type="email" autocomplete="email" inputmode="email" value="{{email}}" onInput="{{onEmail}}" onKeyDown="{{onKey}}" aria-invalid="{{bad}}" aria-describedby="em-err" placeholder="ada@example.com"></label>
     <sc-if value="{{showErr}}" hint-placeholder-val="{{false}}"><p id="em-err" role="alert" style="margin: -6px 0 0; color: #B42828; font-weight: 700; font-size: 14px">Enter a valid email address, like ada@example.com.</p></sc-if><label style="display: none"></label>
-    <p class="muted" style="margin: 0; font-size: 13px">By continuing you agree to the Terms and Privacy policy.</p>
+    <p class="muted" style="margin: 0; font-size: 13px">By continuing you agree to the Terms and Privacy policy.</p><a href="URReviewer.dc.html" style="font-size: 14px; font-weight: 700; min-height: 44px; display: flex; align-items: center">Reviewing Finvora? Open reviewer tools</a>
   </main><div style="margin-top: auto; position: sticky; bottom: 0; z-index: 5; padding: 12px 16px 22px; background: linear-gradient(rgba(255,255,255,0), #FFFFFF 30%); display: flex; flex-direction: column; gap: 10px"><button type="button" class="btn" onClick="{{send}}" style="width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 700">Send code</button></div>
 </div>
 </x-dc>

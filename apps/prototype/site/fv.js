@@ -53,7 +53,8 @@
   ];
   var series = {};
   function D() { return window.FVD; }
-  function simDay() { return Math.max(1, Math.min(SIM_DAYS - 1, Math.floor((Date.now() + 3600000 - SIM_START) / 86400000))); }
+  function dayShift() { try { return +localStorage.getItem("fv.sim.shift") || 0; } catch (e) { return 0; } }
+  function simDay() { return Math.max(1, Math.min(SIM_DAYS - 1, Math.floor((Date.now() + 3600000 - SIM_START) / 86400000) + dayShift())); }
   function pathOf(t) {
     if (!series[t]) { var c = COMPANIES.filter(function (x) { return x.t === t; })[0]; series[t] = D().priceSeries(t, c.base, SIM_DAYS, 0.016); }
     return series[t];
@@ -376,7 +377,8 @@
   // screens with their own words. Amounts are naira; every example is made up for learning.
   var CONTENT = {
     money: {
-      flow: ["info", "myth", "choice", "order", "scenario", "calc"],
+      match: { terms: ["Paying", "Comparing", "Keeping value", "Kobo"], means: ["Handing over money for something now", "Using prices to see what costs more", "Putting money aside to use later", "One hundredth of a naira"], done: "These are money's three jobs, plus the smallest unit of the naira." },
+      flow: ["info", "myth", "choice", "order", "match", "scenario", "calc"],
       myth: { title: "Myth or fact?", lead: "A common idea about money that isn't quite right.", myth: "Money is only coins and notes.", fact: "Money in your bank account or mobile wallet is money too. It still pays for things, compares prices and keeps value.", tip: "What makes something money is that people accept it." },
       order: { q: "Order these from the smallest amount to the largest.", items: [["50 kobo", "Half a naira", "₦0.50"], ["₦5", "500 kobo", "₦5.00"], ["₦50", "5,000 kobo", "₦50.00"]], start: [2, 0, 1],
         wrong: "Change everything to kobo first: ₦1 is 100 kobo. Then compare. Move the items and check again.", right: ["50 kobo is half of ₦1.", "₦5 is 500 kobo.", "₦50 is 5,000 kobo, the largest."], note: "₦1 = 100 kobo.", ends: ["Smallest", "Largest"] },
@@ -396,7 +398,8 @@
       learned: ["Money helps you pay for things.", "Prices in naira let you compare things.", "Money can keep value for later, though inflation can shrink it."], article: "what-is-money"
     },
     income: {
-      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      match: { terms: ["Income", "Expense", "Salary", "Left over"], means: ["Money that comes in", "Money that goes out", "Pay from a job, often monthly", "Income minus expenses"], done: "Every budget starts with these four words." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
       compare: { title: "Income vs expenses", lead: "Every month, money comes in and money goes out.", a: { name: "Income (in)", items: ["Salary or wages", "Profit from a business", "Gifts and support", "Interest on savings"] }, b: { name: "Expenses (out)", items: ["Rent and food", "Transport and data", "School fees", "Loan repayments"] }, tip: "What's left after expenses is what you can save." },
       order: { q: "Kemi earns ₦100,000 a month. Order these months from least to most left over.", items: [["Month A", "Spends ₦95,000", "₦5,000 left"], ["Month B", "Spends ₦80,000", "₦20,000 left"], ["Month C", "Spends ₦70,000", "₦30,000 left"]], start: [1, 2, 0],
         wrong: "Left over is income minus expenses. The more Kemi spends, the less is left. Move the items and check again.", right: ["A: ₦100,000 − ₦95,000 = ₦5,000.", "B: ₦100,000 − ₦80,000 = ₦20,000.", "C: ₦100,000 − ₦70,000 = ₦30,000."], note: "Made-up figures.", ends: ["Least left over", "Most left over"] },
@@ -416,7 +419,8 @@
       learned: ["Income is money coming in.", "Expenses are money going out.", "Income minus expenses is what you can save."], article: "budgeting"
     },
     budget: {
-      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      match: { terms: ["Budget", "Needs", "Wants", "Savings"], means: ["A plan for your money before you spend it", "Things you must pay for, like rent and food", "Nice-to-haves you could skip", "Money you keep for later"], done: "A budget sorts your money into needs, wants and savings." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
       compare: { title: "Needs vs wants", lead: "A budget sorts spending into what you must pay and what's nice to have.", a: { name: "Needs", items: ["Rent", "Food", "Transport to work", "Electricity"] }, b: { name: "Wants", items: ["Eating out", "New clothes", "Streaming", "Weekend trips"] }, tip: "Some things can be both: basic food is a need, a restaurant meal is a want." },
       order: { q: "Ada earns ₦150,000. Using 50/30/20, order the parts from smallest to largest.", items: [["Savings (20%)", "For your future", "₦30,000"], ["Wants (30%)", "Nice to have", "₦45,000"], ["Needs (50%)", "Must pay", "₦75,000"]], start: [2, 0, 1],
         wrong: "Work out each part: 20%, 30% and 50% of ₦150,000. Move the items and check again.", right: ["Savings: 20% = ₦30,000.", "Wants: 30% = ₦45,000.", "Needs: 50% = ₦75,000."], note: "50/30/20 is a guide, not a rule.", ends: ["Smallest", "Largest"] },
@@ -446,7 +450,8 @@
       wrongs: { 300: "That's the increase. Add it to the old price of ₦2,000.", 1700: "It looks like you took the 15% away. Prices went up." },
       calcRight: "₦2,000 + 15% = ₦2,300.", calcNote: "Inflation is usually given as a yearly percentage.",
       learned: ["Inflation means prices rise over time.", "It lowers what each naira can buy.", "Savings growing slower than inflation lose buying power."], article: "inflation",
-      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      match: { terms: ["Inflation", "Purchasing power", "Real return", "NBS"], means: ["Prices rising over time", "How much your money can buy", "Your return after inflation", "Publishes Nigeria's inflation figures each month"], done: "Inflation shrinks purchasing power, so real return is what counts." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
       compare: { title: "Cash vs savings when prices rise", lead: "In a year when prices rise 20%, here is what happens to ₦100,000.",
         a: { name: "Cash at home", items: ["Stays ₦100,000", "Buys about ₦83,333 of today's goods", "Loses about a sixth of its buying power", "Earns no interest"] },
         b: { name: "Savings at 10% a year", items: ["Grows to ₦110,000", "Buys about ₦91,667 of today's goods", "Still loses some buying power", "Loses much less than cash"] },
@@ -462,7 +467,8 @@
         note: "Both options are made up for this lesson. Rates are fixed; tax and fees are ignored." }
     },
     emergency: {
-      flow: ["info", "myth", "choice", "order", "scenario", "calc"],
+      match: { terms: ["Emergency fund", "Easy to reach", "Target", "Top up"], means: ["Money kept for surprises", "You can get it quickly when needed", "A few months of your costs", "Add back what you used"], done: "These four ideas make an emergency fund work." },
+      flow: ["info", "myth", "choice", "order", "match", "scenario", "calc"],
       myth: { title: "Myth or fact?", lead: "A common mistake about emergency money.", myth: "An emergency fund should be invested so it grows fast.", fact: "Its job is to be there when you need it. Keep it safe and easy to reach, even if it grows slowly.", tip: "Growth matters for long-term goals, not for emergencies." },
       order: { q: "Order these places from least to most suitable for an emergency fund.", items: [["Shares", "Can fall in value", "Least suitable"], ["Fixed deposit, locked 1 year", "Safe but hard to reach", "Better"], ["Savings account", "Safe and easy to reach", "Most suitable"]], start: [1, 2, 0],
         wrong: "An emergency fund needs to be safe and quick to reach. Move the items and check again.", right: ["Shares can fall just when you need the money.", "A locked deposit is safe, but reaching it early can cost you.", "A savings account is safe and quick to reach."], note: "A general guide, not personal advice.", ends: ["Least suitable", "Most suitable"] },
@@ -485,7 +491,7 @@
   /** The lesson being played: the one started in this run, else the next one to do (else the designed one). */
   function lessonNow() {
     var s = load(), id = s.run && s.run.l;
-    var L = LESSONS.filter(function (x) { return x.id === id; })[0] || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]);
+    var L = LESSONS.filter(function (x) { return x.id === id; })[0] || (function () { var m = /[?&]l=(\w+)/.exec(location.search); return m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0]; })() || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]);
     var i = LESSONS.indexOf(L);
     return { id: L.id, index: i, title: L.title, min: L.min, designed: L.id === "interest", c: CONTENT[L.id] || null };
   }
@@ -612,7 +618,7 @@
   /** True when a screen is being played inside a lesson (not on its own as a micro module). */
   function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
   function flowVals(kind) {
-    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "order", "scenario", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
+    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
     if (i < 0) i = 0;
     var nx = f[i + 1], total = f.length;
     return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
@@ -626,7 +632,10 @@
     current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
     // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
     lesson: lessonNow, flowVals: flowVals, inLesson: inLesson,
-    startRun: function () { var s = load(), L = s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]; s.run = { answers: {}, given: {}, l: L.id }; save(s); },
+    startRun: function () {
+      // ?l=<lesson id> replays a finished lesson; otherwise the next lesson starts.
+      var s = load(), m = /[?&]l=(\w+)/.exec(location.search), R = m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0];
+      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R }; save(s); },
     answer: function (q, correct, given) {
       var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
       if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
@@ -637,12 +646,16 @@
       var lesson = lessonNow(), given = s.run.given || {};
       var a = s.run.answers, keys = Object.keys(a), right = keys.filter(function (k) { return a[k]; }).length;
       var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
-      var xp = 10 + Math.round(5 * pct / 100), wrong = keys.length - right;
-      if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; }
+      var wrong = keys.length - right, replay = !!s.run.replay, xp;
+      if (replay) {
+        // Engine rule lessonPractice: replaying earns 2 XP, once per lesson per day. The best score is kept.
+        s.practice = s.practice || {}; var pk = lesson.id + "@" + lagosDay(); xp = s.practice[pk] ? 0 : 2; s.practice[pk] = 1;
+        s.best[lesson.index] = Math.max(s.best[lesson.index] || 0, pct);
+      } else { xp = 10 + Math.round(5 * pct / 100); if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; } }
       addXp(s, xp); var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
-      logEvent(s, 'lesson', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
+      logEvent(s, replay ? 'practice' : 'lesson', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
       s.run = null; save(s);
-      return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days) };
+      return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days), replay: replay, best: s.best[lesson.index] };
     },
     passBoss: function (score) {
       var s = load(); var passed = score >= 4;
@@ -653,7 +666,22 @@
     },
     SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK, ME: ME,
     plan: plan, billing: billLoad, saveBilling: billSave,
-    reset: function () { save(fresh()); }
+    reset: function () { save(fresh()); },
+    // Reviewer tools: shortcuts for people checking the app. Everything stays in this browser.
+    REV: {
+      plan: function () { return plan(); },
+      setPlan: function (p) { var b = billLoad(); b.sub = p === "plus" ? { plan: "plus", period: "monthly", renewsOn: D().addPeriod(lagosDay(), "monthly") } : { plan: "free" }; billSave(b); },
+      next: function () { try { return localStorage.getItem("fv.checkout.next") || "success"; } catch (e) { return "success"; } },
+      setNext: function (o) { try { if (o === "success") localStorage.removeItem("fv.checkout.next"); else localStorage.setItem("fv.checkout.next", o); } catch (e) {} },
+      alwaysOpen: function () { return !!ME.prefs().alwaysOpen; },
+      setAlwaysOpen: function (on) { ME.setPref("alwaysOpen", !!on); },
+      day: simDay,
+      nextDay: function () { try { localStorage.setItem("fv.sim.shift", String(dayShift() + 1)); } catch (e) {} return simDay(); },
+      signInAs: function (email, name) { var a = authLoad(); a.email = email; a.name = name; delete a.pending; authSave(a); },
+      setProgress: function (done, boss) { var s = load(); s.done = done; s.best = [100, 100, 100, 100, 100, 100].slice(0, done); s.bossPassed = !!boss; s.run = null; markDay(s); save(s); },
+      staff: function () { try { sessionStorage.setItem("fv.staff", JSON.stringify({ email: "tobi@finvora.app", name: "Tobi" })); } catch (e) {} ADMIN.log("Sign-in", "Tobi signed in from reviewer tools"); },
+      resetAll: function () { try { Object.keys(localStorage).filter(function (k) { return /^fv\./.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); sessionStorage.clear(); } catch (e) {} }
+    }
   };
   window.FV = FV;
   // Admin pages need a staff sign-in in this tab (a demonstration: the check runs in the browser).
