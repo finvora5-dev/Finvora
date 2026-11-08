@@ -84,7 +84,7 @@ class Component extends DCLogic {
   renderVals() {
     const FV = window.FV, P = FV && FV.PAY, D = window.FVD;
     const orders = FV ? FV.billing().orders : [], o = (P && P.current()) || orders.filter((x) => x.status === 'confirmedSuccess')[0];
-    if (!o || !P || !D) return { period: 'monthly', orderNo: 'FV-24117', paid: '2 Nov 2026', total: '₦1,500.00', renews: 'Renews 2 Dec 2026.', back: 'USYourPlan.dc.html', backLabel: 'Back to your plan' };
+    if (!o || !P || !D) return { period: 'monthly', orderNo: 'FV-24117', paid: '2 Nov 2026', total: window.FVD && window.FV ? window.FVD.formatNaira(window.FV.PAY.PRICE.monthly) : '', renews: 'Renews 2 Dec 2026.', back: 'USYourPlan.dc.html', backLabel: 'Back to your plan' };
     const day = (o.updatedAt || o.createdAt).slice(0, 10), sub = FV.billing().sub || {};
     return { period: o.period, orderNo: P.orderNo(o), paid: P.date(day), total: D.formatNaira(o.amountKobo), renews: sub.cancelled ? 'Plus ends on ' + P.date(sub.renewsOn) + '.' : 'Renews ' + P.date(D.addPeriod(day, o.period)) + '.', back: 'USYourPlan.dc.html', backLabel: 'Back to your plan' };
   }

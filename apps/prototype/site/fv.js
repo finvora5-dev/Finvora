@@ -53,8 +53,21 @@
   ];
   var series = {};
   function D() { return window.FVD; }
+  // ---- Stored data upgrades (design Part 1, section 4). Add fields with defaults; never rename or drop
+  // what the code does not know; never crash on old or broken data.
+  var SCHEMA = 2;
+  (function upgrade() {
+    try {
+      var v = +localStorage.getItem("fv.schema") || 1; if (v >= SCHEMA) return;
+      var a = JSON.parse(localStorage.getItem("fv.admin.v1") || "null"), OLD = [150000, 1500000, 250000, 2500000];
+      if (a && a.prices && OLD.indexOf(a.prices.monthly) >= 0 && OLD.indexOf(a.prices.yearly) >= 0) { delete a.prices; localStorage.setItem("fv.admin.v1", JSON.stringify(a)); }
+      var g = JSON.parse(localStorage.getItem("fv.proto.v1") || "null");
+      if (g && typeof g === "object" && !g.misses) { g.misses = {}; localStorage.setItem("fv.proto.v1", JSON.stringify(g)); }
+      localStorage.setItem("fv.schema", String(SCHEMA));
+    } catch (e) {}
+  })();
   function dayShift() { try { return +localStorage.getItem("fv.sim.shift") || 0; } catch (e) { return 0; } }
-  function simDay() { return Math.max(1, Math.min(SIM_DAYS - 1, Math.floor((Date.now() + 3600000 - SIM_START) / 86400000) + dayShift())); }
+  function simDay() { return Math.max(1, Math.min(SIM_DAYS - 1, D().tradingDaysBetween(new Date(SIM_START).toISOString().slice(0, 10), D().lagosParts(Date.now()).day) + dayShift())); }
   function pathOf(t) {
     if (!series[t]) { var c = COMPANIES.filter(function (x) { return x.t === t; })[0]; series[t] = D().priceSeries(t, c.base, SIM_DAYS, 0.016); }
     return series[t];
@@ -98,9 +111,10 @@
     /** The practice market follows trading hours from packages/domain config (weekdays, Lagos time). */
     isOpen: function () {
       try { if (JSON.parse(localStorage.getItem("fv.prefs.v1") || "{}").alwaysOpen) return true; } catch (e) {}
-      var C = D().CONFIG, now = new Date(Date.now() + 3600000), day = now.getUTCDay(), hm = now.toISOString().slice(11, 16);
-      return day >= 1 && day <= 5 && hm >= C.MARKET_OPEN && hm < C.MARKET_CLOSE;
+      return D().isMarketOpen(Date.now());
     },
+    /** When the market next opens, for example "Mon 10:00" (Lagos time). */
+    nextOpen: function () { return D().nextMarketOpen(Date.now()).label; },
     hours: function () { var C = D().CONFIG; return "weekdays " + C.MARKET_OPEN + " to " + C.MARKET_CLOSE + ", Lagos time"; },
     queued: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".queue") || "[]"); } catch (e) { return []; } },
     queue: function (side, t, qty) { var q = SIM.queued(); q.push({ side: side, t: t, qty: qty, key: "q-" + Date.now() }); try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(q)); } catch (e) {} },
@@ -150,7 +164,7 @@
   // ---- Simulated checkout (build-backlog B5). No card details, no real payment. Order rules come
   // from packages/domain: one order per purchase, retries reuse it, only our "server check" decides.
   // Reviewers can pick the next check result by opening a plan page with ?outcome=failed|slow|offline.
-  var PRICE = { monthly: 150000, yearly: 1500000 }; // the designs' figures; the client hasn't set prices yet
+  var PRICE = { monthly: D().CONFIG.PLUS_PRICE_KOBO.monthly, yearly: D().CONFIG.PLUS_PRICE_KOBO.yearly }; // D1, from packages/domain config
   var PAY = {
     PRICE: PRICE,
     order: function (id) { return billLoad().orders.filter(function (o) { return o.id === id; })[0] || null; },
@@ -349,7 +363,7 @@
     decideSum: function (x, d, text) { var a = admLoad(); a.sums[x.id] = { d: d, text: text, at: Date.now() }; admSave(a); ADMIN.log("AI summaries", d + ": " + x.title); },
 
     // Plan prices in kobo. A saved price is what new checkouts charge.
-    prices: function () { return admLoad().prices || { monthly: 150000, yearly: 1500000 }; },
+    prices: function () { return admLoad().prices || { monthly: D().CONFIG.PLUS_PRICE_KOBO.monthly, yearly: D().CONFIG.PLUS_PRICE_KOBO.yearly }; },
     savePrices: function (p) { var a = admLoad(), old = ADMIN.prices(); a.prices = p; admSave(a); PRICE.monthly = p.monthly; PRICE.yearly = p.yearly;
       ["monthly", "yearly"].forEach(function (k) { if (old[k] !== p[k]) ADMIN.log("Plans", "Plus " + k + " price changed from " + D().formatNaira(old[k]) + " to " + D().formatNaira(p[k])); }); }
   };
@@ -677,7 +691,7 @@
       save(s); return passed;
     },
     SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK, ME: ME,
-    plan: plan, billing: billLoad, saveBilling: billSave,
+    plan: plan, billing: billLoad, saveBilling: billSave, LABELS: D().LABELS,
     reset: function () { save(fresh()); },
     // Reviewer tools: shortcuts for people checking the app. Everything stays in this browser.
     REV: {

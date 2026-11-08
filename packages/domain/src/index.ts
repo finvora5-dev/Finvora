@@ -1,6 +1,7 @@
 export * from "./config";
 export * from "./money";
 export * from "./market";
+export * from "./markethours";
 export * from "./simulator";
 export * from "./entitlements";
 export * from "./learning";

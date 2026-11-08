@@ -199,7 +199,7 @@ describe("Ask Fin (scripted)", () => {
 
 describe("checkout (B5 rules)", () => {
   it("only the server check moves an order out of pending", () => {
-    const o = createOrder("o1", "monthly", 250000, "t");
+    const o = createOrder("o1", "monthly", CONFIG.PLUS_PRICE_KOBO.monthly, "t");
     expect(applyCheck(o, "offline", "t").status).toBe("pending");
     expect(applyCheck(o, "pending", "t").status).toBe("pending");
     const f = applyCheck(o, "failed", "t");
@@ -273,5 +273,50 @@ describe("feedback prompts", () => {
     expect(shouldShow({ ...DEFAULT_PROMPTS.rateLesson, frequencyOneIn: 4 }, {}, "2026-11-03", 0.2)).toBe(true);
     expect(shouldShow(DEFAULT_PROMPTS.appReview, { lastShownDay: "2026-10-01" }, "2026-11-03", 0)).toBe(false);
     expect(shouldShow(DEFAULT_PROMPTS.appReview, { declinedForever: true }, "2027-11-03", 0)).toBe(false);
+  });
+});
+
+import { isMarketOpen, nextMarketOpen, tradingDaysBetween, lagosParts } from "./markethours";
+import { LABELS } from "./config";
+
+describe("Part 1 settings (D1, D2, D3, D12)", () => {
+  // Lagos is UTC+1: 10:00 Lagos = 09:00Z. 2026-11-06 is a Friday.
+  const lagos = (iso: string) => Date.parse(iso + "+01:00");
+  it("Plus price is N5,999 a month and N65,989 a year, one month free", () => {
+    expect(CONFIG.PLUS_PRICE_KOBO.monthly).toBe(599900);
+    expect(CONFIG.PLUS_PRICE_KOBO.yearly).toBe(6598900);
+    expect(CONFIG.PLUS_PRICE_KOBO.yearly).toBe(CONFIG.PLUS_PRICE_KOBO.monthly * 11);
+    expect(CONFIG.PLUS_PRICE_IS_PLACEHOLDER).toBe(false);
+  });
+  it("free learners get exactly 5 Ask Fin questions a day", () => {
+    expect(CONFIG.ASK_FIN_FREE_DAILY_LIMIT).toBe(5);
+    expect(entitlements("free").askFinDailyLimit).toBe(5);
+  });
+  it("market is open on weekdays from 10:00 up to 14:30 Lagos time", () => {
+    expect(isMarketOpen(lagos("2026-11-06T09:59:00"))).toBe(false);
+    expect(isMarketOpen(lagos("2026-11-06T10:00:00"))).toBe(true);
+    expect(isMarketOpen(lagos("2026-11-06T14:29:00"))).toBe(true);
+    expect(isMarketOpen(lagos("2026-11-06T14:30:00"))).toBe(false);
+    expect(isMarketOpen(lagos("2026-11-07T11:00:00"))).toBe(false);
+    expect(isMarketOpen(lagos("2026-11-08T11:00:00"))).toBe(false);
+  });
+  it("gives the next opening time", () => {
+    expect(nextMarketOpen(lagos("2026-11-06T15:00:00")).label).toBe("Mon 10:00");
+    expect(nextMarketOpen(lagos("2026-11-05T15:00:00")).label).toBe("tomorrow 10:00");
+    expect(nextMarketOpen(lagos("2026-11-05T08:00:00")).label).toBe("today 10:00");
+    expect(nextMarketOpen(lagos("2026-11-06T11:00:00")).label).toBe("now");
+    expect(nextMarketOpen(lagos("2026-11-08T11:00:00")).ms).toBe(lagos("2026-11-09T10:00:00"));
+  });
+  it("works out Lagos time whatever the phone's time zone", () => {
+    expect(lagosParts(Date.parse("2026-11-06T23:30:00Z")).day).toBe("2026-11-07");
+  });
+  it("counts only trading days", () => {
+    expect(tradingDaysBetween("2026-11-06", "2026-11-09")).toBe(1);
+    expect(tradingDaysBetween("2026-11-02", "2026-11-09")).toBe(5);
+    expect(tradingDaysBetween("2026-11-09", "2026-11-09")).toBe(0);
+  });
+  it("keeps the label words in one place", () => {
+    expect(LABELS.PRACTICE_MARKET).toBe("Practice Market");
+    expect(LABELS.EXAMPLE_ANSWER).toBe("Example answer from the Finvora Library");
   });
 });

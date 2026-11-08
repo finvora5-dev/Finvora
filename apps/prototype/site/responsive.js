@@ -25,6 +25,21 @@
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(route, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
+  // The phone's preferred text size compared with normal: the browser's base font size, or Apple's system text size.
+  var LESSON_PATH = /\/U(P|Dy)P?(LessonInfo|LearnMyth|LearnCompare|LessonChoice|LessonOrder|LessonMatch|LessonScenario|LessonCalc|Celebrate|LessonComplete)\.dc/;
+  var tsCache = null;
+  function textScale() {
+    if (tsCache !== null) return tsCache;
+    var r = 1;
+    try { var f = +localStorage.getItem("fv.textscale"); if (f >= 1 && f <= 3) { tsCache = f; return f; } } catch (e) {}
+    try {
+      var p = document.createElement("span"); p.style.cssText = "position:absolute;visibility:hidden;font-size:1rem"; document.body.appendChild(p);
+      r = Math.max(r, parseFloat(getComputedStyle(p).fontSize) / 16);
+      p.style.font = "-apple-system-body"; var ios = parseFloat(getComputedStyle(p).fontSize); if (ios && /iP(hone|ad|od)/.test(navigator.userAgent)) r = Math.max(r, ios / 17);
+      p.remove();
+    } catch (e) {}
+    tsCache = Math.min(2, r); return tsCache;
+  }
   function fit() {
     var el = root(); if (!el) return;
     unskeleton();
@@ -44,7 +59,10 @@
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (designW < 300) { el.style.zoom = "1"; el.style.margin = "0 auto"; return; } // small component boards (Fin) stay actual size
     if (!wide) {
-      var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
+      // Lesson path follows the phone's text size (D15): lay out narrower, so text renders larger.
+      var ts = textScale(), lw = LESSON_PATH.test(location.pathname) && ts > 1.05 ? Math.round(designW / ts) : designW;
+      var z = vw / lw; el.style.zoom = String(z); el.style.width = lw + "px";
+      el.querySelectorAll('nav[aria-label="Main"]').forEach(function (n) { n.style.setProperty("width", lw + "px", "important"); });
       // Fill the visible screen, not the 844px drawing, so bottom buttons sit on the bottom edge.
       el.style.setProperty("min-height", (window.innerHeight / z) + "px", "important");
       // Pop-ups: the page behind fills the screen exactly, so the sheet sits on the bottom edge.
@@ -116,6 +134,8 @@
   window.addEventListener("offline", function () { window.fvToast("You're offline. Pages you've opened and saved articles still work.", { kind: "info", ms: 6000 }); });
   window.addEventListener("online", function () { window.fvToast("You're back online."); });
   if ("serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) { window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js").catch(function () {}); }); }
+  // A new version took over: say so once (design Part 1, section 5).
+  if ("serviceWorker" in navigator) { var hadSW = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener("controllerchange", function () { if (hadSW && window.fvToast) window.fvToast("Finvora was updated."); hadSW = true; }); }
   var queued = false;
   function schedule() { if (queued) return; queued = true; requestAnimationFrame(function () { queued = false; fit(); }); }
   var mo = new MutationObserver(schedule);
@@ -168,7 +188,9 @@
     bar.classList.toggle("fv-hot", c >= 3);
     if (c < 3) { if (tag) tag.remove(); return; }
     if (!tag) { tag = document.createElement("span"); tag.id = "fv-combo"; tag.setAttribute("role", "status"); bar.insertAdjacentElement("afterend", tag); }
-    tag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z" fill="#F97316"/></svg>' + c + " in a row!";
+    var rootW = parseFloat((root() || {}).style ? root().style.width : 0) || 390, narrow = rootW < 300;
+    tag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z" fill="#F97316"/></svg>' + c + (narrow ? "" : " in a row!");
+    tag.setAttribute("aria-label", c + " in a row");
     if (pop && !calm() && tag.animate) tag.animate([{ transform: "scale(.4)", opacity: 0 }, { transform: "scale(1.2)", opacity: 1, offset: .6 }, { transform: "scale(1)" }], { duration: 450, easing: "ease-out" });
   }
   function hype() {

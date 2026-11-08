@@ -16,6 +16,8 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 
 ## Decisions recorded 8 Nov 2026 (from the product owner)
 
+Built so far: D1, D2, D3, D12, the Practice Market and Ask Fin label parts of D5 and D17, and text size on the lesson path (D15), per [design Part 1](designs/prototype-settings-labels-storage.md). D10/D14, D13, D16 and D18 wait for designs Parts 2 to 5.
+
 | # | Decision | Notes |
 |---|---|---|
 | D1 | **Plus price: ₦5,999 a month** (599900 kobo), agreed by the client. **Yearly: ₦65,989** (6598900 kobo): one month free, 11 × ₦5,999. | Full price would be ₦71,988, so yearly saves ₦5,999 (about 8%). Answers question 3. |

@@ -1,7 +1,7 @@
 # Prototype settings, labels and stored data (Part 1 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Approved (by the author, section by section, 8 Nov 2026)
+*   **Status:** Built (8 Nov 2026). Approved by the author section by section the same day.
 *   **Date:** 2026-11-08
 
 --------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ flowchart LR
 *   Opening rules are unchanged: weekdays, 10:00 to 14:30 Lagos time, always worked out in Lagos time whatever the phone's own time zone.
 *   A new function gives the next opening time, for example "Mon 10:00".
 *   When the market is closed, the practice market screens show one notice: "Practice Market closed. Opens Mon 10:00 Lagos time." with two actions: queue the order (the existing queue fills it at the next open) and "Do a lesson while you wait".
-*   Prices move once per trading day instead of once per calendar day, so a weekend no longer changes a portfolio while the market is closed. Existing holdings keep their values; only the counting of days changes.
+*   Prices move once per trading day instead of once per calendar day, so a weekend no longer changes a portfolio while the market is closed. Holdings, cash and past trades are unchanged. Because fewer days are counted, the simulator's current day moves back about two weeks once, at the upgrade, so current made-up prices change once.
 
 ### 3. One label style and the Practice Market
 
@@ -143,7 +143,7 @@ Work happens in five steps, in this order. Each step ends with the checks listed
 ### Step 1: Shared values and tests (domain package)
 
 *   `packages/domain/src/config.ts`: set the Plus prices to 599900 (monthly) and 6598900 (yearly) kobo; turn off the placeholder flag; replace the "PENDING" notes on the price, the Ask Fin limit (5) and the market hours with references to D1, D2 and D3. Add a small list of label texts used by the app ("Practice Market", "Example answer from the Finvora Library", "Made-up figures") so every screen uses the same words.
-*   `packages/domain/src/market.ts` (new): pure functions for market time in Lagos time: is the market open at a given moment, the next opening time, and the number of trading days between two dates. Pure functions so they can be tested and carried into Phase 2.
+*   `packages/domain/src/markethours.ts` (new; `market.ts` already holds the made-up price generator): pure functions for market time in Lagos time: is the market open at a given moment, the next opening time, and the number of trading days between two dates. Pure functions so they can be tested and carried into Phase 2.
 *   `packages/domain/src/index.ts` (or the package's export file): export the new market functions and label list.
 *   `packages/domain/src/domain.test.ts`: tests for: prices equal 599900 and 6598900; yearly equals 11 times monthly; the free Ask Fin limit equals 5; Friday 14:29 Lagos is open, 14:30 is closed, Saturday and Sunday are closed; the next opening after Friday 15:00 is Monday 10:00; trading days skip weekends; a phone set to another time zone gets the same answers. Existing tests that used 250000 are updated.
 *   `packages/domain/src/money.ts`, `packages/sample-data/src/admin.ts`, `packages/sample-data/src/library.ts`: checked for old Plus price figures. Figures that are lesson examples (not Plus prices) stay unchanged; only Plus price figures change.

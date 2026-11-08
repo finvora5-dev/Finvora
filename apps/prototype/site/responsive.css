@@ -91,3 +91,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
 .fv-bubble { background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px 16px 16px 4px; padding: 10px 12px; font: 800 15px 'Plus Jakarta Sans', sans-serif; color: #0E0B14; max-width: 200px; box-shadow: 0 6px 16px rgba(14,11,20,.12); margin-bottom: 40px; }
 .fv-reduce .fv-bump, .fv-reduce .fv-fire { animation: none; }
 @media (prefers-reduced-motion: reduce) { .fv-bump, .fv-fire { animation: none; } }
+
+/* Design Part 1: one label style for simulated content, the Practice Market entrance, the closed-market box, the Ask Fin source. */
+.fv-label { display: inline-flex; align-items: center; gap: 6px; font: 700 13px 'Plus Jakarta Sans', sans-serif; color: #4C1D95; background: #F1EBFB; border-radius: 999px; padding: 4px 10px 4px 7px; white-space: nowrap; }
+.fv-entrance { display: flex; gap: 10px; align-items: flex-start; background: #F1EBFB; color: #4C1D95; border-radius: 16px; padding: 12px 14px; margin-bottom: 4px; text-align: left; }
+.fv-entrance strong { display: block; font-size: 15px; }
+.fv-entrance > span { font-size: 14px; color: #38323F; }
+.fv-opens { display: flex; gap: 10px; align-items: center; background: #E1F7EA; border-radius: 14px; padding: 10px 12px; text-align: left; }
+.fv-opens b { display: block; color: #147D44; font-size: 17px; }
+.fv-opens > span { font-size: 13px; color: #38323F; }
+.fv-source { display: flex; align-items: center; gap: 6px; font: 700 13px 'Plus Jakarta Sans', sans-serif; color: #4C1D95; border-top: 1.5px dashed #E7E2F0; padding-top: 8px; }
+.fv-source a { color: #5B21B6; }

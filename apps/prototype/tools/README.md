@@ -4,7 +4,7 @@ The site in `apps/prototype/site` is the approved canvas boards. These scripts m
 Run them in this order after copying fresh boards from the canvas:
 
 1. `build_desktop.py <canvas boards> <site>`: the 7 main desktop boards.
-2. `build_fvd.mjs <domain js> <site> <sample-data js>`: compiles the tested rules into `fvd.js`
+2. `build_fvd.mjs <domain js> <site> <sample-data js>`: compiles the tested rules (including `markethours`) into `fvd.js`
    (compile `packages/domain` and `packages/sample-data` with `tsc --noEmit false --outDir` first).
 3. `wire_sim.py`, `wire_ask.py`, `wire_pay.py`, `wire_auth.py`, `wire_lib.py`, `wire_admin.py` on the site:
    simulator, Ask Fin, checkout, sign-in, Library and admin. Each skips boards it already wired.
@@ -17,10 +17,12 @@ Run them in this order after copying fresh boards from the canvas:
    links to them. Desktop boards it touches are patched directly, so run it after step 4.
 8. `wire_replay.py <site>` and `wire_reviewer.py <site>`: lesson replay, and the Reviewer tools page
    with its links from Settings and sign-in. Re-run both after regenerating desktop boards.
-9. `wire_a11y.py <site>`: contrast and ARIA fixes from the axe-core audit. Re-run after any board rebuild.
-10. `build_celebrate.py <site>`: the screens after a lesson (receipt, streak dial, new-high level chart), the
+9. `wire_settings.py <site>`: design Part 1 screens: one price source, the Practice Market label and entrance line,
+   the closed-market sheet with its next opening time, and the Ask Fin source label.
+10. `wire_a11y.py <site>`: contrast and ARIA fixes from the axe-core audit. Re-run after any board rebuild.
+11. `build_celebrate.py <site>`: the screens after a lesson (receipt, streak dial, new-high level chart), the
     summary's use of the saved result, and the white Meet Fin screen.
-11. `build_sw.py <site>` last, so the offline cache lists every file.
+12. `build_sw.py <site>` last, so the offline cache lists every file.
 
 All learner data stays in the browser (`localStorage`, keys starting `fv.`). Nothing is sent anywhere.
 

@@ -25,7 +25,7 @@ self.addEventListener("fetch", (e) => {
   if (url.origin === location.origin) {
     e.respondWith((async () => {
       try {
-        const r = await fetch(req);
+        const r = await fetch(req, { cache: "no-cache" }); // always check for the newest file
         if (r.ok && req.mode !== "navigate") { const c = await caches.open(VERSION); c.put(keyFor(req.url), r.clone()); }
         return r;
       } catch (err) {

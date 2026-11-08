@@ -3,7 +3,7 @@
 
 // ---- config
 // Every configurable business value lives here. Values marked PENDING are not
-// client decisions yet; see docs/PHASE1_STATUS.md. Money is integer kobo (₦1 = 100).
+// client decisions yet; decided values cite docs/open-questions.md (D1 to D21). Money is integer kobo (₦1 = 100).
 const NAIRA = 100;
 const CONFIG = {
     /** ADR 0001 D4: ₦100,000 starting virtual cash. */
@@ -14,19 +14,26 @@ const CONFIG = {
     SIM_MIN_FEE_KOBO: 50 * NAIRA,
     /** Amount presets on the trade sheet (build plan §4.5). */
     SIM_AMOUNT_PRESETS_KOBO: [1_000, 5_000, 10_000, 20_000].map((n) => n * NAIRA),
-    /** NGX trading hours, Lagos time. PENDING: unverified against NGX. */
+    /** NGX trading hours, Lagos time (D3: the practice market follows them; every weekday counts, no holiday calendar). */
     MARKET_OPEN: "10:00",
     MARKET_CLOSE: "14:30",
-    /** PENDING client decision: designs show 5, open-questions #4 says 10. */
+    /** D2: free learners get 5 Ask Fin questions a day. */
     ASK_FIN_FREE_DAILY_LIMIT: 5,
-    /** PENDING client decision: placeholder figures from the designs. */
-    PLUS_PRICE_KOBO: { monthly: 2_500 * NAIRA, yearly: 25_000 * NAIRA },
-    PLUS_PRICE_IS_PLACEHOLDER: true,
+    /** D1: Plus is ₦5,999 a month; yearly is one month free (11 × monthly). */
+    PLUS_PRICE_KOBO: { monthly: 5_999 * NAIRA, yearly: 65_989 * NAIRA },
+    PLUS_PRICE_IS_PLACEHOLDER: false,
     /** Seconds before a pending checkout shows the "taking longer" state. */
     CHECKOUT_SLOW_AFTER_MS: 6_000,
     UNDO_MS: 5_000,
     CALC_AMOUNT_PRESETS_KOBO: [10_000, 50_000, 100_000].map((n) => n * NAIRA),
     CALC_PERIOD_PRESETS_DAYS: [30, 90, 180, 365],
+};
+/** D5, D17: the words every screen uses to mark simulated content, in one place. */
+const LABELS = {
+    PRACTICE_MARKET: "Practice Market",
+    PRACTICE_MARKET_LINE: "Made-up companies, virtual naira, no money at risk.",
+    EXAMPLE_ANSWER: "Example answer from the Finvora Library",
+    MADE_UP_FIGURES: "Made-up figures",
 };
 
 // ---- money
@@ -100,6 +107,52 @@ function priceSeries(ticker, basePriceKobo, days, volatility = 0.02, drift = 0.0
         out.push(Math.max(1, Math.round(out[i - 1] * (1 + move))));
     }
     return out;
+}
+
+// ---- markethours
+// Practice market hours in Lagos time (D3, D12). Lagos is UTC+1 all year (no daylight saving),
+// so the answers are the same whatever the phone's own time zone is.
+
+const LAGOS_OFFSET_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+function minutes(hm) { const [h, m] = hm.split(":").map(Number); return (h ?? 0) * 60 + (m ?? 0); }
+/** The Lagos calendar day (YYYY-MM-DD), weekday (0 = Sunday) and minutes past midnight for a moment. */
+function lagosParts(ms) {
+    const t = new Date(ms + LAGOS_OFFSET_MS);
+    return { day: t.toISOString().slice(0, 10), weekday: t.getUTCDay(), minute: t.getUTCHours() * 60 + t.getUTCMinutes() };
+}
+/** True when the practice market is open: weekdays from MARKET_OPEN up to (not including) MARKET_CLOSE. */
+function isMarketOpen(ms, open = CONFIG.MARKET_OPEN, close = CONFIG.MARKET_CLOSE) {
+    const p = lagosParts(ms);
+    return p.weekday >= 1 && p.weekday <= 5 && p.minute >= minutes(open) && p.minute < minutes(close);
+}
+/** The next moment the market opens (now if it is open), with a short label such as "Mon 10:00". */
+function nextMarketOpen(ms, open = CONFIG.MARKET_OPEN, close = CONFIG.MARKET_CLOSE) {
+    if (isMarketOpen(ms, open, close))
+        return { ms, label: "now", today: true };
+    const start = lagosParts(ms), o = minutes(open);
+    for (let i = 0; i < 8; i++) {
+        const dayStartUtc = Date.parse(start.day + "T00:00:00Z") - LAGOS_OFFSET_MS + i * DAY_MS, at = dayStartUtc + o * 60000;
+        const wd = lagosParts(at).weekday;
+        if (wd >= 1 && wd <= 5 && at > ms)
+            return { ms: at, label: (i === 0 ? "today" : i === 1 ? "tomorrow" : DAY_NAMES[wd]) + " " + open, today: i === 0 };
+    }
+    return { ms, label: open, today: false };
+}
+/** Weekdays from `fromDay` (exclusive) to `toDay` (inclusive), both YYYY-MM-DD. Prices move once per trading day. */
+function tradingDaysBetween(fromDay, toDay) {
+    const a = Date.parse(fromDay + "T00:00:00Z"), b = Date.parse(toDay + "T00:00:00Z");
+    if (!(b > a))
+        return 0;
+    const days = Math.round((b - a) / DAY_MS);
+    let n = 0;
+    for (let i = 1; i <= days; i++) {
+        const wd = new Date(a + i * DAY_MS).getUTCDay();
+        if (wd >= 1 && wd <= 5)
+            n++;
+    }
+    return n;
 }
 
 // ---- simulator
@@ -560,5 +613,5 @@ const ARTICLES = [
 ];
 const TOPICS = ["Money basics", "Investing", "Markets", "Nigerian market", "Company analysis", "Decisions and risk"];
 
-window.FVD = { NAIRA, CONFIG, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, isAdviceRequest, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS };
+window.FVD = { NAIRA, CONFIG, LABELS, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, isAdviceRequest, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS };
 })();
