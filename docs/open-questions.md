@@ -14,7 +14,7 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 | 6 | **Prototype success:** what would make the client happy with Stage 1? | Defines "done" for Week 5 | |
 | 7 | **Founders' expectations:** do they accept that Stage 1 has sample prices, scripted AI and no real users (their brief mentions live data and onboarding early users)? | Avoids a mismatch at the Week 5 review | |
 
-## Decisions recorded 9 Nov 2026 (from the product owner)
+## Decisions recorded 8 Nov 2026 (from the product owner)
 
 | # | Decision | Notes |
 |---|---|---|
