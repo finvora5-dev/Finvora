@@ -17,7 +17,8 @@ Run them in this order after copying fresh boards from the canvas:
    links to them. Desktop boards it touches are patched directly, so run it after step 4.
 8. `wire_replay.py <site>` and `wire_reviewer.py <site>`: lesson replay, and the Reviewer tools page
    with its links from Settings and sign-in. Re-run both after regenerating desktop boards.
-9. `build_sw.py <site>` last, so the offline cache lists every file.
+9. `wire_a11y.py <site>`: contrast and ARIA fixes from the axe-core audit. Re-run after any board rebuild.
+10. `build_sw.py <site>` last, so the offline cache lists every file.
 
 All learner data stays in the browser (`localStorage`, keys starting `fv.`). Nothing is sent anywhere.
 

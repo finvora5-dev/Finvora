@@ -26,7 +26,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 .num{font-variant-numeric:tabular-nums}
 .btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
 .btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:0 3px 0 #E7E2F0;border:1.5px solid #E7E2F0}
-.btn-g{background:#16884A;box-shadow:0 3px 0 #0F6B39}
+.btn-g{background:#147D44;box-shadow:0 3px 0 #0F6B39}
 .btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
 .btn:active,.press:active{transform:translateY(2px)}
 .chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;text-decoration:none;box-sizing:border-box;cursor:pointer}
@@ -125,8 +125,8 @@ class Component extends DCLogic {
   LP() { return window.FV && window.FV.LOOP; }
   renderVals() {
     const F = window.FV, LP = this.LP(), inf = LP && LP.challenge('inflation'), boss = F && F.get().bossPassed;
-    return { infTag: inf ? 'Done' : 'New', infBg: inf ? '#E1F7EA' : '#FFE6E6', infFg: inf ? '#16884A' : '#B42828',
-      bossTag: boss ? 'Done' : 'Boss', bossBg: boss ? '#E1F7EA' : '#F1EBFB', bossFg: boss ? '#16884A' : '#4C1D95' };
+    return { infTag: inf ? 'Done' : 'New', infBg: inf ? '#E1F7EA' : '#FFE6E6', infFg: inf ? '#147D44' : '#B42828',
+      bossTag: boss ? 'Done' : 'Boss', bossBg: boss ? '#E1F7EA' : '#F1EBFB', bossFg: boss ? '#147D44' : '#4C1D95' };
   }
 }
 </script>

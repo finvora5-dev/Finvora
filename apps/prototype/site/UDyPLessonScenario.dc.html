@@ -19,7 +19,7 @@ body{margin:0;background:#FFFFFF}
 a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
 .btn{width:100%;height:54px;border:0;border-radius:16px;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-sizing:border-box}
 .b-blue{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
-.b-green{background:#16884A;color:#FFFFFF;box-shadow:0 3px 0 #0F6B39}
+.b-green{background:#147D44;color:#FFFFFF;box-shadow:0 3px 0 #0F6B39}
 .b-off{background:#E7E2F0;color:#615A6E;cursor:not-allowed}
 .btn:active,.press:active{transform:translateY(2px)}
 .opt{width:100%;min-height:64px;box-sizing:border-box;padding:0 16px;border-radius:16px;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
@@ -135,7 +135,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
     <sc-if value="{{showRight}}" hint-placeholder-val="{{false}}">
       <section aria-labelledby="fb-right" class="sheet" style="padding: 20px 16px 22px; background: #FFFFFF; border-radius: 24px 24px 0 0; box-shadow: 0 -8px 24px rgba(16,30,70,.10); display: flex; flex-direction: column; gap: 10px">
         <div style="display: flex; align-items: center; gap: 10px">
-          <span aria-hidden="true" style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #DCFAE6; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span aria-hidden="true" style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #DCFAE6; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="#147D44" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <h2 id="fb-right" style="margin: 0; font-size: 19px; font-weight: 700; color: #0F6B39">Correct</h2>
         </div>
         <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #38323F">{{rightText}}</p>
@@ -169,7 +169,7 @@ class Component extends DCLogic {
           pressed: sel ? 'true' : 'false', aria: o.name + ', ' + o.rate + ', ' + o.access + (good ? ', correct' : bad ? ', your answer, not quite' : ''),
           bg: good ? '#DCFAE6' : bad ? '#FFE4E2' : sel ? '#F1EBFB' : '#FFFFFF',
           border: good ? '#12B76A' : bad ? '#F04438' : sel ? '#5B21B6' : '#E7E2F0',
-          edge: good ? '#16884A' : bad ? '#F04438' : sel ? '#3B0F7A' : '#E7E2F0',
+          edge: good ? '#147D44' : bad ? '#F04438' : sel ? '#3B0F7A' : '#E7E2F0',
           cls: good ? 'pop' : bad ? 'shake' : '', hasNote: good || bad, note: good ? 'Correct' : 'Your answer', fg: good ? '#0F6B39' : '#B42828',
           pick: () => this.setState({ pick: i, checked: false }) };
       }),

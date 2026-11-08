@@ -70,3 +70,6 @@ html.fv-reduce *, html.fv-reduce *::before, html.fv-reduce *::after { animation:
 .fv-sk { border-radius: 14px; background: linear-gradient(90deg, #F1EBFB 25%, #F8F6FC 50%, #F1EBFB 75%); background-size: 200% 100%; animation: fv-sk 1.2s ease-in-out infinite; }
 @keyframes fv-sk { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .fv-sk { animation: none; } }
+
+/* Text fields always show the focus ring for keyboard users, even where a board turns outlines off (WCAG 2.4.7). */
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #5B21B6 !important; outline-offset: 2px; }

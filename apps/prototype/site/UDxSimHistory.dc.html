@@ -26,7 +26,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 .num{font-variant-numeric:tabular-nums}
 .btn{width:100%;height:54px;border:0;border-radius:16px;background:#5B21B6;color:#FFFFFF;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-shadow:0 3px 0 #3B0F7A;box-sizing:border-box}
 .btn-w{background:#FFFFFF;color:#4C1D95;box-shadow:0 3px 0 #E7E2F0;border:1.5px solid #E7E2F0}
-.btn-g{background:#16884A;box-shadow:0 3px 0 #0F6B39}
+.btn-g{background:#147D44;box-shadow:0 3px 0 #0F6B39}
 .btn-off{background:#E7E2F0;color:#615A6E;box-shadow:none;cursor:not-allowed}
 .btn:active,.press:active{transform:translateY(2px)}
 .chip{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E7E2F0;background:#FFFFFF;color:#0E0B14;display:inline-flex;align-items:center;gap:6px;font:600 14px 'Plus Jakarta Sans',sans-serif;text-decoration:none;box-sizing:border-box;cursor:pointer}
@@ -118,7 +118,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
     <sc-if value="{{has}}" hint-placeholder-val="{{true}}"><div class="card" style="overflow: hidden"><sc-for list="{{rows}}" as="r" hint-placeholder-count="4"><div class="li"><span class="tag" style="background: {{r.bg}}; color: {{r.fg}}; min-width: 64px; justify-content: center">{{r.kind}}</span><span style="flex: 1"><strong style="display: block">{{r.name}}</strong><span class="muted" style="font-size: 13px">{{r.meta}}</span></span><strong class="num">{{r.amt}}</strong></div></sc-for></div></sc-if>
     <sc-if value="{{none}}" hint-placeholder-val="{{false}}"><p class="card muted" style="margin: 0; padding: 14px 16px; font-size: 14px">No trades yet. Your buys and sells will show up here.</p></sc-if>
     <section class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px"><h2 style="font-size: 16px">What you practised</h2>
-      <sc-for list="{{skills}}" as="k" hint-placeholder-count="3"><span class="{{k.cls}}" style="display: flex; gap: 8px; align-items: center"><sc-if value="{{k.done}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if><sc-if value="{{k.todo}}" hint-placeholder-val="{{false}}"><span style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid #D3CDE0; box-sizing: border-box"></span></sc-if>{{k.label}}</span></sc-for></section>
+      <sc-for list="{{skills}}" as="k" hint-placeholder-count="3"><span class="{{k.cls}}" style="display: flex; gap: 8px; align-items: center"><sc-if value="{{k.done}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#147D44" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if><sc-if value="{{k.todo}}" hint-placeholder-val="{{false}}"><span style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid #D3CDE0; box-sizing: border-box"></span></sc-if>{{k.label}}</span></sc-for></section>
   </div></main>
     
   </div>

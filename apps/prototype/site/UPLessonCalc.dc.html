@@ -23,7 +23,7 @@ h1,h2,h3,.fd{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600}
 .btn:active,.press:active{transform:translateY(4px);box-shadow:none!important}
 .b-blue{background:#5B21B6;color:#FFFFFF;box-shadow:0 4px 0 #3B0F7A}
 .b-white{background:#FFFFFF;color:#4C1D95;border:2px solid #E7E2F0;box-shadow:0 4px 0 #E7E2F0}
-.b-green{background:#12B76A;color:#0E0B14;box-shadow:0 4px 0 #16884A}
+.b-green{background:#12B76A;color:#0E0B14;box-shadow:0 4px 0 #147D44}
 .b-coral{background:#F04438;color:#0E0B14;box-shadow:0 4px 0 #F04438}
 .b-off{background:#E7E2F0;color:#615A6E;box-shadow:0 4px 0 #C7CEDB;cursor:not-allowed}
 .b-off:active{transform:none}
@@ -118,7 +118,7 @@ h1,h2,h3,.h,.serif{font-weight:700!important;letter-spacing:-0.02em}
     <sc-if value="{{showRight}}" hint-placeholder-val="{{false}}">
       <section aria-labelledby="fb-right" class="sheet" style="position: relative; padding: 18px 16px 22px; background: #DCFAE6; border-top: 3px solid #12B76A; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 12px">
         <div style="display: flex; align-items: center; gap: 12px">
-          <span aria-hidden="true" style="position: relative; width: 44px; height: 44px; flex: none; border-radius: 999px; background: #16884A; box-shadow: 0 3px 0 #0F7A3A; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span aria-hidden="true" style="position: relative; width: 44px; height: 44px; flex: none; border-radius: 999px; background: #147D44; box-shadow: 0 3px 0 #0F7A3A; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <span style="display: flex; flex-direction: column; gap: 1px">
             <h2 id="fb-right" style="margin: 0; font-size: 24px; color: #0F7A3A">Nice!</h2>
             <span style="font-size: 14px; font-weight: 800">{{rightHead}}</span>
@@ -162,7 +162,7 @@ class Component extends DCLogic {
       valInk: good ? '#0F7A3A' : bad ? '#B42828' : '#0E0B14',
       boxBorder: good ? '#12B76A' : bad ? '#F04438' : '#5B21B6',
       boxBg: good ? '#DCFAE6' : bad ? '#FFE4E2' : '#FFFFFF',
-      boxEdge: good ? '#16884A' : bad ? '#F04438' : '#3B0F7A',
+      boxEdge: good ? '#147D44' : bad ? '#F04438' : '#3B0F7A',
       boxCls: good ? 'pop' : bad ? 'shake' : '',
       onVal: (e) => this.setState({ val: e.target.value.replace(/[^0-9.,]/g, '').slice(0, 6), checked: false }),
       keys: K.map((k) => ({

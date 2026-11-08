@@ -19,7 +19,7 @@ body{margin:0;background:#FFFFFF}
 a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2px}
 .btn{width:100%;height:54px;border:0;border-radius:16px;font:700 16px 'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;box-sizing:border-box}
 .b-blue{background:#5B21B6;color:#FFFFFF;box-shadow:0 3px 0 #3B0F7A}
-.b-green{background:#16884A;color:#FFFFFF;box-shadow:0 3px 0 #0F6B39}
+.b-green{background:#147D44;color:#FFFFFF;box-shadow:0 3px 0 #0F6B39}
 .b-off{background:#E7E2F0;color:#615A6E;cursor:not-allowed}
 .btn:active,.press:active{transform:translateY(2px)}
 .opt{width:100%;min-height:64px;box-sizing:border-box;padding:0 16px;border-radius:16px;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
@@ -65,7 +65,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
   <div aria-live="polite" style="margin-top: auto; position: sticky; bottom: 0; z-index: 5">
     <sc-if value="{{showRight}}" hint-placeholder-val="{{false}}">
       <section class="sheet" style="padding: 20px 16px 22px; background: #FFFFFF; border-radius: 24px 24px 0 0; box-shadow: 0 -8px 24px rgba(16,30,70,.10); display: flex; flex-direction: column; gap: 10px">
-        <div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #DCFAE6; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="#16884A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><h2 style="margin: 0; font-size: 19px; font-weight: 700; color: #0F6B39">All matched</h2></div>
+        <div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #DCFAE6; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="#147D44" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><h2 style="margin: 0; font-size: 19px; font-weight: 700; color: #0F6B39">All matched</h2></div>
         <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #38323F">{{mDone}}</p>
         <a href="{{nextHref}}" class="btn b-green">Continue</a>
       </section>
@@ -82,7 +82,7 @@ class Component extends DCLogic {
     const T = MC ? MC.terms : ['Principal', 'Interest rate', 'Compounding', 'Time horizon'];
     const M = MC ? [2, 0, 3, 1].map((k) => ({ k: k, t: MC.means[k] })) : [{ k: 2, t: 'Earning interest on past interest' }, { k: 0, t: 'The money you start with' }, { k: 3, t: 'How long the money stays invested' }, { k: 1, t: 'The % paid per year' }];
     const all = s.done.length === 4;
-    const tone = (done, sel, miss, fresh) => done ? (fresh ? ['#DCFAE6', '#12B76A', '#16884A', '#0F6B39'] : ['#F5F3F8', '#E7E2F0', '#E7E2F0', '#615A6E']) : miss ? ['#FFE4E2', '#F04438', '#F04438', '#B42828'] : sel ? ['#F1EBFB', '#5B21B6', '#3B0F7A', '#4C1D95'] : ['#FFFFFF', '#E7E2F0', '#E7E2F0', '#0E0B14'];
+    const tone = (done, sel, miss, fresh) => done ? (fresh ? ['#DCFAE6', '#12B76A', '#147D44', '#0F6B39'] : ['#F5F3F8', '#E7E2F0', '#E7E2F0', '#615A6E']) : miss ? ['#FFE4E2', '#F04438', '#F04438', '#B42828'] : sel ? ['#F1EBFB', '#5B21B6', '#3B0F7A', '#4C1D95'] : ['#FFFFFF', '#E7E2F0', '#E7E2F0', '#0E0B14'];
     return {
       terms: T.map((t, i) => { const d = s.done.includes(i), sel = s.sel === i, c = tone(d, sel, false, s.last === i);
         return { label: t, done: d, pressed: sel ? 'true' : 'false', aria: t + (d ? ', matched' : sel ? ', selected' : ''), bg: c[0], border: c[1], edge: c[2], ink: c[3], cls: d && s.last === i ? 'pop' : '',

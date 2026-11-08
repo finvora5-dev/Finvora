@@ -81,7 +81,7 @@ class Component extends DCLogic {
     return { n: s.i + 1, total: all.length, q: q, note: s.note, hasNote: !!s.note, err: s.err, hasErr: !!s.err, previewHref: 'UPDaily.dc.html?dq=' + s.i,
       nums: all.map((x, i) => ({ label: String(i + 1), pressed: i === s.i ? 'true' : 'false', style: i === s.i ? 'background: #5B21B6; color: #FFFFFF; border-color: #5B21B6' : '', pick: () => this.setState({ i: i, q: null, note: '', err: '' }) })),
       types: ['Order the steps', 'Match pairs', 'Scenario A/B', 'Calculation'].map((t) => ({ label: t, pick: () => this.setState({ note: 'Daily questions are multiple choice. ' + t + ' questions are built in the lesson files for now.' }) })),
-      opts: q.opts.map((o, i) => ({ n: i + 1, label: o, right: i === q.right, pressed: i === q.right ? 'true' : 'false', ring: i === q.right ? '#16884A' : '#D3CDE0', fill: i === q.right ? '#16884A' : '#FFFFFF', pvBd: i === q.right ? '#12B76A' : '#E7E2F0', pvBg: i === q.right ? '#DCFAE6' : '#FFFFFF',
+      opts: q.opts.map((o, i) => ({ n: i + 1, label: o, right: i === q.right, pressed: i === q.right ? 'true' : 'false', ring: i === q.right ? '#147D44' : '#D3CDE0', fill: i === q.right ? '#147D44' : '#FFFFFF', pvBd: i === q.right ? '#12B76A' : '#E7E2F0', pvBg: i === q.right ? '#DCFAE6' : '#FFFFFF',
         mark: () => put({ right: i }), edit: (e) => { const a = q.opts.slice(); a[i] = e.target.value; put({ opts: a }); } })),
       onQ: (e) => put({ q: e.target.value }), onExplain: (e) => put({ explain: e.target.value }), onHint: (e) => put({ hint: e.target.value }),
       save: () => {
