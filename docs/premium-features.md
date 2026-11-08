@@ -1,6 +1,6 @@
 # Plus (Premium) features: client's list
 
-**Status:** received 8 Nov 2026 from the client, through the user. Not designed or built yet. This changes the Plus scope, so it needs an EGM design (brainstorm, draft, review) and the user's approval before any build.
+**Decided 9 Nov 2026:** see D6 in [open-questions.md](open-questions.md). **Status:** received 8 Nov 2026 from the client, through the user. Not designed or built yet. This changes the Plus scope, so it needs an EGM design (brainstorm, draft, review) and the user's approval before any build.
 
 ## The client's list (as given)
 

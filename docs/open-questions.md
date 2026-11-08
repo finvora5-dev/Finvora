@@ -14,6 +14,22 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 | 6 | **Prototype success:** what would make the client happy with Stage 1? | Defines "done" for Week 5 | |
 | 7 | **Founders' expectations:** do they accept that Stage 1 has sample prices, scripted AI and no real users (their brief mentions live data and onboarding early users)? | Avoids a mismatch at the Week 5 review | |
 
+## Decisions recorded 9 Nov 2026 (from the product owner)
+
+| # | Decision | Notes |
+|---|---|---|
+| D1 | **Plus price: ₦5,999 a month** (599900 kobo), agreed by the client. | Yearly not yet confirmed. Full price is ₦71,988; proposed ₦59,990 a year (about two months free). Answers question 3. |
+| D2 | **Free Ask Fin limit: 5 questions a day.** | Answers question 4's AI limit. |
+| D3 | **Practice market follows real NGX hours** (weekdays 10:00 to 14:30, Lagos time). Reviewer tools can still open it. | |
+| D4 | **Ask Fin declines non-finance questions and says when it has no figures for a company**, following the RAG procedure in [phase2-ai-rag.md](phase2-ai-rag.md): scope check, then retrieval from approved content, then a grounded answer with real references, else "not enough information". Phase 1 runs this on the app's own Library content in the browser, labelled as example answers. | No live AI or paid service in Phase 1. |
+| D5 | **Labels:** a quiet label on scripted Ask Fin answers ("Example answer") and on made-up company figures ("Made-up figures"). | Answers question 2 in part. |
+| D6 | **Plus features in the prototype:** portfolio insights, market crisis simulator and interactive scenarios built with made-up data; dividend tracker and historical comparisons on made-up companies; "Risk Signals" and "Investment Intelligence" renamed to learning names (for example "Risk explained"). | See [premium-features.md](premium-features.md). |
+| D7 | **Reviewer tools** sit behind a short reviewer code given only to the client. | Testers who are learners don't see them. |
+| D8 | **Replay becomes "Practise my mistakes"** (only missed questions) plus a quick refresher. Reward: 2 XP once per lesson per day, plus a bonus for fixing every mistake. | |
+| D9 | **Text zoom on phones: not in Phase 1.** Recorded as a known accessibility gap (WCAG 1.4.4). | |
+| D10 | **Admin works on phones too**, responsive across all devices. | Needs a mock-up first. |
+| D11 | **Phase 1 success:** a tester finishes a lesson and starts the next one without being asked, and nobody gets lost or stuck. | |
+
 ## Phase 2: parked until the prototype is approved
 
 These don't block Phase 1. The related build rules stay in `build-backlog.md` (B5 to B10) and the **Pre-launch checklist**, so nothing is lost.
