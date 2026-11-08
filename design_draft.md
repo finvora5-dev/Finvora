@@ -29,6 +29,7 @@ It builds on Part 1 ([prototype-settings-labels-storage.md](docs/designs/prototy
 *   **Full replay stays** as a small link, and is the only option for a lesson with no stored misses (a perfect score, or a lesson finished before this change).
 *   **The rules live in the tested domain package** so they carry into Phase 2, with tests for each.
 *   **Clear entry points:** the journey's finished-lesson node and the lesson summary show how many questions are waiting ("2 to review").
+*   **A review has its own end screen,** in the style of the after-lesson celebrations: when every miss is fixed, a "Came back stronger" moment (Fin powers up, the badge pops in, +5 XP rolls up); when some remain, a calm screen saying how many are left. Mock-up first.
 
 ## Non-Goals
 
@@ -38,8 +39,55 @@ It builds on Part 1 ([prototype-settings-labels-storage.md](docs/designs/prototy
 *   **Changing lesson content or question wording.**
 *   **New visual style.** Screens reuse the existing lesson steps; the new entry points get a mock-up before they are built.
 
+## Decisions Made in Drafting
+
+*   **Journey entry:** tapping a finished lesson with misses opens a small sheet: "Review what I missed (N)" and "Replay the whole lesson". A lesson without misses goes straight to the full replay, as today.
+*   **One miss per step:** order and match steps count as one question each.
+*   **Best score unchanged by reviews:** the best score records first attempts and full replays; reviews only clear misses.
+*   **Review end screen:** its own celebration, mock-up first (owner, 8 Nov).
+
+## Technical Plan (Architecture)
+
+```mermaid
+flowchart LR
+  RUN["Lesson run<br/>first-try answers per step"] -->|finishRun| MISS[("progress.misses<br/>lessonId: {step: answer}")]
+  MISS --> ENTRY["Journey sheet / summary<br/>N to review"]
+  ENTRY -->|"?l=id&review=1"| REVIEW["Review run<br/>only missed steps"]
+  REVIEW -->|right| CLEAR["Clear that miss"]
+  CLEAR -->|all cleared, first time| BONUS["+5 XP, Came back stronger badge"]
+  REVIEW --> END["Review end screen"]
+```
+
+### 1. Rules in the domain package
+
+New tested functions in `packages/domain/src/learning.ts`, so the rules carry into Phase 2:
+
+*   **Record misses** after a full lesson or full replay: take the steps answered wrong on the first try and add them to that lesson's misses, keeping the learner's answer. A step answered right in a full replay clears its miss.
+*   **Plan a review:** given a lesson's flow and its misses, return the missed steps in lesson order.
+*   **Apply a review:** steps answered right are cleared; steps still wrong stay. Returns how many remain and whether this review fixed the last one.
+*   **Reward:** fixing the last miss of a lesson gives `XP.improvement` (5) once per lesson, ever; it is remembered so it never pays twice. The usual practice reward (2 XP once per lesson per Lagos day) and the streak day apply to every review and replay.
+
+### 2. Stored data
+
+*   `progress.misses[lessonId] = { stepKind: givenAnswer }`, added empty by the Part 1 upgrade. Step kinds (choice, order, match, scenario, calc) are stable keys within a lesson.
+*   `progress.fixed[lessonId] = true` once the +5 has been paid, so it is paid once ever.
+*   Lessons finished before this change have no misses; they offer full replay only.
+
+### 3. Running a review
+
+*   A review is a lesson run with a review flag and the list of steps to play. The lesson step screens already move to the next step in the flow; in a review they move to the next missed step instead, and the progress bar counts only the review's steps ("1 of 2").
+*   Explainer, myth and compare steps are skipped in a review; they have no answers.
+*   The halfway cheer and "in a row" label work as in a normal lesson.
+*   At the end, the review goes to its own end screen instead of the lesson celebration.
+
+### 4. Screens
+
+*   **Journey sheet** (new): on a finished lesson with misses, a small sheet with the lesson title, "Review what I missed (N)" and "Replay the whole lesson".
+*   **Lesson summary:** when the lesson has misses, a "Review what I missed (N)" button under the existing review of answers.
+*   **Review end screen** (new board, built like the celebration screens): all fixed: Fin powers up, "Came back stronger" badge pops in, +5 XP rolls up, "Back to the journey"; some left: "N still to practise", what was fixed, "Back to the journey".
+*   **History** names reviews "Lesson review".
+*   **Me, Achievements:** the "Came back stronger" badge unlocks when a lesson's misses are all fixed.
+
 ## Open Questions
 
-*   **Where a review starts from the journey:** tapping a finished lesson could open a small sheet with "Review what I missed (2)" and "Replay the whole lesson", or go straight to the review with a replay link on its first screen. Proposed: the small sheet.
-*   **What counts as one question** in multi-part steps (order, match): proposed one miss per step, so a wrong order counts as one question.
-*   **Does a review change the lesson's best score?** Proposed: no. The best score records the first full attempt and full replays only; reviews only clear misses.
+*   None for this part.
