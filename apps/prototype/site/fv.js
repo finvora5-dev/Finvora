@@ -273,6 +273,14 @@
   // screens with their own words. Amounts are naira; every example is made up for learning.
   var CONTENT = {
     money: {
+      flow: ["info", "myth", "choice", "order", "scenario", "calc"],
+      myth: { title: "Myth or fact?", lead: "A common idea about money that isn't quite right.", myth: "Money is only coins and notes.", fact: "Money in your bank account or mobile wallet is money too. It still pays for things, compares prices and keeps value.", tip: "What makes something money is that people accept it." },
+      order: { q: "Order these from the smallest amount to the largest.", items: [["50 kobo", "Half a naira", "₦0.50"], ["₦5", "500 kobo", "₦5.00"], ["₦50", "5,000 kobo", "₦50.00"]], start: [2, 0, 1],
+        wrong: "Change everything to kobo first: ₦1 is 100 kobo. Then compare. Move the items and check again.", right: ["50 kobo is half of ₦1.", "₦5 is 500 kobo.", "₦50 is 5,000 kobo, the largest."], note: "₦1 = 100 kobo.", ends: ["Smallest", "Largest"] },
+      scenario: { q: "Which job of money is Bisi using?", say: ["I'm keeping ", "₦10,000", " in my savings box for ", "next month", "."],
+        opts: [{ name: "Option A", rate: "Paying", access: "Buying something now", why: "Bisi isn't buying anything yet. She's putting money aside for later." },
+               { name: "Option B", rate: "Keeping value", access: "Saving it for later", right: true, why: "Putting money aside for next month uses money to keep value for later. Over time, inflation can shrink that value." }],
+        note: "A made-up example for this lesson." },
       lead: "Money does three jobs: you pay with it, you compare prices with it, and you keep value in it for later.",
       exTitle: "Money's three jobs", rows: [["Paying ₦500 for a danfo ride", "Paying"], ["A shirt is ₦8,000, jeans are ₦12,000", "Comparing"], ["Keeping ₦20,000 for next month", "Keeping value"]],
       tip: "The naira is Nigeria's money. ₦1 is 100 kobo.",
@@ -285,6 +293,14 @@
       learned: ["Money helps you pay for things.", "Prices in naira let you compare things.", "Money can keep value for later, though inflation can shrink it."], article: "what-is-money"
     },
     income: {
+      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      compare: { title: "Income vs expenses", lead: "Every month, money comes in and money goes out.", a: { name: "Income (in)", items: ["Salary or wages", "Profit from a business", "Gifts and support", "Interest on savings"] }, b: { name: "Expenses (out)", items: ["Rent and food", "Transport and data", "School fees", "Loan repayments"] }, tip: "What's left after expenses is what you can save." },
+      order: { q: "Kemi earns ₦100,000 a month. Order these months from least to most left over.", items: [["Month A", "Spends ₦95,000", "₦5,000 left"], ["Month B", "Spends ₦80,000", "₦20,000 left"], ["Month C", "Spends ₦70,000", "₦30,000 left"]], start: [1, 2, 0],
+        wrong: "Left over is income minus expenses. The more Kemi spends, the less is left. Move the items and check again.", right: ["A: ₦100,000 − ₦95,000 = ₦5,000.", "B: ₦100,000 − ₦80,000 = ₦20,000.", "C: ₦100,000 − ₦70,000 = ₦30,000."], note: "Made-up figures.", ends: ["Least left over", "Most left over"] },
+      scenario: { q: "Amaka spends more than she earns. What should she do first?", say: ["I earn ", "₦80,000", " but spend about ", "₦90,000", " a month."],
+        opts: [{ name: "Option A", rate: "Borrow", access: "Take a loan each month", why: "Borrowing to cover a monthly gap builds debt, and the repayments make next month's gap bigger." },
+               { name: "Option B", rate: "Track and cut", access: "List spending, cut wants", right: true, why: "Writing down every expense shows where the money goes. Cutting wants first can close the ₦10,000 gap without new debt." }],
+        note: "A made-up example, not personal advice." },
       lead: "Income is money coming in. Expenses are money going out. What's left over is what you can save.",
       exTitle: "Tunde's month", rows: [["Salary (income)", "₦150,000"], ["Rent and food (expenses)", "−₦95,000"], ["Transport (expense)", "−₦25,000"], ["Left over", "₦30,000"]],
       tip: "Writing both down for one month shows where your money really goes.",
@@ -297,6 +313,14 @@
       learned: ["Income is money coming in.", "Expenses are money going out.", "Income minus expenses is what you can save."], article: "budgeting"
     },
     budget: {
+      flow: ["info", "compare", "choice", "order", "scenario", "calc"],
+      compare: { title: "Needs vs wants", lead: "A budget sorts spending into what you must pay and what's nice to have.", a: { name: "Needs", items: ["Rent", "Food", "Transport to work", "Electricity"] }, b: { name: "Wants", items: ["Eating out", "New clothes", "Streaming", "Weekend trips"] }, tip: "Some things can be both: basic food is a need, a restaurant meal is a want." },
+      order: { q: "Ada earns ₦150,000. Using 50/30/20, order the parts from smallest to largest.", items: [["Savings (20%)", "For your future", "₦30,000"], ["Wants (30%)", "Nice to have", "₦45,000"], ["Needs (50%)", "Must pay", "₦75,000"]], start: [2, 0, 1],
+        wrong: "Work out each part: 20%, 30% and 50% of ₦150,000. Move the items and check again.", right: ["Savings: 20% = ₦30,000.", "Wants: 30% = ₦45,000.", "Needs: 50% = ₦75,000."], note: "50/30/20 is a guide, not a rule.", ends: ["Smallest", "Largest"] },
+      scenario: { q: "Ada's rent goes up. Which change keeps her budget working?", say: ["My rent went up by ", "₦15,000", ". I save ", "₦30,000", " a month."],
+        opts: [{ name: "Option A", rate: "Stop saving", access: "Move all ₦30,000 to rent", why: "Stopping savings completely leaves Ada with no cushion. Wants are the first place to look." },
+               { name: "Option B", rate: "Cut wants", access: "Spend ₦15,000 less on wants", right: true, why: "Rent is a need, so the extra comes from wants first. Ada keeps saving ₦30,000 a month." }],
+        note: "A made-up example. Change the split to fit your life." },
       lead: "A budget is a plan for your income before you spend it. A simple guide splits it 50% needs, 30% wants and 20% savings.",
       exTitle: "50/30/20 on ₦150,000", rows: [["Needs: rent, food, transport (50%)", "₦75,000"], ["Wants: outings, new clothes (30%)", "₦45,000"], ["Savings (20%)", "₦30,000"]],
       tip: "It's a starting point. Change the split to fit your life.",
@@ -335,6 +359,14 @@
         note: "Both options are made up for this lesson. Rates are fixed; tax and fees are ignored." }
     },
     emergency: {
+      flow: ["info", "myth", "choice", "order", "scenario", "calc"],
+      myth: { title: "Myth or fact?", lead: "A common mistake about emergency money.", myth: "An emergency fund should be invested so it grows fast.", fact: "Its job is to be there when you need it. Keep it safe and easy to reach, even if it grows slowly.", tip: "Growth matters for long-term goals, not for emergencies." },
+      order: { q: "Order these places from least to most suitable for an emergency fund.", items: [["Shares", "Can fall in value", "Least suitable"], ["Fixed deposit, locked 1 year", "Safe but hard to reach", "Better"], ["Savings account", "Safe and easy to reach", "Most suitable"]], start: [1, 2, 0],
+        wrong: "An emergency fund needs to be safe and quick to reach. Move the items and check again.", right: ["Shares can fall just when you need the money.", "A locked deposit is safe, but reaching it early can cost you.", "A savings account is safe and quick to reach."], note: "A general guide, not personal advice.", ends: ["Least suitable", "Most suitable"] },
+      scenario: { q: "Bimpe's phone breaks. How should she pay for the repair?", say: ["I have ", "₦150,000", " in an emergency fund and need ", "₦60,000", " today."],
+        opts: [{ name: "Option A", rate: "Borrow", access: "Take a quick loan", why: "A quick loan adds interest and repayments when Bimpe already has money set aside for this." },
+               { name: "Option B", rate: "Use the fund", access: "Then top it up monthly", right: true, why: "This is what the fund is for. She uses ₦60,000, keeps ₦90,000, and rebuilds it a little each month." }],
+        note: "A made-up example." },
       lead: "An emergency fund is money kept safe and easy to reach for surprises, like a medical bill or losing your income.",
       exTitle: "Building a fund", rows: [["Monthly costs", "₦80,000"], ["Goal: 3 months of costs", "₦240,000"], ["Where to keep it", "Savings you can reach fast"]],
       tip: "Many people aim for 3 to 6 months of costs, built up a little at a time.",
@@ -477,7 +509,7 @@
   /** True when a screen is being played inside a lesson (not on its own as a micro module). */
   function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
   function flowVals(kind) {
-    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
+    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "order", "scenario", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
     if (i < 0) i = 0;
     var nx = f[i + 1], total = f.length;
     return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,

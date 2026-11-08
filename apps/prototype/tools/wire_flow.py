@@ -18,7 +18,7 @@ def wrap_render(s, kind, extra=''):
     body = s[a:b].replace('  renderVals() {', '  _rv() {', 1)
     body = body.rstrip()
     assert body.endswith('}')
-    body = body[:-1] + "  renderVals() { const F = window.FV, base = this._rv() || {}; " + extra + "return F && F.flowVals && (F.inLesson() || '%s' !== 'compare') ? Object.assign({}, base, F.flowVals('%s')) : Object.assign({ nextHref: 'UPLessonComplete.dc.html', fLabel: '', fN: '1', fTotal: '1', fPct: '100%%', fFrom: '0%%', fText: '' }, base); }\n}\n" % (kind, kind)
+    body = body[:-1] + "  renderVals() { const F = window.FV, base = this._rv() || {}; " + extra + "return F && F.flowVals && (F.inLesson() || ['compare', 'myth'].indexOf('%s') < 0) ? Object.assign({}, base, F.flowVals('%s')) : Object.assign({ nextHref: 'UPLessonComplete.dc.html', fLabel: '', fN: '1', fTotal: '1', fPct: '100%%', fFrom: '0%%', fText: '' }, base); }\n}\n" % (kind, kind)
     return s[:a] + body + s[b:]
 def progress(s):
     s = resub(s, r'aria-valuemax="3" aria-valuenow="\d"( aria-valuetext="Step \d of 3")?', 'aria-valuemax="{{fTotal}}" aria-valuenow="{{fN}}" aria-valuetext="{{fText}}"')
@@ -89,3 +89,22 @@ if MARK not in s:
     s = sub1(s, "check: () => { if (s.pick !== null) this.setState({ checked: true }); },", "check: () => { if (s.pick !== null) { if (window.FV) window.FV.answer('scenario', !!opts[s.pick].right, opts[s.pick].name + ': ' + opts[s.pick].access); this.setState({ checked: true }); } },")
     wr('UPLessonScenario', wrap_render(s, 'scenario'))
 print('lesson steps wired')
+
+# Myth or fact (quick learn): the lesson's myth when inside a lesson, else the original micro module.
+s = rd('UPLearnMyth')
+if MARK not in s:
+    s = progress(s)
+    s = sub1(s, '>Myth or fact?</h1>', '>{{mTitle}}</h1>')
+    s = sub1(s, '>A quick myth that stops many people from learning about investing.</p>', '>{{mLead}}</p>')
+    s = sub1(s, '>"You need lots of money to start investing."</p>', '>“{{mMyth}}”</p>')
+    s = sub1(s, '>Some investments let you start with small amounts. Understanding the risk matters more than the size.</p>', '>{{mFact}}</p>')
+    s = sub1(s, '>Learning comes first. Finvora never tells you what to buy.</p>', '>{{mTip}}</p>')
+    s = sub1(s, '<a href="{{back}}" onClick="{{finish}}" class="btn b-blue">{{doneLabel}}</a>', '<a href="{{goHref}}" onClick="{{goTap}}" class="btn b-blue">{{goLabel}}</a>')
+    s = s.replace('<a href="UPJourney.dc.html" class="press" aria-label="Close"', '<a href="{{closeHref}}" class="press" aria-label="{{closeLabel}}"', 1)
+    extra = """const L = F && F.lesson ? F.lesson() : null, M = L && L.c && L.c.myth, inL = F && F.inLesson() && M;
+    const X = inL ? M : { title: 'Myth or fact?', lead: 'A quick myth that stops many people from learning about investing.', myth: 'You need lots of money to start investing.', fact: 'Some investments let you start with small amounts. Understanding the risk matters more than the size.', tip: 'Learning comes first. Finvora never tells you what to buy.' };
+    Object.assign(base, { mTitle: X.title, mLead: X.lead, mMyth: X.myth, mFact: X.fact, mTip: X.tip, closeHref: inL ? 'UMLeaveLesson.dc.html' : 'UPJourney.dc.html', closeLabel: inL ? 'Close lesson and return to the journey' : 'Close',
+      goHref: inL ? F.flowVals('myth').nextHref : base.back, goTap: inL ? null : base.finish, goLabel: inL ? 'Continue' : base.doneLabel });
+    """
+    wr('UPLearnMyth', wrap_render(s, 'myth', extra))
+    print('myth wired')

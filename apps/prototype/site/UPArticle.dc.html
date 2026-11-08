@@ -199,7 +199,7 @@ class Component extends DCLogic {
   componentWillUnmount() { if (this.onScroll) window.removeEventListener('scroll', this.onScroll); }
   renderVals() {
     const L = this.L(), fb = (this.props.feedback || 'on') === 'on' && (!window.FV || !window.FV.ADMIN || window.FV.ADMIN.on('report')); if (!L) return { feedbackOn: fb };
-    const a = L.current(), div = a.slug === 'dividend', saved = L.isSaved(a.slug);
+    const a = L.current(), div = false, saved = L.isSaved(a.slug);
     const related = (a.related || []).map((s) => L.article(s)).filter(Boolean).map((r) => ({ href: 'UPArticle.dc.html?a=' + r.slug, title: r.title }));
     const dp = !div && a.deep, f = dp && a.deep.formula, m = dp && a.deep.mistake;
     const deepVals = dp ? { lead0: a.deep.lead[0], lead1: a.deep.lead[1], lead2: a.deep.lead[2], howTitle: a.deep.how.title, howIntro: a.deep.how.intro, howSteps: a.deep.how.steps.map((t, i) => ({ n: String(i + 1), t })),

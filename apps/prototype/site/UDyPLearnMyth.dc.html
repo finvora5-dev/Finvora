@@ -77,17 +77,17 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
   
   <div style="flex: 1; width: 100%; padding: 0 48px; box-sizing: border-box; display: flex; flex-direction: column">
   <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 12px">
-    <a href="UDJourney.dc.html" class="press" aria-label="Close" style="width: 44px; height: 44px; flex: none; margin-left: -10px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#615A6E" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
-    <div role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1" style="flex: 1; height: 8px; border-radius: 999px; background: #E7E2F0; overflow: hidden"><div class="fill" style="--from: 0%; width: 33.3%; height: 100%; border-radius: 999px; background: #5B21B6"></div></div>
-    <span style="font-size: 14px; font-weight: 700; color: #615A6E"></span>
+    <a href="{{closeHref}}" class="press" aria-label="{{closeLabel}}" style="width: 44px; height: 44px; flex: none; margin-left: -10px; border-radius: 12px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#615A6E" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
+    <div role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="{{fTotal}}" aria-valuenow="{{fN}}" aria-valuetext="{{fText}}" style="flex: 1; height: 8px; border-radius: 999px; background: #E7E2F0; overflow: hidden"><div class="fill" style="--from: {{fFrom}}; width: {{fPct}}; height: 100%; border-radius: 999px; background: #5B21B6"></div></div>
+    <span style="font-size: 14px; font-weight: 700; color: #615A6E">{{fLabel}}</span>
   </header>
   <main style="padding: 24px 16px 24px; display: flex; flex-direction: column; gap: 18px">
     <span class="in" style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #5B2FC9">Quick learn</span>
-    <h1 class="in" style="margin: -10px 0 0; font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em">Myth or fact?</h1>
-    <p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">A quick myth that stops many people from learning about investing.</p>
+    <h1 class="in" style="margin: -10px 0 0; font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em">{{mTitle}}</h1>
+    <p class="in" style="margin: -6px 0 0; font-size: 18px; line-height: 1.5; color: #1C1726">{{mLead}}</p>
     <div class="in" style="animation-delay: .06s; display: flex; flex-direction: column; gap: 12px">
-      <section style="background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px; border-color: #F04438; box-shadow: none; background: #FFE4E2"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #F04438; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><strong style="color: #C4170C; font-size: 13px; letter-spacing: .06em; text-transform: uppercase">Myth</strong></div><p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.4">"You need lots of money to start investing."</p></section>
-      <section style="background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px; border-color: #12B76A; box-shadow: none; background: #DCFAE6"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #12B76A; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><strong style="color: #067A3E; font-size: 13px; letter-spacing: .06em; text-transform: uppercase">Fact</strong></div><p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.4">Some investments let you start with small amounts. Understanding the risk matters more than the size.</p></section>
+      <section style="background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px; border-color: #F04438; box-shadow: none; background: #FFE4E2"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #F04438; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><strong style="color: #C4170C; font-size: 13px; letter-spacing: .06em; text-transform: uppercase">Myth</strong></div><p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.4">“{{mMyth}}”</p></section>
+      <section style="background: #FFFFFF; border: 2px solid #E7E2F0; box-shadow: 0 4px 0 #E7E2F0; border-radius: 20px; padding: 16px; border-color: #12B76A; box-shadow: none; background: #DCFAE6"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #12B76A; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><strong style="color: #067A3E; font-size: 13px; letter-spacing: .06em; text-transform: uppercase">Fact</strong></div><p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.4">{{mFact}}</p></section>
     </div>
     <div class="in" style="animation-delay: .1s; display: flex; align-items: flex-end; gap: 8px">
       <div style="width: 64px; height: 64px; flex: none"><svg width="64" height="64" viewBox="0 0 120 120" role="img" aria-label="Fin, the Finvora coin">
@@ -103,12 +103,12 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
   <circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".7"></circle>
   <path d="M48 70 q12 14 26 0 z" fill="#0B1F44"></path><path d="M54 76 q6 4 12 0" fill="#FF8FA3"></path>
 </svg></div>
-      <p style="flex: 1; margin: 0 0 10px; background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px; padding: 10px 14px; font-size: 15px; font-weight: 600; line-height: 1.45">Learning comes first. Finvora never tells you what to buy.</p>
+      <p style="flex: 1; margin: 0 0 10px; background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px; padding: 10px 14px; font-size: 15px; font-weight: 600; line-height: 1.45">{{mTip}}</p>
     </div>
     
   </main>
   <div style="margin-top: auto; position: sticky; bottom: 0; z-index: 5; padding: 12px 16px 22px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px">
-    <a href="{{back}}" onClick="{{finish}}" class="btn b-blue">{{doneLabel}}</a>
+    <a href="{{goHref}}" onClick="{{goTap}}" class="btn b-blue">{{goLabel}}</a>
     <a href="UPAskKobo.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #4C1D95; text-decoration: none">Explain it differently</a>
   </div>
 </div>
@@ -118,7 +118,12 @@ a:focus-visible,button:focus-visible{outline:3px solid #5B21B6;outline-offset:2p
 class Component extends DCLogic {
   LP() { return window.FV && window.FV.LOOP; }
   componentDidMount() { const prev = window.FV_PREV || ''; if (prev && !/Learn/.test(prev)) this.from = prev.replace(/^U[DP][xyz]?(?=[A-Z])/, (m) => m); this.setState({ n: 1 }); }
-  renderVals() { const LP = this.LP(), done = LP && LP.micro('myth'); return { back: this.from || 'UPLibrary.dc.html', doneLabel: done ? 'Done' : 'Done \u00b7 +15 XP', finish: () => { if (LP) LP.finishMicro('myth'); } }; }
+  _rv() { const LP = this.LP(), done = LP && LP.micro('myth'); return { back: this.from || 'UPLibrary.dc.html', doneLabel: done ? 'Done' : 'Done \u00b7 +15 XP', finish: () => { if (LP) LP.finishMicro('myth'); } }; }
+  renderVals() { const F = window.FV, base = this._rv() || {}; const L = F && F.lesson ? F.lesson() : null, M = L && L.c && L.c.myth, inL = F && F.inLesson() && M;
+    const X = inL ? M : { title: 'Myth or fact?', lead: 'A quick myth that stops many people from learning about investing.', myth: 'You need lots of money to start investing.', fact: 'Some investments let you start with small amounts. Understanding the risk matters more than the size.', tip: 'Learning comes first. Finvora never tells you what to buy.' };
+    Object.assign(base, { mTitle: X.title, mLead: X.lead, mMyth: X.myth, mFact: X.fact, mTip: X.tip, closeHref: inL ? 'UMLeaveLesson.dc.html' : 'UPJourney.dc.html', closeLabel: inL ? 'Close lesson and return to the journey' : 'Close',
+      goHref: inL ? F.flowVals('myth').nextHref : base.back, goTap: inL ? null : base.finish, goLabel: inL ? 'Continue' : base.doneLabel });
+    return F && F.flowVals && (F.inLesson() || ['compare', 'myth'].indexOf('myth') < 0) ? Object.assign({}, base, F.flowVals('myth')) : Object.assign({ nextHref: 'UPLessonComplete.dc.html', fLabel: '', fN: '1', fTotal: '1', fPct: '100%', fFrom: '0%', fText: '' }, base); }
 }
 </script>
 </body>

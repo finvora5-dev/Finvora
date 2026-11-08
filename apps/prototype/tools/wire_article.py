@@ -4,7 +4,7 @@ Articles without deep data keep the shorter layout. Usage: python3 wire_article.
 import sys, os
 SITE = sys.argv[1]
 p = os.path.join(SITE, 'UPArticle.dc.html'); s = open(p).read()
-if '{{deepOn}}' in s: print('articles already wired'); sys.exit()
+ALREADY = '{{deepOn}}' in s
 def sub1(s, a, b):
     if a not in s: raise SystemExit('missing: ' + a[:90])
     return s.replace(a, b, 1)
@@ -38,24 +38,33 @@ DEEP = '''<sc-if value="{{deepOn}}" hint-placeholder-val="{{false}}"><section st
       <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #1C1726">{{mFact}}</p>
     </section></sc-if></sc-if>
     '''
-# Lead: deep articles highlight the term, like Dividend.
-s = sub1(s, '<sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if>',
-    '<sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if><sc-if value="{{deepOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{lead0}}<span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">{{lead1}}</span>{{lead2}}</p></sc-if>')
-# Deep sections go before the short Example; the short Example shows only for articles without deep data.
-a = '<sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">'
-s = sub1(s, a, DEEP + '<sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">')
-s = sub1(s, '''<p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
-    </section>
-    <section style="display: flex; flex-direction: column; gap: 10px">
-      <h2 style="font-size: 22px">Why it matters</h2>''', '''<p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
-    </section></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}">
-    <section style="display: flex; flex-direction: column; gap: 10px">
-      <h2 style="font-size: 22px">Why it matters</h2>''')
-# Values.
-s = sub1(s, "    return { feedbackOn: fb, tag: L.topicOf(a).name,", """    const dp = !div && a.deep, f = dp && a.deep.formula, m = dp && a.deep.mistake;
-    const deepVals = dp ? { lead0: a.deep.lead[0], lead1: a.deep.lead[1], lead2: a.deep.lead[2], howTitle: a.deep.how.title, howIntro: a.deep.how.intro, howSteps: a.deep.how.steps.map((t, i) => ({ n: String(i + 1), t })),
-      exLine: a.deep.example.line, exRows: a.deep.example.rows.map((r) => ({ k: r[0], v: r[1] })), exNote: a.deep.example.note, hasFormula: !!f, fTitle: f ? f.title : '', fIntro: f ? f.intro : '', fRule: f ? f.rule : '', fCalc: f ? f.calc : '', fNote: f ? f.note : '',
-      hasMistake: !!m, mMyth: m ? m.myth : '', mFact: m ? m.fact : '' } : {};
-    return { ...deepVals, deepOn: !!dp, plainOn: !div && !dp, feedbackOn: fb, tag: L.topicOf(a).name,""")
-s = sub1(s, "points: a.explanation,", "points: dp ? a.deep.takeaways : a.explanation,")
-open(p, 'w').write(s); print('articles wired')
+def wire_deep(s):
+    # Lead: deep articles highlight the term, like Dividend.
+    s = sub1(s, '<sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if>',
+        '<sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{definition}}</p></sc-if><sc-if value="{{deepOn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #0E0B14">{{lead0}}<span style="background: #F1EBFB; padding: 0 4px; border-radius: 4px">{{lead1}}</span>{{lead2}}</p></sc-if>')
+    # Deep sections go before the short Example; the short Example shows only for articles without deep data.
+    a = '<sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">'
+    s = sub1(s, a, DEEP + '<sc-if value="{{plainOn}}" hint-placeholder-val="{{false}}"><section aria-labelledby="ex" style="border: 2px solid #E7E2F0; border-radius: 18px; overflow: hidden">')
+    s = sub1(s, '''<p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 10px">
+          <h2 style="font-size: 22px">Why it matters</h2>''', '''<p style="margin: 0; padding: 14px 16px; font-size: 16px; line-height: 1.55">{{example}}</p>
+        </section></sc-if><sc-if value="{{notDiv}}" hint-placeholder-val="{{false}}">
+        <section style="display: flex; flex-direction: column; gap: 10px">
+          <h2 style="font-size: 22px">Why it matters</h2>''')
+    # Values.
+    s = sub1(s, "    return { feedbackOn: fb, tag: L.topicOf(a).name,", """    const dp = !div && a.deep, f = dp && a.deep.formula, m = dp && a.deep.mistake;
+        const deepVals = dp ? { lead0: a.deep.lead[0], lead1: a.deep.lead[1], lead2: a.deep.lead[2], howTitle: a.deep.how.title, howIntro: a.deep.how.intro, howSteps: a.deep.how.steps.map((t, i) => ({ n: String(i + 1), t })),
+          exLine: a.deep.example.line, exRows: a.deep.example.rows.map((r) => ({ k: r[0], v: r[1] })), exNote: a.deep.example.note, hasFormula: !!f, fTitle: f ? f.title : '', fIntro: f ? f.intro : '', fRule: f ? f.rule : '', fCalc: f ? f.calc : '', fNote: f ? f.note : '',
+          hasMistake: !!m, mMyth: m ? m.myth : '', mFact: m ? m.fact : '' } : {};
+        return { ...deepVals, deepOn: !!dp, plainOn: !div && !dp, feedbackOn: fb, tag: L.topicOf(a).name,""")
+    s = sub1(s, "points: a.explanation,", "points: dp ? a.deep.takeaways : a.explanation,")
+
+    return s
+if not ALREADY:
+    s = wire_deep(s); open(p, 'w').write(s); print('articles wired')
+
+# Every article now has full sections in the data, so Dividend no longer needs its own hand-built page.
+p = os.path.join(SITE, 'UPArticle.dc.html'); s = open(p).read()
+if "div = a.slug === 'dividend'" in s:
+    s = s.replace("div = a.slug === 'dividend'", "div = false", 1); open(p, 'w').write(s); print('dividend uses the shared article data')
