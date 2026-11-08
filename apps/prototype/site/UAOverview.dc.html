@@ -55,17 +55,17 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
       <div style="display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px">
         <div class="card" style="padding: 18px 20px"><span class="eyebrow">Daily learners</span><div class="num" style="font-size: 30px; font-weight: 800; color: #0E0B14; line-height: 1.2; margin-top: 6px">1,104</div><span class="muted" style="font-size: 13px">Up 12% on last week</span></div>
         <div class="card" style="padding: 18px 20px"><span class="eyebrow">Lessons finished</span><div class="num" style="font-size: 30px; font-weight: 800; color: #0E0B14; line-height: 1.2; margin-top: 6px">3,870</div><span class="muted" style="font-size: 13px">Avg 3.5 per learner</span></div>
-        <div class="card" style="padding: 18px 20px"><span class="eyebrow">Open feedback</span><div class="num" style="font-size: 30px; font-weight: 800; color: #B42828; line-height: 1.2; margin-top: 6px">23</div><span class="muted" style="font-size: 13px">6 mistake reports</span></div>
-        <div class="card" style="padding: 18px 20px"><span class="eyebrow">Ask Fin to review</span><div class="num" style="font-size: 30px; font-weight: 800; color: #4C1D95; line-height: 1.2; margin-top: 6px">9</div><span class="muted" style="font-size: 13px">Flagged by learners or rules</span></div>
+        <div class="card" style="padding: 18px 20px"><span class="eyebrow">Open feedback</span><div class="num" style="font-size: 30px; font-weight: 800; color: #B42828; line-height: 1.2; margin-top: 6px">{{openFb}}</div><span class="muted" style="font-size: 13px">{{reportsText}}</span></div>
+        <div class="card" style="padding: 18px 20px"><span class="eyebrow">Ask Fin to review</span><div class="num" style="font-size: 30px; font-weight: 800; color: #4C1D95; line-height: 1.2; margin-top: 6px">{{toReview}}</div><span class="muted" style="font-size: 13px">Flagged by learners or rules</span></div>
       </div>
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px">
         <section class="card" style="padding: 20px"><div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="font-size: 17px">Daily learners</h2><span class="muted" style="font-size: 13px">Today 1,104</span></div>
           <div role="img" aria-label="Daily learners rose from 380 to 1,104 over 14 days" style="height: 170px; display: flex; align-items: flex-end; gap: 8px; margin-top: 16px; border-bottom: 1.5px solid #E7E2F0"><div title="38 learners" style="flex: 1; height: 52px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="52 learners" style="flex: 1; height: 71px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="47 learners" style="flex: 1; height: 64px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="61 learners" style="flex: 1; height: 83px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="58 learners" style="flex: 1; height: 79px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="72 learners" style="flex: 1; height: 98px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="80 learners" style="flex: 1; height: 109px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="76 learners" style="flex: 1; height: 104px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="88 learners" style="flex: 1; height: 120px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="93 learners" style="flex: 1; height: 127px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="85 learners" style="flex: 1; height: 116px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="97 learners" style="flex: 1; height: 132px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="104 learners" style="flex: 1; height: 142px; border-radius: 6px 6px 0 0; background: #C4B5FD"></div><div title="110 learners" style="flex: 1; height: 150px; border-radius: 6px 6px 0 0; background: #5B21B6"></div></div></section>
         <section class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px"><h2 style="font-size: 17px">Needs attention</h2>
-          <a href="UAFeedbackInbox.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #FFE6E6; color: #B42828">6</span><span>Mistake reports on articles</span></a>
-          <a href="UAAskKoboReview.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #F1EBFB; color: #4C1D95">9</span><span>Ask Fin answers to check</span></a>
-          <a href="UAContent.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #F5F3F8; color: #38323F">4</span><span>Drafts waiting for review</span></a>
-          <a href="UAFeedbackSettings.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #E1F7EA; color: #0F6B39">On</span><span>All 4 feedback prompts live</span></a></section>
+          <a href="UAFeedbackInbox.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #FFE6E6; color: #B42828">{{reports}}</span><span>Mistake reports on articles</span></a>
+          <a href="UAAskKoboReview.dc.html" class="press" style="min-height: 32px; display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #F1EBFB; color: #4C1D95">{{toReview}}</span><span>Ask Fin answers to check</span></a>
+          <a href="UAContent.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: #F5F3F8; color: #38323F">{{drafts}}</span><span>Drafts waiting for review</span></a>
+          <a href="UAFeedbackSettings.dc.html" class="press" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #0E0B14"><span class="tag" style="background: {{fbBg}}; color: {{fbFg}}">{{fbTag}}</span><span>{{fbText}}</span></a></section>
       </div>
       <section class="card" style="overflow: hidden"><div style="padding: 16px 16px 6px"><h2 style="font-size: 17px">Lowest-rated lessons</h2></div>
         <table><tr><th>Lesson</th><th>World</th><th>Rating</th><th>Top tag</th></tr>
@@ -75,10 +75,20 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
     </main>
   </div>
 </div>
-</x-dc>
+<!-- fv-admin-wired --></x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  renderVals() {
+    const A = window.FV && window.FV.ADMIN;
+    if (!A) return { openFb: 0, reportsText: '', reports: 0, toReview: 0, drafts: 0, fbBg: '#E1F7EA', fbFg: '#0F6B39', fbTag: 'On', fbText: 'All 4 feedback prompts live' };
+    const mine = A.inbox().filter((x) => !x.done), reports = mine.filter((x) => x.kind === 'Report').length + 1;
+    const on = ['rate', 'report', 'suggest', 'review'].filter((k) => A.on(k)).length;
+    const openFb = mine.length + 5;
+    return { openFb: openFb, reports: reports, reportsText: reports + (reports === 1 ? ' mistake report' : ' mistake reports'),
+      toReview: A.reviewQueue().length, drafts: A.contentRows().filter((r) => r.status !== 'Published').length,
+      fbBg: on === 4 ? '#E1F7EA' : '#FFE6E6', fbFg: on === 4 ? '#0F6B39' : '#B42828', fbTag: on === 4 ? 'On' : on + ' of 4',
+      fbText: on === 4 ? 'All 4 feedback prompts live' : (4 - on) + (4 - on === 1 ? ' feedback prompt is off' : ' feedback prompts are off') };
+  }
 }
 </script>
 </body>

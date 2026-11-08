@@ -51,22 +51,36 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
       <div style="flex: 1"><span class="muted" style="font-size: 13px">Fin-written summaries waiting for a human check</span><h1 style="font-size: 22px; line-height: 1.2">AI summary approvals</h1></div>
     </header>
     <main style="padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px">
-
-      <div style="display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start">
-        <section class="card" style="overflow: hidden"><div style="padding: 14px 16px; border-bottom: 1px solid #E7E2F0; background: #F1EBFB"><div style="display:flex;justify-content:space-between"><span class="tag" style="background: #F1EBFB; color: #4C1D95">Article</span><span class="muted" style="font-size:12px">10m</span></div><strong style="display:block;margin-top:6px">Treasury bills</strong></div><div style="padding: 14px 16px; border-bottom: 1px solid #E7E2F0; "><div style="display:flex;justify-content:space-between"><span class="tag" style="background: #F1EBFB; color: #4C1D95">Dictionary</span><span class="muted" style="font-size:12px">1h</span></div><strong style="display:block;margin-top:6px">Ex-dividend date</strong></div><div style="padding: 14px 16px; border-bottom: 1px solid #E7E2F0; "><div style="display:flex;justify-content:space-between"><span class="tag" style="background: #F1EBFB; color: #4C1D95">Company</span><span class="muted" style="font-size:12px">3h</span></div><strong style="display:block;margin-top:6px">Nupe Trust Bank</strong></div><div style="padding: 14px 16px; border-bottom: 1px solid #E7E2F0; "><div style="display:flex;justify-content:space-between"><span class="tag" style="background: #F1EBFB; color: #4C1D95">Article</span><span class="muted" style="font-size:12px">1d</span></div><strong style="display:block;margin-top:6px">Pension basics (RSA)</strong></div></section>
+      <sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><section class="card" style="padding: 32px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start"><h2 style="font-size: 18px">All summaries checked</h2><p class="muted" style="margin: 0">Nothing is waiting. Every decision is in the audit log.</p><a href="UAAudit.dc.html" class="btn btn-w">Open the audit log</a></section></sc-if>
+      <sc-if value="{{has}}" hint-placeholder-val="{{true}}"><div style="display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; align-items: start">
+        <section class="card" style="overflow: hidden"><sc-for list="{{items}}" as="x" hint-placeholder-count="4"><button type="button" class="press" aria-pressed="{{x.pressed}}" onClick="{{x.pick}}" style="display: block; width: 100%; text-align: left; border: 0; font: inherit; color: inherit; cursor: pointer; padding: 14px 16px; border-bottom: 1px solid #E7E2F0; background: {{x.bg}}"><span style="display:flex;justify-content:space-between"><span class="tag" style="background: #F1EBFB; color: #4C1D95">{{x.kind}}</span><span class="muted" style="font-size:12px">{{x.ago}}</span></span><strong style="display:block;margin-top:6px">{{x.title}}</strong></button></sc-for></section>
         <section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px">
-          <div><span class="eyebrow">Source</span><p style="margin: 6px 0 0; font-weight: 700">Article · Treasury bills (approved version 3)</p></div>
-          <div style="background: #F8F6FC; border: 1.5px solid #E7E2F0; border-radius: 14px; padding: 16px"><span class="eyebrow">Fin's summary</span><p style="margin: 6px 0 0; line-height: 1.6">A treasury bill is a short loan you give the government. You pay less than its face value now and get the full amount back when it matures, often in 91, 182 or 364 days.</p></div>
-          <div style="display: flex; flex-direction: column; gap: 6px"><span class="eyebrow">Checks</span><span><span class="tag" style="background: #E1F7EA; color: #0F6B39">Pass</span> Matches the source article</span><span><span class="tag" style="background: #E1F7EA; color: #0F6B39">Pass</span> No advice to buy or sell</span><span><span class="tag" style="background: #FFE6E6; color: #B42828">Check</span> Mentions durations: confirm against source</span></div>
-          <div style="display: flex; gap: 10px"><button class="btn" type="button">Approve and publish</button><button class="btn btn-w" type="button">Edit before approving</button><button class="btn btn-w" type="button" style="color: #B42828">Reject</button></div>
-        </section></div>
+          <div><span class="eyebrow">Source</span><p style="margin: 6px 0 0; font-weight: 700">{{sel.source}}</p></div>
+          <sc-if value="{{reading}}" hint-placeholder-val="{{true}}"><div style="background: #F8F6FC; border: 1.5px solid #E7E2F0; border-radius: 14px; padding: 16px"><span class="eyebrow">Fin's summary</span><p style="margin: 6px 0 0; line-height: 1.6">{{text}}</p></div></sc-if>
+          <sc-if value="{{editing}}" hint-placeholder-val="{{false}}"><label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Fin's summary (your edit)</span><textarea rows="4" style="border-radius: 12px; border: 1.5px solid #E7E2F0; padding: 10px 12px; font: 500 14px 'Plus Jakarta Sans', sans-serif; resize: vertical" value="{{text}}" onInput="{{onText}}"></textarea></label></sc-if>
+          <div style="display: flex; flex-direction: column; gap: 6px"><span class="eyebrow">Checks</span><sc-for list="{{checks}}" as="c" hint-placeholder-count="3"><span><span class="tag" style="background: {{c.bg}}; color: {{c.fg}}">{{c.tag}}</span> {{c.text}}</span></sc-for></div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap"><button class="btn" type="button" onClick="{{approve}}">Approve and publish</button><button class="btn btn-w" type="button" aria-pressed="{{editPressed}}" onClick="{{edit}}">{{editLabel}}</button><button class="btn btn-w" type="button" style="color: #B42828" onClick="{{reject}}">Reject</button></div>
+        </section></div></sc-if>
     </main>
   </div>
 </div>
-</x-dc>
+<!-- fv-admin-wired --></x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(p) { super(p); this.state = { sel: null, editing: false, text: null }; }
+  renderVals() {
+    const A = window.FV && window.FV.ADMIN, s = this.state, items = A ? A.sumQueue() : [];
+    const tagc = (t) => t === 'Published' || t === 'Confirmed' || t === 'Pass' || t === 'Live' ? ['#E1F7EA', '#0F6B39'] : t === 'Draft' ? ['#F5F3F8', '#38323F'] : t === 'Sent back' || t === 'Failed' || t === 'Fix' || t === 'Check' ? ['#FFE6E6', '#B42828'] : ['#F1EBFB', '#4C1D95'];
+    if (!items.length) return { empty: true, has: false, items: [], checks: [], sel: {}, text: '' };
+    const sel = items.filter((x) => x.id === s.sel)[0] || items[0], text = s.text !== null ? s.text : sel.text;
+    const checks = [[true, 'Matches the source'], [!/\b(buy|sell|you should)\b/i.test(text), 'No advice to buy or sell']].concat(sel.flag ? [[false, sel.flag]] : []);
+    const decide = (d) => { A.decideSum(sel, d, text); this.setState({ sel: null, editing: false, text: null }); if (window.fvToast) window.fvToast(d === 'Rejected' ? 'Rejected. Fin will not use this summary.' : 'Approved. The summary is live.'); };
+    return { empty: false, has: true, sel: sel, text: text, editing: s.editing, reading: !s.editing, editLabel: s.editing ? 'Done editing' : 'Edit before approving', editPressed: s.editing ? 'true' : 'false',
+      onText: (e) => this.setState({ text: e.target.value }), edit: () => this.setState({ editing: !s.editing, text: text }),
+      items: items.map((x) => ({ kind: x.kind, title: x.title, ago: x.ago, bg: x.id === sel.id ? '#F1EBFB' : '#FFFFFF', pressed: x.id === sel.id ? 'true' : 'false', pick: () => this.setState({ sel: x.id, editing: false, text: null }) })),
+      checks: checks.map((c) => ({ tag: c[0] ? 'Pass' : 'Check', bg: tagc(c[0] ? 'Pass' : 'Check')[0], fg: tagc(c[0] ? 'Pass' : 'Check')[1], text: c[1] })),
+      approve: () => decide(s.text !== null && s.text !== sel.text ? 'Approved with edits' : 'Approved'), reject: () => decide('Rejected') };
+  }
 }
 </script>
 </body>

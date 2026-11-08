@@ -145,7 +145,7 @@ class Component extends DCLogic {
       showCheck: !s.checked && !(D && D.done), showWrong: wrong, showRight: right || !!(D && D.done && !s.checked),
       wrongText: wrong ? picked.why : '', rightText: D ? (D.done && !s.checked ? 'You\'ve done today\'s question. Come back tomorrow for a new one.' : D.explain) : '', qText: D ? D.q : 'Which currency is used in Ghana?', doneLabel: 'See your streak',
       checkOff: s.pick === null, checkClass: s.pick === null ? 'btn btn-off' : 'btn',
-      check: () => { if (s.pick !== null) { if (LP) LP.dailyAnswer(!!opts[s.pick].right); this.setState({ checked: true }); } },
+      check: () => { if (s.pick !== null) { if (LP && !/[?&]dq=/.test(location.search)) LP.dailyAnswer(!!opts[s.pick].right); this.setState({ checked: true }); } },
       retry: () => this.setState({ pick: null, checked: false })
     };
   }

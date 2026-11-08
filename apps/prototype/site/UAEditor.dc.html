@@ -48,30 +48,60 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
   </aside>
   <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
     <header style="height: 72px; flex: none; padding: 0 32px; display: flex; align-items: center; gap: 16px; border-bottom: 1.5px solid #E7E2F0; background: #FFFFFF">
-      <div style="flex: 1"><span class="muted" style="font-size: 13px">Content / Article</span><h1 style="font-size: 22px; line-height: 1.2">Treasury bills</h1></div><a href="UAContent.dc.html" class="btn btn-w">Back to content</a><button class="btn" type="button">Save draft</button>
+      <div style="flex: 1; min-width: 0"><span class="muted" style="font-size: 13px">Content / Article</span><h1 style="font-size: 22px; line-height: 1.2; overflow-wrap: anywhere">{{heading}}</h1></div><a href="UAContent.dc.html" class="btn btn-w">Back to content</a><button class="btn" type="button" onClick="{{saveDraft}}">Save draft</button>
     </header>
     <main style="padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px">
-
-      <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start">
+      <sc-if value="{{missing}}" hint-placeholder-val="{{false}}"><section class="card" style="padding: 24px"><h2 style="font-size: 18px">This article doesn't exist</h2><p class="muted" style="margin: 6px 0 12px">It may have been removed. Pick one from the content list.</p><a href="UAContent.dc.html" class="btn" style="align-self: flex-start">Back to content</a></section></sc-if>
+      <sc-if value="{{found}}" hint-placeholder-val="{{true}}"><div style="display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start">
         <section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px">
-          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Title</span><input class="field" value="Treasury bills"></label>
-          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">One-line definition</span><input class="field" value="A short-term loan you give to the government, repaid with interest."></label>
-          <div style="display: flex; gap: 6px; border-bottom: 1.5px solid #E7E2F0; padding-bottom: 10px"><button class="chip" type="button" style="font-weight: 800">B</button><button class="chip" type="button">H2</button><button class="chip" type="button">List</button><button class="chip" type="button">Key takeaways</button><button class="chip" type="button">African example</button><button class="chip" type="button">Formula</button></div>
-          <div style="min-height: 360px; font-size: 16px; line-height: 1.7; color: #1C1726"><h2 style="font-size: 20px; color: #0E0B14; margin-bottom: 8px">How treasury bills work</h2><p style="margin: 0 0 12px">The Central Bank sells treasury bills for the government. You pay less than the face value today and get the full amount when the bill matures, usually in 91, 182 or 364 days.</p><div style="border: 2px dashed #E7E2F0; border-radius: 14px; padding: 14px; color: #615A6E">African example block · fictional company and figures only</div></div>
+          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Title</span><input class="field" value="{{f.title}}" onInput="{{on.title}}"></label>
+          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">One-line definition</span><input class="field" value="{{f.definition}}" onInput="{{on.definition}}"></label>
+          <div style="display: flex; gap: 6px; border-bottom: 1.5px solid #E7E2F0; padding-bottom: 10px; flex-wrap: wrap; align-items: center"><span class="muted" style="font-size: 13px; font-weight: 700; margin-right: 4px">Show section</span><sc-for list="{{secs}}" as="c" hint-placeholder-count="3"><button class="chip" type="button" aria-pressed="{{c.pressed}}" style="{{c.style}}" onClick="{{c.pick}}">{{c.label}}</button></sc-for></div>
+          <div style="display: flex; flex-direction: column; gap: 10px"><label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Section heading</span><input class="field" style="font-size: 18px; font-weight: 800" value="{{f.howTitle}}" onInput="{{on.howTitle}}"></label>
+            <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Body</span><textarea rows="7" style="border-radius: 12px; border: 1.5px solid #E7E2F0; padding: 10px 12px; font: 500 14px 'Plus Jakarta Sans', sans-serif; resize: vertical" value="{{f.howIntro}}" onInput="{{on.howIntro}}"></textarea></label></div>
+          <sc-if value="{{hasSec}}" hint-placeholder-val="{{false}}"><div style="border: 2px dashed #E7E2F0; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px"><span class="eyebrow">{{secTitle}}</span><sc-for list="{{secLines}}" as="l" hint-placeholder-count="2"><span style="font-size: 14px; line-height: 1.5">{{l}}</span></sc-for><span class="muted" style="font-size: 12px">Shown as written. Editing this section comes later.</span></div></sc-if>
         </section>
         <aside style="display: flex; flex-direction: column; gap: 16px">
-          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px"><span class="eyebrow">Status</span><span class="tag" style="background: #F1EBFB; color: #4C1D95">In review</span><span class="muted" style="font-size: 13px">Reviewer: Amaka E.</span><button class="btn" type="button">Approve and publish</button><button class="btn btn-w" type="button">Send back with notes</button></section>
-          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eyebrow">Details</span><span style="font-size: 14px">Topic: Saving</span><span style="font-size: 14px">Level: Beginner</span><span style="font-size: 14px">Linked micro module: <a href="UAQuestions.dc.html">T-bills basics</a></span></section>
-          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eyebrow">Checks</span><span style="font-size: 14px"><span class="tag" style="background: #E1F7EA; color: #0F6B39">Pass</span> No advice to buy or sell</span><span style="font-size: 14px"><span class="tag" style="background: #E1F7EA; color: #0F6B39">Pass</span> Figures use fictional names</span><span style="font-size: 14px"><span class="tag" style="background: #FFE6E6; color: #B42828">Fix</span> Add a source for rates</span></section>
+          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px"><span class="eyebrow">Status</span><span class="tag" style="align-self: flex-start; background: {{stBg}}; color: {{stFg}}">{{status}}</span><span class="muted" style="font-size: 13px">{{statusNote}}</span><button class="{{pubClass}}" type="button" aria-disabled="{{pubOff}}" onClick="{{publish}}">Approve and publish</button><button class="btn btn-w" type="button" onClick="{{sendBack}}">Send back with notes</button></section>
+          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eyebrow">Details</span><sc-if value="{{isNew}}" hint-placeholder-val="{{false}}"><label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Topic</span><select class="field" onChange="{{on.topic}}" value="{{f.topic}}"><sc-for list="{{topics}}" as="t" hint-placeholder-count="4"><option value="{{t}}">{{t}}</option></sc-for></select></label></sc-if><sc-if value="{{notNew}}" hint-placeholder-val="{{true}}"><span style="font-size: 14px">Topic: {{f.topic}}</span></sc-if><span style="font-size: 14px">Level: Beginner</span><sc-if value="{{live}}" hint-placeholder-val="{{true}}"><a href="{{appHref}}" style="font-size: 14px; font-weight: 700">See it in the app</a></sc-if></section>
+          <section class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eyebrow">Checks</span><sc-for list="{{checks}}" as="c" hint-placeholder-count="3"><span style="font-size: 14px"><span class="tag" style="background: {{c.bg}}; color: {{c.fg}}">{{c.tag}}</span> {{c.text}}</span></sc-for></section>
         </aside>
-      </div>
+      </div></sc-if>
     </main>
   </div>
 </div>
-</x-dc>
+<!-- fv-admin-wired --></x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(p) {
+    super(p); const A = window.FV && window.FV.ADMIN, m = /[?&]a=([\w-]+)/.exec(location.search), d = A ? A.form(m ? m[1] : 'dividend') : null;
+    this.state = { id: d && d.id, f: d ? Object.assign({}, d.form) : null, status: d ? d.status : '', isNew: !!(d && d.isNew), sec: '' };
+  }
+  save(status) {
+    const A = window.FV && window.FV.ADMIN, s = this.state; if (!A || !s.f) return;
+    A.saveArticle(s.id, s.f, status); this.setState({ status: status });
+    if (window.fvToast) window.fvToast(status === 'Published' ? 'Published. Learners see it now.' : status === 'Sent back' ? 'Sent back to the writer.' : 'Draft saved. Learners still see the published version.');
+  }
+  renderVals() {
+    const A = window.FV && window.FV.ADMIN, s = this.state, L = window.FV && window.FV.LIB;
+    const tagc = (t) => t === 'Published' || t === 'Confirmed' || t === 'Pass' || t === 'Live' ? ['#E1F7EA', '#0F6B39'] : t === 'Draft' ? ['#F5F3F8', '#38323F'] : t === 'Sent back' || t === 'Failed' || t === 'Fix' || t === 'Check' ? ['#FFE6E6', '#B42828'] : ['#F1EBFB', '#4C1D95'];
+    if (!s.f) return { missing: true, found: false, heading: 'Article', saveDraft: () => {}, f: {}, on: {}, secs: [], secLines: [], checks: [], topics: [] };
+    const set = (k) => (e) => this.setState({ f: Object.assign({}, s.f, { [k]: e.target.value }) });
+    const checks = A ? A.checks(s.f) : [], ok = checks.every((c) => c.ok);
+    const art = !s.isNew && L ? (window.FVD && window.FVD.ARTICLES || []).filter((x) => x.slug === s.id)[0] : null, deep = art && art.deep;
+    const SECS = { 'Key takeaways': deep ? deep.takeaways : [], 'African example': deep && deep.example ? [deep.example.line].concat(deep.example.rows.map((r) => r[0] + ': ' + r[1])) : [], Formula: deep && deep.formula ? [deep.formula.text || deep.formula.line || JSON.stringify(deep.formula).replace(/[{}"]/g, ' ')] : [] };
+    const secs = Object.keys(SECS).filter((k) => SECS[k] && SECS[k].length);
+    const notes = { Published: 'Live in the app.', Draft: 'Not live yet. Learners see the published version.', 'Sent back': 'Waiting for the writer to make changes.' };
+    return { missing: false, found: true, heading: s.f.title || 'New article', f: s.f, isNew: s.isNew, notNew: !s.isNew, topics: L ? L.TOPICS.map((t) => t.name) : [],
+      on: { title: set('title'), definition: set('definition'), howTitle: set('howTitle'), howIntro: set('howIntro'), topic: set('topic') },
+      secs: secs.map((k) => ({ label: k, pressed: s.sec === k ? 'true' : 'false', style: s.sec === k ? 'background: #5B21B6; color: #FFFFFF; border-color: #5B21B6' : '', pick: () => this.setState({ sec: s.sec === k ? '' : k }) })),
+      hasSec: !!s.sec, secTitle: s.sec, secLines: s.sec ? SECS[s.sec] : [],
+      status: s.status, stBg: tagc(s.status)[0], stFg: tagc(s.status)[1], statusNote: notes[s.status] || '',
+      pubClass: ok ? 'btn' : 'btn btn-off', pubOff: ok ? 'false' : 'true', live: !s.isNew || s.status === 'Published', appHref: 'UPArticle.dc.html?a=' + s.id,
+      checks: checks.map((c) => ({ tag: c.ok ? 'Pass' : 'Fix', bg: tagc(c.ok ? 'Pass' : 'Fix')[0], fg: tagc(c.ok ? 'Pass' : 'Fix')[1], text: c.text })),
+      saveDraft: () => this.save('Draft'), sendBack: () => this.save('Sent back'),
+      publish: () => { if (ok) this.save('Published'); else if (window.fvToast) window.fvToast('Fix the checks marked Fix first.'); } };
+  }
 }
 </script>
 </body>

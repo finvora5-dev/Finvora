@@ -196,10 +196,12 @@
     signedIn: function () { return !!authLoad().email; },
     setGoal: function (g) { var a = authLoad(); a.goal = g; authSave(a); },
     validEmail: function (e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || "").trim()); },
-    sendCode: function (email, changing) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.wrong = 0; a.lockUntil = 0; a.changing = !!changing; authSave(a); },
+    sendCode: function (email, changing) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.code = String(234567 + Math.floor(Math.random() * 700000)); a.wrong = 0; a.lockUntil = 0; a.changing = !!changing; authSave(a); },
     resendIn: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.sentAt || 0) + 60000 - Date.now()) / 1000)); },
     lockedFor: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.lockUntil || 0) - Date.now()) / 1000)); },
     triesLeft: function () { return Math.max(0, 3 - (authLoad().wrong || 0)); },
+    /** The code in the latest sign-in email (shown in the in-app email preview). */
+    code: function () { return authLoad().code || ""; },
     /** "ok", "wrong", "expired" or "locked". */
     verify: function (code) {
       var a = authLoad();
@@ -223,7 +225,11 @@
   ];
   function libLoad() { try { var l = JSON.parse(localStorage.getItem(LIB_KEY) || "null"); if (l && Array.isArray(l.saved)) return l; } catch (e) {} return { saved: [], read: {}, recent: [] }; }
   function libSave(l) { try { localStorage.setItem(LIB_KEY, JSON.stringify(l)); } catch (e) {} }
-  function arts() { return D().ARTICLES; }
+  function arts() {
+    var a = admLoad(), list = D().ARTICLES.map(function (x) { var e = a.edits[x.slug]; return e && e.pub ? applyEdit(x, e.pub) : x; });
+    a.fresh.forEach(function (f) { if (f.status !== "Published") return; var t = TOPICS.filter(function (z) { return z.name === f.form.topic; })[0] || TOPICS[0];
+      list.push({ slug: f.id, title: f.form.title, category: t.cats[0], definition: f.form.definition, explanation: [f.form.howIntro], example: "", whyItMatters: "", misconceptions: [], related: [] }); });
+    return list; }
   var LIB = {
     TOPICS: TOPICS,
     all: arts,
@@ -252,7 +258,9 @@
   // ---- Admin (a demonstration in this browser, not real staff access): feedback prompt settings,
   // the feedback inbox and an append-only audit log of admin changes.
   var ADM_KEY = "fv.admin.v1";
-  function admLoad() { try { var a = JSON.parse(localStorage.getItem(ADM_KEY) || "null"); if (a && a.on) return a; } catch (e) {} return { on: { rate: true, report: true, suggest: true, review: true }, n: 3, audit: [], inbox: [], rates: 0 }; }
+  function admLoad() {
+    var d = { on: { rate: true, report: true, suggest: true, review: true }, n: 3, audit: [], inbox: [], rates: 0, edits: {}, fresh: [], qs: {}, review: {}, sums: {}, prices: null };
+    try { var a = JSON.parse(localStorage.getItem(ADM_KEY) || "null"); if (a && a.on) { for (var k in d) if (!(k in a)) a[k] = d[k]; return a; } } catch (e) {} return d; }
   function admSave(a) { try { localStorage.setItem(ADM_KEY, JSON.stringify(a)); } catch (e) {} }
   function stamp() { return new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).replace(",", ","); }
   var ADMIN = {
@@ -266,8 +274,103 @@
     submit: function (kind, where, what, note) { var a = admLoad(); a.inbox.unshift({ id: "fb-" + Date.now(), kind: kind, where: where, what: what, note: note || "", at: Date.now(), done: false }); admSave(a); },
     markDone: function (id) { var a = admLoad(); a.inbox.forEach(function (x) { if (x.id === id) x.done = true; }); admSave(a); },
     inbox: function () { return admLoad().inbox; },
-    audit: function () { return admLoad().audit; }
+    audit: function () { return admLoad().audit; },
+
+    // Staff sign-in (simulated, kept for this browser tab only). Work emails end in @finvora.app.
+    // Any 6 digits sign in, except 000000 (wrong). Three wrong codes lock the form for 15 minutes.
+    staff: function () { try { return JSON.parse(sessionStorage.getItem("fv.staff") || "null"); } catch (e) { return null; } },
+    signIn: function (email, code) {
+      email = String(email || "").trim().toLowerCase(); var a = admLoad();
+      if ((a.lockUntil || 0) > Date.now()) return "locked";
+      if (!/^[^\s@]+@finvora\.app$/.test(email)) return "domain";
+      if (!/^\d{6}$/.test(String(code))) return "short";
+      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) { a.lockUntil = Date.now() + 900000; a.wrong = 0; } admSave(a); return (a.lockUntil || 0) > Date.now() ? "locked" : "wrong"; }
+      a.wrong = 0; admSave(a);
+      var nm = email.split("@")[0].split(/[._-]/).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ");
+      try { sessionStorage.setItem("fv.staff", JSON.stringify({ email: email, name: nm })); } catch (e) {}
+      ADMIN.log("Sign-in", nm + " signed in"); return "ok";
+    },
+    triesLeft: function () { return 3 - (admLoad().wrong || 0); },
+    signOut: function () { try { sessionStorage.removeItem("fv.staff"); } catch (e) {} },
+
+    // Content: edits to Library articles. Drafts stay here; publishing changes the article in the app.
+    contentRows: function () {
+      var a = admLoad(), rows = D().ARTICLES.map(function (x) { var e = a.edits[x.slug] || {}; return { id: x.slug, title: (e.pub && e.pub.title) || x.title, type: "Article", topic: LIB.topicOf(x).name, status: e.status || "Published", at: e.at || 0 }; });
+      a.fresh.forEach(function (x) { rows.unshift({ id: x.id, title: x.form.title || "Untitled article", type: "Article", topic: x.form.topic, status: x.status, at: x.at }); });
+      Object.keys(MICRO).forEach(function (k) { rows.push({ id: "", title: MICRO[k], type: "Micro module", topic: "World 1", status: "Published", at: 0 }); });
+      return rows;
+    },
+    /** The form for an article: its saved draft, else what learners see now. */
+    form: function (id) {
+      var a = admLoad(), f = a.fresh.filter(function (x) { return x.id === id; })[0];
+      if (f) return { id: id, isNew: true, status: f.status, form: f.form };
+      var x = D().ARTICLES.filter(function (y) { return y.slug === id; })[0]; if (!x) return null;
+      var e = a.edits[id] || {}, base = e.pub || {}, live = applyEdit(x, base);
+      return { id: id, isNew: false, status: e.status || "Published", form: e.draft || { title: live.title, definition: live.definition, howTitle: (live.deep && live.deep.how && live.deep.how.title) || "", howIntro: (live.deep && live.deep.how && live.deep.how.intro) || (live.explanation || [])[0] || "", topic: LIB.topicOf(x).name } };
+    },
+    newArticle: function () { var a = admLoad(), id = "new-" + Date.now().toString(36); a.fresh.unshift({ id: id, status: "Draft", at: Date.now(), form: { title: "", definition: "", howTitle: "", howIntro: "", topic: "Money basics" } }); admSave(a); return id; },
+    checks: function (f) {
+      var all = [f.title, f.definition, f.howTitle, f.howIntro].join(" ");
+      return [
+        { ok: !/\b(you should (buy|sell|invest)|buy now|sell now|guaranteed|can't lose|best stock)\b/i.test(all), text: "No advice to buy or sell" },
+        { ok: !!(String(f.title).trim() && String(f.definition).trim() && String(f.howIntro).trim()), text: "Title, definition and body filled in" },
+        { ok: String(f.definition).length <= 160, text: "Definition is one short line (160 characters at most)" }
+      ];
+    },
+    saveArticle: function (id, form, status) {
+      var a = admLoad(), f = a.fresh.filter(function (x) { return x.id === id; })[0], title = form.title || "Untitled article";
+      if (f) { f.form = form; f.status = status; f.at = Date.now(); }
+      else { var e = a.edits[id] = a.edits[id] || {}; e.status = status; e.at = Date.now(); if (status === "Published") { e.pub = { title: form.title, definition: form.definition, howTitle: form.howTitle, howIntro: form.howIntro }; delete e.draft; } else e.draft = form; }
+      admSave(a);
+      ADMIN.log("Content", (status === "Published" ? "Published: " : status === "Sent back" ? "Sent back: " : "Draft saved: ") + title);
+    },
+    published: function () { return admLoad().fresh.filter(function (x) { return x.status === "Published"; }); },
+
+    // Daily questions (the learner's Daily question). Saved edits replace the question for learners.
+    questions: function () { var q = admLoad().qs; return DAILY.map(function (d, i) { return q[i] ? q[i] : { q: d[0], opts: d[1].slice(), right: d[2], explain: d[3], whys: d[4], hint: "" }; }); },
+    saveQuestion: function (i, q) { var a = admLoad(); a.qs[i] = q; admSave(a); ADMIN.log("Questions", "Daily question " + (i + 1) + " saved: " + q.q); },
+
+    // Ask Fin review: learners' answers that Fin refused or couldn't answer in this browser, then older flags.
+    reviewQueue: function () {
+      var a = admLoad(), items = [];
+      askLoad().msgs.forEach(function (m) { if (m.r && m.r.kind !== "answer") items.push({ id: "m-" + m.at, q: m.q, a: m.r.answer || "", tag: m.r.kind === "refusal" ? "Asks for a pick" : "No answer", at: Date.parse(m.at) || Date.now(), mine: true, kind: m.r.kind }); });
+      items.reverse();
+      return items.concat(REVIEW_SEED).filter(function (x) { return !a.review[x.id]; });
+    },
+    decide: function (id, q, d, note) { var a = admLoad(); a.review[id] = { d: d, note: note || "", at: Date.now() }; admSave(a); ADMIN.log("Ask Fin review", d + ': "' + q + '"' + (note ? " (note: " + note + ")" : "")); },
+
+    // AI summary approvals: nothing reaches learners without a person approving it.
+    sumQueue: function () { var a = admLoad(); return SUM_SEED.filter(function (x) { return !a.sums[x.id]; }); },
+    decideSum: function (x, d, text) { var a = admLoad(); a.sums[x.id] = { d: d, text: text, at: Date.now() }; admSave(a); ADMIN.log("AI summaries", d + ": " + x.title); },
+
+    // Plan prices in kobo. A saved price is what new checkouts charge.
+    prices: function () { return admLoad().prices || { monthly: 150000, yearly: 1500000 }; },
+    savePrices: function (p) { var a = admLoad(), old = ADMIN.prices(); a.prices = p; admSave(a); PRICE.monthly = p.monthly; PRICE.yearly = p.yearly;
+      ["monthly", "yearly"].forEach(function (k) { if (old[k] !== p[k]) ADMIN.log("Plans", "Plus " + k + " price changed from " + D().formatNaira(old[k]) + " to " + D().formatNaira(p[k])); }); }
   };
+  var REVIEW_SEED = [
+    { id: "s1", q: "Which bank stock should I buy?", a: "I can't tell you what to buy. I can show you how people compare banks: look at profit over several years, dividend history and how much bad debt each bank has. Want a quick lesson on reading a bank's results?", tag: "Asks for a pick", ago: "12m", kind: "refusal" },
+    { id: "s2", q: "Explain P/E with a Ghana example", a: "P/E compares a share's price with the profit behind each share. If a share costs GH₵10 and earns GH₵1 a year, its P/E is 10.", tag: "Thumbs down", ago: "1h", kind: "answer" },
+    { id: "s3", q: "What is today's T-bill rate?", a: "I don't have today's rates. The Central Bank publishes the results of each T-bill sale on its website.", tag: "Number check", ago: "3h", kind: "insufficient" },
+    { id: "s4", q: "Is crypto a good idea?", a: "I can't tell you whether to buy anything. Crypto prices can rise and fall very fast, and in Nigeria the rules for it are still changing. Want to learn how risk works first?", tag: "Thumbs down", ago: "5h", kind: "refusal" }
+  ];
+  var SUM_SEED = [
+    { id: "a1", kind: "Article", title: "Treasury bills", ago: "10m", source: "Article · Treasury bills (approved version 3)", text: "A treasury bill is a short loan you give the government. You pay less than its face value now and get the full amount back when it matures, often in 91, 182 or 364 days.", flag: "Mentions durations: confirm against source" },
+    { id: "a2", kind: "Dictionary", title: "Ex-dividend date", ago: "1h", source: "Dictionary · Ex-dividend date", text: "The ex-dividend date is the cut-off for a dividend. If you buy shares on or after this date, the next dividend goes to the seller.", flag: "" },
+    { id: "a3", kind: "Company", title: "Nupe Trust Bank", ago: "3h", source: "Company profile · Nupe Trust Bank (made-up company)", text: "Nupe Trust Bank makes most of its money from the interest it charges on loans, plus fees for transfers and cards.", flag: "Company is made up: keep the label" },
+    { id: "a4", kind: "Article", title: "Pension basics (RSA)", ago: "1d", source: "Article · Pension basics (draft)", text: "A Retirement Savings Account holds money you and your employer put aside for when you stop working. A licensed pension fund administrator invests it for you.", flag: "Source is still a draft" }
+  ];
+  function applyEdit(x, p) {
+    if (!p || !p.title) return x; var y = Object.assign({}, x, { title: p.title, definition: p.definition });
+    if (x.deep && x.deep.how) {
+      y.deep = Object.assign({}, x.deep, { how: Object.assign({}, x.deep.how, { title: p.howTitle, intro: p.howIntro }) });
+      if (p.definition !== x.definition) { var d = p.definition, i = d.toLowerCase().indexOf(String(p.title).toLowerCase().replace(/s$/, "")), n = i >= 0 ? (/^\w+/.exec(d.slice(i)) || [""])[0] : "";
+        y.deep.lead = i >= 0 && n ? [d.slice(0, i), d.slice(i, i + n.length), d.slice(i + n.length)] : ["", "", d]; }
+    }
+    else y.explanation = [p.howIntro].concat((x.explanation || []).slice(1));
+    return y;
+  }
+  (function () { var p = admLoad().prices; if (p) { PRICE.monthly = p.monthly; PRICE.yearly = p.yearly; } })();
 
   // ---- Lesson content for World 1. "interest" is the designed lesson; the other five reuse its
   // screens with their own words. Amounts are naira; every example is made up for learning.
@@ -433,7 +536,7 @@
       var set = {}; s.days.forEach(function (d) { set[d] = 1; }); return runEnding(set, last, false).n;
     },
     seenLost: function () { var s = load(); s.lostSeen = s.days.slice().sort().pop(); save(s); },
-    daily: function () { var n = Math.floor(new Date(lagosDay() + "T00:00:00Z").getTime() / 86400000); var q = DAILY[n % DAILY.length]; return { q: q[0], opts: q[1], right: q[2], explain: q[3], whys: q[4], done: load().dailyDay === lagosDay() }; },
+    daily: function () { var n = Math.floor(new Date(lagosDay() + "T00:00:00Z").getTime() / 86400000); var m = /[?&]dq=(\d+)/.exec(location.search), all = ADMIN.questions(), q = all[m ? (+m[1]) % all.length : n % all.length]; return { q: q.q, opts: q.opts, right: q.right, explain: q.explain, whys: q.whys, hint: q.hint || "", done: !m && load().dailyDay === lagosDay() }; },
     dailyAnswer: function (correct) { var s = load(); if (s.dailyDay === lagosDay()) return false; s.dailyDay = lagosDay(); addXp(s, 5 + (correct ? 3 : 0)); markDay(s); logEvent(s, 'daily', 'Daily question', 'UPDaily.dc.html', 5 + (correct ? 3 : 0)); s.dailyCount = (s.dailyCount || 0) + 1; save(s); return true; }, // XP rules from packages/engine: daily 5, +3 if right
     startBoss: function () { var s = load(); s.boss = { i: 0, score: 0, first: {} }; save(s); },
     bossState: function () { var s = load(); return s.boss || { i: 0, score: 0, first: {} }; },
@@ -553,6 +656,8 @@
     reset: function () { save(fresh()); }
   };
   window.FV = FV;
+  // Admin pages need a staff sign-in in this tab (a demonstration: the check runs in the browser).
+  (function () { var m = /\/(UA\w+\.dc\.html)$/.exec(location.pathname); if (m && m[1] !== "UASignIn.dc.html" && !ADMIN.staff()) location.replace("UASignIn.dc.html?next=" + encodeURIComponent(m[1] + location.search)); })();
   // Queued practice orders are placed as soon as the market is open.
   try { var placed = SIM.runQueue(); if (placed) sessionStorage.setItem("fv.flash", placed + (placed === 1 ? " queued order was" : " queued orders were") + " placed now that the market is open."); } catch (e) {}
 })();

@@ -48,29 +48,50 @@ td{padding:12px 16px;border-bottom:1px solid #F5F3F8;vertical-align:middle}
   </aside>
   <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
     <header style="height: 72px; flex: none; padding: 0 32px; display: flex; align-items: center; gap: 16px; border-bottom: 1.5px solid #E7E2F0; background: #FFFFFF">
-      <div style="flex: 1"><span class="muted" style="font-size: 13px">Content / T-bills basics / Question 2 of 3</span><h1 style="font-size: 22px; line-height: 1.2">Question builder</h1></div><button class="btn btn-w" type="button">Preview on phone</button><button class="btn" type="button">Save question</button>
+      <div style="flex: 1"><span class="muted" style="font-size: 13px">Content / Daily questions / Question {{n}} of {{total}}</span><h1 style="font-size: 22px; line-height: 1.2">Question builder</h1></div><a href="{{previewHref}}" class="btn btn-w">Preview on phone</a><button class="btn" type="button" onClick="{{save}}">Save question</button>
     </header>
     <main style="padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px">
-
-      <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="chip" type="button" aria-pressed="true" style="background: #5B21B6; color: #FFFFFF; border-color: #5B21B6">Multiple choice</button><button class="chip" type="button" aria-pressed="false" style="">Order the steps</button><button class="chip" type="button" aria-pressed="false" style="">Match pairs</button><button class="chip" type="button" aria-pressed="false" style="">Scenario A/B</button><button class="chip" type="button" aria-pressed="false" style="">Calculation</button></div>
-      <div style="display: grid; grid-template-columns: 1fr 390px; gap: 20px; align-items: start">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><span class="muted" style="font-size: 13px; font-weight: 700">Question</span><sc-for list="{{nums}}" as="c" hint-placeholder-count="10"><button class="chip" type="button" aria-label="Question {{c.label}}" aria-pressed="{{c.pressed}}" style="min-width: 44px; {{c.style}}" onClick="{{c.pick}}">{{c.label}}</button></sc-for></div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="chip" type="button" aria-pressed="true" style="background: #5B21B6; color: #FFFFFF; border-color: #5B21B6">Multiple choice</button><sc-for list="{{types}}" as="t" hint-placeholder-count="4"><button class="chip" type="button" aria-pressed="false" onClick="{{t.pick}}">{{t.label}}</button></sc-for></div>
+      <sc-if value="{{hasNote}}" hint-placeholder-val="{{false}}"><p role="status" class="muted" style="margin: 0; font-size: 14px">{{note}}</p></sc-if>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 20px; align-items: start">
         <section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px">
-          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Question</span><input class="field" value="A ₦100,000 bill is sold for ₦90,000. What is the return?"></label>
-          <div style="display: flex; flex-direction: column; gap: 10px"><span style="font-weight: 700; font-size: 13px">Answers (tap the circle to mark correct)</span><div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #D3CDE0; background: #FFFFFF; flex: none"></span><input class="field" style="flex: 1" value="5%"></div><div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #16884A; background: #16884A; flex: none"></span><input class="field" style="flex: 1" value="10%"><span class="tag" style="background: #E1F7EA; color: #0F6B39">Correct</span></div><div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #D3CDE0; background: #FFFFFF; flex: none"></span><input class="field" style="flex: 1" value="15%"></div><div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #D3CDE0; background: #FFFFFF; flex: none"></span><input class="field" style="flex: 1" value="50%"></div></div>
-          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Explain the answer</span><textarea rows="3" style="border-radius: 12px; border: 1.5px solid #E7E2F0; padding: 10px 12px; font: 500 14px 'Plus Jakarta Sans', sans-serif; resize: vertical">You earn ₦10,000 on ₦90,000 paid. That is about 11%, but the question asks the discount on face value, which is 10%.</textarea></label>
-          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Hint (optional)</span><input class="field" value="Compare the discount with the face value."></label>
+          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Question</span><input class="field" value="{{q.q}}" onInput="{{onQ}}"></label>
+          <div style="display: flex; flex-direction: column; gap: 10px"><span style="font-weight: 700; font-size: 13px">Answers (tap the circle to mark correct)</span><sc-for list="{{opts}}" as="o" hint-placeholder-count="4"><div style="display: flex; align-items: center; gap: 10px"><button type="button" aria-label="Mark answer {{o.n}} correct" aria-pressed="{{o.pressed}}" onClick="{{o.mark}}" style="width: 44px; height: 44px; margin: -11px; flex: none; border: 0; background: none; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid {{o.ring}}; background: {{o.fill}}"></span></button><input class="field" style="flex: 1; margin-left: 11px" aria-label="Answer {{o.n}}" value="{{o.label}}" onInput="{{o.edit}}"><sc-if value="{{o.right}}" hint-placeholder-val="{{false}}"><span class="tag" style="background: #E1F7EA; color: #0F6B39">Correct</span></sc-if></div></sc-for></div>
+          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Explain the answer</span><textarea rows="3" style="border-radius: 12px; border: 1.5px solid #E7E2F0; padding: 10px 12px; font: 500 14px 'Plus Jakarta Sans', sans-serif; resize: vertical" value="{{q.explain}}" onInput="{{onExplain}}"></textarea></label>
+          <label style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; font-size: 13px">Hint (optional)</span><input class="field" value="{{q.hint}}" onInput="{{onHint}}"></label>
+          <sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; color: #B42828; font-weight: 700; font-size: 14px">{{err}}</p></sc-if>
         </section>
         <section class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px; background: #FFFFFF"><span class="eyebrow">Learner preview</span>
-          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px"><strong style="font-size: 17px; line-height: 1.35">A ₦100,000 bill is sold for ₦90,000. What is the return?</strong>
-          <div style="min-height: 48px; border-radius: 14px; border: 2px solid #E7E2F0; background: #FFFFFF; display: flex; align-items: center; padding: 0 14px; font-weight: 700">5%</div><div style="min-height: 48px; border-radius: 14px; border: 2px solid #12B76A; background: #DCFAE6; display: flex; align-items: center; padding: 0 14px; font-weight: 700">10%</div><div style="min-height: 48px; border-radius: 14px; border: 2px solid #E7E2F0; background: #FFFFFF; display: flex; align-items: center; padding: 0 14px; font-weight: 700">15%</div><div style="min-height: 48px; border-radius: 14px; border: 2px solid #E7E2F0; background: #FFFFFF; display: flex; align-items: center; padding: 0 14px; font-weight: 700">50%</div></div></section>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px"><strong style="font-size: 17px; line-height: 1.35">{{q.q}}</strong>
+          <sc-for list="{{opts}}" as="o" hint-placeholder-count="4"><div style="min-height: 48px; border-radius: 14px; border: 2px solid {{o.pvBd}}; background: {{o.pvBg}}; display: flex; align-items: center; padding: 0 14px; font-weight: 700">{{o.label}}</div></sc-for>
+          <p class="muted" style="margin: 0; font-size: 14px; line-height: 1.5">{{q.explain}}</p></div></section>
       </div>
     </main>
   </div>
 </div>
-</x-dc>
+<!-- fv-admin-wired --></x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(p) { super(p); this.state = { i: 0, q: null, note: '', err: '' }; }
+  cur() { const A = window.FV && window.FV.ADMIN; return this.state.q || (A ? JSON.parse(JSON.stringify(A.questions()[this.state.i])) : { q: '', opts: ['', '', '', ''], right: 0, explain: '', whys: [], hint: '' }); }
+  renderVals() {
+    const A = window.FV && window.FV.ADMIN, s = this.state, q = this.cur(), all = A ? A.questions() : [q];
+    const put = (ch) => this.setState({ q: Object.assign({}, q, ch), err: '', note: '' });
+    return { n: s.i + 1, total: all.length, q: q, note: s.note, hasNote: !!s.note, err: s.err, hasErr: !!s.err, previewHref: 'UPDaily.dc.html?dq=' + s.i,
+      nums: all.map((x, i) => ({ label: String(i + 1), pressed: i === s.i ? 'true' : 'false', style: i === s.i ? 'background: #5B21B6; color: #FFFFFF; border-color: #5B21B6' : '', pick: () => this.setState({ i: i, q: null, note: '', err: '' }) })),
+      types: ['Order the steps', 'Match pairs', 'Scenario A/B', 'Calculation'].map((t) => ({ label: t, pick: () => this.setState({ note: 'Daily questions are multiple choice. ' + t + ' questions are built in the lesson files for now.' }) })),
+      opts: q.opts.map((o, i) => ({ n: i + 1, label: o, right: i === q.right, pressed: i === q.right ? 'true' : 'false', ring: i === q.right ? '#16884A' : '#D3CDE0', fill: i === q.right ? '#16884A' : '#FFFFFF', pvBd: i === q.right ? '#12B76A' : '#E7E2F0', pvBg: i === q.right ? '#DCFAE6' : '#FFFFFF',
+        mark: () => put({ right: i }), edit: (e) => { const a = q.opts.slice(); a[i] = e.target.value; put({ opts: a }); } })),
+      onQ: (e) => put({ q: e.target.value }), onExplain: (e) => put({ explain: e.target.value }), onHint: (e) => put({ hint: e.target.value }),
+      save: () => {
+        if (!A) return;
+        if (!q.q.trim() || q.opts.some((o) => !o.trim()) || !q.explain.trim()) { this.setState({ err: 'Fill in the question, all four answers and the explanation.' }); return; }
+        const old = A.questions()[s.i], whys = q.opts.map((o, i) => i === q.right ? '' : (old.opts[i] === o && old.whys[i] ? old.whys[i] : 'Not quite.' + (q.hint ? ' Hint: ' + q.hint : ' Try again.')));
+        A.saveQuestion(s.i, Object.assign({}, q, { whys: whys })); this.setState({ q: null, err: '' });
+        if (window.fvToast) window.fvToast('Saved. Learners get this question on its day.');
+      } };
+  }
 }
 </script>
 </body>

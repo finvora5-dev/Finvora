@@ -39,10 +39,14 @@
     html.classList.toggle("fv-big", designW >= 1200 && vw >= DESK);
     fillFV(el);
     if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
+    // Fluid boards (the email previews) reflow at real size on every screen.
+    if (el.hasAttribute("data-fv-fluid")) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; return; }
     if (!phoneBoard) { el.style.zoom = String(Math.min(1, vw / designW)); return; }
     if (designW < 300) { el.style.zoom = "1"; el.style.margin = "0 auto"; return; } // small component boards (Fin) stay actual size
     if (!wide) {
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
+      // Fill the visible screen, not the 844px drawing, so bottom buttons sit on the bottom edge.
+      el.style.setProperty("min-height", (window.innerHeight / z) + "px", "important");
       // Pop-ups: the page behind fills the screen exactly, so the sheet sits on the bottom edge.
       var dlg = el.querySelector(':scope > [role="dialog"], :scope > [role="alertdialog"]');
       if (dlg) { el.style.setProperty("height", Math.max(window.innerHeight / z, dlg.offsetHeight + 24) + "px", "important"); el.style.setProperty("min-height", "0", "important"); el.style.overflow = "hidden"; }
