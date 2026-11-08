@@ -86,7 +86,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
 [role="progressbar"].fv-hot > div { background: linear-gradient(90deg, #7C3AED, #F97316) !important; box-shadow: 0 0 12px rgba(249,115,22,.6); }
 #fv-combo { flex: none; display: inline-flex; align-items: center; gap: 3px; font: 800 12px 'Plus Jakarta Sans', sans-serif; color: #C2410C; background: #FFEDD5; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
 #fv-combo svg { width: 14px; height: 14px; }
-#fv-hype { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); z-index: 65; display: flex; align-items: flex-end; gap: 6px; pointer-events: none; }
+#fv-hype { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); z-index: 65; display: flex; align-items: flex-end; gap: 6px; pointer-events: none; }
 #fv-hype > svg { width: 84px; height: 84px; flex: none; }
 .fv-bubble { background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px 16px 16px 4px; padding: 10px 12px; font: 800 15px 'Plus Jakarta Sans', sans-serif; color: #0E0B14; max-width: 200px; box-shadow: 0 6px 16px rgba(14,11,20,.12); margin-bottom: 40px; }
 .fv-reduce .fv-bump, .fv-reduce .fv-fire { animation: none; }
@@ -117,7 +117,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
 .fv-rlink { text-align: center; color: #5B21B6; font-weight: 700; min-height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
 
 /* Lesson moments: a full screen between two steps (approved mock-up). Sits below the progress bar. */
-#fv-moment { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(110px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); text-align: center; overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif; }
+#fv-moment { cursor: pointer; position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); text-align: center; overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif; }
 html.fv-moment-open { overflow: hidden; }
 .fvm-h { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; color: #5B21B6; }
 .fvm-roll .fvm-h, .fvm-unstop .fvm-h { color: #EA580C; }

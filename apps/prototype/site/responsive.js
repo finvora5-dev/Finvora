@@ -206,6 +206,7 @@
     if (max >= 4 && now === max && !sh.almost) return "almost";
     return null;
   }
+  var MHOLD = { roll: 2300, unstop: 2900, back: 2300, half: 2700, almost: 2200 };
   function showMoment() {
     var FV = window.FV, bar = lessonBar(); if (bar) bar.classList.toggle("fv-hot", !!(FV && FV.momentState && (FV.momentState() || {}).combo >= 3));
     var c = chooseMoment(); if (!c) return;
@@ -216,15 +217,16 @@
       : kind === "back" ? '<div class="fvm-backart"><span class="fvm-ring"></span>' + MFIN + '<span class="fvm-tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>'
       : kind === "half" ? '<div class="fvm-power"><span class="fvm-aura"></span>' + MFIN + "</div>"
       : '<div class="fvm-almostart"><svg class="fvm-flag" viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="6" width="4" height="54" rx="2" fill="#38323F"/><path class="cloth" d="M16 8h34l-8 10 8 10H16z" fill="#5B21B6"/><path d="M22 12h6v6h-6zM34 12h6v6h-6zM28 18h6v6h-6z" fill="#FFFFFF" opacity=".9"/></svg><div class="fvm-race"><div class="fvm-racefill"></div><span class="fvm-runner">' + MTINY + "</span></div></div>";
-    var w = document.createElement("div"); w.id = "fv-moment"; w.className = "fvm-" + kind; w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-labelledby", "fvm-h");
+    var w = document.createElement("div"); w.id = "fv-moment"; w.className = "fvm-" + kind; w.setAttribute("role", "status"); w.setAttribute("aria-live", "polite");
     var top = bar ? Math.round(bar.getBoundingClientRect().bottom + 10) : 0; w.style.top = Math.max(0, top) + "px";
-    w.innerHTML = '<div class="fvm-art">' + art + '</div><h2 id="fvm-h" class="fvm-h">' + title + '</h2><p class="fvm-sub">' + sub + '</p><div class="fvm-foot"><button type="button" class="fvm-btn">Continue</button></div>';
+    w.innerHTML = '<div class="fvm-art">' + art + '</div><h2 id="fvm-h" class="fvm-h">' + title + '</h2><p class="fvm-sub">' + sub + '</p>';
     document.body.appendChild(w); document.documentElement.classList.add("fv-moment-open");
-    var btn = w.querySelector(".fvm-btn"), done = function () { document.documentElement.classList.remove("fv-moment-open"); clearInterval(w._emb);
-      if (calm() || !w.animate) { w.remove(); return; } w.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-40px)" }], { duration: 200, easing: "ease-in" }).onfinish = function () { w.remove(); }; };
-    btn.addEventListener("click", done); setTimeout(function () { w.setAttribute("tabindex", "-1"); w.style.outline = "none"; w.focus({ preventScroll: true }); }, 50);
+    var gone = false, done = function () { if (gone) return; gone = true; clearTimeout(w._hold); document.documentElement.classList.remove("fv-moment-open"); clearInterval(w._emb);
+      if (calm() || !w.animate) { w.remove(); return; } w.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-60px)" }], { duration: 260, easing: "ease-in" }).onfinish = function () { w.remove(); }; };
+    // No button: the moment plays, then slides away by itself. A tap skips it.
+    w.addEventListener("click", done); w._hold = setTimeout(done, calm() ? 1600 : MHOLD[kind]);
     if (calm() || !w.animate) { w.classList.add("on"); return; }
-    w.animate([{ opacity: 0, transform: "translateX(40px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "ease-out" });
+    w.animate([{ opacity: 0, transform: "translateX(60px)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
     ({ roll: mRoll, unstop: mUnstop, back: mBack, half: mHalf, almost: mAlmost })[kind](w);
   }
   function mFire(w) {
