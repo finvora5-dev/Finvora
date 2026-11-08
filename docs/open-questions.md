@@ -38,6 +38,7 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 | D18 | **Ask Fin:** declines and "no figures" replies do not count towards the 5-a-day limit; answers come from a search of Library text with a minimum match score, tested on about 30 questions. | Refines D4. |
 | D19 | **Sign-off:** the product owner is the reviewer and signs off by using the app. No activity log or session recording in the code. | Answers question 5 and replaces the D11 measurement ideas. Question 7 answered: the client knows all of this is Phase 1. Question 1 answered: purple, as on the live site. |
 
+| D20 | **Reviewer tools use a separate demo copy of the data.** Changes made from Reviewer tools (plan, progress, market) go into a demo copy; "Back to my progress" restores the tester's real progress exactly as it was. No reviewer-mode label, and the test sign-in codes stay as they are. The reviewer code (D7) stays. | Answers Q9 from the review. |
 
 ## Phase 2: parked until the prototype is approved
 
