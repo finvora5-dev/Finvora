@@ -1,14 +1,14 @@
 # Prototype settings, labels and stored data (Part 1 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Draft
+*   **Status:** Approved (by the author, section by section, 8 Nov 2026)
 *   **Date:** 2026-11-08
 
 --------------------------------------------------------------------------------
 
 ## Overview
 
-This is the first of five designs for the next round of Finvora Phase 1 changes, decided as D1 to D20 in [docs/open-questions.md](docs/open-questions.md) after a seven-reviewer EGM review ([concepts_brief.md](concepts_brief.md)). It covers the shared foundations the other four designs depend on: the Plus price and Ask Fin limit, practice market hours, labels for simulated content and the Practice Market, how stored data changes safely in testers' browsers, and how returning testers get the updated app. The other four designs (Review what I missed, Ask Fin grounded answers, Plus features, admin on phones) follow once this one is approved.
+This is the first of five designs for the next round of Finvora Phase 1 changes, decided as D1 to D20 in [docs/open-questions.md](../open-questions.md) after a seven-reviewer EGM review ([concepts_brief.md](../../concepts_brief.md)). It covers the shared foundations the other four designs depend on: the Plus price and Ask Fin limit, practice market hours, labels for simulated content and the Practice Market, how stored data changes safely in testers' browsers, and how returning testers get the updated app. The other four designs (Review what I missed, Ask Fin grounded answers, Plus features, admin on phones) follow once this one is approved.
 
 Everything stays in the browser, as in the rest of Phase 1: no backend, no paid service, no live AI.
 
