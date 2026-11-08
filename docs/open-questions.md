@@ -32,11 +32,11 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 | D12 | **Market hours, refined:** when closed, show the next opening time (Lagos time), let practice orders queue for the open, and offer a lesson meanwhile. Prices move only on trading days. | Keeps D3; stops testers getting stuck. |
 | D13 | **All of the client's listed Plus features are built** (replaces the "build some, lock the rest" option). One shared advice check blocks buy, sell, avoid, rating, signal, recommend, scores and ranks in all Plus and Ask Fin text. Learning names: "What this number means" (was Risk Signals), "Your practice portfolio" (was Portfolio intelligence). The word is **Plus** everywhere. | Refines D6. |
 | D14 | **Admin on phones = admin tasks** (approve, check, switch on or off); wide tables say "open on a larger screen". | Refines D10. |
-| D15 | **Text zoom is removed from every phase.** Recorded as a known accessibility gap (WCAG 1.4.4). | Replaces D9. |
+| D15 | **Text zoom is in Phase 1** (the owner reversed the earlier removal on 8 Nov). Text on phones follows the phone's text-size setting, starting with the lesson path, then the other screens. | Replaces D9. WCAG 1.4.4. |
 | D16 | **Review what I missed** (the name for D8): a miss is a question wrong on the first try and clears when answered right; fixing every miss gives +5 XP once per lesson, ever, and the "Came back stronger" badge; full replay stays as a small link. No spaced-recall checks. | Refines D8. |
 | D17 | **Practice Market:** made-up companies are presented as a named Practice Market with one clear line at its entrance and a small icon inside; Ask Fin answers say "Example answer from the Finvora Library" with a link; checkout says "No money is taken". Mock-up first. | Refines D5. |
 | D18 | **Ask Fin:** declines and "no figures" replies do not count towards the 5-a-day limit; answers come from a search of Library text with a minimum match score, tested on about 30 questions. | Refines D4. |
-| D19 | **Sign-off:** the product owner is the reviewer and signs off by using the app. No activity log or session recording in the code. | Answers question 5 and replaces the D11 measurement ideas. Question 7 answered: the client knows all of this is Phase 1. |
+| D19 | **Sign-off:** the product owner is the reviewer and signs off by using the app. No activity log or session recording in the code. | Answers question 5 and replaces the D11 measurement ideas. Question 7 answered: the client knows all of this is Phase 1. Question 1 answered: purple, as on the live site. |
 
 
 ## Phase 2: parked until the prototype is approved
