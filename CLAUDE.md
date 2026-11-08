@@ -5,6 +5,12 @@
 - If a relevant skill or checklist exists (e.g. design critique, accessibility review, code review, security review), use it or say you didn't.
 - Say what you actually checked ("verified by running it", "from PRD §9") versus what you assumed.
 
+## Design reviews: Elephant-Goldfish Model (EGM)
+- The EGM plugin (google/elephant-goldfish-model) is enabled for this project in `.claude/settings.json`. Start a new session after pulling if its commands are missing.
+- Use it for any feature, scope or architecture change before building: `/egm:egm-brainstorm`, then `/egm:egm-draft`, then `/egm:egm-review <draft>`. Save approved specs in `docs/designs/`.
+- Use `/egm:egm-review-loop` for other documents (ADRs, Phase 2 briefs), and `/egm:egm-drift-report` to check the code still matches approved designs.
+- Small fixes and copy changes don't need it. The user approves every design before it is implemented.
+
 ## Project rules (decided)
 - **Phase 1 (the prototype) comes first.** Open questions live in `docs/open-questions.md`; only its Phase 1 list blocks work. Don't raise Phase 2 questions unless asked.
 - Read `docs/TECHNICAL_PROPOSAL.md`, `docs/adr/`, `docs/ux-principles.md` and `docs/build-backlog.md` before changing scope or architecture.
