@@ -672,6 +672,11 @@
     /** The current run's first-try answers in order, for the "in a row" label. */
     runCombo: function () { var s = load(), a = s.run && s.run.answers ? s.run.answers : {}, k = Object.keys(a), c = 0; for (var i = k.length - 1; i >= 0 && a[k[i]]; i--) c++; return c; },
     /** Fin's halfway cheer shows once per run. */
+    /** For the lesson moments: answers in a row, whether the last answer recovered from a miss, and which moments have shown. */
+    momentState: function () { var s = load(), r = s.run; if (!r) return null; var a = r.answers || {}, k = Object.keys(a), c = 0;
+      for (var i = k.length - 1; i >= 0 && a[k[i]]; i--) c++;
+      return { combo: c, back: k.length >= 2 && !!a[k[k.length - 1]] && !a[k[k.length - 2]], backKey: "back" + k.length, shown: r.moments || {}, review: !!r.review }; },
+    markMoment: function (key) { var s = load(); if (!s.run) return; s.run.moments = s.run.moments || {}; s.run.moments[key] = 1; save(s); },
     hypeOnce: function () { var s = load(); if (!s.run || s.run.hyped) return false; s.run.hyped = true; save(s); return true; },
     startRun: function () {
       // ?l=<lesson id> replays a finished lesson; otherwise the next lesson starts.

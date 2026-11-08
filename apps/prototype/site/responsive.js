@@ -181,35 +181,92 @@
     }, 750);
   };
   // Inside a lesson: "3 in a row!" on the progress bar, and Fin's cheer just past halfway.
-  var FIN = '<svg viewBox="0 0 120 120" aria-hidden="true" style="overflow:visible"><path d="M22 52q-12-8-10-22" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><path d="M98 52q12-8 10-22" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><circle cx="60" cy="62" r="42" fill="#0F55C9"/><circle cx="60" cy="58" r="42" fill="#1A73F5"/><circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"/><path d="M38 55 q8 -10 16 0 M66 55 q8 -10 16 0" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><path d="M44 68q16 20 32 0z" fill="#0B1F44"/><path d="M54 77 q6 4 12 0" fill="#FF8FA3"/></svg>';
-  function combo(pop) {
-    var FV = window.FV, bar = document.querySelector('[role="progressbar"][aria-label="Lesson progress"]'); if (!FV || !FV.runCombo || !bar || !FV.inLesson || !FV.inLesson()) return;
-    var c = FV.runCombo(), tag = document.getElementById("fv-combo");
-    bar.classList.toggle("fv-hot", c >= 3);
-    if (c < 3) { if (tag) tag.remove(); return; }
-    if (!tag) { tag = document.createElement("span"); tag.id = "fv-combo"; tag.setAttribute("role", "status"); bar.insertAdjacentElement("afterend", tag); }
-    var rootW = parseFloat((root() || {}).style ? root().style.width : 0) || 390, narrow = rootW < 300;
-    tag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z" fill="#F97316"/></svg>' + c + (narrow ? "" : " in a row!");
-    tag.setAttribute("aria-label", c + " in a row");
-    if (pop && !calm() && tag.animate) tag.animate([{ transform: "scale(.4)", opacity: 0 }, { transform: "scale(1.2)", opacity: 1, offset: .6 }, { transform: "scale(1)" }], { duration: 450, easing: "ease-out" });
+  // ---- Lesson moments (approved mock-up, 9 Nov 2026): a full screen between two steps, then Continue.
+  // On a roll (3 in a row), Unstoppable (4 in a row; a lesson has 5 questions, so 5 would land after the last one), Back on track (right after a miss, repeatable),
+  // Halfway there, One more to go. At most one per gap, each once per lesson except Back on track.
+  var MLINES = {
+    roll: [["3 in a row!", "Three right on the first try. Your money brain is on fire."], ["On a roll!", "Three in a row. Fin is impressed."], ["Hot streak!", "Three right answers, back to back. Keep it going."]],
+    unstop: [["Unstoppable!", "Four in a row. That is how investors think: one good decision at a time."], ["Four for four!", "Not one slip. Are you sure you're new to this?"], ["Money master mode!", "Four right in a row. The coins are raining."]],
+    back: [["Back on track!", "One slip, then straight back. That is how learning sticks."], ["Nice recovery!", "You got the next one right. Mistakes are part of it."], ["That's the spirit!", "Missed one, nailed the next. Keep going."]],
+    half: [["Halfway there, {n}!", "Keep this pace and you'll finish in about two minutes."], ["You're halfway!", "The hard part is starting, and you've done that."], ["Half done, {n}!", "Fin is cheering you on. Let's finish it."]],
+    almost: [["One more to go!", "Last question. Finish strong."], ["Final question!", "You're nearly there. One more and it's done."], ["Last one, {n}!", "The finish line is right there."]]
+  };
+  var MFL = '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z" fill="#F97316"/><path class="core" d="M12 12.6c1.7 1.5 3.2 2.6 3.2 4.7a3.2 3.2 0 0 1-6.4 0c0-1.7 1.3-2.8 3.2-4.7z" fill="#FDBA74"/>';
+  var MFIN = '<svg class="fvm-fin" viewBox="0 0 120 120" aria-hidden="true" style="overflow:visible"><g class="fvm-body"><path class="armL" d="M20 66q-8 6-6 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><path class="armR" d="M100 66q8 6 6 16" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><rect x="44" y="96" width="10" height="14" rx="5" fill="#0F55C9"/><rect x="66" y="96" width="10" height="14" rx="5" fill="#0F55C9"/><circle cx="60" cy="62" r="42" fill="#0F55C9"/><circle class="coin" cx="60" cy="58" r="42" fill="#1A73F5"/><circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"/><path d="M38 55 q8 -10 16 0 M66 55 q8 -10 16 0" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><path d="M44 68q16 20 32 0z" fill="#0B1F44"/><path d="M54 77 q6 4 12 0" fill="#FF8FA3"/></g></svg>';
+  var MTINY = '<svg viewBox="0 0 120 120" width="34" height="34" aria-hidden="true"><circle cx="60" cy="62" r="42" fill="#0F55C9"/><circle cx="60" cy="58" r="42" fill="#1A73F5"/><path d="M38 55 q8 -10 16 0 M66 55 q8 -10 16 0" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/><path d="M44 68q16 20 32 0z" fill="#0B1F44"/></svg>';
+  function lessonBar() { return document.querySelector('[role="progressbar"][aria-label="Lesson progress"]'); }
+  function chooseMoment() {
+    var FV = window.FV, bar = lessonBar(); if (!FV || !bar || !FV.inLesson || !FV.inLesson() || !FV.momentState) return null;
+    var m = FV.momentState(); if (!m || m.review) return null;
+    var now = +bar.getAttribute("aria-valuenow"), max = +bar.getAttribute("aria-valuemax"), sh = m.shown;
+    if (m.combo === 4 && !sh.unstop) return "unstop";
+    if (m.combo === 3 && !sh.roll) return "roll";
+    if (m.back && !sh[m.backKey]) return { kind: "back", key: m.backKey };
+    if (max >= 4 && now >= Math.floor(max / 2) + 1 && !sh.half) return "half";
+    if (max >= 4 && now === max && !sh.almost) return "almost";
+    return null;
   }
-  function hype() {
-    var FV = window.FV, bar = document.querySelector('[role="progressbar"][aria-label="Lesson progress"]'); if (!FV || !bar || !FV.inLesson || !FV.inLesson()) return;
-    var now = +bar.getAttribute("aria-valuenow"), max = +bar.getAttribute("aria-valuemax");
-    if (!max || max < 4 || now !== Math.floor(max / 2) + 1 || !FV.hypeOnce()) return;
-    var a = FV.AUTH ? FV.AUTH.get() : {}, h = document.createElement("div"); h.id = "fv-hype";
-    h.innerHTML = FIN + '<div class="fv-bubble" role="status">Halfway there' + (a.name ? ", " + a.name : "") + "! You're on a roll.</div>";
-    document.body.appendChild(h);
-    var out = function () { if (calm() || !h.animate) { h.remove(); return; } h.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(140px)", opacity: 0 }], { duration: 350, easing: "ease-in", fill: "forwards" }).onfinish = function () { h.remove(); }; };
-    if (!calm() && h.animate) { h.querySelector("svg").animate([{ transform: "translateY(140px) rotate(-20deg)" }, { transform: "translateY(-10px) rotate(6deg)", offset: .65 }, { transform: "none" }], { duration: 600, easing: "ease-out" });
-      h.querySelector(".fv-bubble").animate([{ transform: "scale(.3)", opacity: 0 }, { transform: "scale(1.06)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }], { duration: 450, delay: 300, easing: "ease-out", fill: "backwards" }); }
-    setTimeout(out, 2600);
+  function showMoment() {
+    var FV = window.FV, bar = lessonBar(); if (bar) bar.classList.toggle("fv-hot", !!(FV && FV.momentState && (FV.momentState() || {}).combo >= 3));
+    var c = chooseMoment(); if (!c) return;
+    var kind = c.kind || c, key = c.key || c; FV.markMoment(key);
+    var who = (FV.AUTH && FV.AUTH.get().name) || "", L = MLINES[kind][Math.floor(Math.random() * MLINES[kind].length)];
+    var title = L[0].replace(", {n}", who ? ", " + who : "").replace("{n}", who), sub = L[1];
+    var art = kind === "roll" || kind === "unstop" ? '<div class="fvm-flame' + (kind === "unstop" ? " big" : "") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + MFL + "</svg></div>" + (kind === "roll" ? '<div class="fvm-three"><span><svg viewBox="0 0 24 24">' + MFL + '</svg></span><span><svg viewBox="0 0 24 24">' + MFL + '</svg></span><span><svg viewBox="0 0 24 24">' + MFL + "</svg></span></div>" : "")
+      : kind === "back" ? '<div class="fvm-backart"><span class="fvm-ring"></span>' + MFIN + '<span class="fvm-tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>'
+      : kind === "half" ? '<div class="fvm-power"><span class="fvm-aura"></span>' + MFIN + "</div>"
+      : '<div class="fvm-almostart"><svg class="fvm-flag" viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="6" width="4" height="54" rx="2" fill="#38323F"/><path class="cloth" d="M16 8h34l-8 10 8 10H16z" fill="#5B21B6"/><path d="M22 12h6v6h-6zM34 12h6v6h-6zM28 18h6v6h-6z" fill="#FFFFFF" opacity=".9"/></svg><div class="fvm-race"><div class="fvm-racefill"></div><span class="fvm-runner">' + MTINY + "</span></div></div>";
+    var w = document.createElement("div"); w.id = "fv-moment"; w.className = "fvm-" + kind; w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-labelledby", "fvm-h");
+    var top = bar ? Math.round(bar.getBoundingClientRect().bottom + 10) : 0; w.style.top = Math.max(0, top) + "px";
+    w.innerHTML = '<div class="fvm-art">' + art + '</div><h2 id="fvm-h" class="fvm-h">' + title + '</h2><p class="fvm-sub">' + sub + '</p><div class="fvm-foot"><button type="button" class="fvm-btn">Continue</button></div>';
+    document.body.appendChild(w); document.documentElement.classList.add("fv-moment-open");
+    var btn = w.querySelector(".fvm-btn"), done = function () { document.documentElement.classList.remove("fv-moment-open"); clearInterval(w._emb);
+      if (calm() || !w.animate) { w.remove(); return; } w.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-40px)" }], { duration: 200, easing: "ease-in" }).onfinish = function () { w.remove(); }; };
+    btn.addEventListener("click", done); setTimeout(function () { w.setAttribute("tabindex", "-1"); w.style.outline = "none"; w.focus({ preventScroll: true }); }, 50);
+    if (calm() || !w.animate) { w.classList.add("on"); return; }
+    w.animate([{ opacity: 0, transform: "translateX(40px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "ease-out" });
+    ({ roll: mRoll, unstop: mUnstop, back: mBack, half: mHalf, almost: mAlmost })[kind](w);
   }
-  function lessonMotion() {
-    var FV = window.FV; if (!FV) return;
-    if (FV.answer && !FV.answer.__fv) { var orig = FV.answer; FV.answer = function () { var r = orig.apply(this, arguments); setTimeout(function () { combo(true); }, 50); return r; }; FV.answer.__fv = true; }
-    setTimeout(function () { combo(false); hype(); }, 500);
+  function mFire(w) {
+    var fl = w.querySelector(".fvm-flame");
+    var a = fl.querySelector("svg").animate([{ transform: "scale(.1)", opacity: .2 }, { transform: "scale(1.45,1.55) rotate(-6deg)", opacity: 1, offset: .5 }, { transform: "scale(.92,.96) rotate(5deg)", offset: .72 }, { transform: "scale(1)" }], { duration: 850, easing: "ease-out" });
+    a.onfinish = function () { fl.classList.add("lit");
+      w._emb = setInterval(function () { if (!w.isConnected) { clearInterval(w._emb); return; } var e = document.createElement("span"); e.className = "fvm-ember"; fl.appendChild(e); var dx = (Math.random() - .5) * 70;
+        e.animate([{ transform: "translate(-50%,-50%)", opacity: 1 }, { transform: "translate(calc(-50% + " + dx + "px), -110px) scale(.2)", opacity: 0 }], { duration: 1200 + Math.random() * 600, easing: "ease-out", fill: "forwards" }).onfinish = function () { e.remove(); }; }, 170); };
   }
+  function mRoll(w) { mFire(w); w.querySelectorAll(".fvm-three span").forEach(function (d, k) { d.animate([{ transform: "scale(0)" }, { transform: "scale(1.3)", offset: .6 }, { transform: "scale(1)" }], { duration: 400, delay: 700 + k * 200, easing: "ease-out", fill: "backwards" }); }); }
+  function mUnstop(w) { mFire(w);
+    for (var i = 0; i < 18; i++) { (function (i) { var c = document.createElement("span"); c.className = "fvm-coin"; c.textContent = "₦"; c.style.left = (8 + Math.random() * 84) + "%"; w.appendChild(c);
+      c.animate([{ transform: "translateY(0) rotate(0)" }, { transform: "translateY(" + (window.innerHeight + 60) + "px) rotate(" + (360 + Math.random() * 360) + "deg)" }], { duration: 1400 + Math.random() * 900, delay: 300 + i * 90, easing: "cubic-bezier(.4,0,.8,.6)", fill: "backwards" }).onfinish = function () { c.remove(); }; })(i); } }
+  function mBack(w) {
+    var f = w.querySelector(".fvm-fin"), r = w.querySelector(".fvm-ring"), t = w.querySelector(".fvm-tick");
+    w.querySelector(".armL").setAttribute("d", "M22 52q-12-8-10-22"); w.querySelector(".armR").setAttribute("d", "M98 52q12-8 10-22");
+    f.animate([{ transform: "translateY(40px) scale(.7)", opacity: 0 }, { transform: "translateY(-18px) scale(1.06)", opacity: 1, offset: .55 }, { transform: "translateY(0) scale(.97,1.03)", offset: .8 }, { transform: "none" }], { duration: 700, easing: "ease-out" });
+    f.animate([{ transform: "none" }, { transform: "translateY(-10px)" }, { transform: "none" }], { duration: 600, delay: 800, iterations: 2, easing: "ease-in-out" });
+    r.animate([{ transform: "scale(.5)", opacity: .9 }, { transform: "scale(1.35)", opacity: 0 }], { duration: 800, delay: 400, easing: "ease-out", iterations: 2 });
+    t.animate([{ transform: "scale(0) rotate(-90deg)" }, { transform: "scale(1.3) rotate(10deg)", offset: .6 }, { transform: "scale(1)" }], { duration: 500, delay: 550, easing: "ease-out", fill: "backwards" });
+  }
+  function mHalf(w) {
+    var box = w.querySelector(".fvm-power"), body = w.querySelector(".fvm-body"), aura = w.querySelector(".fvm-aura"), aL = w.querySelector(".armL"), aR = w.querySelector(".armR");
+    var BOLT = '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#C4B5FD" stroke="#5B21B6" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+    body.animate([{ transform: "scale(1,1)" }, { transform: "scale(1.12,.84)" }], { duration: 600, delay: 200, easing: "ease-in", fill: "forwards" });
+    aura.animate([{ opacity: 0, transform: "scale(.3)" }, { opacity: 1, transform: "scale(.9)" }], { duration: 650, delay: 150, easing: "ease-in", fill: "forwards" });
+    setTimeout(function () { aL.setAttribute("d", "M22 52q-12-8-10-22"); aR.setAttribute("d", "M98 52q12-8 10-22");
+      body.animate([{ transform: "scale(1.12,.84)" }, { transform: "scale(.9,1.15) translateY(-28px)", offset: .35 }, { transform: "scale(1.06,.95)", offset: .75 }, { transform: "none" }], { duration: 650, easing: "ease-out", fill: "forwards" });
+      for (var k = 0; k < 3; k++) { var sh = document.createElement("span"); sh.className = "fvm-shock"; box.appendChild(sh); sh.animate([{ transform: "scale(.4)", opacity: .9 }, { transform: "scale(2.1)", opacity: 0 }], { duration: 700, delay: k * 140, easing: "ease-out", fill: "forwards" }).onfinish = (function (x) { return function () { x.remove(); }; })(sh); }
+      for (var j = 0; j < 8; j++) { (function (j) { var b = document.createElement("span"); b.className = "fvm-bolt"; b.innerHTML = BOLT; box.appendChild(b); var a = j / 8 * Math.PI * 2 + .3, r = 110 + Math.random() * 30;
+        b.animate([{ transform: "translate(-50%,-50%) scale(.4)", opacity: 1 }, { transform: "translate(calc(-50% + " + Math.cos(a) * r + "px), calc(-50% + " + Math.sin(a) * r + "px)) scale(1.2)", opacity: 0 }], { duration: 700, easing: "cubic-bezier(.2,.8,.3,1)", fill: "forwards" }).onfinish = function () { b.remove(); }; })(j); }
+      setTimeout(function () { body.getAnimations().forEach(function (a) { a.cancel(); }); aura.getAnimations().forEach(function (a) { a.cancel(); }); w.classList.add("on"); }, 680);
+    }, 850);
+  }
+  function mAlmost(w) {
+    var bar = lessonBar(), max = bar ? +bar.getAttribute("aria-valuemax") : 7, from = Math.round((max - 1) / max * 100), to = 100;
+    var fill = w.querySelector(".fvm-racefill"), run = w.querySelector(".fvm-runner"); w.classList.add("on"); fill.style.width = from + "%"; run.style.left = from + "%";
+    fill.animate([{ width: from + "%" }, { width: to + "%" }], { duration: 900, delay: 400, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "forwards" });
+    run.animate([{ left: from + "%" }, { left: to + "%" }], { duration: 900, delay: 400, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "forwards" });
+    w.querySelector(".fvm-flag").animate([{ transform: "scale(.4) rotate(-20deg)", opacity: 0 }, { transform: "scale(1.1) rotate(4deg)", opacity: 1, offset: .7 }, { transform: "none" }], { duration: 600, easing: "ease-out" });
+  }
+  function lessonMotion() { setTimeout(showMoment, 450); }
   function motionStart() { arrive(); lessonMotion(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(motionStart, 300); }); else setTimeout(motionStart, 300);
 
