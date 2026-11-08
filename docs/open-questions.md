@@ -18,7 +18,7 @@ Split by phase on 29 Oct 2026. **Only the Phase 1 list blocks current work.** Ph
 
 | # | Decision | Notes |
 |---|---|---|
-| D1 | **Plus price: ₦5,999 a month** (599900 kobo), agreed by the client. | Yearly not yet confirmed. Full price is ₦71,988; proposed ₦59,990 a year (about two months free). Answers question 3. |
+| D1 | **Plus price: ₦5,999 a month** (599900 kobo), agreed by the client. **Yearly: ₦65,989** (6598900 kobo): one month free, 11 × ₦5,999. | Full price would be ₦71,988, so yearly saves ₦5,999 (about 8%). Answers question 3. |
 | D2 | **Free Ask Fin limit: 5 questions a day.** | Answers question 4's AI limit. |
 | D3 | **Practice market follows real NGX hours** (weekdays 10:00 to 14:30, Lagos time). Reviewer tools can still open it. | |
 | D4 | **Ask Fin declines non-finance questions and says when it has no figures for a company**, following the RAG procedure in [phase2-ai-rag.md](phase2-ai-rag.md): scope check, then retrieval from approved content, then a grounded answer with real references, else "not enough information". Phase 1 runs this on the app's own Library content in the browser, labelled as example answers. | No live AI or paid service in Phase 1. |
