@@ -1,7 +1,7 @@
 # Ask Fin grounded answers (Part 3 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Draft
+*   **Status:** Approved 8 Nov 2026
 *   **Date:** 2026-11-08
 
 --------------------------------------------------------------------------------

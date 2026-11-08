@@ -50,7 +50,8 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   All product decisions: `docs/open-questions.md` (D1 to D21).
 *   Design Part 1, built: `docs/designs/prototype-settings-labels-storage.md`.
 *   Design Part 2, built: `docs/designs/review-what-i-missed.md`.
-*   Still to design: Part 3 Ask Fin grounded answers (D4, D18), Part 4 Plus features (D6, D13), Part 5 admin tasks on phones (D10, D14).
+*   Design Part 3, approved: `docs/designs/ask-fin-grounded-answers.md`.
+*   Still to design: Part 4 Plus features (D6, D13), Part 5 admin tasks on phones (D10, D14).
 *   EGM review brief: `concepts_brief.md`.
 
 ## Known limits
