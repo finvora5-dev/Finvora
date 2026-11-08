@@ -22,7 +22,9 @@ Run them in this order after copying fresh boards from the canvas:
 10. `wire_a11y.py <site>`: contrast and ARIA fixes from the axe-core audit. Re-run after any board rebuild.
 11. `build_celebrate.py <site>`: the screens after a lesson (receipt, streak dial, new-high level chart), the
     summary's use of the saved result, and the white Meet Fin screen.
-12. `build_sw.py <site>` last, so the offline cache lists every file.
+12. `build_review.py <site>`: Review what I missed (design Part 2): the review end screen, the lesson summary button,
+    "Lesson review" in History. The journey sheet is in `responsive.js`.
+13. `build_sw.py <site>` last, so the offline cache lists every file.
 
 All learner data stays in the browser (`localStorage`, keys starting `fv.`). Nothing is sent anywhere.
 

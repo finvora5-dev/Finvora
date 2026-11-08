@@ -155,6 +155,46 @@ function tradingDaysBetween(fromDay, toDay) {
     return n;
 }
 
+// ---- review
+// Review what I missed (design Part 2, D8, D14, D16). Pure rules, no storage, so they carry into Phase 2.
+// Amounts mirror packages/engine XP.improvement and XP.lessonPractice (a test keeps them equal).
+const REVIEW_XP = { allFixed: 5, practice: 2 };
+/** After a first attempt or a full replay: add first-try wrong steps, clear steps answered right. */
+function recordMisses(prev, answers, given = {}) {
+    const out = { ...(prev || {}) };
+    for (const step of Object.keys(answers)) {
+        if (answers[step])
+            delete out[step];
+        else
+            out[step] = String(given[step] ?? "");
+    }
+    return out;
+}
+/** The missed steps to play, in lesson order. Steps without answers (explainers) never appear. */
+function planReview(flow, misses) {
+    const m = misses || {};
+    return flow.filter((step) => Object.prototype.hasOwnProperty.call(m, step));
+}
+/** After a review: steps answered right are cleared, steps still wrong stay. */
+function applyReview(misses, answers) {
+    const before = misses || {}, remaining = { ...before }, fixed = [], stillMissed = [];
+    for (const step of Object.keys(before)) {
+        if (!(step in answers))
+            continue;
+        if (answers[step]) {
+            delete remaining[step];
+            fixed.push(step);
+        }
+        else
+            stillMissed.push(step);
+    }
+    return { remaining, fixed, stillMissed, lastFixed: Object.keys(before).length > 0 && Object.keys(remaining).length === 0 };
+}
+/** XP for a review: the practice reward once per lesson per day, plus the bonus once per lesson, ever. */
+function reviewReward(r) {
+    return { practice: r.practicePaidToday ? 0 : REVIEW_XP.practice, bonus: r.lastFixed && !r.bonusPaidBefore ? REVIEW_XP.allFixed : 0 };
+}
+
 // ---- simulator
 // Virtual-money simulator (proposal §7, ADR D3–D5). Pure functions; the
 // caller persists the returned account. Money is integer kobo, shares are integers.
@@ -613,5 +653,5 @@ const ARTICLES = [
 ];
 const TOPICS = ["Money basics", "Investing", "Markets", "Nigerian market", "Company analysis", "Decisions and risk"];
 
-window.FVD = { NAIRA, CONFIG, LABELS, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, isAdviceRequest, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS };
+window.FVD = { NAIRA, CONFIG, LABELS, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, REVIEW_XP, recordMisses, planReview, applyReview, reviewReward, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, isAdviceRequest, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS };
 })();

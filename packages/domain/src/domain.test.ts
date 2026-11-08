@@ -320,3 +320,32 @@ describe("Part 1 settings (D1, D2, D3, D12)", () => {
     expect(LABELS.EXAMPLE_ANSWER).toBe("Example answer from the Finvora Library");
   });
 });
+
+import { recordMisses, planReview, applyReview, reviewReward, REVIEW_XP } from "./review";
+import { XP } from "@finvora/engine";
+
+describe("Review what I missed (Part 2)", () => {
+  const flow = ["info", "myth", "choice", "order", "match", "scenario", "calc"];
+  it("records first-try misses with the answer, and clears steps answered right", () => {
+    const m = recordMisses(undefined, { choice: true, order: false, calc: false }, { order: "B, A, C", calc: "250" });
+    expect(m).toEqual({ order: "B, A, C", calc: "250" });
+    expect(recordMisses(m, { order: true, calc: false }, { calc: "300" })).toEqual({ calc: "300" });
+  });
+  it("plans a review of missed steps in lesson order, never explainers", () => {
+    expect(planReview(flow, { calc: "x", order: "y" })).toEqual(["order", "calc"]);
+    expect(planReview(flow, {})).toEqual([]);
+  });
+  it("clears fixed steps and keeps the rest", () => {
+    const r = applyReview({ order: "y", calc: "x" }, { order: true, calc: false });
+    expect(r.remaining).toEqual({ calc: "x" }); expect(r.fixed).toEqual(["order"]); expect(r.lastFixed).toBe(false);
+    expect(applyReview(r.remaining, { calc: true }).lastFixed).toBe(true);
+  });
+  it("pays the bonus once ever and the practice reward once a day", () => {
+    expect(reviewReward({ lastFixed: true, bonusPaidBefore: false, practicePaidToday: false })).toEqual({ practice: 2, bonus: 5 });
+    expect(reviewReward({ lastFixed: true, bonusPaidBefore: true, practicePaidToday: true })).toEqual({ practice: 0, bonus: 0 });
+  });
+  it("uses the game rules' amounts", () => {
+    expect(REVIEW_XP.allFixed).toBe(XP.improvement);
+    expect(REVIEW_XP.practice).toBe(XP.lessonPractice);
+  });
+});

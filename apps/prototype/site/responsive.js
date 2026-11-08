@@ -212,4 +212,28 @@
   }
   function motionStart() { arrive(); lessonMotion(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(motionStart, 300); }); else setTimeout(motionStart, 300);
+
+  // ---- Review what I missed (design Part 2): a finished lesson with misses opens a small sheet.
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href*="UPLessonInfo.dc.html?l="]') : null; if (!a || a.hasAttribute("data-fv-replay") || /review=1/.test(a.getAttribute("href"))) return;
+    var FV = window.FV, m = /[?&]l=(\w+)/.exec(a.getAttribute("href")); if (!FV || !m || !FV.missCount || !FV.missCount(m[1])) return;
+    e.preventDefault(); openReviewSheet(m[1], a.getAttribute("href"));
+  }, true);
+  function openReviewSheet(id, replayHref) {
+    var FV = window.FV, L = FV.LESSONS.filter(function (x) { return x.id === id; })[0], i = FV.LESSONS.indexOf(L), best = (FV.get().best || [])[i];
+    var NAMES = { choice: "Quick question", order: "Order the steps", match: "Match the pairs", scenario: "Scenario", calc: "Calculation" };
+    var list = FV.missList(id), n = list.length, old = document.getElementById("fv-rsheet"); if (old) old.remove();
+    var w = document.createElement("div"); w.id = "fv-rsheet";
+    w.innerHTML = '<div class="fv-rdim"></div><div class="fv-rbox" role="dialog" aria-modal="true" aria-labelledby="fv-rh"><span class="fv-rgrab" aria-hidden="true"></span>' +
+      '<h2 id="fv-rh">' + L.title + '</h2><p class="fv-rmeta">Lesson ' + (i + 1) + (best != null ? ' · best score ' + best + '%' : '') + '</p>' +
+      '<div class="fv-rmiss"><b>' + n + '</b><span>' + (n === 1 ? 'question' : 'questions') + ' to review: ' + list.map(function (k) { return NAMES[k] || k; }).join(', ') + '</span></div>' +
+      '<a class="fv-rbtn" href="UPLessonInfo.dc.html?l=' + id + '&review=1">Review what I missed<span class="fv-rcount">' + n + '</span></a>' +
+      '<a class="fv-rlink" href="' + replayHref + '" data-fv-replay="1">Replay the whole lesson</a></div>';
+    document.body.appendChild(w);
+    var close = function () { w.remove(); document.removeEventListener("keydown", esc); }, esc = function (ev) { if (ev.key === "Escape") close(); };
+    w.querySelector(".fv-rdim").addEventListener("click", close); document.addEventListener("keydown", esc);
+    w.querySelector('[data-fv-replay]').addEventListener("click", function (ev) { ev.stopPropagation(); });
+    var box = w.querySelector(".fv-rbox"); if (!calm() && box.animate) box.animate([{ transform: "translateY(100%)" }, { transform: "none" }], { duration: 260, easing: "ease-out" });
+    w.querySelector(".fv-rbtn").focus();
+  }
 })();

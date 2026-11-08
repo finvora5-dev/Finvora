@@ -36,7 +36,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 
 ## What works
 
-*   **Learning:** World 1 with six 7-step lessons (explainer, myth or compare, question, order, match, scenario, calculation), a boss challenge, daily question, micro modules, challenges, XP, five levels, streak with a weekly rest day, badges, lesson replay. Inside lessons: a "3 in a row" label and Fin's halfway cheer. After a lesson: a learning receipt, the streak fire dial (first activity of the day) and a "new high" level chart (when a level is crossed), then the summary.
+*   **Learning:** World 1 with six 7-step lessons (explainer, myth or compare, question, order, match, scenario, calculation), a boss challenge, daily question, micro modules, challenges, XP, five levels, streak with a weekly rest day, badges. **Review what I missed:** questions answered wrong on the first try are kept per lesson; tapping a finished lesson offers a review of just those, a miss clears when answered right, and fixing them all gives +5 XP once per lesson and the "Came back stronger" badge. Full replay stays. Inside lessons: a "3 in a row" label and Fin's halfway cheer. After a lesson: a learning receipt, the streak fire dial (first activity of the day) and a "new high" level chart (when a level is crossed), then the summary.
 *   **Library:** 15 articles with takeaways, how it works, an African example with made-up figures and common mistakes; search; saved articles; dictionary. Reading an article to the end earns 3 XP once.
 *   **Ask Fin:** scripted answers, refusal of buy or sell advice, a free limit of 5 questions a day, links only to real Library articles, every answer labelled "Example answer from the Finvora Library".
 *   **Practice Market (simulator):** made-up companies and virtual naira, amount-first buying, approximate fees, real NGX hours (weekdays 10:00 to 14:30 Lagos time) with a closed sheet that shows the next opening time and offers to queue the order or do a lesson. Prices move once per trading day.
@@ -49,7 +49,8 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 
 *   All product decisions: `docs/open-questions.md` (D1 to D21).
 *   Design Part 1, built: `docs/designs/prototype-settings-labels-storage.md`.
-*   Still to design: Part 2 Review what I missed (D8, D16), Part 3 Ask Fin grounded answers (D4, D18), Part 4 Plus features (D6, D13), Part 5 admin tasks on phones (D10, D14).
+*   Design Part 2, built: `docs/designs/review-what-i-missed.md`.
+*   Still to design: Part 3 Ask Fin grounded answers (D4, D18), Part 4 Plus features (D6, D13), Part 5 admin tasks on phones (D10, D14).
 *   EGM review brief: `concepts_brief.md`.
 
 ## Known limits

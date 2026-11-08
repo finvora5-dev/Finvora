@@ -102,3 +102,16 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
 .fv-opens > span { font-size: 13px; color: #38323F; }
 .fv-source { display: flex; align-items: center; gap: 6px; font: 700 13px 'Plus Jakarta Sans', sans-serif; color: #4C1D95; border-top: 1.5px dashed #E7E2F0; padding-top: 8px; }
 .fv-source a { color: #5B21B6; }
+
+/* Review what I missed: the journey sheet (design Part 2). */
+#fv-rsheet { position: fixed; inset: 0; z-index: 80; }
+.fv-rdim { position: absolute; inset: 0; background: rgba(14, 11, 20, .35); }
+.fv-rbox { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: min(430px, 100%); box-sizing: border-box; background: #FFFFFF; border-radius: 24px 24px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
+.fv-rgrab { width: 40px; height: 5px; border-radius: 5px; background: #E7E2F0; align-self: center; }
+.fv-rbox h2 { margin: 0; font-size: 20px; font-weight: 800; color: #0E0B14; }
+.fv-rmeta { margin: 0; color: #615A6E; font-size: 14px; }
+.fv-rmiss { display: flex; gap: 10px; align-items: center; background: #FFF4ED; border-radius: 14px; padding: 10px 12px; font-size: 14px; color: #38323F; }
+.fv-rmiss b { color: #C2410C; font-size: 16px; }
+.fv-rbtn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 16px; background: #5B21B6; color: #FFFFFF; font-weight: 800; font-size: 16px; text-decoration: none; box-shadow: 0 4px 0 #3B0F7A; }
+.fv-rcount { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; background: #FFFFFF; color: #5B21B6; font-weight: 800; font-size: 14px; }
+.fv-rlink { text-align: center; color: #5B21B6; font-weight: 700; min-height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; }

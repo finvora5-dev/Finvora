@@ -1,7 +1,7 @@
 # Review what I missed (Part 2 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Approved (by the author, section by section, 8 Nov 2026)
+*   **Status:** Built (8 Nov 2026). Approved by the author section by section the same day.
 *   **Date:** 2026-11-08
 
 --------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ flowchart LR
 
 ### 1. Rules in the domain package
 
-New tested functions in `packages/domain/src/learning.ts`, so the rules carry into Phase 2:
+New tested functions in `packages/domain/src/review.ts` (a new file: `learning.ts` depends on the engine package, which the browser bundle does not include), so the rules carry into Phase 2:
 
 *   **Record misses** after a full lesson or full replay: take the steps answered wrong on the first try and add them to that lesson's misses, keeping the learner's answer. A step answered right in a full replay clears its miss.
 *   **Plan a review:** given a lesson's flow and its misses, return the missed steps in lesson order.

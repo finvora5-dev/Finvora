@@ -131,7 +131,7 @@ class Component extends DCLogic {
   renderVals() {
     const F = this.F(); if (!F || !F.ME) return {};
     const f = this.state.f, today = F.LOOP.streakInfo().week.find((d) => d.today), mon = F.LOOP.streakInfo().week[0].d, td = today ? today.d : '';
-    const kindName = { article: 'Article', lesson: 'Lesson', practice: 'Lesson replay', micro: 'Micro module', daily: 'Daily question', challenge: 'Challenge', boss: 'Boss challenge' };
+    const kindName = { article: 'Article', lesson: 'Lesson', practice: 'Lesson replay', review: 'Lesson review', micro: 'Micro module', daily: 'Daily question', challenge: 'Challenge', boss: 'Boss challenge' };
     const keep = (e) => f === 'All' || (f === 'Reading' ? e.kind === 'article' : e.kind !== 'article');
     const when = (e) => { const m = Math.round((Date.now() - e.at) / 60000); return e.day === td ? (m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + 'h ago') : new Date(e.at).toLocaleDateString('en-GB', e.day >= mon ? { weekday: 'long' } : { day: 'numeric', month: 'short' }); };
     const G = [['Today', (e) => e.day === td], ['This week', (e) => e.day !== td && e.day >= mon], ['Earlier', (e) => e.day < mon]];

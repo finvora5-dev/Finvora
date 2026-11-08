@@ -604,7 +604,7 @@
     { id: "daily", title: "Daily habit", desc: "Complete 3 daily questions.", ok: function (s) { return (s.dailyCount || 0) >= 3; } },
     { id: "solver", title: "Problem solver", desc: "Complete 3 practical challenges.", ok: function (s) { return Object.keys(s.challenges || {}).length >= 3; } },
     { id: "curious", title: "Curious mind", desc: "Read 5 library articles.", ok: function (s) { return Object.keys((libLoad().read) || {}).length >= 5; } },
-    { id: "back", title: "Came back stronger", desc: "Ace a lesson you found hard.", ok: function () { return false; } },
+    { id: "back", title: "Came back stronger", desc: "Fix every question you missed in a lesson.", ok: function () { return !!Object.keys(load().fixed || {}).length; } },
     { id: "investor", title: "Investor's mindset", desc: "Pass the Investing boss.", ok: function () { return false; } }
   ];
   var PREF_KEY = "fv.prefs.v1";
@@ -635,14 +635,31 @@
   var STEP_BOARD = { info: "UPLessonInfo", compare: "UPLearnCompare", term: "UPLearnTerm", steps: "UPLearnSteps", market: "UPLearnMarket", myth: "UPLearnMyth", choice: "UPLessonChoice", order: "UPLessonOrder", match: "UPLessonMatch", scenario: "UPLessonScenario", calc: "UPLessonCalc" };
   /** True when a screen is being played inside a lesson (not on its own as a micro module). */
   function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
+  function flowOf(id) { var c = CONTENT[id]; return (c && c.flow) || (id === "interest" ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]); }
   function flowVals(kind) {
-    var L = lessonNow(), f = (L.c && L.c.flow) || (L.designed ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]), i = f.indexOf(kind);
+    var L = lessonNow(), run = load().run, rev = run && run.review, f = rev || flowOf(L.id), i = f.indexOf(kind);
     if (i < 0) i = 0;
     var nx = f[i + 1], total = f.length;
     return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
-      fText: "Step " + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : "UPCelebrate.dc.html" };
+      fText: (rev ? "Review step " : "Step ") + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : (rev ? "UPReviewDone.dc.html" : "UPCelebrate.dc.html") };
+  }
+  // End of a review: clear fixed misses, pay the practice reward once a day and the all-fixed bonus once ever.
+  function finishReview(s, lesson, answers) {
+    s.misses = s.misses || {}; s.fixed = s.fixed || {}; s.practice = s.practice || {};
+    var r = D().applyReview(s.misses[lesson.id], answers), pk = lesson.id + "@" + lagosDay();
+    var w = D().reviewReward({ lastFixed: r.lastFixed, bonusPaidBefore: !!s.fixed[lesson.id], practicePaidToday: !!s.practice[pk] });
+    var newDay = s.days.indexOf(lagosDay()) < 0, firstBadge = w.bonus > 0 && !Object.keys(s.fixed).length;
+    if (Object.keys(r.remaining).length) s.misses[lesson.id] = r.remaining; else delete s.misses[lesson.id];
+    s.practice[pk] = 1; if (w.bonus) s.fixed[lesson.id] = true;
+    var xp = w.practice + w.bonus; addXp(s, xp); markDay(s);
+    logEvent(s, 'review', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
+    s.run = null; save(s);
+    var res = { review: true, lesson: lesson, fixed: r.fixed, stillMissed: r.stillMissed, allFixed: !Object.keys(r.remaining).length, practice: w.practice, bonus: w.bonus, xp: xp, firstBadge: firstBadge, newDay: newDay, streak: streak(s.days), totalXp: s.xp };
+    try { sessionStorage.setItem('fv.lastReview', JSON.stringify(res)); } catch (e) {}
+    return res;
   }
   var FV = {
+    lastReview: function () { try { return JSON.parse(sessionStorage.getItem('fv.lastReview') || 'null'); } catch (e) { return null; } },
     LESSONS: LESSONS, BOSS: BOSS,
     get: load,
     streak: function () { return streak(load().days); },
@@ -659,7 +676,11 @@
     startRun: function () {
       // ?l=<lesson id> replays a finished lesson; otherwise the next lesson starts.
       var s = load(), m = /[?&]l=(\w+)/.exec(location.search), R = m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0];
-      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R, t0: Date.now() }; save(s); },
+      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R, t0: Date.now() };
+      // ?review=1 with ?l=<finished lesson>: play only that lesson's missed steps (design Part 2).
+      if (R && /[?&]review=1/.test(location.search)) { var plan = D().planReview(flowOf(L.id), (s.misses || {})[L.id]); if (plan.length) { s.run.review = plan; s.run.replay = false; } }
+      save(s);
+      if (s.run.review && /LessonInfo/.test(location.pathname)) location.replace(STEP_BOARD[s.run.review[0]] + ".dc.html?in=1"); },
     answer: function (q, correct, given) {
       var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
       if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
@@ -670,6 +691,8 @@
       var lesson = lessonNow(), given = s.run.given || {};
       var a = s.run.answers, keys = Object.keys(a), right = keys.filter(function (k) { return a[k]; }).length;
       var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
+      if (s.run.review) return finishReview(s, lesson, a);
+      s.misses = s.misses || {}; s.misses[lesson.id] = D().recordMisses(s.misses[lesson.id], a, given); if (!Object.keys(s.misses[lesson.id]).length) delete s.misses[lesson.id];
       var wrong = keys.length - right, replay = !!s.run.replay, xp, newDay = s.days.indexOf(lagosDay()) < 0, lvBefore = lvOf(s.xp).n, t0 = s.run.t0 || 0;
       if (replay) {
         // Engine rule lessonPractice: replaying earns 2 XP, once per lesson per day. The best score is kept.
@@ -683,6 +706,9 @@
       try { sessionStorage.setItem('fv.lastRun', JSON.stringify(res)); } catch (e) {}
       return res;
     },
+    /** Missed steps waiting for review in a lesson. */
+    missCount: function (id) { var m = (load().misses || {})[id]; return m ? Object.keys(m).length : 0; },
+    missList: function (id) { var m = (load().misses || {})[id] || {}; return D().planReview(flowOf(id), m); },
     passBoss: function (score) {
       var s = load(); var passed = score >= 4;
       if (passed && !s.bossPassed) { s.bossPassed = true; addXp(s, 55); }
