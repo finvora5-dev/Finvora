@@ -71,7 +71,7 @@
   function fillFV(el) {
     var FV = window.FV; if (!FV) return;
     var st = FV.get(), v = { streak: String(FV.streak()), xp: String(st.xp), levelText: "Level " + FV.level(st.xp) + " learner" };
-    el.querySelectorAll("[data-fv]").forEach(function (n) { var t = v[n.getAttribute("data-fv")]; if (t != null && n.textContent !== t) n.textContent = t; });
+    el.querySelectorAll("[data-fv]").forEach(function (n) { if (n.hasAttribute("data-fv-anim")) return; var t = v[n.getAttribute("data-fv")]; if (t != null && n.textContent !== t) n.textContent = t; });
     el.querySelectorAll("[data-fv-label]").forEach(function (n) {
       var k = n.getAttribute("data-fv-label"), t = k === "streak" ? "Streak: " + v.streak + (v.streak === "1" ? " day" : " days") : v.xp + " XP, " + v.levelText;
       if (n.getAttribute("aria-label") !== t) n.setAttribute("aria-label", t);
@@ -122,4 +122,72 @@
   function start() { mo.observe(document.body, { childList: true, subtree: true }); fit(); }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
   window.addEventListener("resize", fit);
+
+  // ---- Motion for XP and streak (approved mock-up, 9 Nov 2026). Calm fallbacks when motion is reduced.
+  function calm() { return document.documentElement.classList.contains("fv-reduce") || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  function bumpChip(kind, from, to) {
+    document.querySelectorAll('[data-fv="' + kind + '"]').forEach(function (n) {
+      var chip = n.closest("a,button,span,div") || n; n.textContent = String(from);
+      if (calm()) { n.textContent = String(to); return; }
+      n.setAttribute("data-fv-anim", "1"); chip.classList.remove("fv-bump", "fv-fire"); void chip.offsetWidth; chip.classList.add(kind === "xp" ? "fv-bump" : "fv-fire");
+      var t0 = performance.now();
+      (function tick(t) { var q = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - q, 3); n.textContent = String(Math.round(from + (to - from) * e)); if (q < 1) requestAnimationFrame(tick); else n.removeAttribute("data-fv-anim"); })(t0);
+    });
+  }
+  // On arrival: chips count up from what this tab last showed.
+  function arrive() {
+    var FV = window.FV; if (!FV) return;
+    var now = { xp: FV.get().xp, streak: FV.streak() }, seen = null;
+    try { seen = JSON.parse(sessionStorage.getItem("fv.seen") || "null"); sessionStorage.setItem("fv.seen", JSON.stringify(now)); } catch (e) {}
+    if (!seen) return;
+    setTimeout(function () { if (now.xp > seen.xp) bumpChip("xp", seen.xp, now.xp); if (now.streak > seen.streak) bumpChip("streak", seen.streak, now.streak); }, 450);
+  }
+  var BOLT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#FFFFFF"/></svg>';
+  /** "+3 XP" pill that springs up, throws sparks and flies into the XP chip (or floats up when there is none). */
+  window.fvXpBurst = function (n, msg) {
+    var FV = window.FV, after = FV ? FV.get().xp : 0, before = after - n;
+    try { sessionStorage.setItem("fv.seen", JSON.stringify({ xp: after, streak: FV ? FV.streak() : 0 })); } catch (e) {}
+    var b = document.createElement("div"); b.className = "fv-burst"; b.setAttribute("aria-hidden", "true"); b.innerHTML = BOLT + "+" + n + " XP"; document.body.appendChild(b);
+    var done = function () { if (b.parentNode) b.remove(); bumpChip("xp", before, after); if (msg && window.fvToast) window.fvToast(msg); };
+    if (calm() || !b.animate) { setTimeout(done, 700); return; }
+    b.animate([{ transform: "translate(-50%,-50%) scale(.4)", opacity: 0 }, { transform: "translate(-50%,-50%) scale(1.15)", opacity: 1, offset: .55 }, { transform: "translate(-50%,-50%) scale(1)", opacity: 1 }], { duration: 450, easing: "cubic-bezier(.3,1.5,.5,1)", fill: "forwards" });
+    var cols = ["#5B21B6", "#A78BFA", "#F97316", "#147D44"];
+    for (var i = 0; i < 10; i++) { (function (i) { var sp = document.createElement("span"); sp.className = "fv-spark"; sp.style.background = cols[i % 4]; document.body.appendChild(sp); var a = i / 10 * Math.PI * 2, r = 60 + Math.random() * 30;
+      sp.animate([{ transform: "translate(-50%,-50%)", opacity: 1 }, { transform: "translate(calc(-50% + " + Math.cos(a) * r + "px), calc(-50% + " + Math.sin(a) * r + "px)) scale(.3)", opacity: 0 }], { duration: 650, easing: "cubic-bezier(.2,.8,.3,1)", fill: "forwards" }).onfinish = function () { sp.remove(); }; })(i); }
+    setTimeout(function () {
+      var chip = document.querySelector('[data-fv="xp"]'), br = b.getBoundingClientRect(), dx = 0, dy = -120;
+      if (chip && chip.getBoundingClientRect().width) { var cr = chip.getBoundingClientRect(); dx = cr.left + cr.width / 2 - (br.left + br.width / 2); dy = cr.top + cr.height / 2 - (br.top + br.height / 2); }
+      b.animate([{ transform: "translate(-50%,-50%) scale(1)", opacity: 1 }, { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px)) scale(.35)", opacity: .1 }], { duration: 480, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" }).onfinish = done;
+    }, 750);
+  };
+  // Inside a lesson: "3 in a row!" on the progress bar, and Fin's cheer just past halfway.
+  var FIN = '<svg viewBox="0 0 120 120" aria-hidden="true" style="overflow:visible"><path d="M22 52q-12-8-10-22" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><path d="M98 52q12-8 10-22" fill="none" stroke="#0F55C9" stroke-width="8" stroke-linecap="round"/><circle cx="60" cy="62" r="42" fill="#0F55C9"/><circle cx="60" cy="58" r="42" fill="#1A73F5"/><circle cx="60" cy="58" r="33" fill="none" stroke="#9CC3FF" stroke-width="3" stroke-dasharray="4 5"/><path d="M38 55 q8 -10 16 0 M66 55 q8 -10 16 0" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><circle cx="84" cy="68" r="5" fill="#FF8FA3" opacity=".8"/><path d="M44 68q16 20 32 0z" fill="#0B1F44"/><path d="M54 77 q6 4 12 0" fill="#FF8FA3"/></svg>';
+  function combo(pop) {
+    var FV = window.FV, bar = document.querySelector('[role="progressbar"][aria-label="Lesson progress"]'); if (!FV || !FV.runCombo || !bar || !FV.inLesson || !FV.inLesson()) return;
+    var c = FV.runCombo(), tag = document.getElementById("fv-combo");
+    bar.classList.toggle("fv-hot", c >= 3);
+    if (c < 3) { if (tag) tag.remove(); return; }
+    if (!tag) { tag = document.createElement("span"); tag.id = "fv-combo"; tag.setAttribute("role", "status"); bar.insertAdjacentElement("afterend", tag); }
+    tag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z" fill="#F97316"/></svg>' + c + " in a row!";
+    if (pop && !calm() && tag.animate) tag.animate([{ transform: "scale(.4)", opacity: 0 }, { transform: "scale(1.2)", opacity: 1, offset: .6 }, { transform: "scale(1)" }], { duration: 450, easing: "ease-out" });
+  }
+  function hype() {
+    var FV = window.FV, bar = document.querySelector('[role="progressbar"][aria-label="Lesson progress"]'); if (!FV || !bar || !FV.inLesson || !FV.inLesson()) return;
+    var now = +bar.getAttribute("aria-valuenow"), max = +bar.getAttribute("aria-valuemax");
+    if (!max || max < 4 || now !== Math.floor(max / 2) + 1 || !FV.hypeOnce()) return;
+    var a = FV.AUTH ? FV.AUTH.get() : {}, h = document.createElement("div"); h.id = "fv-hype";
+    h.innerHTML = FIN + '<div class="fv-bubble" role="status">Halfway there' + (a.name ? ", " + a.name : "") + "! You're on a roll.</div>";
+    document.body.appendChild(h);
+    var out = function () { if (calm() || !h.animate) { h.remove(); return; } h.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(140px)", opacity: 0 }], { duration: 350, easing: "ease-in", fill: "forwards" }).onfinish = function () { h.remove(); }; };
+    if (!calm() && h.animate) { h.querySelector("svg").animate([{ transform: "translateY(140px) rotate(-20deg)" }, { transform: "translateY(-10px) rotate(6deg)", offset: .65 }, { transform: "none" }], { duration: 600, easing: "ease-out" });
+      h.querySelector(".fv-bubble").animate([{ transform: "scale(.3)", opacity: 0 }, { transform: "scale(1.06)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }], { duration: 450, delay: 300, easing: "ease-out", fill: "backwards" }); }
+    setTimeout(out, 2600);
+  }
+  function lessonMotion() {
+    var FV = window.FV; if (!FV) return;
+    if (FV.answer && !FV.answer.__fv) { var orig = FV.answer; FV.answer = function () { var r = orig.apply(this, arguments); setTimeout(function () { combo(true); }, 50); return r; }; FV.answer.__fv = true; }
+    setTimeout(function () { combo(false); hype(); }, 500);
+  }
+  function motionStart() { arrive(); lessonMotion(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(motionStart, 300); }); else setTimeout(motionStart, 300);
 })();

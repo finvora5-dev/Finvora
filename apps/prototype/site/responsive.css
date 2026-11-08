@@ -73,3 +73,21 @@ html.fv-reduce *, html.fv-reduce *::before, html.fv-reduce *::after { animation:
 
 /* Text fields always show the focus ring for keyboard users, even where a board turns outlines off (WCAG 2.4.7). */
 input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #5B21B6 !important; outline-offset: 2px; }
+
+/* XP and streak motion (approved mock-up, 9 Nov 2026). */
+.fv-burst { position: fixed; left: 50%; top: 52%; z-index: 70; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; background: #5B21B6; color: #FFFFFF; font: 800 20px 'Plus Jakarta Sans', sans-serif; box-shadow: 0 10px 24px rgba(91, 33, 182, .35); pointer-events: none; }
+.fv-burst svg { width: 20px; height: 20px; }
+.fv-spark { position: fixed; left: 50%; top: 52%; z-index: 69; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; }
+@keyframes fvBump { 0% { transform: scale(1) } 35% { transform: scale(1.22) } 70% { transform: scale(.95) } 100% { transform: scale(1) } }
+@keyframes fvGlow { 0% { box-shadow: 0 0 0 0 rgba(91,33,182,.45) } 100% { box-shadow: 0 0 0 14px rgba(91,33,182,0) } }
+@keyframes fvGlowF { 0% { box-shadow: 0 0 0 0 rgba(249,115,22,.5) } 100% { box-shadow: 0 0 0 16px rgba(249,115,22,0) } }
+.fv-bump { animation: fvBump .5s cubic-bezier(.3,1.6,.5,1), fvGlow .7s ease-out; }
+.fv-fire { animation: fvBump .55s cubic-bezier(.3,1.6,.5,1), fvGlowF .8s ease-out; }
+[role="progressbar"].fv-hot > div { background: linear-gradient(90deg, #7C3AED, #F97316) !important; box-shadow: 0 0 12px rgba(249,115,22,.6); }
+#fv-combo { flex: none; display: inline-flex; align-items: center; gap: 3px; font: 800 12px 'Plus Jakarta Sans', sans-serif; color: #C2410C; background: #FFEDD5; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+#fv-combo svg { width: 14px; height: 14px; }
+#fv-hype { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); z-index: 65; display: flex; align-items: flex-end; gap: 6px; pointer-events: none; }
+#fv-hype > svg { width: 84px; height: 84px; flex: none; }
+.fv-bubble { background: #FFFFFF; border: 2px solid #E7E2F0; border-radius: 16px 16px 16px 4px; padding: 10px 12px; font: 800 15px 'Plus Jakarta Sans', sans-serif; color: #0E0B14; max-width: 200px; box-shadow: 0 6px 16px rgba(14,11,20,.12); margin-bottom: 40px; }
+.fv-reduce .fv-bump, .fv-reduce .fv-fire { animation: none; }
+@media (prefers-reduced-motion: reduce) { .fv-bump, .fv-fire { animation: none; } }

@@ -244,7 +244,11 @@
     isSaved: function (slug) { return libLoad().saved.indexOf(slug) >= 0; },
     toggleSave: function (slug) { var l = libLoad(), i = l.saved.indexOf(slug); if (i >= 0) l.saved.splice(i, 1); else l.saved.unshift(slug); libSave(l); return i < 0; },
     saved: function () { return libLoad().saved.map(LIB.article).filter(Boolean); },
-    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old) { var a0 = LIB.article(slug), m0 = load(); logEvent(m0, 'article', a0 ? a0.title : slug, 'UPArticle.dc.html?a=' + slug, 0); save(m0); } if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now() }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); } },
+    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old) { var a0 = LIB.article(slug), m0 = load(); logEvent(m0, 'article', a0 ? a0.title : slug, 'UPArticle.dc.html?a=' + slug, 0); save(m0); } if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now(), xp: old && old.xp }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); }
+      var r = l.read[slug];
+      if (pct >= 90 && !r.xp) { r.xp = 3; libSave(l); var m1 = load(), a1 = LIB.article(slug), fresh = m1.days.indexOf(lagosDay()) < 0; addXp(m1, 3); markDay(m1); logEvent(m1, 'article', (a1 ? a1.title : slug) + ' (read)', 'UPArticle.dc.html?a=' + slug, 3); save(m1);
+        if (window.fvXpBurst) window.fvXpBurst(3, 'Article read: +3 XP' + (fresh ? '. Your streak is safe today.' : '')); return 3; }
+      return 0; },
     reading: function () { var r = libLoad().read || {}; return Object.keys(r).filter(function (k) { return r[k].pct < 90 && LIB.article(k); }).sort(function (a, b) { return r[b].at - r[a].at; }).map(function (k) { return { a: LIB.article(k), pct: r[k].pct }; }); },
     addRecent: function (q) { q = String(q).trim(); if (!q) return; var l = libLoad(); l.recent = [q].concat((l.recent || []).filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); })).slice(0, 5); libSave(l); },
     recent: function () { return libLoad().recent || []; },
@@ -622,7 +626,7 @@
     if (i < 0) i = 0;
     var nx = f[i + 1], total = f.length;
     return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
-      fText: "Step " + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : "UPLessonComplete.dc.html" };
+      fText: "Step " + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : "UPCelebrate.dc.html" };
   }
   var FV = {
     LESSONS: LESSONS, BOSS: BOSS,
@@ -632,10 +636,16 @@
     current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
     // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
     lesson: lessonNow, flowVals: flowVals, inLesson: inLesson,
+    lastRun: function () { try { return JSON.parse(sessionStorage.getItem('fv.lastRun') || 'null'); } catch (e) { return null; } },
+    levelInfo: function (n) { var L = LEVELS.filter(function (x) { return x.n === n; })[0] || LEVELS[0], nx = LEVELS.filter(function (x) { return x.n === n + 1; })[0] || null; return { n: L.n, name: L.name, at: L.at, next: nx }; },
+    /** The current run's first-try answers in order, for the "in a row" label. */
+    runCombo: function () { var s = load(), a = s.run && s.run.answers ? s.run.answers : {}, k = Object.keys(a), c = 0; for (var i = k.length - 1; i >= 0 && a[k[i]]; i--) c++; return c; },
+    /** Fin's halfway cheer shows once per run. */
+    hypeOnce: function () { var s = load(); if (!s.run || s.run.hyped) return false; s.run.hyped = true; save(s); return true; },
     startRun: function () {
       // ?l=<lesson id> replays a finished lesson; otherwise the next lesson starts.
       var s = load(), m = /[?&]l=(\w+)/.exec(location.search), R = m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0];
-      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R }; save(s); },
+      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R, t0: Date.now() }; save(s); },
     answer: function (q, correct, given) {
       var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
       if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
@@ -646,7 +656,7 @@
       var lesson = lessonNow(), given = s.run.given || {};
       var a = s.run.answers, keys = Object.keys(a), right = keys.filter(function (k) { return a[k]; }).length;
       var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
-      var wrong = keys.length - right, replay = !!s.run.replay, xp;
+      var wrong = keys.length - right, replay = !!s.run.replay, xp, newDay = s.days.indexOf(lagosDay()) < 0, lvBefore = lvOf(s.xp).n, t0 = s.run.t0 || 0;
       if (replay) {
         // Engine rule lessonPractice: replaying earns 2 XP, once per lesson per day. The best score is kept.
         s.practice = s.practice || {}; var pk = lesson.id + "@" + lagosDay(); xp = s.practice[pk] ? 0 : 2; s.practice[pk] = 1;
@@ -655,7 +665,9 @@
       addXp(s, xp); var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
       logEvent(s, replay ? 'practice' : 'lesson', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
       s.run = null; save(s);
-      return { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days), replay: replay, best: s.best[lesson.index] };
+      var res = { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days), replay: replay, best: s.best[lesson.index], newDay: newDay, totalXp: s.xp, lvBefore: lvBefore, lvAfter: lvOf(s.xp).n, secs: t0 ? Math.round((Date.now() - t0) / 1000) : 0 };
+      try { sessionStorage.setItem('fv.lastRun', JSON.stringify(res)); } catch (e) {}
+      return res;
     },
     passBoss: function (score) {
       var s = load(); var passed = score >= 4;

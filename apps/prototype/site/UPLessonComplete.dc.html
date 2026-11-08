@@ -170,7 +170,7 @@ class Component extends DCLogic {
     this.timers = [];
   }
   componentDidMount() {
-    const r = (window.FV && window.FV.finishRun()) || { xp: 14, streak: (window.FV ? window.FV.streak() : 6), wrong: 0, pct: 100 };
+    const r = (window.FV && (window.FV.finishRun() || window.FV.lastRun())) || { xp: 14, streak: (window.FV ? window.FV.streak() : 6), wrong: 0, pct: 100 };
     this.result = r;
     if (r.replay) { const h = document.getElementById('done-h'); if (h) h.textContent = 'Replay complete!'; if (window.fvToast) window.fvToast(r.xp ? 'Replay: +2 XP. Your best score is kept.' : 'Replay done. Your best score is kept. Replay XP is once a day per lesson.'); }
     const target = r.xp, endStreak = Math.max(1, r.streak);
