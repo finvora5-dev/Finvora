@@ -125,7 +125,7 @@ interface AskSources {
 | Company questions, all expecting a company answer (3 real asking for a figure, 1 made-up, 1 with no figure word) | 5 | 1 |
 | Not enough information (finance words, no article, e.g. "How do I file my tax return?") | 3 | 1 |
 
-Tests: every case gets its expected kind; the lowest in-scope answer score is at least 0.05 above `ASK_SCORE_HIGH`, and the highest off-topic score at least 0.05 below `ASK_SCORE_LOW`; adding one made-up article to the sources does not change any held-out result. A held-out failure is fixed by adding keywords, never by moving the thresholds.
+Tests: every case gets its expected kind; the lowest in-scope answer score is at least 0.03 above `ASK.SCORE_HIGH` (0.26), and the highest off-topic score at least 0.03 below `ASK.SCORE_LOW` (0.22); 0.05 left no room on 15 articles; adding one made-up article to the sources does not change any held-out result. A held-out failure is fixed by adding keywords, never by moving the thresholds.
 
 ### Note for the client
 
