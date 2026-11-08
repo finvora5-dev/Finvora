@@ -102,6 +102,40 @@ flowchart LR
 *   On the lesson path (lesson steps, the after-lesson screens and the lesson summary), the app reads the phone's preferred text size. If it is larger than normal, the screen is laid out at a narrower design width before scaling, so the text renders larger and the layout reflows downwards instead of shrinking. At normal size nothing changes.
 *   **Risk to verify on a real phone:** browsers report the phone's text setting differently (some change the page's base font size, others zoom text separately). The build step includes checking on an Android phone with large text, and the fallback is the browser's pinch zoom, which keeps working.
 
+## Alternatives Considered
+
+### Prices
+*   **Keep the price figures in `fv.js`.** Rejected: they are not covered by the domain tests and already drifted to ₦1,500 while the config said ₦2,500.
+*   **Ignore prices an admin saved.** Rejected: the admin plans page exists to change prices. Only saved values equal to old defaults are dropped.
+*   **Show the new price on old receipts.** Rejected by author: a receipt should show what was paid.
+
+### Market hours
+*   **Keep the practice market always open.** Rejected by author (D3): learners should learn that markets close.
+*   **Real hours with no closed-market help.** Rejected: an evening or weekend tester gets stuck, which fails D11.
+*   **Close on Nigerian public holidays.** Rejected by author for Phase 1: needs a calendar that has to be kept up to date, for little learning value.
+*   **Keep prices moving every calendar day.** Rejected: a portfolio changing over a weekend while the market is closed is confusing.
+
+### Labels
+*   **A label on every made-up number.** Rejected: repetitive, and it keeps reminding the learner the app is not real. One clear line at the Practice Market entrance plus a small icon covers it.
+*   **No labels.** Rejected: scripted answers and made-up figures could mislead a real learner.
+*   **"Demo", "sample" or "prototype" wording.** Rejected: the project rules forbid it outside the simulator; "Practice Market", "Example answer" and "Made-up figures" say the same thing in learner terms.
+
+### Reviewer tools
+*   **Hide them behind a reviewer code, with a demo copy of the tester's data.** Rejected by author (D21): the owner tests the app personally and accepts that testers can find the tools.
+
+### Stored data
+*   **No version number; patch fields as needed.** Rejected: Parts 2 to 5 add stored data, and without a version there is no safe way to upgrade a tester's browser.
+*   **Move everything to new key names.** Rejected: a mistake would lose testers' progress. Adding fields in place keeps it.
+
+### Updates
+*   **Ask the tester to tap "Reload to update".** Rejected: an extra step a tester may ignore, leaving them on old prices. The new version takes over by itself and a one-time toast says so.
+*   **Turn off the offline cache.** Rejected: offline use is a built feature (pages a tester opened, saved articles).
+
+### Phone text size
+*   **Make every phone screen fluid at once.** Rejected for this part: about 200 screens, too much at once. The lesson path comes first (D15), the rest later.
+*   **An in-app text-size control instead.** Rejected: it does not follow the phone's own setting, which is what D15 asks for.
+*   **Leave text size out entirely.** Rejected by author: D15 brought it back into Phase 1.
+
 ## Open Questions
 
 *   None for this part. New questions found while planning the implementation will be added here.
