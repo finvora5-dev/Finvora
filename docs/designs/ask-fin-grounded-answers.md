@@ -15,7 +15,7 @@ This design keeps Ask Fin's existing answer shape (kind, answer, citations, foll
 ## The Problem
 
 *   **Off-topic questions get the wrong reply.** "What is the weather in Lagos?" gets "I don't have a good answer for that yet", as if Fin simply lacked an article, instead of a polite "I only help with money and investing".
-*   **Company questions can mislead.** "What was Zenith Bank's profit last year?" gets a general explanation of profit. No figure is invented, but Fin never says it has no figures for that company.
+*   **Company questions get a thin answer.** "What was Zenith Bank's profit last year?" gets a general explanation of profit and nothing about Zenith Bank itself.
 *   **Answers do not come from the Library.** Fin picks one of 19 hand-written answers by keyword. It never reads the 15 Library articles, so a question the articles answer well but the keywords miss gets no answer.
 *   **Every question uses up the free limit.** A free learner who asks something off-topic, or gets "I don't know", loses one of their 5 daily questions for nothing.
 *   **Tests use made-up data.** The five Ask Fin tests (`domain.test.ts`) use one invented script. They never run the real answers, the Library, or off-topic and company questions.
@@ -23,10 +23,9 @@ This design keeps Ask Fin's existing answer shape (kind, answer, citations, foll
 ## Goals
 
 *   **Follow the RAG steps, in order:** check scope, refuse advice, recognise named companies, search the Library, answer from what was found or say there is not enough information.
-*   **Polite finance-only decline** for questions outside money, saving and investing, pointing back to learning.
-*   **"No figures" reply** for questions about a named company's numbers: Fin says it has no figures for that company, explains where real figures come from (annual reports, the exchange), and offers the related Library article.
+*   **Every finance question gets an answer**, including questions about a named company. **Polite finance-only decline** for questions outside money, saving and investing, pointing back to learning.
 *   **Answers from the Library:** search the text of the Library articles (including ones an admin published in this browser) and answer from the best match above a minimum score, citing that article. The hand-written answers stay as a first layer for common questions.
-*   **Only real answers use up a free question.** Declines, "no figures" replies, advice refusals, "Did you mean" and "not enough information" are free (D18, widened 8 Nov).
+*   **Only real answers use up a free question.** Declines, advice refusals, "Did you mean" and "not enough information" are free (D18, widened 8 Nov).
 *   **A test set of about 30 questions** covering answers, declines, advice refusals, company questions and unknowns, run with the domain tests.
 *   **Label stays:** every reply keeps "Example answer from the Finvora Library" (Part 1).
 *   **A short note for the client** saying this is a stand-in for the Phase 2 AI, so nobody mistakes it for the real thing.
@@ -42,7 +41,7 @@ This design keeps Ask Fin's existing answer shape (kind, answer, citations, foll
 ## Decisions (approved 8 Nov 2026)
 
 *   **Finance scope:** a question is in scope if it reaches the low score band against the Library, or contains a word from the finance list (`ASK_FINANCE_WORDS` in `config.ts`). Anything else gets the decline.
-*   **"No figures" companies:** the 8 real NGX companies on the Markets screens and the 6 made-up Practice Market companies, by full name, ticker or a listed short name. For made-up ones, Fin says their figures are made up for practice.
+*   **Company questions get a full answer** (owner, 8 Nov, replaces the "no figures" reply): what the company does and how it makes money (from the company data), plus the Library explanation of what was asked (profit, dividend, P/E). No number is given and Fin does not say figures are missing. Real figures come from the Mansa API in Phase 2. Applies to the 8 real NGX companies and the 6 Practice Market companies, by full name, ticker or a listed short name.
 *   **Minimum match score:** two thresholds, tuned on the test set and checked on held-out questions (see Test set).
 *   **What uses up a free question:** only a real answer. Every other reply is free. (Owner, 8 Nov; widens D18.)
 *   **When the 5 free questions are used up:** Ask Fin is blocked. The question box is replaced by the existing limit message and the Plus offer, and no further questions of any kind can be sent that day. (Owner, 8 Nov.)
@@ -86,7 +85,7 @@ interface AskSources {
 
 1.  **Too short:** after normalising, fewer than 2 letters. Reply "not enough information".
 2.  **Advice:** the existing buy-or-sell check. Reply unchanged.
-3.  **Company figures:** the question names a company **and** contains a figure word (`ASK_FIGURE_WORDS`: profit, revenue, earnings, price, share price, dividend, how much, results, last year, this year and similar). Names match as whole words. Tickers of 3 letters or fewer (NB) match only when typed in capitals. With two companies named, the reply names both. Real: "I don't have figures for Zenith Bank. Real figures come from the company's annual report and the Nigerian Exchange (NGX) website." Made-up: "Okeke Bank is a made-up company for practice. The prices on its page are made up too." A company question with no figure word carries on.
+3.  **Company:** the question names a company (names match as whole words; tickers of 3 letters or fewer, such as NB, match only in capitals). Fin answers: the company's `about` and `howItMakesMoney` sentences, then the definition of the best-matching Library article for the rest of the question (for "profit", Revenue and profit), cited. With two companies named, both are described. This is a normal answer and uses a free question. No figures are given.
 4.  **Score:** hand-written answers and articles are scored together by the one scorer below. Hand-written answers get a 10% boost, so a common question keeps its tuned wording when both match.
     *   Score at or above `ASK_SCORE_HIGH`: **answer** from the best match.
     *   Between `ASK_SCORE_LOW` and `ASK_SCORE_HIGH`: **"Did you mean"**: "I'm not sure I understood. Did you mean one of these?" with the two best articles as buttons. Tapping one asks "What is {title}?".
@@ -110,7 +109,7 @@ interface AskSources {
 
 ### Admin
 
-*   Review list tags (`fv.js` line 355): `refusal` "Asks for a pick", `decline` "Off topic", `no-figures` "No figures", `insufficient` "No answer", `didyoumean` "Unsure". The review screen gets a short checklist for each.
+*   Review list tags (`fv.js` line 355): `refusal` "Asks for a pick", `decline` "Off topic", `insufficient` "No answer", `didyoumean` "Unsure". The review screen gets a short checklist for each.
 *   The admin article form gets an optional "Ask words" box (comma separated). Its words are stored as the published article's `keywords`.
 
 ### Test set
@@ -123,7 +122,7 @@ interface AskSources {
 | Answers only the Library finds | 6 | 3 |
 | Off topic, including "Can you share a recipe?" | 6 | 2 |
 | Advice | 4 | 1 |
-| Company: 3 real asking for a figure, 1 made-up, 1 real with no figure word (expects an answer) | 5 | 1 |
+| Company questions, all expecting a company answer (3 real asking for a figure, 1 made-up, 1 with no figure word) | 5 | 1 |
 | Not enough information (finance words, no article, e.g. "How do I file my tax return?") | 3 | 1 |
 
 Tests: every case gets its expected kind; the lowest in-scope answer score is at least 0.05 above `ASK_SCORE_HIGH`, and the highest off-topic score at least 0.05 below `ASK_SCORE_LOW`; adding one made-up article to the sources does not change any held-out result. A held-out failure is fixed by adding keywords, never by moving the thresholds.
@@ -141,6 +140,7 @@ Tests: every case gets its expected kind; the lowest in-scope answer score is at
 ## Risks
 
 *   **Word-matching misses.** "Why is everything so expensive now?" shares no word with the Inflation article. Mitigation: everyday words in article `keywords`, and "Did you mean" for near misses. How many phrasings this catches is known only once the test set runs.
+*   **No figures in Phase 1.** Learners asking for a number get an explanation, not the number, until the Mansa API is connected.
 *   **Short names that are ordinary words.** Short names are listed by hand and kept specific ("Zenith", "GTBank", not "Access" alone); 3-letter tickers match only in capitals.
 *   **Answers read as stitched together**, because they join Library sentences. Accepted for Phase 1; the client note says so.
 
