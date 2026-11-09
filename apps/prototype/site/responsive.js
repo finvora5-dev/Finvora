@@ -5,7 +5,7 @@
 (function () {
   if (/UP(Lesson(Info|Choice|Calc|Order|Scenario|Match)|LearnMyth|LearnCompare)\.dc|UDyP(Lesson|Learn)/.test(location.pathname)) { document.documentElement.classList.add("fv-mwait"); setTimeout(function () { if (!document.documentElement.classList.contains("fv-moment-open")) document.documentElement.classList.remove("fv-mwait"); }, 2500); }
   // Sound effects (approved 9 Nov 2026): recorded sounds in sfx/, played from the animation that owns them. Off when Settings > Sound effects is off.
-  var SFX = {}, SFX_PAGE = { lesson: ["correct", "wrong", "roll", "unstop", "back", "half", "almost", "xp"], journey: ["pop", "xp", "streak"], celebrate: ["complete", "xp", "streak"] };
+  var SFX = {}, SFX_PAGE = { lesson: ["correct", "wrong", "roll", "unstop", "back", "half", "almost", "xp", "pairok", "pairno"], journey: ["pop", "xp", "streak"], celebrate: ["complete", "xp", "streak"] };
   function sfxOn() { try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null"); return !p || p.sound !== false; } catch (e) { return true; } }
   function sfxGet(n) { if (!SFX[n]) { try { SFX[n] = new Audio("sfx/" + n + ".mp3"); SFX[n].preload = "auto"; } catch (e) { return null; } } return SFX[n]; }
   window.fvSound = function (n, delay) {
