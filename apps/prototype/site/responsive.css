@@ -179,7 +179,7 @@ html.fv-moment-open { overflow: hidden; }
 .fv-admin-phone body { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 /* Wide tables keep all their columns and scroll sideways inside their card. */
 .fv-admin-phone .root *:has(> table) { overflow-x: auto !important; max-width: 100% !important; }
-.fv-admin-phone .root table { min-width: 640px; }
+.fv-admin-phone .root table { min-width: 600px !important; }
 .fv-admin-phone .root, .fv-admin-phone .root * { box-sizing: border-box !important; }
 .fv-admin-phone .root > div:not(.fv-apbar) { display: block !important; width: 100% !important; min-width: 0 !important; }
 .fv-admin-phone .root header, .fv-admin-phone .root main { width: 100% !important; max-width: 100% !important; }
