@@ -43,3 +43,5 @@ After `wire_settings.py`: `wire_askfin3.py` (design Part 3: Ask Fin "Did you mea
 After `wire_askfin3.py`: `wire_plus.py` (design Part 4: the eight Plus tool boards drawn by `site/plus.js`, plus entry points on the Practice Market, Plans and Learn). Then `wire_a11y.py` if re-running, and `build_sw.py` last.
 
 Then `wire_admin_phone.py` (design Part 5: `UAPhoneTasks` and `UAPhoneTask`, drawn by `site/admin-phone.js`; `responsive.js` sends admin pages there when the shorter screen side is under 700 px). Then `build_sw.py` last.
+
+`wire_profile.py`: one way into Me (removes the Home top-right profile icon and the desktop sidebar "Me" link; the sidebar learner card opens Me). Then `build_sw.py` last.

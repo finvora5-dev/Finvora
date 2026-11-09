@@ -267,3 +267,8 @@ html.fv-moment-open { overflow: hidden; }
 .fv-admin-rail .root main [style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; }
 .fv-admin-rail .root main [style*="grid-template-columns: 360px 1fr"], .fv-admin-rail .root main [style*="grid-template-columns: 1fr 420px"], .fv-admin-rail .root main [style*="grid-template-columns: 1fr 390px"] { grid-template-columns: 1fr !important; }
 .fv-admin-rail .root main *:has(> table) { overflow-x: auto; }
+/* Desktop: the learner card is the way into Me (one entry point, owner 9 Nov 2026). */
+.dme { border-radius: 14px; padding: 6px 8px !important; }
+.dme:hover { background: #F8F6FC; }
+.dme[aria-current="page"] { background: #F1EBFB; }
+.dme[aria-current="page"] strong { color: #4C1D95; }
