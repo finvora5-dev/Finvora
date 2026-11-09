@@ -65,6 +65,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   Text size follows the phone setting on the lesson path only so far; other screens rely on pinch zoom. Checked by the owner on a real Android phone and an iPhone with the largest text size, 9 Nov 2026: looks fine.
 *   Ask Fin matches words, not meaning, so unusual phrasing may get "Did you mean". No company figures until the Mansa API (Phase 2).
 *   Market hours ignore public holidays.
+*   Reviewer tools are hidden from learners and the client. Open any page with `?reviewer=1` to show them in that browser (`?reviewer=0` hides them). Admin sign-in: any @finvora.app email and any 6-digit code.
 *   Lesson and article content was written for the prototype and needs review by a finance educator.
 
 ## Phase 2 (not in this build)

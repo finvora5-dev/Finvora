@@ -3,6 +3,15 @@
 // Tablets and desktop (>= 600px): the board reflows to fill the whole window, with no width cap:
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
+
+  // Reviewer tools are hidden from the client (owner, 9 Nov 2026). Open any page with ?reviewer=1 to show them in this browser; ?reviewer=0 hides them again.
+  (function () {
+    var on = false;
+    try { var q = new URLSearchParams(location.search).get("reviewer"); if (q === "1") localStorage.setItem("fv.reviewer", "1"); if (q === "0") localStorage.removeItem("fv.reviewer"); on = localStorage.getItem("fv.reviewer") === "1"; } catch (e) {}
+    if (on) return;
+    document.documentElement.classList.add("fv-noreview");
+    if (/\/URReviewer\.dc/.test(location.pathname)) location.replace("UPSettings.dc.html");
+  })();
   // Desktop (>= 1024px) uses the desktop boards; smaller screens use the phone boards.
   var DESK = 1024;
   var PAIRS = { UOHome: "UDHome", UPJourney: "UDJourney", UPLibrary: "UDLibrary", UPMarkets: "UDMarkets", USimHome: "UDSimulator", UPMe: "UDMe" };
