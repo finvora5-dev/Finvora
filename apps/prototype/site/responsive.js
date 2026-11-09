@@ -3,6 +3,22 @@
 // Tablets and desktop (>= 600px): the board reflows to fill the whole window, with no width cap:
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
+  // Sound effects (approved 9 Nov 2026): recorded sounds in sfx/, played from the animation that owns them. Off when Settings > Sound effects is off.
+  var SFX = {}, SFX_PAGE = { lesson: ["correct", "wrong", "roll", "unstop", "back", "half", "almost", "xp"], journey: ["pop", "xp", "streak"], celebrate: ["complete", "xp", "streak"] };
+  function sfxOn() { try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null"); return !p || p.sound !== false; } catch (e) { return true; } }
+  function sfxGet(n) { if (!SFX[n]) { try { SFX[n] = new Audio("sfx/" + n + ".mp3"); SFX[n].preload = "auto"; } catch (e) { return null; } } return SFX[n]; }
+  window.fvSound = function (n, delay) {
+    if (!sfxOn()) return; var a = sfxGet(n); if (!a) return;
+    var go = function () { try { a.currentTime = 0; var r = a.play(); if (r && r.catch) r.catch(function () {}); } catch (e) {} };
+    if (delay) setTimeout(go, delay * 1000); else go();
+  };
+  (function () {
+    var pth = location.pathname, list = /Lesson(Info|Choice|Calc|Order|Scenario|Match)|LearnMyth|LearnCompare/.test(pth) ? SFX_PAGE.lesson : /Journey\.dc/.test(pth) ? SFX_PAGE.journey : /Celebrate\.dc/.test(pth) ? SFX_PAGE.celebrate : [];
+    if (list.length && sfxOn()) list.forEach(sfxGet);
+    // Right or wrong: the moment the answer is checked (FV.answer runs in the Check handler).
+    var hook = function () { var F = window.FV; if (!F || !F.answer || F.answer.fvSound) return; var o = F.answer; F.answer = function (q, correct) { window.fvSound(correct ? "correct" : "wrong"); return o.apply(this, arguments); }; F.answer.fvSound = 1; };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", hook); else hook();
+  })();
 
   // Reviewer tools are hidden from the client (owner, 9 Nov 2026). Open any page with ?reviewer=1 to show them in this browser; ?reviewer=0 hides them again.
   (function () {
@@ -208,7 +224,7 @@
     document.querySelectorAll('[data-fv="' + kind + '"]').forEach(function (n) {
       var chip = n.closest("a,button,span,div") || n; n.textContent = String(from);
       if (calm()) { n.textContent = String(to); return; }
-      n.setAttribute("data-fv-anim", "1"); chip.classList.remove("fv-bump", "fv-fire"); void chip.offsetWidth; chip.classList.add(kind === "xp" ? "fv-bump" : "fv-fire");
+      if (kind === "streak") window.fvSound("streak", 0.1); n.setAttribute("data-fv-anim", "1"); chip.classList.remove("fv-bump", "fv-fire"); void chip.offsetWidth; chip.classList.add(kind === "xp" ? "fv-bump" : "fv-fire");
       var t0 = performance.now();
       (function tick(t) { var q = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - q, 3); n.textContent = String(Math.round(from + (to - from) * e)); if (q < 1) requestAnimationFrame(tick); else n.removeAttribute("data-fv-anim"); })(t0);
     });
@@ -226,7 +242,7 @@
   window.fvXpBurst = function (n, msg) {
     var FV = window.FV, after = FV ? FV.get().xp : 0, before = after - n;
     try { sessionStorage.setItem("fv.seen", JSON.stringify({ xp: after, streak: FV ? FV.streak() : 0 })); } catch (e) {}
-    var b = document.createElement("div"); b.className = "fv-burst"; b.setAttribute("aria-hidden", "true"); b.innerHTML = BOLT + "+" + n + " XP"; document.body.appendChild(b);
+    window.fvSound("xp", 0.12); var b = document.createElement("div"); b.className = "fv-burst"; b.setAttribute("aria-hidden", "true"); b.innerHTML = BOLT + "+" + n + " XP"; document.body.appendChild(b);
     var done = function () { if (b.parentNode) b.remove(); bumpChip("xp", before, after); if (msg && window.fvToast) window.fvToast(msg); };
     if (calm() || !b.animate) { setTimeout(done, 700); return; }
     b.animate([{ transform: "translate(-50%,-50%) scale(.4)", opacity: 0 }, { transform: "translate(-50%,-50%) scale(1.15)", opacity: 1, offset: .55 }, { transform: "translate(-50%,-50%) scale(1)", opacity: 1 }], { duration: 450, easing: "cubic-bezier(.3,1.5,.5,1)", fill: "forwards" });
@@ -284,7 +300,8 @@
       if (calm() || !w.animate) { w.remove(); return; } w.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(-60px)" }], { duration: 260, easing: "ease-in" }).onfinish = function () { w.remove(); }; };
     // No button: the moment plays, then slides away by itself. A tap skips it.
     w.addEventListener("click", done); w._hold = setTimeout(done, calm() ? 1600 : MHOLD[kind]);
-    if (calm() || !w.animate) { w.classList.add("on"); return; }
+    if (calm() || !w.animate) { window.fvSound(kind); w.classList.add("on"); return; }
+    window.fvSound(kind);
     w.animate([{ opacity: 0, transform: "translateX(60px)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
     ({ roll: mRoll, unstop: mUnstop, back: mBack, half: mHalf, almost: mAlmost })[kind](w);
   }
@@ -396,6 +413,7 @@
     // 1. Finished lesson: press, pop, green ring, confetti, +15 XP.
     prev.animate([{ transform: "scale(1)" }, { transform: "scale(.88)", offset: .25 }, { transform: "scale(1.1)", offset: .6 }, { transform: "scale(1)" }], { duration: 520, easing: "ease-out" });
     setTimeout(buzz, 150);
+    window.fvSound("pop", 0.14);
     var ring = put("left:" + A.x + "px;top:" + A.y + "px;width:" + A.w + "px;height:" + A.w + "px;margin:-" + A.w / 2 + "px 0 0 -" + A.w / 2 + "px;border-radius:50%;border:4px solid #16A34A;box-sizing:border-box");
     ring.animate([{ transform: "scale(.9)", opacity: .9 }, { transform: "scale(1.9)", opacity: 0 }], { duration: 650, delay: 140, easing: "cubic-bezier(.2,.7,.3,1)", fill: "both" });
     var COL = ["#7C3AED", "#176EEB", "#16A34A", "#FF8FA3", "#0FA394", "#5B21B6"];

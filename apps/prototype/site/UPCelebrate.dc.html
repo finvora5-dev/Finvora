@@ -161,6 +161,7 @@ class Component extends DCLogic {
     const BOLT = '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#C4B5FD" stroke="#5B21B6" stroke-width="1.2" stroke-linejoin="round"/></svg>';
     if (calm()) { aL.setAttribute('d', UP[0]); aR.setAttribute('d', UP[1]); fin.classList.add('on'); return; }
     aL.setAttribute('d', DOWN[0]); aR.setAttribute('d', DOWN[1]);
+    if (window.fvSound) window.fvSound('complete');
     fin.animate([{ opacity: 0, transform: 'translateY(40px) scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
     body.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(1.12,.84)' }], { duration: 650, delay: 250, easing: 'ease-in', fill: 'forwards' });
     aura.animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(.9)' }], { duration: 700, delay: 200, easing: 'ease-in', fill: 'forwards' });
