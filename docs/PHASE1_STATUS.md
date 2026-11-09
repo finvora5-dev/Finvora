@@ -62,7 +62,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   Everything is per browser. Clearing the browser or switching device loses progress.
 *   Reviewer tools are open to everyone (D21).
 *   Admin checks run in the browser and are not real security.
-*   Text size follows the phone setting on the lesson path only so far; other screens rely on pinch zoom. Checked by the owner on a real Android phone with the largest text size, 9 Nov 2026: looks fine.
+*   Text size follows the phone setting on the lesson path only so far; other screens rely on pinch zoom. Checked by the owner on a real Android phone and an iPhone with the largest text size, 9 Nov 2026: looks fine.
 *   Ask Fin matches words, not meaning, so unusual phrasing may get "Did you mean". No company figures until the Mansa API (Phase 2).
 *   Market hours ignore public holidays.
 *   Lesson and article content was written for the prototype and needs review by a finance educator.
