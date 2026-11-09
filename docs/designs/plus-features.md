@@ -1,7 +1,7 @@
 # Plus learning tools (Part 4 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Draft, revised after EGM review
+*   **Status:** Approved 9 Nov 2026 (open-question proposals accepted)
 *   **Date:** 2026-11-08
 
 ## Overview

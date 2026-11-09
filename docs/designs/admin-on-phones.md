@@ -1,7 +1,7 @@
 # Admin tasks on phones (Part 5 of 5)
 
 *   **Author:** Powellgraham5
-*   **Status:** Draft, revised after EGM review
+*   **Status:** Approved 9 Nov 2026 (open-question proposals accepted)
 *   **Date:** 2026-11-08
 
 ## Overview
@@ -28,7 +28,7 @@ Admin boards are 1440 px wide. Below 1024 px, `fit()` in `responsive.js` scales 
 | Feedback | Mark done | `ADMIN.markDone(id)` (exists) |
 | Features on or off | the existing switches, with the existing confirm screen (`UAConfirmOff`) before switching off | `ADMIN.set(k, on)` plus `ADMIN.log` (the board logs it) |
 
-*   **Undo:** after any action, a 5-second toast "Done. Undo" (the existing `fvToast` with an action). The call runs only when the toast closes, so the audit log never records an undone action.
+*   **Undo:** after any action, a 2.5-second toast "Done. Undo" (the existing `fvToast` with an action). The call runs only when the toast closes, so the audit log never records an undone action.
 *   **Wide screens on phones:** Users and payments, Audit log, Content table, Plans and Overview charts show the 3 or 4 summary numbers they already have, plus "Open on a larger screen to see the full table". Nothing is hidden that the task list needs.
 *   **Navigation:** the sidebar becomes a top bar with the Finvora mark, the screen name and a menu button that opens the same links as a sheet.
 *   **Same data, same audit log:** every phone action calls the same `FV.ADMIN` functions as desktop, so the audit log records it the same way.
@@ -56,4 +56,4 @@ Admin boards are 1440 px wide. Below 1024 px, `fit()` in `responsive.js` scales 
 ## Open Questions
 
 1.  **Breakpoint:** proposed: shorter screen side under 700 px.
-2.  **Undo:** proposed: 5-second Undo on every phone action; the action runs when the toast closes.
+2.  **Undo:** proposed: 2.5-second Undo on every phone action; the action runs when the toast closes.

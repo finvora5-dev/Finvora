@@ -114,7 +114,7 @@
     t.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="' + (ICON[opts.kind || "ok"] || ICON.ok) + '" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex:1"></span>';
     t.querySelector("span").textContent = msg;
     if (opts.action) { var b = document.createElement("button"); b.type = "button"; b.textContent = opts.action; b.style.cssText = "border:0;background:transparent;color:inherit;font:800 14px 'Plus Jakarta Sans',sans-serif;text-decoration:underline;cursor:pointer;min-height:44px"; b.onclick = function () { t.remove(); if (opts.onAction) opts.onAction(); }; t.appendChild(b); }
-    document.body.appendChild(t); setTimeout(function () { if (t.parentNode) t.remove(); }, opts.ms || 4000);
+    document.body.appendChild(t); setTimeout(function () { if (t.parentNode) t.remove(); }, opts.ms || 2500);
   };
   // Loading: a skeleton until the screen has drawn (the design's loading state, not a blank page).
   function skeleton() {
