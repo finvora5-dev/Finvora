@@ -276,3 +276,8 @@ html.fv-moment-open { overflow: hidden; }
 .dme[aria-current="page"] { background: #F1EBFB; }
 .dme[aria-current="page"] strong { color: #4C1D95; }
 .fv-admin-rail .root > aside > div > span:first-child { flex: none !important; }
+
+/* Learn path: moving-forward moment (plays once per finished lesson). */
+.fv-pm-tick { position: absolute; z-index: 30; width: 26px; height: 26px; border-radius: 50%; background: #16A34A; color: #FFFFFF; font: 800 15px 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; pointer-events: none; }
+.fv-pm-line { position: absolute; z-index: 25; pointer-events: none; overflow: visible; }
+.fv-pm-spark { position: absolute; z-index: 30; width: 8px; height: 8px; border-radius: 50%; background: #7C3AED; pointer-events: none; }

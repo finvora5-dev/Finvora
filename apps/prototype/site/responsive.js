@@ -332,4 +332,41 @@
     var box = w.querySelector(".fv-rbox"); if (!calm() && box.animate) box.animate([{ transform: "translateY(100%)" }, { transform: "none" }], { duration: 260, easing: "ease-out" });
     w.querySelector(".fv-rbtn").focus();
   }
+
+  // ---- Learn path: after finishing a lesson, the path shows you moving forward (owner, 9 Nov 2026; mock-up approved).
+  // Plays once per newly finished lesson: the finished node pops, the path to the next lesson fills, Start slides down.
+  function pathMoment() {
+    if (!/U[PD]Journey\.dc/.test(location.pathname) || !window.FV) return;
+    var done = FV.get().done || 0, seen = -1;
+    try { seen = +(localStorage.getItem("fv.pathSeen") || -1); localStorage.setItem("fv.pathSeen", String(done)); } catch (e) { return; }
+    if (seen < 0 || done <= seen || done < 1) return;
+    var nodes = [].slice.call(document.querySelectorAll('a[href*="LessonInfo"][aria-label]')).filter(function (a) { return /lesson \d+ of/.test(a.getAttribute("aria-label")); });
+    var prev = nodes.filter(function (a) { return /completed/.test(a.getAttribute("aria-label")); }).pop();
+    var next = nodes.filter(function (a) { return /current lesson/.test(a.getAttribute("aria-label")); })[0];
+    if (!prev) return;
+    var icon = function (a) { var el = a.querySelector("svg") || a; var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY, el: el }; };
+    var pr = prev.getBoundingClientRect(); window.scrollTo({ top: Math.max(0, pr.top + scrollY - innerHeight * 0.3), behavior: calm() ? "auto" : "smooth" });
+    if (calm() || !document.body.animate) return;
+    setTimeout(function () {
+      var A = icon(prev);
+      prev.animate([{ transform: "scale(1)" }, { transform: "scale(1.12)", offset: .4 }, { transform: "scale(1)" }], { duration: 450, easing: "ease-out" });
+      if (!next) return;
+      var B = icon(next), routes = [].slice.call(document.querySelectorAll("svg path[stroke-dasharray]")).filter(function (pth) { return pth.closest("svg").getBoundingClientRect().height > 400; });
+      routes.forEach(function (pth) {
+        var hr = pth.getBoundingClientRect(), top = hr.top + scrollY, hgt = hr.height || 1;
+        var c = pth.cloneNode(false); c.setAttribute("stroke", "#5B21B6"); c.setAttribute("class", "fv-pm-route"); pth.parentNode.appendChild(c);
+        var t0 = Math.max(0, (A.y - top) / hgt * 100), t1 = Math.max(0, 100 - (B.y - top) / hgt * 100);
+        c.style.clipPath = "inset(" + t0 + "% 0 100% 0)";
+        c.animate([{ clipPath: "inset(" + t0 + "% 0 " + (100 - t0) + "% 0)" }, { clipPath: "inset(" + t0 + "% 0 " + t1 + "% 0)" }], { duration: 700, delay: 350, easing: "ease-in-out", fill: "forwards" });
+        c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, delay: 2400, fill: "forwards" }).onfinish = function () { c.remove(); };
+      });
+      var start = [].slice.call(document.querySelectorAll("a, span, div, p")).filter(function (e) { return e.children.length === 0 && e.textContent.trim() === "Start" && e.getBoundingClientRect().width > 0; })[0];
+      var startBox = start ? (start.closest('[class*="bubble"]') || start.parentElement) : null;
+      if (startBox) { var dx = A.x - B.x, dy = A.y - B.y; startBox.animate([{ transform: "translate(" + dx + "px," + dy + "px)", opacity: .6 }, { transform: "translate(" + dx / 2 + "px," + dy / 2 + "px)", opacity: 1, offset: .5 }, { transform: "none" }], { duration: 700, delay: 750, easing: "cubic-bezier(.3,1.2,.5,1)", fill: "backwards" }); }
+      next.animate([{ transform: "scale(.85)" }, { transform: "scale(1.12)", offset: .6 }, { transform: "scale(1)" }], { duration: 500, delay: 1200, fill: "backwards" });
+      for (var k = 0; k < 8; k++) { (function (k) { var sp = document.createElement("span"); sp.className = "fv-pm-spark"; sp.style.left = B.x + "px"; sp.style.top = B.y + "px"; document.body.appendChild(sp); var a = k / 8 * Math.PI * 2;
+        sp.animate([{ transform: "translate(-50%,-50%) scale(.5)", opacity: 1 }, { transform: "translate(calc(-50% + " + Math.cos(a) * 80 + "px), calc(-50% + " + Math.sin(a) * 80 + "px)) scale(1)", opacity: 0 }], { duration: 700, delay: 1300, easing: "ease-out", fill: "both" }).onfinish = function () { sp.remove(); }; })(k); }
+    }, 700);
+  }
+  if (document.readyState === "complete") setTimeout(pathMoment, 600); else window.addEventListener("load", function () { setTimeout(pathMoment, 600); });
 })();
