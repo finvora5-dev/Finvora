@@ -170,34 +170,34 @@ html.fv-moment-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { #fv-moment *, #fv-moment *::before { animation: none !important; } }
 
 /* Admin on phones (design Part 5): real size, one column, sidebar hidden, wide tables replaced by a note. */
-.fv-admin-phone .dside, .fv-admin-phone .root > aside { display: none !important; }
-.fv-admin-phone .root { display: block !important; width: 100% !important; min-width: 0 !important; }
-.fv-admin-phone .root > *:not(.fv-apbar) { width: auto !important; max-width: 100% !important; min-width: 0 !important; }
-.fv-admin-phone .root [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
-.fv-admin-phone .root [style*="display: flex"] { flex-wrap: wrap; }
-.fv-admin-phone .root [style*="width: 1"], .fv-admin-phone .root [style*="width: 2"], .fv-admin-phone .root [style*="width: 3"], .fv-admin-phone .root [style*="width: 4"], .fv-admin-phone .root [style*="width: 5"], .fv-admin-phone .root [style*="width: 6"], .fv-admin-phone .root [style*="width: 7"], .fv-admin-phone .root [style*="width: 8"], .fv-admin-phone .root [style*="width: 9"] { max-width: 100% !important; }
+.fv-admin-phone .dside, .fv-admin-phone .root:not(.root .root) > aside:not([style*="scale(0.8)"] *) { display: none !important; }
+.fv-admin-phone .root:not(.root .root):not([style*="scale(0.8)"] *) { display: block !important; width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root:not(.root .root) > *:not(.fv-apbar):not([style*="scale(0.8)"] *) { width: auto !important; max-width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root:not(.root .root) [style*="grid-template-columns"]:not([style*="scale(0.8)"] *) { grid-template-columns: 1fr !important; }
+.fv-admin-phone .root:not(.root .root) [style*="display: flex"]:not([style*="scale(0.8)"] *) { flex-wrap: wrap; }
+.fv-admin-phone .root:not(.root .root) [style*="width: 1"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 2"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 3"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 4"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 5"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 6"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 7"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 8"]:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) [style*="width: 9"]:not([style*="scale(0.8)"] *) { max-width: 100% !important; }
 .fv-admin-phone body { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 /* Wide tables keep all their columns and scroll sideways inside their card. */
-.fv-admin-phone .root *:has(> table) { overflow-x: auto !important; max-width: 100% !important; }
-.fv-admin-phone .root table { min-width: 600px !important; }
-.fv-admin-phone .root, .fv-admin-phone .root * { box-sizing: border-box !important; }
-.fv-admin-phone .root > div:not(.fv-apbar) { display: block !important; width: 100% !important; min-width: 0 !important; }
-.fv-admin-phone .root header, .fv-admin-phone .root main { width: 100% !important; max-width: 100% !important; }
-.fv-admin-phone .root header, .fv-admin-phone .root main { padding-left: 16px !important; padding-right: 16px !important; height: auto !important; min-height: 0 !important; flex-wrap: wrap; row-gap: 10px; }
-.fv-admin-phone .root header { padding-top: 12px !important; padding-bottom: 12px !important; }
-.fv-admin-phone .root header > * { min-width: 0; }
-.fv-admin-phone .root header > div:first-child { flex: 1 1 100% !important; }
-.fv-admin-phone .root [style*="display: flex"] > * { min-width: 0; }
+.fv-admin-phone .root:not(.root .root) *:has(> table):not([style*="scale(0.8)"] *) { overflow-x: auto !important; max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) table:not([style*="scale(0.8)"] *) { min-width: 600px !important; }
+.fv-admin-phone .root:not(.root .root):not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) *:not([style*="scale(0.8)"] *) { box-sizing: border-box !important; }
+.fv-admin-phone .root:not(.root .root) > div:not(.fv-apbar):not([style*="scale(0.8)"] *) { display: block !important; width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root:not(.root .root) header:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) main:not([style*="scale(0.8)"] *) { width: 100% !important; max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) header:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) main:not([style*="scale(0.8)"] *) { padding-left: 16px !important; padding-right: 16px !important; height: auto !important; min-height: 0 !important; flex-wrap: wrap; row-gap: 10px; }
+.fv-admin-phone .root:not(.root .root) header:not([style*="scale(0.8)"] *) { padding-top: 12px !important; padding-bottom: 12px !important; }
+.fv-admin-phone .root:not(.root .root) header > *:not([style*="scale(0.8)"] *) { min-width: 0; }
+.fv-admin-phone .root:not(.root .root) header > div:first-child:not([style*="scale(0.8)"] *) { flex: 1 1 100% !important; }
+.fv-admin-phone .root:not(.root .root) [style*="display: flex"] > *:not([style*="scale(0.8)"] *) { min-width: 0; }
 .fv-apnote { margin: 8px 0; padding: 12px 14px; border-radius: 14px; background: #F1EBFB; color: #4C1D95; font: 700 14px 'Plus Jakarta Sans', sans-serif; }
 .fv-apbar { box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #E7E2F0; background: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; }
 .fv-apbar b { flex: 1; font-size: 17px; }
 .fv-apbar a:last-child { font-size: 14px; font-weight: 700; color: #4C1D95; }
 .fv-apmark { width: 34px; height: 34px; border-radius: 10px; background: #5B21B6; color: #FFFFFF !important; font-weight: 800; display: flex; align-items: center; justify-content: center; text-decoration: none; }
-.fv-admin-phone .root * { min-width: 0 !important; }
-.fv-admin-phone .root label, .fv-admin-phone .root section { max-width: 100% !important; }
-.fv-admin-phone .root main > *, .fv-admin-phone .root main [style*="display: grid"] > * { max-width: 100% !important; }
-.fv-admin-phone .root input, .fv-admin-phone .root textarea, .fv-admin-phone .root select { max-width: 100%; }
-.fv-admin-phone .root section > div, .fv-admin-phone .root section > label { max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) *:not([style*="scale(0.8)"] *) { min-width: 0 !important; }
+.fv-admin-phone .root:not(.root .root) label:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) section:not([style*="scale(0.8)"] *) { max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) main > *:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) main [style*="display: grid"] > *:not([style*="scale(0.8)"] *) { max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) input:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) textarea:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) select:not([style*="scale(0.8)"] *) { max-width: 100%; }
+.fv-admin-phone .root:not(.root .root) section > div:not([style*="scale(0.8)"] *), .fv-admin-phone .root:not(.root .root) section > label:not([style*="scale(0.8)"] *) { max-width: 100% !important; }
 
 .fv-abnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; justify-content: space-around; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: #FFFFFF; border-top: 1.5px solid #E7E2F0; font-family: 'Plus Jakarta Sans', sans-serif; }
 .fv-abnav a, .fv-abnav button { flex: 1; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; color: #615A6E; text-decoration: none; font: 600 11px 'Plus Jakarta Sans', sans-serif; border-radius: 14px; cursor: pointer; }
@@ -212,20 +212,20 @@ html.fv-moment-open { overflow: hidden; }
 .fv-absheet-in svg { flex: none; }
 
 /* Admin on phones: matches the approved mock-up (canvas section 25). */
-.fv-admin-phone .root header { flex-wrap: wrap !important; gap: 10px 12px !important; padding-top: 12px !important; padding-bottom: 12px !important; }
-.fv-admin-phone .root header > div:first-of-type { flex: 1 1 auto !important; }
-.fv-admin-phone .root header h1 { font-size: 19px !important; }
-.fv-admin-phone .root header .btn { height: 38px !important; padding: 0 12px !important; }
+.fv-admin-phone .root:not(.root .root) header:not([style*="scale(0.8)"] *) { flex-wrap: wrap !important; gap: 10px 12px !important; padding-top: 12px !important; padding-bottom: 12px !important; }
+.fv-admin-phone .root:not(.root .root) header > div:first-of-type:not([style*="scale(0.8)"] *) { flex: 1 1 auto !important; }
+.fv-admin-phone .root:not(.root .root) header h1:not([style*="scale(0.8)"] *) { font-size: 19px !important; }
+.fv-admin-phone .root:not(.root .root) header .btn:not([style*="scale(0.8)"] *) { height: 38px !important; padding: 0 12px !important; }
 .fv-abmark { width: 34px; height: 34px; flex: none; border-radius: 10px; background: #5B21B6; color: #FFFFFF; font: 800 15px 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; }
 .fv-abav { width: 32px; height: 32px; flex: none; border-radius: 999px; background: #F1EBFB; color: #4C1D95; font: 800 12px 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; }
-.fv-admin-phone .root main { padding-top: 16px !important; padding-bottom: 16px !important; gap: 14px !important; }
-.fv-admin-phone .root [style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-.fv-admin-phone .root [style*="repeat(4"] > .card { padding: 14px !important; }
-.fv-admin-phone .root [style*="repeat(4"] .num { font-size: 24px !important; }
-.fv-admin-phone .root [style*="repeat(4"] .eyebrow { font-size: 11px !important; }
-.fv-admin-phone .root main section.card[style*="padding: 2"] { padding: 16px !important; }
-.fv-admin-phone .root main div:has(> button.btn + button.btn) { flex-direction: column !important; }
-.fv-admin-phone .root main div:has(> button.btn + button.btn) > .btn { width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) main:not([style*="scale(0.8)"] *) { padding-top: 16px !important; padding-bottom: 16px !important; gap: 14px !important; }
+.fv-admin-phone .root:not(.root .root) [style*="repeat(4"]:not([style*="scale(0.8)"] *) { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.fv-admin-phone .root:not(.root .root) [style*="repeat(4"] > .card:not([style*="scale(0.8)"] *) { padding: 14px !important; }
+.fv-admin-phone .root:not(.root .root) [style*="repeat(4"] .num:not([style*="scale(0.8)"] *) { font-size: 24px !important; }
+.fv-admin-phone .root:not(.root .root) [style*="repeat(4"] .eyebrow:not([style*="scale(0.8)"] *) { font-size: 11px !important; }
+.fv-admin-phone .root:not(.root .root) main section.card[style*="padding: 2"]:not([style*="scale(0.8)"] *) { padding: 16px !important; }
+.fv-admin-phone .root:not(.root .root) main div:has(> button.btn + button.btn):not([style*="scale(0.8)"] *) { flex-direction: column !important; }
+.fv-admin-phone .root:not(.root .root) main div:has(> button.btn + button.btn) > .btn:not([style*="scale(0.8)"] *) { width: 100% !important; }
 .fv-abnav a, .fv-abnav button { color: #615A6E; }
 .fv-abnav svg { width: 20px; height: 20px; padding: 4px 14px; border-radius: 10px; }
 .fv-abnav [aria-current="page"] svg { background: #F1EBFB; }
@@ -238,10 +238,32 @@ html.fv-moment-open { overflow: hidden; }
 .fv-abme > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; color: #615A6E; }
 .fv-abme strong { color: #0E0B14; }
 .fv-about { height: 38px; padding: 0 14px; border-radius: 12px; border: 1.5px solid #E7E2F0; background: #FFFFFF; color: #4C1D95; font: 700 14px 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
-.fv-admin-phone .root main label:has(> input.field[placeholder^="Search"]) { flex: 1 1 100% !important; max-width: 100% !important; }
-.fv-admin-phone .root main input.field[placeholder^="Search"] { width: 100% !important; }
-.fv-admin-phone .root header > div:first-of-type { flex: 1 1 calc(100% - 100px) !important; order: 1; }
-.fv-admin-phone .root header > .fv-abmark { order: 0; }
-.fv-admin-phone .root header > .fv-abav { order: 2; }
-.fv-admin-phone .root header > *:not(.fv-abmark):not(.fv-abav):not(div:first-of-type) { order: 3; }
-.fv-admin-phone .root header > div:not(:first-of-type) { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+.fv-admin-phone .root:not(.root .root) main label:has(> input.field[placeholder^="Search"]):not([style*="scale(0.8)"] *) { flex: 1 1 100% !important; max-width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) main input.field[placeholder^="Search"]:not([style*="scale(0.8)"] *) { width: 100% !important; }
+.fv-admin-phone .root:not(.root .root) header > div:first-of-type:not([style*="scale(0.8)"] *) { flex: 1 1 calc(100% - 100px) !important; order: 1; }
+.fv-admin-phone .root:not(.root .root) header > .fv-abmark:not([style*="scale(0.8)"] *) { order: 0; }
+.fv-admin-phone .root:not(.root .root) header > .fv-abav:not([style*="scale(0.8)"] *) { order: 2; }
+.fv-admin-phone .root:not(.root .root) header > *:not(.fv-abmark):not(.fv-abav):not(div:first-of-type):not([style*="scale(0.8)"] *) { order: 3; }
+.fv-admin-phone .root:not(.root .root) header > div:not(:first-of-type):not([style*="scale(0.8)"] *) { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+/* Feedback settings live preview on phones: a smaller phone frame with the preview scaled to fill it. */
+.fv-admin-phone .root:not(.root .root) [style*="width: 328px; height: 736px"]:not([style*="scale(0.8)"] *) { width: 280px !important; height: 625px !important; }
+.fv-admin-phone .root [style*="scale(0.8)"] { transform: scale(.677) !important; }
+@media (max-width: 340px) {
+  .fv-admin-phone .root:not(.root .root) [style*="width: 328px; height: 736px"]:not([style*="scale(0.8)"] *) { width: 216px !important; height: 478px !important; }
+  .fv-admin-phone .root:not(.root .root) [style*="scale(0.8)"]:not([style*="scale(0.8)"] *) { transform: scale(.513) !important; }
+}
+
+/* Admin sidebar reacts: hover feedback everywhere, and an icon strip between phone and full laptop width. */
+.root aside a.nav:hover { background: #F8F6FC; color: #4C1D95; }
+.root aside a.nav[aria-current="page"]:hover { background: #F1EBFB; }
+.fv-admin-rail .root { width: 100% !important; min-width: 0 !important; }
+.fv-admin-rail .root > aside { width: 76px !important; padding: 20px 10px !important; align-items: center; }
+.fv-admin-rail .root > aside > div:first-child { padding: 0 0 18px !important; }
+.fv-admin-rail .root > aside > div:first-child > span:last-child { display: none; }
+.fv-admin-rail .root > aside a.nav { width: 52px; height: 48px; padding: 0 !important; justify-content: center; font-size: 0 !important; gap: 0 !important; }
+.fv-admin-rail .root > aside a.nav svg { width: 22px; height: 22px; }
+.fv-admin-rail .root > aside > div:last-child { padding: 12px 0 0 !important; justify-content: center; }
+.fv-admin-rail .root > aside > div:last-child > span:last-child { display: none; }
+.fv-admin-rail .root main [style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+.fv-admin-rail .root main [style*="grid-template-columns: 360px 1fr"], .fv-admin-rail .root main [style*="grid-template-columns: 1fr 420px"], .fv-admin-rail .root main [style*="grid-template-columns: 1fr 390px"] { grid-template-columns: 1fr !important; }
+.fv-admin-rail .root main *:has(> table) { overflow-x: auto; }

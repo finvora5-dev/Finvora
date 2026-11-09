@@ -11,7 +11,7 @@
   Object.keys(MORE).forEach(function (k) { PAIRS[k] = MORE[k]; });
   var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
   // Admin on phones (design Part 5): the shorter screen side decides, so landscape phones count as phones.
-  function adminPhone() { return Math.min(document.documentElement.clientWidth, window.innerHeight) < 700; }
+  function adminPhone() { var w = document.documentElement.clientWidth, h = window.innerHeight; return w < 700 || (h < 500 && w < 1024); }  // phones, and phones turned sideways; never a laptop with a short window
   var ADMIN_PHONE = { UAOverview: "UAPhoneTasks", UAAISummaries: "UAPhoneTask?type=sums", UAAskKoboReview: "UAPhoneTask?type=ask", UAFeedbackInbox: "UAPhoneTask?type=feedback" };
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
@@ -85,6 +85,10 @@
     html.classList.toggle("fv-big", designW >= 1200 && vw >= DESK);
     fillFV(el);
     // Admin on phones (design Part 5): wide admin pages reflow at real size instead of shrinking.
+    // Admin on tablets and small laptop windows: real size, with the sidebar folded to an icon strip.
+    var adminBoard = designW >= 1200 && /\/UA[A-Za-z]+\.dc/.test(location.pathname);
+    html.classList.toggle("fv-admin-rail", adminBoard && !adminPhone() && vw < 1200);
+    if (adminBoard && !adminPhone() && vw < 1200) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; el.querySelectorAll("aside a.nav").forEach(function (a) { if (!a.title) a.title = a.textContent.trim(); a.setAttribute("aria-label", a.textContent.trim()); }); return; }
     if (designW >= 1200 && /\/UA[A-Za-z]+\.dc/.test(location.pathname) && adminPhone()) { html.classList.add("fv-admin-phone"); el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; adminPhoneBar(el); return; }
     if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
     // Fluid boards (the email previews) reflow at real size on every screen.
