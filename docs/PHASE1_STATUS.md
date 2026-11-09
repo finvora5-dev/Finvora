@@ -42,7 +42,7 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   **Practice Market (simulator):** made-up companies and virtual naira, amount-first buying, approximate fees, real NGX hours (weekdays 10:00 to 14:30 Lagos time) with a closed sheet that shows the next opening time and offers to queue the order or do a lesson. Prices move once per trading day.
 *   **Plus learning tools** (design Part 4): What this number means, Your practice portfolio, Crisis practice, Money scenarios, Dividend tracker, Compare over time and Watchlists, on the five made-up Practice Market companies, with an advice-word check in the tests. Free learners see them locked.
 *   **Plans and checkout:** Plus at ₦5,999 a month or ₦65,989 a year (one month free); simulated checkout with pending, confirmed success and confirmed failed states; receipt email preview.
-*   **Admin on phones** (design Part 5): a task list (AI summaries, Ask Fin replies, feedback, learner prompts) with one item per screen and a 2.5-second Undo; wide tables say "open on a larger screen".
+*   **Admin on phones** (design Part 5, changed by D23): the same admin pages as on a laptop, one column, with a bottom navigation bar; wide tables scroll sideways.
 *   **Admin (browser-only demonstration):** staff sign-in, overview, content editor, daily-question builder, Ask Fin review, AI summary approvals, users and payments, plan prices, feedback, audit log.
 *   **Reviewer tools** (Settings, or the sign-in screen): switch Free or Plus, sign in as Ada, open admin, pick the next checkout result, open the market, jump progress, clear everything. Open to everyone by decision D21.
 *   **Phones:** every screen fits widths from 280 px up; the lesson path follows the phone's text-size setting.

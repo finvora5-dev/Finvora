@@ -42,6 +42,7 @@ Built so far: D1, D2, D3, D12, the Practice Market and Ask Fin label parts of D5
 | D20 | **Reviewer tools use a separate demo copy of the data.** Changes made from Reviewer tools (plan, progress, market) go into a demo copy; "Back to my progress" restores the tester's real progress exactly as it was. No reviewer-mode label, and the test sign-in codes stay as they are. The reviewer code (D7) stays. | Answers Q9 from the review. |
 | D21 | **Reviewer tools stay open as they are today.** No reviewer code and no demo copy. | Replaces D7 and D20. The owner tests the app personally and accepts that testers can find the tools. |
 | D22 | **Success toasts last 2.5 seconds** for every action, including the admin Undo toast. Parts 4 and 5 approved with their proposals (Plus tools on the Practice Market home, 10/5 XP, in-app watchlist alerts, phone admin below a 700 px shorter side, Undo on phone admin actions). | Owner, 9 Nov 2026. |
+| D23 | **Admin on phones shows the same pages as the laptop** with a bottom navigation bar, not a separate task list. Replaces the task-list part of D14. | Owner, 9 Nov 2026. |
 
 ## Phase 2: parked until the prototype is approved
 

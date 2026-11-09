@@ -16,8 +16,8 @@
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
     var name = m[1], vw = document.documentElement.clientWidth, target = null;
-    if (adminPhone() && ADMIN_PHONE[name]) { var t = ADMIN_PHONE[name].split("?"); location.replace(location.pathname.replace(name + ".dc", t[0] + ".dc") + (t[1] ? "?" + t[1] : "")); return true; }
-    if (!adminPhone() && /^UAPhoneTasks?$/.test(name)) { var back = name === "UAPhoneTasks" ? "UAOverview" : ({ sums: "UAAISummaries", ask: "UAAskKoboReview", feedback: "UAFeedbackInbox" })[(/type=(\w+)/.exec(location.search) || [])[1]] || "UAOverview"; location.replace(location.pathname.replace(name + ".dc", back + ".dc")); return true; }
+    // Phones show the same admin pages as laptops (owner, 9 Nov); the old phone task pages send people back to them.
+    if (/^UAPhoneTasks?$/.test(name)) { var back = name === "UAPhoneTasks" ? "UAOverview" : ({ sums: "UAAISummaries", ask: "UAAskKoboReview", feedback: "UAFeedbackInbox" })[(/type=(\w+)/.exec(location.search) || [])[1]] || "UAOverview"; location.replace(location.pathname.replace(name + ".dc", back + ".dc")); return true; }
     if (vw >= DESK && PAIRS[name]) target = PAIRS[name];
     if (vw < DESK && BACK[name]) target = BACK[name];
     if (!target) return false;
@@ -45,12 +45,23 @@
     } catch (e) {}
     tsCache = Math.min(2, r); return tsCache;
   }
+  // Admin on phones: the same pages as on a laptop, with a bottom navigation bar instead of the sidebar.
+  var ADMIN_TABS = [["UAOverview", "Overview"], ["UAContent", "Content"], ["UAAskKoboReview", "Ask Fin"], ["UAAISummaries", "Summaries"]];
   function adminPhoneBar(el) {
-    if (el.querySelector(".fv-apbar")) return;
-    var bar = document.createElement("div"); bar.className = "fv-apbar";
-    bar.innerHTML = '<a href="UAPhoneTasks.dc.html" aria-label="Admin tasks" class="fv-apmark">F</a><b>Finvora admin</b><a href="UAPhoneTasks.dc.html">All tasks</a>';
-    el.insertBefore(bar, el.firstChild);
-    el.querySelectorAll("table").forEach(function (t) { var n = document.createElement("p"); n.className = "fv-apnote"; n.textContent = "Open on a larger screen to see the full table."; t.parentNode.insertBefore(n, t); });
+    if (document.querySelector(".fv-abnav")) return;
+    var links = [].slice.call(el.querySelectorAll("aside a[href^='UA']")).filter(function (a) { return a.querySelector("svg"); });
+    var here = (location.pathname.match(/(UA[A-Za-z]+)\.dc/) || [])[1];
+    function icon(page) { var a = links.filter(function (x) { return x.getAttribute("href").indexOf(page + ".") === 0; })[0]; return a ? a.querySelector("svg").outerHTML : ""; }
+    var inTabs = ADMIN_TABS.some(function (t) { return t[0] === here; });
+    var nav = document.createElement("nav"); nav.className = "fv-abnav"; nav.setAttribute("aria-label", "Admin");
+    nav.innerHTML = ADMIN_TABS.map(function (t) { return '<a href="' + t[0] + '.dc.html"' + (t[0] === here ? ' aria-current="page"' : "") + ">" + icon(t[0]) + "<span>" + t[1] + "</span></a>"; }).join("") +
+      '<button type="button"' + (inTabs ? "" : ' aria-current="page"') + ' aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>More</span></button>';
+    var sheet = document.createElement("div"); sheet.className = "fv-absheet"; sheet.hidden = true; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-label", "All admin pages");
+    sheet.innerHTML = '<div class="fv-absheet-in">' + links.map(function (a) { var c = a.cloneNode(true); c.removeAttribute("class"); if (c.getAttribute("href").indexOf(here + ".") === 0) c.setAttribute("aria-current", "page"); else c.removeAttribute("aria-current"); return c.outerHTML; }).join("") + "</div>";
+    var more = nav.querySelector("button");
+    more.addEventListener("click", function () { sheet.hidden = !sheet.hidden; more.setAttribute("aria-expanded", String(!sheet.hidden)); });
+    sheet.addEventListener("click", function (e) { if (e.target === sheet) { sheet.hidden = true; more.setAttribute("aria-expanded", "false"); } });
+    document.body.appendChild(sheet); document.body.appendChild(nav);
   }
   function fit() {
     var el = root(); if (!el) return;

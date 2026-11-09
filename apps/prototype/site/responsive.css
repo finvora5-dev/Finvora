@@ -176,7 +176,10 @@ html.fv-moment-open { overflow: hidden; }
 .fv-admin-phone .root [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
 .fv-admin-phone .root [style*="display: flex"] { flex-wrap: wrap; }
 .fv-admin-phone .root [style*="width: 1"], .fv-admin-phone .root [style*="width: 2"], .fv-admin-phone .root [style*="width: 3"], .fv-admin-phone .root [style*="width: 4"], .fv-admin-phone .root [style*="width: 5"], .fv-admin-phone .root [style*="width: 6"], .fv-admin-phone .root [style*="width: 7"], .fv-admin-phone .root [style*="width: 8"], .fv-admin-phone .root [style*="width: 9"] { max-width: 100% !important; }
-.fv-admin-phone table { display: none !important; }
+.fv-admin-phone body { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+/* Wide tables keep all their columns and scroll sideways inside their card. */
+.fv-admin-phone .root *:has(> table) { overflow-x: auto !important; max-width: 100% !important; }
+.fv-admin-phone .root table { min-width: 640px; }
 .fv-admin-phone .root, .fv-admin-phone .root * { box-sizing: border-box !important; }
 .fv-admin-phone .root > div:not(.fv-apbar) { display: block !important; width: 100% !important; min-width: 0 !important; }
 .fv-admin-phone .root header, .fv-admin-phone .root main { width: 100% !important; max-width: 100% !important; }
@@ -195,3 +198,15 @@ html.fv-moment-open { overflow: hidden; }
 .fv-admin-phone .root main > *, .fv-admin-phone .root main [style*="display: grid"] > * { max-width: 100% !important; }
 .fv-admin-phone .root input, .fv-admin-phone .root textarea, .fv-admin-phone .root select { max-width: 100%; }
 .fv-admin-phone .root section > div, .fv-admin-phone .root section > label { max-width: 100% !important; }
+
+.fv-abnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; justify-content: space-around; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: #FFFFFF; border-top: 1.5px solid #E7E2F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+.fv-abnav a, .fv-abnav button { flex: 1; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; color: #615A6E; text-decoration: none; font: 600 11px 'Plus Jakarta Sans', sans-serif; border-radius: 14px; cursor: pointer; }
+.fv-abnav [aria-current="page"] { color: #4C1D95; font-weight: 800; }
+.fv-abnav [aria-current="page"] svg { background: #F1EBFB; border-radius: 10px; }
+.fv-abnav svg { width: 22px; height: 22px; padding: 2px 10px; box-sizing: content-box; }
+.fv-absheet { position: fixed; inset: 0; z-index: 49; background: rgba(14, 11, 20, .35); display: flex; align-items: flex-end; }
+.fv-absheet[hidden] { display: none; }
+.fv-absheet-in { width: 100%; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 14px 12px calc(92px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 1fr 1fr; gap: 6px; box-sizing: border-box; }
+.fv-absheet-in a { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border-radius: 12px; color: #0E0B14; text-decoration: none; font: 600 14px 'Plus Jakarta Sans', sans-serif; }
+.fv-absheet-in a[aria-current="page"] { background: #F1EBFB; color: #4C1D95; }
+.fv-absheet-in svg { flex: none; }
