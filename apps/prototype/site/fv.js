@@ -137,6 +137,12 @@
   function plan() { return D().effectivePlan(billLoad().sub, lagosDay()); }
 
   // ---- Ask Fin: scripted answers and refusals from packages/domain, free daily limit, saved chat.
+  // The Practice Market's own companies (COMPANIES above) plus the real NGX companies, for Ask Fin.
+  function askCos() {
+    var learn = { Food: "revenue-and-profit", Energy: "risk-and-return", Banking: "price-to-earnings", Transport: "revenue-and-profit", Telecoms: "dividend" };
+    var made = COMPANIES.map(function (c) { var w = c.name.split(" ")[0]; return { name: c.name, ticker: c.t, askAliases: [w], about: "A made-up " + c.label.toLowerCase() + " company in the Practice Market.", slug: learn[c.sector], madeUp: true }; });
+    return D().askCompanies().filter(function (c) { return !c.madeUp; }).concat(made);
+  }
   var ASK_KEY = "fv.ask.v1";
   function askLoad() {
     try { var a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); if (a && Array.isArray(a.msgs)) return a; } catch (e) {}
@@ -153,7 +159,7 @@
       q = String(q || "").trim(); if (!q) return null;
       if (!ASK.status().allowed) return null;
       // Design Part 3: answers come from hand-written answers, the Library as this browser shows it, and company data.
-      var r = D().answerQuestion(q, null, { scripts: D().SCRIPTED_ANSWERS, articles: LIB.all(), companies: D().askCompanies() });
+      var r = D().answerQuestion(q, null, { scripts: D().SCRIPTED_ANSWERS, articles: LIB.all(), companies: askCos() });
       var a = askLoad(); if (D().countsTowardLimit(r.kind)) a.usage = D().recordAsk(a.usage, lagosDay());
       a.msgs = a.msgs.concat([{ q: q, r: r, at: new Date().toISOString() }]).slice(-30); askSave(a);
       return r;
