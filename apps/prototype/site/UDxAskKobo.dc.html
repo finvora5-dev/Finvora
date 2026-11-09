@@ -129,14 +129,14 @@ class Component extends DCLogic {
   A() { return window.FV && window.FV.ASK; }
   componentDidMount() {
     try { const r = document.referrer ? new URL(document.referrer) : null; if (r && r.origin === location.origin && !/Ask/.test(r.pathname)) this.back = r.pathname.split('/').pop(); } catch (e) {}
-    this.setState({ tick: 1 }); setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
+    this.setState({ tick: 1 }); [50, 300, 700].forEach((t) => setTimeout(() => window.scrollTo(0, document.documentElement.scrollHeight), t));
   }
   send(q) {
     const A = this.A(); q = String(q || '').trim(); if (!A || !q || this.state.pending) return;
     if (!A.status().allowed) { location.href = 'UMAskLimit.dc.html'; return; }
     this.setState({ pending: q, text: '' });
     setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 30);
-    setTimeout(() => { A.ask(q); this.setState({ pending: '' }); setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 30); }, 700);
+    setTimeout(() => { A.ask(q); this.setState({ pending: '' }); [30, 250, 600].forEach((t) => setTimeout(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: t > 30 ? 'smooth' : 'auto' }), t)); }, 700);
   }
   renderVals() {
     const A = this.A(); if (!A) return {};
