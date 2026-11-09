@@ -3,6 +3,7 @@
 // Tablets and desktop (>= 600px): the board reflows to fill the whole window, with no width cap:
 // full-width sections stretch, two-column grids gain columns, and fixed-size drawings stay centred.
 (function () {
+  if (/UP(Lesson(Info|Choice|Calc|Order|Scenario|Match)|LearnMyth|LearnCompare)\.dc|UDyP(Lesson|Learn)/.test(location.pathname)) { document.documentElement.classList.add("fv-mwait"); setTimeout(function () { if (!document.documentElement.classList.contains("fv-moment-open")) document.documentElement.classList.remove("fv-mwait"); }, 2500); }
   // Sound effects (approved 9 Nov 2026): recorded sounds in sfx/, played from the animation that owns them. Off when Settings > Sound effects is off.
   var SFX = {}, SFX_PAGE = { lesson: ["correct", "wrong", "roll", "unstop", "back", "half", "almost", "xp"], journey: ["pop", "xp", "streak"], celebrate: ["complete", "xp", "streak"] };
   function sfxOn() { try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null"); return !p || p.sound !== false; } catch (e) { return true; } }
@@ -16,7 +17,7 @@
     var pth = location.pathname, list = /Lesson(Info|Choice|Calc|Order|Scenario|Match)|LearnMyth|LearnCompare/.test(pth) ? SFX_PAGE.lesson : /Journey\.dc/.test(pth) ? SFX_PAGE.journey : /Celebrate\.dc/.test(pth) ? SFX_PAGE.celebrate : [];
     if (list.length && sfxOn()) list.forEach(sfxGet);
     // Right or wrong: the moment the answer is checked (FV.answer runs in the Check handler).
-    var hook = function () { var F = window.FV; if (!F || !F.answer || F.answer.fvSound) return; var o = F.answer; F.answer = function (q, correct) { window.fvSound(correct ? "correct" : "wrong"); return o.apply(this, arguments); }; F.answer.fvSound = 1; };
+    var hook = function () { var F = window.FV; if (!F || !F.answer || F.answer.fvSound) return; var o = F.answer; F.answer = function (q, correct) { if (q !== "match") window.fvSound(correct ? "correct" : "wrong"); return o.apply(this, arguments); }; F.answer.fvSound = 1; }; // matching plays its own sounds per pair
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", hook); else hook();
   })();
 
@@ -344,9 +345,18 @@
     run.animate([{ left: from + "%" }, { left: to + "%" }], { duration: 900, delay: 400, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "forwards" });
     w.querySelector(".fvm-flag").animate([{ transform: "scale(.4) rotate(-20deg)", opacity: 0 }, { transform: "scale(1.1) rotate(4deg)", opacity: 1, offset: .7 }, { transform: "none" }], { duration: 600, easing: "ease-out" });
   }
-  function lessonMotion() { setTimeout(showMoment, 450); }
+  // Decide on a moment as soon as the progress bar exists; the question stays hidden until then, so it never flashes before the moment (owner bug report, 9 Nov 2026).
+  function lessonMotion() {
+    var html = document.documentElement, t0 = Date.now();
+    (function wait() {
+      if (!lessonBar() && Date.now() - t0 < 1500) { setTimeout(wait, 30); return; }
+      try { showMoment(); } catch (e) {}
+      // While a moment is on screen the question stays hidden; it appears as the moment slides away.
+      (function reveal() { if (html.classList.contains("fv-moment-open")) { setTimeout(reveal, 40); return; } html.classList.remove("fv-mwait"); })();
+    })();
+  }
   function motionStart() { arrive(); lessonMotion(); }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(motionStart, 300); }); else setTimeout(motionStart, 300);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { lessonMotion(); setTimeout(arrive, 300); }); else { lessonMotion(); setTimeout(arrive, 300); }
 
   // ---- Review what I missed (design Part 2): a finished lesson with misses opens a small sheet.
   document.addEventListener("click", function (e) {

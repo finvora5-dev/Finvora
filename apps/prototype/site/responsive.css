@@ -330,3 +330,4 @@ html.fv-admin-phone body .root:not(.root .root) > section[style*="translate(-50%
 .fv-pg-more:active { transform: translateY(2px); box-shadow: 0 1px 0 #E7E2F0; }
 section.card tr[hidden], section.card > button.press[hidden] { display: none !important; }
 .fv-noreview a[href^="URReviewer"] { display: none !important; }
+html.fv-mwait #dc-root { visibility: hidden; }
