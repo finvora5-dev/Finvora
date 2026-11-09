@@ -72,7 +72,12 @@ html.fv-reduce *, html.fv-reduce *::before, html.fv-reduce *::after { animation:
 @media (prefers-reduced-motion: reduce) { .fv-sk { animation: none; } }
 
 /* Text fields always show the focus ring for keyboard users, even where a board turns outlines off (WCAG 2.4.7). */
-input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #5B21B6 !important; outline-offset: 2px; }
+/* Text fields: the focus state belongs to the whole field, never a box drawn inside it (UI/UX: focus-states, consistency).
+   The ring goes on whichever element draws the field's border: the input itself, or the rounded box around it. */
+html :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select):focus-visible { outline: none !important; box-shadow: none !important; }
+html input.field:focus-visible, html textarea.field:focus-visible, html input[style*="border: 1"]:focus-visible, html input[style*="border: 2"]:focus-visible, html textarea[style*="border: 1"]:focus-visible, html textarea[style*="border: 2"]:focus-visible, html select:focus-visible { border-color: #5B21B6 !important; box-shadow: 0 0 0 3px rgba(91, 33, 182, .18) !important; }
+html [style*="border: 1"]:has(> :is(input, textarea):not(.field):not([style*="border: 1"]):not([style*="border: 2"]):focus-visible), html [style*="border: 2"]:has(> :is(input, textarea):not(.field):not([style*="border: 1"]):not([style*="border: 2"]):focus-visible), html .card:has(> label > :is(input, textarea):not(.field):not([style*="border: 1"]):not([style*="border: 2"]):focus-visible) { border-color: #5B21B6 !important; box-shadow: 0 0 0 3px rgba(91, 33, 182, .18) !important; }
+html input[type="checkbox"]:focus-visible, html input[type="radio"]:focus-visible, html input[type="range"]:focus-visible { outline: 3px solid #5B21B6 !important; outline-offset: 2px; }
 
 /* XP and streak motion (approved mock-up, 9 Nov 2026). */
 .fv-burst { position: fixed; left: 50%; top: 52%; z-index: 70; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; background: #5B21B6; color: #FFFFFF; font: 800 20px 'Plus Jakarta Sans', sans-serif; box-shadow: 0 10px 24px rgba(91, 33, 182, .35); pointer-events: none; }
