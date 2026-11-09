@@ -79,6 +79,10 @@ class Component extends DCLogic {
     }
     [['Ada Okafor', 'ada@example.com', 'Plus monthly', 'FV-24117', '₦5,999', 'Confirmed'], ['Kwame Mensah', 'kwame@example.com', 'Plus yearly', 'FV-24109', '₦65,989', 'Pending'], ['Wanjiru Kamau', 'wanjiru@example.com', 'Free', '', '', ''], ['Tunde Bello', 'tunde@example.com', 'Plus monthly', 'FV-24098', '₦5,999', 'Failed'], ['Zainab Musa', 'zainab@example.com', 'Plus monthly', 'FV-24090', '₦5,999', 'Confirmed']]
       .forEach((r) => rows.push({ id: r[1], name: r[0], email: r[1], plan: r[2], order: r[3], amount: r[4], status: r[5], orders: r[3] ? [r[3] + ' · ' + r[4] + ' · ' + r[5] + ' · 1 attempt'] : ['No orders'] }));
+    // More sample learners so the table has pages (sample data, like the rows above).
+    const FN = ['Chidi', 'Ngozi', 'Emeka', 'Funke', 'Bola', 'Ifeoma', 'Segun', 'Aisha', 'Yemi', 'Obinna', 'Halima', 'Kelechi', 'Tobi', 'Adaeze', 'Musa', 'Temi'], LN = ['Okeke', 'Adeyemi', 'Bello', 'Eze', 'Ibrahim', 'Okafor', 'Balogun', 'Nwosu'];
+    for (let i = 0; i < 42; i++) { const fn = FN[i % FN.length], ln = LN[(i * 3) % LN.length], plus = i % 3 === 0, yr = i % 7 === 0, stt = i % 11 === 5 ? 'Pending' : i % 13 === 4 ? 'Failed' : 'Confirmed', no = 'FV-' + (24080 - i * 3), amt = yr ? '₦65,989' : '₦5,999', em = (fn + '.' + ln).toLowerCase() + (i > 15 ? i : '') + '@example.com';
+      rows.push(plus ? { id: em, name: fn + ' ' + ln, email: em, plan: yr ? 'Plus yearly' : 'Plus monthly', order: no, amount: amt, status: stt, orders: [no + ' · ' + amt + ' · ' + stt + ' · 1 attempt'] } : { id: em, name: fn + ' ' + ln, email: em, plan: 'Free', order: '', amount: '', status: '', orders: ['No orders'] }); }
     const F = { All: () => true, Plus: (r) => /^Plus/.test(r.plan), Pending: (r) => r.status === 'Pending', Failed: (r) => r.status === 'Failed' };
     const q = s.q.trim().toLowerCase(), list = rows.filter(F[s.f]).filter((r) => !q || (r.email + ' ' + r.order + ' ' + r.name).toLowerCase().indexOf(q) >= 0);
     return { q: s.q, onQ: (e) => this.setState({ q: e.target.value }), none: !list.length,

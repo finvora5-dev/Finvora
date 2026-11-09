@@ -312,3 +312,20 @@ html.fv-admin-phone body .root:not(.root .root) > section[style*="translate(-50%
 /* Folded phones: five 12px labels don't fit in 280px, so only the current tab shows its label (screen readers still read every name). */
 @media (max-width: 340px) { .fv-abnav { padding-left: 2px; padding-right: 2px; } .fv-abnav > :not([aria-current]) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 .fv-hit::after { content: ""; position: absolute; inset: calc(-1 * var(--fv-hit, 0px)); }
+/* Admin pagination */
+.fv-pager:empty { display: none; }
+.fv-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-top: 1px solid #E7E2F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+.fv-pg-count { margin: 0; color: #615A6E; font-size: 13px; } .fv-pg-count b { color: #0E0B14; }
+.fv-pager nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.fv-pager nav button { min-width: 36px; height: 36px; padding: 0 10px; border-radius: 10px; border: 1.5px solid #E7E2F0; background: #FFFFFF; color: #0E0B14; font: 700 13px 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+.fv-pager nav button:hover:not(:disabled):not([aria-current]) { background: #F6F3FB; border-color: #C4B5FD; }
+.fv-pager nav button:active:not(:disabled) { transform: scale(.96); }
+.fv-pager nav button[aria-current="page"] { background: #5B21B6; border-color: #5B21B6; color: #FFFFFF; }
+.fv-pager nav button:disabled { color: #9A93A8; cursor: default; }
+.fv-pager button:focus-visible { outline: 3px solid #5B21B6; outline-offset: 2px; }
+.fv-pg-gap { color: #615A6E; padding: 0 2px; }
+@media (max-width: 1023px) { .fv-pager nav button { min-width: 44px; height: 44px; } }
+.fv-admin-phone .fv-pager { flex-direction: column; align-items: stretch; text-align: center; padding: 14px 16px 16px; }
+.fv-pg-more { width: 100%; height: 48px; border-radius: 14px; border: 1.5px solid #E7E2F0; background: #FFFFFF; color: #4C1D95; font: 800 15px 'Plus Jakarta Sans', sans-serif; box-shadow: 0 3px 0 #E7E2F0; cursor: pointer; }
+.fv-pg-more:active { transform: translateY(2px); box-shadow: 0 1px 0 #E7E2F0; }
+section.card tr[hidden], section.card > button.press[hidden] { display: none !important; }

@@ -404,4 +404,50 @@
     h.addEventListener("focusin", function () { h.classList.remove("fv-reveal-hide"); hidden = false; });
   }
   if (document.readyState === "complete") setTimeout(revealHeader, 400); else window.addEventListener("load", function () { setTimeout(revealHeader, 400); });
+  // Admin pagination (approved 9 Nov 2026): 20 rows a page. Laptop and tablet: numbered pages, page number in the link (?page=). Phone admin: "Show 20 more".
+  var PAGED = { UAUsers: "learners", UAAudit: "entries", UAContent: "items", UAFeedbackInbox: "messages", UAAskKoboReview: "answers", UAAISummaries: "summaries" };
+  function pager() {
+    var m = location.pathname.match(/\/(UA[A-Za-z]+)\.dc/), noun = m && PAGED[m[1]]; if (!noun) return;
+    var SIZE = 20, shown = SIZE, sig = "", busy = false;
+    var page = Math.max(1, parseInt(new URLSearchParams(location.search).get("page"), 10) || 1);
+    function rowsOf() {
+      var t = document.querySelector("section.card table");
+      if (t) return { box: t, rows: [].slice.call(t.querySelectorAll("tr")).filter(function (r) { return !r.querySelector("th"); }) };
+      var q = [].filter.call(document.querySelectorAll("section.card"), function (c) { return c.querySelector(":scope > button.press"); })[0];
+      return q ? { box: q, rows: [].slice.call(q.querySelectorAll(":scope > button.press")) } : null;
+    }
+    function setPage(n) { page = n; var u = new URL(location.href); if (n > 1) u.searchParams.set("page", n); else u.searchParams.delete("page"); history.replaceState(history.state, "", u); draw(); }
+    function draw() {
+      var g = rowsOf(); if (!g) return; busy = true;
+      var N = g.rows.length, phone = document.documentElement.classList.contains("fv-admin-phone"), pages = Math.max(1, Math.ceil(N / SIZE));
+      var now = N + "|" + (g.rows[0] ? g.rows[0].textContent.slice(0, 40) : "");
+      if (sig && now !== sig) { page = 1; shown = SIZE; } sig = now; // search or filter changed: back to the start
+      if (page > pages) page = pages;
+      var from = phone ? 0 : (page - 1) * SIZE, to = phone ? Math.min(N, shown) : Math.min(N, page * SIZE);
+      g.rows.forEach(function (r, i) { r.hidden = i < from || i >= to; });
+      var card = g.box.closest("section.card") || g.box, f = card.querySelector(":scope > .fv-pager");
+      if (!f) { f = document.createElement("div"); f.className = "fv-pager"; card.appendChild(f); }
+      if (!N) { f.innerHTML = ""; busy = false; return; }
+      var fmt = function (x) { return x.toLocaleString("en-NG"); };
+      if (phone) {
+        f.innerHTML = '<p class="fv-pg-count" aria-live="polite">Showing ' + fmt(to) + " of " + fmt(N) + " " + noun + "</p>" + (to < N ? '<button type="button" class="fv-pg-more">Show ' + Math.min(SIZE, N - to) + " more</button>" : "");
+      } else {
+        var b = function (label, n, opts) { opts = opts || {}; return '<button type="button" data-p="' + n + '"' + (opts.cur ? ' aria-current="page"' : "") + (opts.dis ? " disabled" : "") + (opts.aria ? ' aria-label="' + opts.aria + '"' : "") + ">" + label + "</button>"; };
+        var nums = [], add = function (n) { if (nums.indexOf(n) < 0 && n >= 1 && n <= pages) nums.push(n); };
+        add(1); add(page - 1); add(page); add(page + 1); add(pages); nums.sort(function (a, c) { return a - c; });
+        var html = "", last = 0; nums.forEach(function (n) { if (n - last > 1) html += '<span class="fv-pg-gap" aria-hidden="true">…</span>'; html += b(n, n, { cur: n === page, aria: "Page " + n }); last = n; });
+        f.innerHTML = '<span class="fv-pg-count">Showing <b>' + fmt(from + 1) + "–" + fmt(to) + "</b> of " + fmt(N) + " " + noun + "</span>" +
+          (pages > 1 ? '<nav aria-label="Pages">' + b("‹ Previous", page - 1, { dis: page === 1 }) + html + b("Next ›", page + 1, { dis: page === pages }) + "</nav>" : "");
+      }
+      setTimeout(function () { busy = false; }, 0);
+    }
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest && e.target.closest(".fv-pager button"); if (!t) return;
+      if (t.classList.contains("fv-pg-more")) { var g = rowsOf(), first = g && g.rows[shown]; shown += SIZE; draw(); if (first) { first.setAttribute("tabindex", "-1"); first.focus({ preventScroll: true }); } return; }
+      setPage(+t.getAttribute("data-p")); var c = document.querySelector(".fv-pager"); if (c) (c.closest("section.card") || c).scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    var tm; new MutationObserver(function () { if (busy) return; clearTimeout(tm); tm = setTimeout(draw, 50); }).observe(document.body, { childList: true, subtree: true });
+    draw();
+  }
+  if (document.readyState === "complete") setTimeout(pager, 300); else window.addEventListener("load", function () { setTimeout(pager, 300); });
 })();
