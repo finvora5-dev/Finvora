@@ -57,11 +57,19 @@
     nav.innerHTML = ADMIN_TABS.map(function (t) { return '<a href="' + t[0] + '.dc.html"' + (t[0] === here ? ' aria-current="page"' : "") + ">" + icon(t[0]) + "<span>" + t[1] + "</span></a>"; }).join("") +
       '<button type="button"' + (inTabs ? "" : ' aria-current="page"') + ' aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>More</span></button>';
     var sheet = document.createElement("div"); sheet.className = "fv-absheet"; sheet.hidden = true; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-label", "All admin pages");
-    sheet.innerHTML = '<div class="fv-absheet-in">' + links.map(function (a) { var c = a.cloneNode(true); c.removeAttribute("class"); if (c.getAttribute("href").indexOf(here + ".") === 0) c.setAttribute("aria-current", "page"); else c.removeAttribute("aria-current"); return c.outerHTML; }).join("") + "</div>";
+    var staff = (window.FV && FV.ADMIN && FV.ADMIN.staff && FV.ADMIN.staff()) || { name: "Tobi O." };
+    sheet.innerHTML = '<div class="fv-absheet-in"><span class="fv-abhandle"></span><h2>All admin pages</h2><div class="fv-abgrid">' + links.map(function (a) { var c = a.cloneNode(true); c.removeAttribute("class"); if (c.getAttribute("href").indexOf(here + ".") === 0) c.setAttribute("aria-current", "page"); else c.removeAttribute("aria-current"); return c.outerHTML; }).join("") + '</div><div class="fv-abme"><span class="fv-abav">' + (function (n) { var w = String(n || "Tobi").trim().split(/\s+/); return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase(); })(staff.name) + '</span><span><strong>' + String(staff.name || "Tobi").replace(/[<&]/g, "") + '</strong><span>Content editor</span></span><button type="button" class="fv-about">Sign out</button></div></div>';
     var more = nav.querySelector("button");
     more.addEventListener("click", function () { sheet.hidden = !sheet.hidden; more.setAttribute("aria-expanded", String(!sheet.hidden)); });
     sheet.addEventListener("click", function (e) { if (e.target === sheet) { sheet.hidden = true; more.setAttribute("aria-expanded", "false"); } });
+    sheet.querySelector(".fv-about").addEventListener("click", function () { if (window.FV && FV.ADMIN && FV.ADMIN.signOut) FV.ADMIN.signOut(); location.href = "UASignIn.dc.html"; });
     document.body.appendChild(sheet); document.body.appendChild(nav);
+    // Top bar as in the approved mock-up: Finvora mark, the page's own title, the staff avatar.
+    var hd = el.querySelector("header");
+    if (hd && !hd.querySelector(".fv-abmark")) {
+      var mk = document.createElement("span"); mk.className = "fv-abmark"; mk.textContent = "F"; mk.setAttribute("aria-hidden", "true"); hd.insertBefore(mk, hd.firstChild);
+      var av = document.createElement("span"); av.className = "fv-abav"; av.setAttribute("role", "img"); av.setAttribute("aria-label", staff.name || "Staff"); av.textContent = sheet.querySelector(".fv-abav").textContent; hd.appendChild(av);
+    }
   }
   function fit() {
     var el = root(); if (!el) return;
