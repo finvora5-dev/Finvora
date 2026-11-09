@@ -3,12 +3,13 @@ import {
   CONFIG, feeFor, quoteByAmount, newAccount, executeTrade, valuePortfolio, replay, formatNaira, parseNairaToKobo,
   entitlements, nextForYou, emptyLearning, startLesson, completeLesson, streak, isUnlocked,
   answerQuestion, isAdviceRequest, canAsk, recordAsk, suggestedPrompts, scoreAll, countsTowardLimit, ASK, type AskSources,
+  measures, positionOf, portfolioMix, dividendCalendar, CRISES, crisisStep, totalOf, salarySplit, surpriseBill, buyingPower, adviceCheck, type CrisisPosition,
   createOrder, applyCheck, retry, canStartPurchase, effectivePlan, addPeriod,
   historicalReturn, compound, parseStored, serialise, isObject, search, suggest, shouldShow, DEFAULT_PROMPTS, priceSeries,
   type TradeRequest,
 } from "./index";
 import { ASK_CASES } from "./askfin.cases";
-import { SCRIPTED_ANSWERS, ARTICLES, askCompanies } from "../../sample-data/src/index";
+import { SCRIPTED_ANSWERS, ARTICLES, askCompanies, PRACTICE_COMPANIES } from "../../sample-data/src/index";
 
 const N = 100; // kobo per naira
 const fees = { bps: 150, minKobo: 50 * N };
@@ -373,5 +374,68 @@ describe("Review what I missed (Part 2)", () => {
   it("uses the game rules' amounts", () => {
     expect(REVIEW_XP.allFixed).toBe(XP.improvement);
     expect(REVIEW_XP.practice).toBe(XP.lessonPractice);
+  });
+});
+
+describe("Plus learning tools (design Part 4)", () => {
+  const P = PRACTICE_COMPANIES;
+  const ntb = P.find((c) => c.ticker === "NTB")!, ksp = P.find((c) => c.ticker === "KSP")!;
+  it("gives Plus learners the tools and free learners none", () => {
+    expect(entitlements("plus").plusTools).toBe(true);
+    expect(entitlements("free").plusTools).toBe(false);
+  });
+  it("explains numbers and positions without judging", () => {
+    const m = measures(ntb, 5620, [5400, 5620, 5800]);
+    expect(m.pe).toBeCloseTo(8, 0);
+    expect(m.dividendCover).not.toBeNull();
+    expect(measures(ksp, 12450, [12000, 12450]).dividendCover).toBeNull();
+    expect(positionOf(3, [1, 2, 3])).toBe("highest of the five");
+    expect(positionOf(null, [1, 2])).toBe("not applicable");
+  });
+  it("adds up the practice portfolio and fees in kobo", () => {
+    const acc = { cashKobo: 1000, holdings: [{ ticker: "ADF", quantity: 10 }, { ticker: "NTB", quantity: 5 }], trades: [{ ticker: "ADF", side: "buy" as const, quantity: 10, feesKobo: 50, day: 1 }, { ticker: "NTB", side: "buy" as const, quantity: 5, feesKobo: 70, day: 2 }] };
+    const mix = portfolioMix(acc, P, (t) => (t === "ADF" ? 3000 : 5600));
+    expect(mix.investedKobo).toBe(30000 + 28000);
+    expect(mix.sectors.reduce((s, x) => s + x.valueKobo, 0)).toBe(mix.investedKobo);
+    expect(mix.feesKobo).toBe(120);
+    expect(mix.biggest?.ticker).toBe("ADF");
+  });
+  it("pays dividends only on shares held before the pay day", () => {
+    const trades = [{ ticker: "NTB", side: "buy" as const, quantity: 100, feesKobo: 0, day: 50 }];
+    const acc = { cashKobo: 0, holdings: [{ ticker: "NTB", quantity: 100 }], trades };
+    const before = dividendCalendar(acc, P, 80)[0]!, after = dividendCalendar(acc, P, 95)[0]!;
+    expect(before.receivedKobo).toBe(0);
+    expect(after.receivedKobo).toBe(100 * 300);
+    expect(after.nextDay).toBe(250 + 90);
+    expect(dividendCalendar({ ...acc, holdings: [{ ticker: "ZLT", quantity: 3 }], trades: [{ ...trades[0]!, ticker: "ZLT" }] }, P, 95)[0]!.pays).toBe(false);
+  });
+  it("runs a crisis on a copy and keeps every kobo", () => {
+    const start: CrisisPosition = { cashKobo: 50_000, values: { ADF: 30_000, NTB: 20_000 } }, copy = JSON.parse(JSON.stringify(start));
+    const sector = (t: string) => P.find((c) => c.ticker === t)!.sector;
+    let pos = start;
+    for (const st of CRISES[0]!.steps) pos = crisisStep(pos, sector, st, "cash");
+    expect(start).toEqual(copy);
+    const cashOnly = crisisStep(start, sector, { text: "", moveBps: {} }, "cash");
+    expect(totalOf(cashOnly)).toBe(totalOf(start));
+    const add = crisisStep(start, sector, { text: "", moveBps: {} }, "add");
+    expect(totalOf(add)).toBe(totalOf(start));
+  });
+  it("money scenarios add up in kobo", () => {
+    const s = salarySplit(15_000_000, 5000, 3000);
+    expect(s.needsKobo + s.wantsKobo + s.savingsKobo).toBe(15_000_000);
+    const b = surpriseBill(5_000_000, 2_000_000, 500, 3);
+    expect(b.fromSavingsKobo + b.borrowedKobo).toBe(5_000_000);
+    expect(b.extraCostKobo).toBeGreaterThan(0);
+    expect(buyingPower(10_000_000, 2000, 1)).toBe(8_333_333);
+  });
+  it("blocks advice words in every Plus text", () => {
+    expect(adviceCheck("You should buy this share")).toEqual(["buy"]);
+    expect(adviceCheck("A buyer's market")).toEqual([]);
+    const texts = [...CRISES.flatMap((c) => [c.title, c.style, c.history, c.end, ...c.steps.map((s) => s.text)]), ...P.map((c) => c.about), "highest of the five", "in the middle", "lowest of the five", "Keep everything", "Move some to cash", "Add more"];
+    for (const t of texts) expect(adviceCheck(t), t).toEqual([]);
+  });
+  it("Ask Fin's fixed replies pass the advice check except the refusal that names it", () => {
+    const off = answerQuestion("What is the weather?", null, { scripts: SCRIPTED_ANSWERS, articles: ARTICLES, companies: askCompanies() });
+    expect(adviceCheck(off.answer)).toEqual([]);
   });
 });

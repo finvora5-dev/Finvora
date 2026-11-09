@@ -12,3 +12,4 @@ export * from "./storage";
 export * from "./search";
 export * from "./feedback";
 export * from "./review";
+export * from "./plus";

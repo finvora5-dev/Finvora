@@ -44,13 +44,9 @@
   // ---- Simulator: virtual money, made-up companies. Rules (fees, trades, valuation) come from
   // packages/domain via fvd.js. Prices move once a day on a fixed made-up path.
   var SIM_KEY = "fv.sim.v1", SIM_START = Date.UTC(2026, 9, 1), SIM_DAYS = 800;
-  var COMPANIES = [
-    { t: "ADF", name: "Adire Foods", sector: "Food", label: "Food and drink", base: 3000, div: 150, color: "#5B21B6" },
-    { t: "KSP", name: "Kola Solar Power", sector: "Energy", label: "Energy", base: 12450, div: 0, color: "#0FA394" },
-    { t: "NTB", name: "Nupe Trust Bank", sector: "Banking", label: "Banking", base: 5620, div: 300, color: "#7B4AF0" },
-    { t: "OKM", name: "Okeke Motors", sector: "Transport", label: "Transport", base: 8100, div: 200, color: "#E8361C" },
-    { t: "ZLT", name: "Zuri Telecom", sector: "Telecoms", label: "Telecoms", base: 2275, div: 0, color: "#4C1D95" }
-  ];
+  // The Practice Market's made-up companies, from packages/sample-data (design Part 4: one list for every screen).
+  var COMPANIES = window.FVD.PRACTICE_COMPANIES.map(function (c) { var y = c.years[c.years.length - 1];
+    return { t: c.ticker, name: c.name, sector: c.sector, label: c.label, base: c.basePriceKobo, div: y.dividendPerShareKobo, color: c.color }; });
   var series = {};
   function D() { return window.FVD; }
   // ---- Stored data upgrades (design Part 1, section 4). Add fields with defaults; never rename or drop
@@ -139,9 +135,7 @@
   // ---- Ask Fin: scripted answers and refusals from packages/domain, free daily limit, saved chat.
   // The Practice Market's own companies (COMPANIES above) plus the real NGX companies, for Ask Fin.
   function askCos() {
-    var learn = { Food: "revenue-and-profit", Energy: "risk-and-return", Banking: "price-to-earnings", Transport: "revenue-and-profit", Telecoms: "dividend" };
-    var made = COMPANIES.map(function (c) { var w = c.name.split(" ")[0]; return { name: c.name, ticker: c.t, askAliases: [w], about: "A made-up " + c.label.toLowerCase() + " company in the Practice Market.", slug: learn[c.sector], madeUp: true }; });
-    return D().askCompanies().filter(function (c) { return !c.madeUp; }).concat(made);
+    return D().askCompanies();
   }
   var ASK_KEY = "fv.ask.v1";
   function askLoad() {
@@ -747,6 +741,71 @@
       resetAll: function () { try { Object.keys(localStorage).filter(function (k) { return /^fv\./.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); sessionStorage.clear(); } catch (e) {} }
     }
   };
+
+  // ---- Plus learning tools (design Part 4). Rules in packages/domain/src/plus.ts; this is browser state and glue.
+  var PLUS_KEY = "fv.plus.v1";
+  function plusLoad() {
+    try { var p = JSON.parse(localStorage.getItem(PLUS_KEY) || "null"); if (p && Array.isArray(p.lists)) return p; } catch (e) {}
+    return { lists: [{ name: "My watchlist", tickers: [], notes: {} }], alertBps: 500, seenAlerts: {}, crises: {}, scenarios: {}, run: null };
+  }
+  function plusSave(p) { try { localStorage.setItem(PLUS_KEY, JSON.stringify(p)); } catch (e) {} }
+  function pc(t) { return D().PRACTICE_COMPANIES.filter(function (c) { return c.ticker === t; })[0]; }
+  function plusXp(kind, id, n, title) {
+    var p = plusLoad(); if (p[kind][id]) return 0; p[kind][id] = true; plusSave(p);
+    var s = load(); addXp(s, n); markDay(s); logEvent(s, "plus", title, "USimPlus.dc.html", n); save(s);
+    if (window.fvXpBurst) window.fvXpBurst(n, title + ": +" + n + " XP"); return n;
+  }
+  var PLUS = {
+    on: function () { return D().entitlements(plan()).plusTools; },
+    companies: function () { return D().PRACTICE_COMPANIES; },
+    company: pc,
+    measures: function (t) {
+      var all = D().PRACTICE_COMPANIES.map(function (c) { return { t: c.ticker, m: D().measures(c, SIM.price(c.ticker), SIM.history(c.ticker, 30)) }; });
+      var me = all.filter(function (x) { return x.t === t; })[0].m, col = function (k) { return all.map(function (x) { return x.m[k]; }); };
+      return { m: me, pos: { pe: D().positionOf(me.pe, col("pe")), debtToEquity: D().positionOf(me.debtToEquity, col("debtToEquity")), swingPct: D().positionOf(me.swingPct, col("swingPct")), dividendCover: D().positionOf(me.dividendCover, col("dividendCover")) } };
+    },
+    mix: function () { return D().portfolioMix(SIM.account(), D().PRACTICE_COMPANIES, SIM.price); },
+    dividends: function () { return D().dividendCalendar(SIM.account(), D().PRACTICE_COMPANIES, simDay()); },
+    history: function (t) { return D().companyHistory(pc(t)); },
+    day: simDay,
+    // Crisis practice: runs on a copy of the practice portfolio; the real one is never changed.
+    crisis: function (id) { return D().CRISES.filter(function (c) { return c.id === id; })[0]; },
+    run: function () { return plusLoad().run; },
+    startCrisis: function (id) {
+      var a = SIM.account(), values = {};
+      a.holdings.forEach(function (h) { if (h.quantity > 0) values[h.ticker] = h.quantity * SIM.price(h.ticker); });
+      var own = Object.keys(values).length > 0;
+      // No practice shares yet: an example ₦100,000 portfolio, said so on screen.
+      if (!own) values = { ADF: 3000000, NTB: 3000000, ZLT: 2000000 };
+      var start = { cashKobo: own ? a.cashKobo : 2000000, values: values, example: !own };
+      var p = plusLoad(); p.run = { id: id, step: 0, pos: start, still: start, start: D().totalOf(start), path: [] }; plusSave(p); return p.run;
+    },
+    choose: function (choice) {
+      var p = plusLoad(), r = p.run; if (!r) return null; var c = PLUS.crisis(r.id), st = c.steps[r.step];
+      var sec = function (t) { return pc(t) ? pc(t).sector : ""; };
+      r.pos = D().crisisStep(r.pos, sec, st, choice); r.still = D().crisisStep(r.still, sec, st, "keep");
+      r.path.push(choice); r.step++; plusSave(p);
+      if (r.step >= c.steps.length) plusXp("crises", r.id, 10, "Crisis practice: " + c.title);
+      return r;
+    },
+    total: function (pos) { return D().totalOf(pos); },
+    scenarioDone: function (id, title) { return plusXp("scenarios", id, 5, "Money scenario: " + title); },
+    // Watchlists
+    lists: function () { return plusLoad().lists; },
+    addList: function (name) { var p = plusLoad(); p.lists.push({ name: name || "New list", tickers: [], notes: {} }); plusSave(p); },
+    toggle: function (i, t) { var p = plusLoad(), l = p.lists[i]; if (!l) return; var k = l.tickers.indexOf(t); if (k < 0) l.tickers.push(t); else l.tickers.splice(k, 1); plusSave(p); },
+    note: function (i, t, text) { var p = plusLoad(); if (p.lists[i]) { p.lists[i].notes[t] = text; plusSave(p); } },
+    alertBps: function () { return plusLoad().alertBps; },
+    setAlert: function (bps) { var p = plusLoad(); p.alertBps = bps; plusSave(p); },
+    /** Companies on any list that moved more than the alert size since the last trading day; each shown once a day. */
+    alerts: function () {
+      var p = plusLoad(), d = simDay(), seen = {}, out = [];
+      p.lists.forEach(function (l) { l.tickers.forEach(function (t) { if (seen[t]) return; seen[t] = 1; var ch = SIM.change(t); if (Math.abs(ch) * 100 >= p.alertBps && p.seenAlerts[t] !== d) out.push({ t: t, change: ch }); }); });
+      if (out.length) { out.forEach(function (o) { p.seenAlerts[o.t] = d; }); plusSave(p); }
+      return out;
+    },
+  };
+  FV.PLUS = PLUS;
   window.FV = FV;
   // Admin pages need a staff sign-in in this tab (a demonstration: the check runs in the browser).
   (function () { var m = /\/(UA\w+\.dc\.html)$/.exec(location.pathname); if (m && m[1] !== "UASignIn.dc.html" && !ADMIN.staff()) location.replace("UASignIn.dc.html?next=" + encodeURIComponent(m[1] + location.search)); })();

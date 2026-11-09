@@ -40,7 +40,9 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   **Library:** 15 articles with takeaways, how it works, an African example with made-up figures and common mistakes; search; saved articles; dictionary. Reading an article to the end earns 3 XP once.
 *   **Ask Fin** (design Part 3): answers every money question from hand-written answers, Library articles (including admin-published ones) and company descriptions, never with invented figures; refuses buy or sell advice; declines off-topic questions; "Did you mean" for near misses; only real answers use up the 5 free a day, then Ask Fin closes until tomorrow; admin "Ask words" help Fin find articles; 40 test questions. Client note: `docs/ask-fin-phase1-note.md`.
 *   **Practice Market (simulator):** made-up companies and virtual naira, amount-first buying, approximate fees, real NGX hours (weekdays 10:00 to 14:30 Lagos time) with a closed sheet that shows the next opening time and offers to queue the order or do a lesson. Prices move once per trading day.
+*   **Plus learning tools** (design Part 4): What this number means, Your practice portfolio, Crisis practice, Money scenarios, Dividend tracker, Compare over time and Watchlists, on the five made-up Practice Market companies, with an advice-word check in the tests. Free learners see them locked.
 *   **Plans and checkout:** Plus at ₦5,999 a month or ₦65,989 a year (one month free); simulated checkout with pending, confirmed success and confirmed failed states; receipt email preview.
+*   **Admin on phones** (design Part 5): a task list (AI summaries, Ask Fin replies, feedback, learner prompts) with one item per screen and a 2.5-second Undo; wide tables say "open on a larger screen".
 *   **Admin (browser-only demonstration):** staff sign-in, overview, content editor, daily-question builder, Ask Fin review, AI summary approvals, users and payments, plan prices, feedback, audit log.
 *   **Reviewer tools** (Settings, or the sign-in screen): switch Free or Plus, sign in as Ada, open admin, pick the next checkout result, open the market, jump progress, clear everything. Open to everyone by decision D21.
 *   **Phones:** every screen fits widths from 280 px up; the lesson path follows the phone's text-size setting.
@@ -51,7 +53,8 @@ Rebuild steps are in `apps/prototype/tools/README.md`. `build_sw.py` always runs
 *   Design Part 1, built: `docs/designs/prototype-settings-labels-storage.md`.
 *   Design Part 2, built: `docs/designs/review-what-i-missed.md`.
 *   Design Part 3, approved: `docs/designs/ask-fin-grounded-answers.md`.
-*   Still to design: Part 4 Plus features (D6, D13), Part 5 admin tasks on phones (D10, D14).
+*   Design Part 4, built: `docs/designs/plus-features.md`. Design Part 5, built: `docs/designs/admin-on-phones.md`.
+*   Handover to Phase 2: `docs/adr/0002-phase-1-handover.md`.
 *   EGM review brief: `concepts_brief.md`.
 
 ## Known limits

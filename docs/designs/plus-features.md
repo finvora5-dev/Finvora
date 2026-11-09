@@ -88,6 +88,12 @@ Each step ships on its own: hub and entitlements, What this number means, Your p
 *   **Made-up figures read as real:** every figure carries the made-up label; crisis names say "style".
 *   **Scope:** seven tools is the largest part so far; the build order lets the owner review each as it lands.
 
+## As built (9 Nov 2026)
+
+*   `SIM_COMPANIES` is kept (marked unused) because the old `apps/web` files still import it; everything in the prototype reads `PRACTICE_COMPANIES`.
+*   Tools render from `site/plus.js` into boards made by `wire_plus.py`; on desktop they are centred at 720 px wide.
+*   Crisis practice uses an example ₦100,000 portfolio (said on screen) when the learner owns no practice shares.
+
 ## Alternatives Considered
 
 *   **Build some, lock the rest:** rejected by the owner (D13).

@@ -168,3 +168,30 @@ html.fv-moment-open { overflow: hidden; }
 @keyframes fvmWave { 0%,100% { transform: skewY(0) scaleX(1) } 50% { transform: skewY(-6deg) scaleX(.94) } }
 .fv-reduce #fv-moment *, .fv-reduce #fv-moment *::before { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #fv-moment *, #fv-moment *::before { animation: none !important; } }
+
+/* Admin on phones (design Part 5): real size, one column, sidebar hidden, wide tables replaced by a note. */
+.fv-admin-phone .dside, .fv-admin-phone .root > aside { display: none !important; }
+.fv-admin-phone .root { display: block !important; width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root > *:not(.fv-apbar) { width: auto !important; max-width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+.fv-admin-phone .root [style*="display: flex"] { flex-wrap: wrap; }
+.fv-admin-phone .root [style*="width: 1"], .fv-admin-phone .root [style*="width: 2"], .fv-admin-phone .root [style*="width: 3"], .fv-admin-phone .root [style*="width: 4"], .fv-admin-phone .root [style*="width: 5"], .fv-admin-phone .root [style*="width: 6"], .fv-admin-phone .root [style*="width: 7"], .fv-admin-phone .root [style*="width: 8"], .fv-admin-phone .root [style*="width: 9"] { max-width: 100% !important; }
+.fv-admin-phone table { display: none !important; }
+.fv-admin-phone .root, .fv-admin-phone .root * { box-sizing: border-box !important; }
+.fv-admin-phone .root > div:not(.fv-apbar) { display: block !important; width: 100% !important; min-width: 0 !important; }
+.fv-admin-phone .root header, .fv-admin-phone .root main { width: 100% !important; max-width: 100% !important; }
+.fv-admin-phone .root header, .fv-admin-phone .root main { padding-left: 16px !important; padding-right: 16px !important; height: auto !important; min-height: 0 !important; flex-wrap: wrap; row-gap: 10px; }
+.fv-admin-phone .root header { padding-top: 12px !important; padding-bottom: 12px !important; }
+.fv-admin-phone .root header > * { min-width: 0; }
+.fv-admin-phone .root header > div:first-child { flex: 1 1 100% !important; }
+.fv-admin-phone .root [style*="display: flex"] > * { min-width: 0; }
+.fv-apnote { margin: 8px 0; padding: 12px 14px; border-radius: 14px; background: #F1EBFB; color: #4C1D95; font: 700 14px 'Plus Jakarta Sans', sans-serif; }
+.fv-apbar { box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #E7E2F0; background: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; }
+.fv-apbar b { flex: 1; font-size: 17px; }
+.fv-apbar a:last-child { font-size: 14px; font-weight: 700; color: #4C1D95; }
+.fv-apmark { width: 34px; height: 34px; border-radius: 10px; background: #5B21B6; color: #FFFFFF !important; font-weight: 800; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.fv-admin-phone .root * { min-width: 0 !important; }
+.fv-admin-phone .root label, .fv-admin-phone .root section { max-width: 100% !important; }
+.fv-admin-phone .root main > *, .fv-admin-phone .root main [style*="display: grid"] > * { max-width: 100% !important; }
+.fv-admin-phone .root input, .fv-admin-phone .root textarea, .fv-admin-phone .root select { max-width: 100%; }
+.fv-admin-phone .root section > div, .fv-admin-phone .root section > label { max-width: 100% !important; }

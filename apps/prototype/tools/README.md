@@ -39,3 +39,7 @@ Reviewer shortcuts:
 - Checkout: open Plans with `?outcome=failed`, `slow` or `offline` to see those results; otherwise payments succeed.
 
 After `wire_settings.py`: `wire_askfin3.py` (design Part 3: Ask Fin "Did you mean" buttons, free-reply line, limit panel, admin Ask words). Then `build_sw.py` last.
+
+After `wire_askfin3.py`: `wire_plus.py` (design Part 4: the eight Plus tool boards drawn by `site/plus.js`, plus entry points on the Practice Market, Plans and Learn). Then `wire_a11y.py` if re-running, and `build_sw.py` last.
+
+Then `wire_admin_phone.py` (design Part 5: `UAPhoneTasks` and `UAPhoneTask`, drawn by `site/admin-phone.js`; `responsive.js` sends admin pages there when the shorter screen side is under 700 px). Then `build_sw.py` last.

@@ -1,3 +1,4 @@
+import { PRACTICE_COMPANIES } from "./practice";
 // Companies: real names and tickers (ADR 0001 D8) with plain-language descriptions only.
 // No real financial figures are stated. Every price in the app is synthetic "Demo data".
 // Simulator companies are made up (build plan §10 #5), so no real price is ever implied.
@@ -36,6 +37,7 @@ export interface SimCompany {
   learnSlug: string;
 }
 
+/** Not used by the prototype: the Practice Market uses PRACTICE_COMPANIES (practice.ts). Kept for apps/web. */
 export const SIM_COMPANIES: SimCompany[] = [
   { ticker: "LGFD", name: "Lagoon Foods", sector: "Consumer goods", blurb: "A made-up food company that sells noodles and snacks.", basePriceKobo: 1250_00, volatility: 0.015, learnSlug: "revenue-and-profit" },
   { ticker: "SVNT", name: "Savanna Telecom", sector: "Telecoms", blurb: "A made-up mobile network selling data bundles.", basePriceKobo: 3400_00, volatility: 0.018, learnSlug: "dividend" },
@@ -56,6 +58,6 @@ export const ASK_ALIASES: Record<string, string[]> = {
 export function askCompanies(): import("@finvora/domain").AskCompany[] {
   return [
     ...COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.about, howItMakesMoney: c.howItMakesMoney, slug: c.learnSlugs[0], madeUp: false })),
-    ...SIM_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.blurb, slug: c.learnSlug, madeUp: true })),
+    ...PRACTICE_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: [c.name.split(" ")[0]!], about: c.about, slug: c.learnSlug, madeUp: true })),
   ];
 }

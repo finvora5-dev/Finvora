@@ -333,6 +333,7 @@ function entitlements(plan) {
         calculatorDividends: plus,
         reportScan: plus,
         pdfSummary: plus,
+        plusTools: plus,
     };
 }
 
@@ -505,6 +506,154 @@ function canAsk(usage, today, limit) {
 }
 function recordAsk(usage, today) {
     return usage && usage.day === today ? { day: today, count: usage.count + 1 } : { day: today, count: 1 };
+}
+
+// ---- plus
+// Plus learning tools (design Part 4, docs/designs/plus-features.md). Pure, tested, kobo everywhere.
+// Nothing here rates a company or tells anyone what to do with money; adviceCheck guards the wording.
+/** Round half to even, for every multiplication of kobo by a rate. */
+function roundHalfEven(x) {
+    const f = Math.floor(x), d = x - f;
+    if (Math.abs(d - 0.5) < 1e-9)
+        return f % 2 === 0 ? f : f + 1;
+    return Math.round(x);
+}
+const latest = (c) => c.years[c.years.length - 1];
+// ---- Compare over time
+function companyHistory(c) {
+    return c.years.map((y) => ({ year: y.year, revenueKobo: y.revenueKobo, profitKobo: y.profitKobo, dividendPerShareKobo: y.dividendPerShareKobo }));
+}
+/** priceKobo: today's price. recent: the last 30 trading days of prices, oldest first. */
+function measures(c, priceKobo, recent) {
+    const y = latest(c), eps = y.profitKobo / c.sharesInIssue;
+    const hi = Math.max(...recent), lo = Math.min(...recent);
+    return {
+        pe: eps > 0 ? Math.round((priceKobo / eps) * 10) / 10 : null,
+        debtToEquity: Math.round((y.debtKobo / y.equityKobo) * 10) / 10,
+        swingPct: lo > 0 ? Math.round(((hi - lo) / lo) * 100) : 0,
+        dividendCover: y.dividendPerShareKobo > 0 && eps > 0 ? Math.round((eps / y.dividendPerShareKobo) * 10) / 10 : null,
+    };
+}
+/** Where one value sits among all five companies' values. Never good or bad. */
+function positionOf(value, all) {
+    if (value === null)
+        return "not applicable";
+    const v = all.filter((x) => x !== null);
+    if (value >= Math.max(...v))
+        return "highest of the five";
+    if (value <= Math.min(...v))
+        return "lowest of the five";
+    return "in the middle";
+}
+function portfolioMix(account, companies, priceOf) {
+    const rows = account.holdings.filter((h) => h.quantity > 0).map((h) => {
+        const c = companies.find((x) => x.ticker === h.ticker);
+        return { ticker: h.ticker, sector: c ? c.label : h.ticker, valueKobo: h.quantity * priceOf(h.ticker) };
+    });
+    const investedKobo = rows.reduce((s, r) => s + r.valueKobo, 0);
+    const bySector = {};
+    for (const r of rows)
+        bySector[r.sector] = (bySector[r.sector] || 0) + r.valueKobo;
+    const biggest = rows.reduce((m, r) => (r.valueKobo > m.valueKobo ? r : m), { ticker: "", sector: "", valueKobo: 0 });
+    return {
+        investedKobo, cashKobo: account.cashKobo, companyCount: rows.length,
+        sectors: Object.entries(bySector).map(([label, valueKobo]) => ({ label, valueKobo, pct: investedKobo ? Math.round((valueKobo / investedKobo) * 100) : 0 })).sort((a, b) => b.valueKobo - a.valueKobo),
+        biggest: biggest.ticker ? { ticker: biggest.ticker, pct: Math.round((biggest.valueKobo / investedKobo) * 100) } : null,
+        feesKobo: account.trades.reduce((s, t) => s + t.feesKobo, 0),
+    };
+}
+// ---- Dividend tracker
+const SIM_YEAR_DAYS = 250;
+/** Shares held at the start of a simulator day, from the trade list. */
+function sharesOn(trades, ticker, day) {
+    return trades.filter((t) => t.ticker === ticker && t.day < day).reduce((s, t) => s + (t.side === "buy" ? t.quantity : -t.quantity), 0);
+}
+function dividendCalendar(account, companies, today) {
+    return companies.filter((c) => account.holdings.some((h) => h.ticker === c.ticker && h.quantity > 0) || account.trades.some((t) => t.ticker === c.ticker)).map((c) => {
+        const dps = latest(c).dividendPerShareKobo, held = account.holdings.find((h) => h.ticker === c.ticker)?.quantity || 0;
+        if (!dps || !c.payDay)
+            return { ticker: c.ticker, name: c.name, pays: false, nextDay: null, perShareKobo: 0, nextKobo: 0, receivedKobo: 0 };
+        let received = 0;
+        for (let d = c.payDay; d <= today; d += SIM_YEAR_DAYS)
+            received += sharesOn(account.trades, c.ticker, d) * dps;
+        const yearStart = Math.floor(today / SIM_YEAR_DAYS) * SIM_YEAR_DAYS;
+        const next = yearStart + c.payDay > today ? yearStart + c.payDay : yearStart + SIM_YEAR_DAYS + c.payDay;
+        return { ticker: c.ticker, name: c.name, pays: true, nextDay: next, perShareKobo: dps, nextKobo: held * dps, receivedKobo: received };
+    });
+}
+const CRISES = [
+    { id: "oil", title: "Oil price shock", style: "2016 style", history: "In 2016 oil prices fell sharply, Nigeria's economy shrank and many share prices fell for months.", steps: [
+            { text: "Oil prices fall by a third. Transport and energy companies feel it first.", moveBps: { Energy: -1800, Transport: -1500, Banking: -600, Food: -300, Telecoms: -300 } },
+            { text: "Oil keeps falling. Banks worry about loans to oil firms.", moveBps: { Energy: -1000, Transport: -800, Banking: -1200, Food: -400, Telecoms: -200 } },
+            { text: "Prices of imported goods rise. Shoppers cut back.", moveBps: { Energy: -300, Transport: -500, Banking: -300, Food: -700, Telecoms: -200 } },
+            { text: "Oil steadies. Some prices stop falling.", moveBps: { Energy: 600, Transport: 400, Banking: 300, Food: 200, Telecoms: 300 } },
+            { text: "A slow recovery starts, unevenly.", moveBps: { Energy: 900, Transport: 700, Banking: 600, Food: 500, Telecoms: 500 } },
+        ], end: "Shocks hit some sectors much harder than others. Recoveries are slow and uneven, and nobody knows in advance how long a fall lasts." },
+    { id: "bank", title: "Bank scare", style: "2009 style", history: "In 2009 several Nigerian banks were rescued after bad loans, and bank shares fell steeply.", steps: [
+            { text: "News that some banks made risky loans. Bank shares drop.", moveBps: { Banking: -2200, Energy: -500, Transport: -500, Food: -300, Telecoms: -300 } },
+            { text: "People worry about their deposits. Lending slows.", moveBps: { Banking: -1500, Energy: -700, Transport: -700, Food: -300, Telecoms: -400 } },
+            { text: "The central bank steps in to support the banks.", moveBps: { Banking: 500, Energy: 100, Transport: 100, Food: 100, Telecoms: 200 } },
+            { text: "Banks raise new money. Old shareholders own a smaller part.", moveBps: { Banking: -400, Energy: 300, Transport: 200, Food: 300, Telecoms: 300 } },
+            { text: "Confidence returns slowly.", moveBps: { Banking: 800, Energy: 500, Transport: 400, Food: 400, Telecoms: 500 } },
+        ], end: "When one sector has a crisis, owning companies in different sectors can soften the fall. It does not remove the risk." },
+    { id: "pandemic", title: "Pandemic shock", style: "2020 style", history: "In early 2020 markets around the world fell fast as countries locked down, then recovered at different speeds.", steps: [
+            { text: "Lockdowns begin. Almost everything falls at once.", moveBps: { Banking: -1500, Energy: -1800, Transport: -2500, Food: -800, Telecoms: -700 } },
+            { text: "People stay home. Data use jumps; travel stops.", moveBps: { Banking: -500, Energy: -600, Transport: -1200, Food: 200, Telecoms: 800 } },
+            { text: "Shops reopen for food and essentials.", moveBps: { Banking: 300, Energy: 200, Transport: -200, Food: 600, Telecoms: 400 } },
+            { text: "Lockdowns ease. Some sectors bounce back.", moveBps: { Banking: 900, Energy: 1000, Transport: 1200, Food: 400, Telecoms: 300 } },
+            { text: "Most prices recover; travel stays weaker.", moveBps: { Banking: 800, Energy: 900, Transport: 900, Food: 300, Telecoms: 400 } },
+        ], end: "Falls can be fast and recoveries uneven. Selling after a big fall locks in the loss; adding more costs cash you may need. Both have trade-offs." },
+];
+/** One step on a copy: moves each sector by its basis points, then applies the learner's choice. Never touches the real account. */
+function crisisStep(pos, sectorOf, step, choice) {
+    const values = {};
+    for (const [t, v] of Object.entries(pos.values))
+        values[t] = roundHalfEven((v * (10_000 + (step.moveBps[sectorOf(t)] || 0))) / 10_000);
+    let cash = pos.cashKobo;
+    if (choice === "cash")
+        for (const t of Object.keys(values)) {
+            const out = roundHalfEven(values[t] / 4);
+            values[t] = values[t] - out;
+            cash += out;
+        }
+    if (choice === "add") {
+        const add = roundHalfEven(cash / 4), keys = Object.keys(values);
+        if (keys.length) {
+            const each = Math.floor(add / keys.length);
+            for (const t of keys)
+                values[t] = values[t] + each;
+            cash -= each * keys.length;
+        }
+    }
+    return { cashKobo: cash, values };
+}
+const totalOf = (p) => p.cashKobo + Object.values(p.values).reduce((s, v) => s + v, 0);
+// ---- Money scenarios
+function salarySplit(salaryKobo, needsBps, wantsBps) {
+    const needs = roundHalfEven((salaryKobo * needsBps) / 10_000), wants = roundHalfEven((salaryKobo * wantsBps) / 10_000);
+    return { needsKobo: needs, wantsKobo: wants, savingsKobo: salaryKobo - needs - wants };
+}
+/** Surprise bill: from savings, or borrowed at a monthly rate for a number of months. */
+function surpriseBill(billKobo, savingsKobo, monthlyRateBps, months) {
+    const fromSavings = Math.min(billKobo, savingsKobo), borrowed = billKobo - fromSavings;
+    let owed = borrowed;
+    for (let m = 0; m < months; m++)
+        owed = roundHalfEven((owed * (10_000 + monthlyRateBps)) / 10_000);
+    return { fromSavingsKobo: fromSavings, borrowedKobo: borrowed, repayKobo: owed, extraCostKobo: owed - borrowed };
+}
+/** Prices rising: what savings buy after some years of inflation, in today's naira. */
+function buyingPower(savingsKobo, inflationBps, years) {
+    let v = savingsKobo;
+    for (let y = 0; y < years; y++)
+        v = roundHalfEven((v * 10_000) / (10_000 + inflationBps));
+    return v;
+}
+// ---- Advice check (D13)
+const ADVICE_WORDS = ["buy", "sell", "avoid", "rating", "rated", "signal", "recommend", "recommendation", "score", "rank", "ranked", "outperform", "underperform", "undervalued", "overvalued", "good investment", "bad investment"];
+/** Blocked words found in a piece of text: whole words, any case. */
+function adviceCheck(text) {
+    const t = " " + text.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ") + " ";
+    return ADVICE_WORDS.filter((w) => t.includes(" " + w + " "));
 }
 
 // ---- checkout
@@ -776,10 +925,60 @@ const ARTICLES = [
 ];
 const TOPICS = ["Money basics", "Investing", "Markets", "Nigerian market", "Company analysis", "Decisions and risk"];
 
+// ---- sd:practice
+// The Practice Market's made-up companies (design Part 4). One list for every screen and for Ask Fin.
+// Prices come from the seeded price series; yearly figures are written by hand. All money in kobo.
+const BN = 100_000_000_000; // ₦1 billion in kobo
+const PRACTICE_COMPANIES = [
+    { ticker: "ADF", name: "Adire Foods", sector: "Food", label: "Food and drink", basePriceKobo: 3000, color: "#5B21B6", payDay: 120,
+        about: "A made-up food and drink company that sells packaged snacks and drinks.", sharesInIssue: 1_000_000_000, learnSlug: "revenue-and-profit",
+        years: [
+            { year: 2021, revenueKobo: 18 * BN, profitKobo: 2.0 * BN, dividendPerShareKobo: 120, debtKobo: 6 * BN, equityKobo: 13 * BN },
+            { year: 2022, revenueKobo: 20 * BN, profitKobo: 2.2 * BN, dividendPerShareKobo: 130, debtKobo: 6 * BN, equityKobo: 14 * BN },
+            { year: 2023, revenueKobo: 22 * BN, profitKobo: 2.5 * BN, dividendPerShareKobo: 140, debtKobo: 6 * BN, equityKobo: 14 * BN },
+            { year: 2024, revenueKobo: 25 * BN, profitKobo: 2.8 * BN, dividendPerShareKobo: 150, debtKobo: 6 * BN, equityKobo: 15 * BN },
+            { year: 2025, revenueKobo: 27 * BN, profitKobo: 3.1 * BN, dividendPerShareKobo: 150, debtKobo: 6 * BN, equityKobo: 15 * BN },
+        ] },
+    { ticker: "KSP", name: "Kola Solar Power", sector: "Energy", label: "Energy", basePriceKobo: 12450, color: "#0FA394", payDay: 0,
+        about: "A made-up solar energy company that builds and runs solar farms.", sharesInIssue: 400_000_000, learnSlug: "risk-and-return",
+        years: [
+            { year: 2021, revenueKobo: 4 * BN, profitKobo: -1.0 * BN, dividendPerShareKobo: 0, debtKobo: 18 * BN, equityKobo: 8 * BN },
+            { year: 2022, revenueKobo: 6 * BN, profitKobo: -0.4 * BN, dividendPerShareKobo: 0, debtKobo: 19 * BN, equityKobo: 8 * BN },
+            { year: 2023, revenueKobo: 9 * BN, profitKobo: 0.8 * BN, dividendPerShareKobo: 0, debtKobo: 20 * BN, equityKobo: 9 * BN },
+            { year: 2024, revenueKobo: 12 * BN, profitKobo: 1.6 * BN, dividendPerShareKobo: 0, debtKobo: 20 * BN, equityKobo: 10 * BN },
+            { year: 2025, revenueKobo: 15 * BN, profitKobo: 2.4 * BN, dividendPerShareKobo: 0, debtKobo: 20 * BN, equityKobo: 10 * BN },
+        ] },
+    { ticker: "NTB", name: "Nupe Trust Bank", sector: "Banking", label: "Banking", basePriceKobo: 5620, color: "#7B4AF0", payDay: 90,
+        about: "A made-up bank that earns interest on loans and fees on transfers and cards.", sharesInIssue: 2_000_000_000, learnSlug: "price-to-earnings",
+        years: [
+            { year: 2021, revenueKobo: 60 * BN, profitKobo: 10 * BN, dividendPerShareKobo: 200, debtKobo: 380 * BN, equityKobo: 70 * BN },
+            { year: 2022, revenueKobo: 66 * BN, profitKobo: 11 * BN, dividendPerShareKobo: 220, debtKobo: 390 * BN, equityKobo: 74 * BN },
+            { year: 2023, revenueKobo: 74 * BN, profitKobo: 12 * BN, dividendPerShareKobo: 250, debtKobo: 395 * BN, equityKobo: 77 * BN },
+            { year: 2024, revenueKobo: 82 * BN, profitKobo: 13 * BN, dividendPerShareKobo: 280, debtKobo: 400 * BN, equityKobo: 79 * BN },
+            { year: 2025, revenueKobo: 90 * BN, profitKobo: 14 * BN, dividendPerShareKobo: 300, debtKobo: 400 * BN, equityKobo: 80 * BN },
+        ] },
+    { ticker: "OKM", name: "Okeke Motors", sector: "Transport", label: "Transport", basePriceKobo: 8100, color: "#E8361C", payDay: 200,
+        about: "A made-up company that assembles and sells buses and motorcycles.", sharesInIssue: 500_000_000, learnSlug: "revenue-and-profit",
+        years: [
+            { year: 2021, revenueKobo: 30 * BN, profitKobo: 2.2 * BN, dividendPerShareKobo: 150, debtKobo: 12 * BN, equityKobo: 18 * BN },
+            { year: 2022, revenueKobo: 28 * BN, profitKobo: 1.5 * BN, dividendPerShareKobo: 120, debtKobo: 13 * BN, equityKobo: 18 * BN },
+            { year: 2023, revenueKobo: 33 * BN, profitKobo: 2.6 * BN, dividendPerShareKobo: 160, debtKobo: 12 * BN, equityKobo: 19 * BN },
+            { year: 2024, revenueKobo: 36 * BN, profitKobo: 3.0 * BN, dividendPerShareKobo: 180, debtKobo: 12 * BN, equityKobo: 20 * BN },
+            { year: 2025, revenueKobo: 40 * BN, profitKobo: 3.4 * BN, dividendPerShareKobo: 200, debtKobo: 12 * BN, equityKobo: 20 * BN },
+        ] },
+    { ticker: "ZLT", name: "Zuri Telecom", sector: "Telecoms", label: "Telecoms", basePriceKobo: 2275, color: "#4C1D95", payDay: 0,
+        about: "A made-up mobile network that sells airtime and data bundles.", sharesInIssue: 3_000_000_000, learnSlug: "dividend",
+        years: [
+            { year: 2021, revenueKobo: 25 * BN, profitKobo: 1.5 * BN, dividendPerShareKobo: 0, debtKobo: 28 * BN, equityKobo: 22 * BN },
+            { year: 2022, revenueKobo: 29 * BN, profitKobo: 2.0 * BN, dividendPerShareKobo: 0, debtKobo: 29 * BN, equityKobo: 23 * BN },
+            { year: 2023, revenueKobo: 33 * BN, profitKobo: 2.4 * BN, dividendPerShareKobo: 0, debtKobo: 30 * BN, equityKobo: 24 * BN },
+            { year: 2024, revenueKobo: 38 * BN, profitKobo: 2.9 * BN, dividendPerShareKobo: 0, debtKobo: 30 * BN, equityKobo: 25 * BN },
+            { year: 2025, revenueKobo: 44 * BN, profitKobo: 3.4 * BN, dividendPerShareKobo: 0, debtKobo: 30 * BN, equityKobo: 25 * BN },
+        ] },
+];
+
 // ---- sd:companies
-// Companies: real names and tickers (ADR 0001 D8) with plain-language descriptions only.
-// No real financial figures are stated. Every price in the app is synthetic "Demo data".
-// Simulator companies are made up (build plan §10 #5), so no real price is ever implied.
+
 const COMPANIES = [
     { ticker: "MTNN", name: "MTN Nigeria", sector: "Telecoms", exchange: "NGX", about: "A mobile network company offering calls, data and mobile money services.", howItMakesMoney: "Mostly from people paying for airtime and data, plus fintech and other digital services.", learnSlugs: ["revenue-and-profit", "dividend"], demoBasePriceKobo: 22000_00, paysDividends: true },
     { ticker: "DANGCEM", name: "Dangote Cement", sector: "Industrial goods", exchange: "NGX", about: "A cement maker with plants in Nigeria and other African countries.", howItMakesMoney: "Selling cement to builders, governments and distributors.", learnSlugs: ["market-capitalisation", "revenue-and-profit"], demoBasePriceKobo: 45000_00, paysDividends: true },
@@ -790,6 +989,7 @@ const COMPANIES = [
     { ticker: "SEPLAT", name: "Seplat Energy", sector: "Oil and gas", exchange: "NGX", about: "An energy company producing oil and gas in Nigeria.", howItMakesMoney: "Selling crude oil and natural gas.", learnSlugs: ["risk-and-return"], demoBasePriceKobo: 500000_00, paysDividends: true },
     { ticker: "NB", name: "Nigerian Breweries", sector: "Consumer goods", exchange: "NGX", about: "Brews and sells beers and soft drinks.", howItMakesMoney: "Selling drinks through distributors, bars and shops.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 3500_00, paysDividends: true },
 ];
+/** Not used by the prototype: the Practice Market uses PRACTICE_COMPANIES (practice.ts). Kept for apps/web. */
 const SIM_COMPANIES = [
     { ticker: "LGFD", name: "Lagoon Foods", sector: "Consumer goods", blurb: "A made-up food company that sells noodles and snacks.", basePriceKobo: 1250_00, volatility: 0.015, learnSlug: "revenue-and-profit" },
     { ticker: "SVNT", name: "Savanna Telecom", sector: "Telecoms", blurb: "A made-up mobile network selling data bundles.", basePriceKobo: 3400_00, volatility: 0.018, learnSlug: "dividend" },
@@ -808,9 +1008,9 @@ const ASK_ALIASES = {
 function askCompanies() {
     return [
         ...COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.about, howItMakesMoney: c.howItMakesMoney, slug: c.learnSlugs[0], madeUp: false })),
-        ...SIM_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: ASK_ALIASES[c.ticker] || [], about: c.blurb, slug: c.learnSlug, madeUp: true })),
+        ...PRACTICE_COMPANIES.map((c) => ({ name: c.name, ticker: c.ticker, askAliases: [c.name.split(" ")[0]], about: c.about, slug: c.learnSlug, madeUp: true })),
     ];
 }
 
-window.FVD = { NAIRA, CONFIG, LABELS, ASK, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, REVIEW_XP, recordMisses, planReview, applyReview, reviewReward, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, countsTowardLimit, isAdviceRequest, stem, askWords, scoreAll, answerQuestion, suggestedPrompts, canAsk, recordAsk, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS, COMPANIES, SIM_COMPANIES, ASK_ALIASES, askCompanies };
+window.FVD = { NAIRA, CONFIG, LABELS, ASK, assertKobo, divRoundHalfUp, formatNaira, parseNairaToKobo, bpsToPercent, percentChange, rng, hashSeed, priceSeries, lagosParts, isMarketOpen, nextMarketOpen, tradingDaysBetween, REVIEW_XP, recordMisses, planReview, applyReview, reviewReward, DEFAULT_FEES, newAccount, feeFor, quoteShares, quoteByAmount, executeTrade, valuePortfolio, replay, entitlements, countsTowardLimit, isAdviceRequest, stem, askWords, scoreAll, answerQuestion, suggestedPrompts, canAsk, recordAsk, roundHalfEven, companyHistory, measures, positionOf, portfolioMix, SIM_YEAR_DAYS, sharesOn, dividendCalendar, CRISES, crisisStep, totalOf, salarySplit, surpriseBill, buyingPower, adviceCheck, createOrder, applyCheck, retry, canStartPurchase, addPeriod, effectivePlan, historicalReturn, compound, normalise, search, suggest, editDistance, SCRIPTED_ANSWERS, ARTICLES, TOPICS, PRACTICE_COMPANIES, COMPANIES, SIM_COMPANIES, ASK_ALIASES, askCompanies };
 })();

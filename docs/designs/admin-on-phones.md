@@ -48,6 +48,12 @@ Admin boards are 1440 px wide. Below 1024 px, `fit()` in `responsive.js` scales 
 *   **Done when:** the owner can approve a summary, check an Ask Fin reply with a note, mark feedback done and switch a feature on a 390 px phone without zooming (D19).
 *   **Tests:** a Playwright walk at 280, 390, 844×390 (landscape) and 820 px: each action once, Undo once, the counts go down, "All done" shows, the audit log lists the actions and not the undone one, and wide boards show the banner.
 
+## As built (9 Nov 2026)
+
+*   Admin boards use a plain `aside` sidebar, not `.dside`; the phone mode is chosen by board name (`UA...`) and width.
+*   The top bar has an "All tasks" link instead of a menu sheet: every phone task starts from the task list, and the other admin pages are reachable from it or from a larger screen. My judgement: one way back is simpler on a phone.
+*   The "Daily question for tomorrow" card was dropped in review (the code has no "set for tomorrow" state).
+
 ## Alternatives Considered
 
 *   **Scale the desktop layout:** today's behaviour; unreadable.

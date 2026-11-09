@@ -10,9 +10,14 @@
   var MORE = {"UPTopic":"UDxTopic","UPSearch":"UDxSearch","UPDictionary":"UDxDictionary","UPEmptySearch":"UDxEmptySearch","UPExchange":"UDxExchange","URCompanies":"UDxRCompanies","URCompany":"UDxRCompany","URCompanyLoading":"UDxRCompanyLoading","UPChallenges":"UDxChallenges","UPInflation":"UDxInflation","USimCompany":"UDxSimCompany","USimMarket":"UDxSimMarket","USimHistory":"UDxSimHistory","USimEmpty":"UDxSimEmpty","UPAskKobo":"UDxAskKobo","UPProgress":"UDxProgress","UPAchievements":"UDxAchievements","UPHistory":"UDxHistory","UPSaved":"UDxSaved","UPNotifications":"UDxNotifications","UPSettings":"UDxSettings","URSetEmail":"UDxRSetEmail","URSetGoal":"UDxRSetGoal","URSetPrivacy":"UDxRSetPrivacy","URSetTerms":"UDxRSetTerms","URHelp":"UDxRHelp","URDeleteAccount":"UDxRDeleteAccount","USPlans":"UDxSPlans","USCompare":"UDxSCompare","USYourPlan":"UDxSYourPlan","UMEmptyHistory":"UDxMEmptyHistory","UMEmptyNotif":"UDxMEmptyNotif","UMEmptySaved":"UDxMEmptySaved","UPOnbGoal":"UDyPOnbGoal","UPSignIn":"UDyPSignIn","UPSignInCode":"UDyPSignInCode","URAgeCheck":"UDyRAgeCheck","URNotifAsk":"UDyRNotifAsk","URCodeError":"UDyRCodeError","UPDaily":"UDyPDaily","UPLevelUp":"UDyPLevelUp","UPStreak":"UDyPStreak","URStreakLost":"UDyRStreakLost","UPLessonInfo":"UDyPLessonInfo","UPLessonChoice":"UDyPLessonChoice","UPLessonCalc":"UDyPLessonCalc","UPLessonComplete":"UDyPLessonComplete","UPLearnTerm":"UDyPLearnTerm","UPLearnSteps":"UDyPLearnSteps","UPLearnCompare":"UDyPLearnCompare","UPLearnMarket":"UDyPLearnMarket","UPLearnMyth":"UDyPLearnMyth","UPLessonOrder":"UDyPLessonOrder","UPLessonMatch":"UDyPLessonMatch","UPLessonScenario":"UDyPLessonScenario","UPBossIntro":"UDyPBossIntro","UPBossQuestion":"UDyPBossQuestion","UPBossResult":"UDyPBossResult","USCheckPending":"UDySCheckPending","USCheckSuccess":"UDySCheckSuccess","USCheckFailed":"UDySCheckFailed","USCheckSlow":"UDySCheckSlow","USCheckOffline":"UDySCheckOffline","USCheckAlready":"UDySCheckAlready","USimDone":"UDySimDone","UPError":"UDyPError","UPOffline":"UDyPOffline","URDeleted":"UDyRDeleted","UFRate":"UDzFRate","UFReport":"UDzFReport","UFReview":"UDzFReview","UFSuggest":"UDzFSuggest","UMAskLimit":"UDzMAskLimit","UMCancelPlan":"UDzMCancelPlan","UMLeaveLesson":"UDzMLeaveLesson","UMLocked":"UDzMLocked","UMOrderClosed":"UDzMOrderClosed","UMSignOut":"UDzMSignOut","UMSimReset":"UDzMSimReset","USUpgrade":"UDzSUpgrade","USimSell":"UDzSimSell","UPArticle":"UDArticle","UPOnbWelcome":"UDWelcome","USimTrade":"UDBuy"};
   Object.keys(MORE).forEach(function (k) { PAIRS[k] = MORE[k]; });
   var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
+  // Admin on phones (design Part 5): the shorter screen side decides, so landscape phones count as phones.
+  function adminPhone() { return Math.min(document.documentElement.clientWidth, window.innerHeight) < 700; }
+  var ADMIN_PHONE = { UAOverview: "UAPhoneTasks", UAAISummaries: "UAPhoneTask?type=sums", UAAskKoboReview: "UAPhoneTask?type=ask", UAFeedbackInbox: "UAPhoneTask?type=feedback" };
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
     var name = m[1], vw = document.documentElement.clientWidth, target = null;
+    if (adminPhone() && ADMIN_PHONE[name]) { var t = ADMIN_PHONE[name].split("?"); location.replace(location.pathname.replace(name + ".dc", t[0] + ".dc") + (t[1] ? "?" + t[1] : "")); return true; }
+    if (!adminPhone() && /^UAPhoneTasks?$/.test(name)) { var back = name === "UAPhoneTasks" ? "UAOverview" : ({ sums: "UAAISummaries", ask: "UAAskKoboReview", feedback: "UAFeedbackInbox" })[(/type=(\w+)/.exec(location.search) || [])[1]] || "UAOverview"; location.replace(location.pathname.replace(name + ".dc", back + ".dc")); return true; }
     if (vw >= DESK && PAIRS[name]) target = PAIRS[name];
     if (vw < DESK && BACK[name]) target = BACK[name];
     if (!target) return false;
@@ -40,6 +45,13 @@
     } catch (e) {}
     tsCache = Math.min(2, r); return tsCache;
   }
+  function adminPhoneBar(el) {
+    if (el.querySelector(".fv-apbar")) return;
+    var bar = document.createElement("div"); bar.className = "fv-apbar";
+    bar.innerHTML = '<a href="UAPhoneTasks.dc.html" aria-label="Admin tasks" class="fv-apmark">F</a><b>Finvora admin</b><a href="UAPhoneTasks.dc.html">All tasks</a>';
+    el.insertBefore(bar, el.firstChild);
+    el.querySelectorAll("table").forEach(function (t) { var n = document.createElement("p"); n.className = "fv-apnote"; n.textContent = "Open on a larger screen to see the full table."; t.parentNode.insertBefore(n, t); });
+  }
   function fit() {
     var el = root(); if (!el) return;
     unskeleton();
@@ -53,6 +65,8 @@
     html.classList.toggle("fv-desk", deskBoard && vw >= DESK);
     html.classList.toggle("fv-big", designW >= 1200 && vw >= DESK);
     fillFV(el);
+    // Admin on phones (design Part 5): wide admin pages reflow at real size instead of shrinking.
+    if (designW >= 1200 && /\/UA[A-Za-z]+\.dc/.test(location.pathname) && adminPhone()) { html.classList.add("fv-admin-phone"); el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; adminPhoneBar(el); return; }
     if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
     // Fluid boards (the email previews) reflow at real size on every screen.
     if (el.hasAttribute("data-fv-fluid")) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; return; }

@@ -14,6 +14,8 @@ export interface Entitlements {
   calculatorDividends: boolean;
   reportScan: boolean;
   pdfSummary: boolean;
+  /** The seven Plus learning tools (design Part 4). */
+  plusTools: boolean;
 }
 
 export function entitlements(plan: Plan): Entitlements {
@@ -28,5 +30,6 @@ export function entitlements(plan: Plan): Entitlements {
     calculatorDividends: plus,
     reportScan: plus,
     pdfSummary: plus,
+    plusTools: plus,
   };
 }
