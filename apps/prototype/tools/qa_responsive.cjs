@@ -42,6 +42,12 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
         const ix = Math.min(a.right, c.right) - Math.max(a.left, c.left), iy = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
         if (ix > 4 && iy > 4 && ix * iy > 0.3 * Math.min(a.width * a.height, c.width * c.height)) {
           const fa = getComputedStyle(L[i]).position, fb = getComputedStyle(L[j]).position;
+          const pinned = (e) => { for (let a = e; a && a !== document.body; a = a.parentElement) { const st = getComputedStyle(a); if (st.position === 'fixed' || st.position === 'sticky' || +st.opacity === 0 || st.visibility === 'hidden') return true; } return false; };
+          if (pinned(L[i]) || pinned(L[j])) continue; // content scrolling under a pinned bar, or a hidden sheet
+          const blk = (e) => { let a = e; while (a && getComputedStyle(a).display.startsWith('inline')) a = a.parentElement; return a; };
+          if (blk(L[i]) === blk(L[j])) continue; // inline runs in one wrapped paragraph
+          const hit = [...L[i].getClientRects()].some((x) => [...L[j].getClientRects()].some((y) => Math.min(x.right, y.right) - Math.max(x.left, y.left) > 4 && Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top) > 4));
+          if (!hit) continue; // wrapped text: the outer box overlaps but no line does
           if (L[i].closest('[role=dialog],[role=alertdialog]') || L[j].closest('[role=dialog],[role=alertdialog]')) continue;
           out.push(['text overlaps text', label(L[i]) + ' / ' + label(L[j])]); if (out.filter((x) => x[0] === 'text overlaps text').length > 4) break;
         }

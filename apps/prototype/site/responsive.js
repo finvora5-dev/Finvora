@@ -51,7 +51,7 @@
     if (document.querySelector(".fv-abnav")) return;
     var links = [].slice.call(el.querySelectorAll("aside a[href^='UA']")).filter(function (a) { return a.querySelector("svg"); });
     var here = (location.pathname.match(/(UA[A-Za-z]+)\.dc/) || [])[1];
-    function icon(page) { var a = links.filter(function (x) { return x.getAttribute("href").indexOf(page + ".") === 0; })[0]; return a ? a.querySelector("svg").outerHTML : ""; }
+    function icon(page) { var a = links.filter(function (x) { return x.getAttribute("href").indexOf(page + ".") === 0; })[0], k = "fv.navIcon." + page; try { if (a) { localStorage.setItem(k, a.querySelector("svg").outerHTML); return a.querySelector("svg").outerHTML; } return localStorage.getItem(k) || ""; } catch (e) { return a ? a.querySelector("svg").outerHTML : ""; } } // boards without a sidebar (confirm screens) reuse icons saved from one that has it
     var inTabs = ADMIN_TABS.some(function (t) { return t[0] === here; });
     var nav = document.createElement("nav"); nav.className = "fv-abnav"; nav.setAttribute("aria-label", "Admin");
     nav.innerHTML = ADMIN_TABS.map(function (t) { return '<a href="' + t[0] + '.dc.html"' + (t[0] === here ? ' aria-current="page"' : "") + ">" + icon(t[0]) + "<span>" + t[1] + "</span></a>"; }).join("") +
