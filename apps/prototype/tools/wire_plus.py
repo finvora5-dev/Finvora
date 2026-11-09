@@ -46,7 +46,8 @@ if 'USimPlus.dc.html' not in s:
     s = s.replace('</main>', '<a href="USimPlus.dc.html" style="align-self: center; font-weight: 700; font-size: 14px">See the Plus learning tools</a></main>', 1); wr('USPlans', s)
 s = rd('UPJourney')
 ANCHOR = '    <section aria-labelledby="later-h"'
-if 'UPScenario.dc.html' not in s and ANCHOR in s:
+if False:  # Money scenarios moved to the simulator's Plus tools (owner, 9 Nov 2026); no Learn card
+  if 'UPScenario.dc.html' not in s and ANCHOR in s:
     s = s.replace(ANCHOR, '<a href="UPScenario.dc.html" class="card press" style="padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #0E0B14"><span style="flex: 1; display: flex; flex-direction: column"><b>Money scenarios</b><span class="muted" style="font-size: 13px">Salary day, surprise bills, rising prices. Plus.</span></span><span aria-hidden="true" style="font-size: 20px; color: #5B21B6">›</span></a></main>', 1); wr('UPJourney', s)
 for B in ['USimCompany', 'UDxSimCompany']:
   s = rd(B)
@@ -66,5 +67,5 @@ for B in ['UDxSimEmpty']:
 s = rd('UDxSPlans')
 if 'USimPlus.dc.html' not in s: s = s.replace('</main>', '<a href="USimPlus.dc.html" style="align-self: center; font-weight: 700; font-size: 14px">See the Plus learning tools</a></main>', 1); wr('UDxSPlans', s)
 s = rd('UDJourney')
-if 'UPScenario.dc.html' not in s: s = s.replace('</main>', '<a href="UPScenario.dc.html" class="card press" style="padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #0E0B14"><span style="flex: 1; display: flex; flex-direction: column"><b>Money scenarios</b><span class="muted" style="font-size: 13px">Salary day, surprise bills, rising prices. Plus.</span></span><span aria-hidden="true" style="font-size: 20px; color: #5B21B6">\u203a</span></a></main>', 1); wr('UDJourney', s)
+if False and 'UPScenario.dc.html' not in s: s = s.replace('</main>', '<a href="UPScenario.dc.html" class="card press" style="padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #0E0B14"><span style="flex: 1; display: flex; flex-direction: column"><b>Money scenarios</b><span class="muted" style="font-size: 13px">Salary day, surprise bills, rising prices. Plus.</span></span><span aria-hidden="true" style="font-size: 20px; color: #5B21B6">\u203a</span></a></main>', 1); wr('UDJourney', s)
 print('Plus boards wired:', len(BOARDS))
