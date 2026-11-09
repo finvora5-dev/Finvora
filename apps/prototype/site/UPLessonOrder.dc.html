@@ -44,6 +44,7 @@ h1,h2,h3,.fd{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600}
 @keyframes v-burst{0%{transform:translate(0,0) scale(.4);opacity:1}70%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
 @keyframes v-spark{0%,70%,100%{transform:scale(.2);opacity:0}82%{transform:scale(1.1);opacity:1}92%{transform:scale(.7);opacity:.6}}
 @media (prefers-reduced-motion: no-preference){
+.tilebtn{touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}
 .btn,.press,.tilebtn{transition:transform .15s ease-out,box-shadow .15s ease-out,background-color .15s ease-out,border-color .15s ease-out}
 .in{animation:v-in .35s ease-out both}
 .k-idle{animation:v-idle 3.2s ease-in-out infinite}
@@ -159,21 +160,25 @@ class Component extends DCLogic {
       items: s.order.map((k, i) => {
         const dragging = s.drag === k;
         const lifted = !s.checked && (s.moved === k || dragging);
+        // Fluid drag (owner, 9 Nov 2026): the order stays put while dragging; other tiles slide aside; the new order is saved on release.
         const grab = (e) => {
-          if (s.checked) return;
-          try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
-          this._d = { k, y: e.clientY, step: e.currentTarget.offsetHeight + 10 };
-          this.setState({ drag: k, dy: 0, moved: k });
+          if (s.checked || this._d) return;
+          if (e.button !== undefined && e.button !== 0) return;
+          e.preventDefault();
+          const d = { k, y: e.clientY, step: e.currentTarget.offsetHeight + 10, from: s.order.indexOf(k), to: s.order.indexOf(k) };
+          const mv = (ev) => { const dy = ev.clientY - d.y; d.to = Math.max(0, Math.min(n - 1, d.from + Math.round(dy / d.step))); this.setState({ dy, to: d.to }); };
+          const up = () => {
+            window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+            this._d = null; const o = this.state.order.slice(); o.splice(d.from, 1); o.splice(d.to, 0, k);
+            this.setState({ order: o, drag: null, dy: 0, to: null, moved: k, status: d.to !== d.from ? L[k].label + ' moved to position ' + (d.to + 1) + ' of 3.' : this.state.status });
+          };
+          window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+          this._d = d; this.setState({ drag: k, dy: 0, to: d.from, moved: k });
         };
-        const drag = (e) => {
-          const d = this._d; if (!d || d.k !== k) return;
-          let dy = e.clientY - d.y;
-          const o = this.state.order.slice(); const at = o.indexOf(k);
-          if (dy > d.step / 2 && at < n - 1) { [o[at], o[at + 1]] = [o[at + 1], o[at]]; d.y += d.step; dy -= d.step; this.setState({ order: o, status: L[k].label + ' moved to position ' + (at + 2) + ' of 3.' }); }
-          else if (dy < -d.step / 2 && at > 0) { [o[at], o[at - 1]] = [o[at - 1], o[at]]; d.y -= d.step; dy += d.step; this.setState({ order: o, status: L[k].label + ' moved to position ' + at + ' of 3.' }); }
-          this.setState({ dy });
-        };
-        const drop = () => { if (!this._d) return; this._d = null; this.setState({ drag: null, dy: 0 }); };
+        const drag = () => {};
+        const drop = () => {};
+        const from = s.drag != null ? s.order.indexOf(s.drag) : -1, to = s.to != null ? s.to : from, step = this._d ? this._d.step : 0;
+        const shift = (!dragging && from >= 0) ? (from < i && i <= to ? -step : (to <= i && i < from ? step : 0)) : 0;
         return {
           grab, drag, drop,
           shadow: dragging ? '0 12px 24px rgba(16,30,70,.18)' : '0 4px 0 ' + (good ? '#147D44' : bad ? '#F04438' : lifted ? '#3B0F7A' : '#E7E2F0'),
@@ -190,7 +195,7 @@ class Component extends DCLogic {
           edge: good ? '#147D44' : bad ? '#F04438' : lifted ? '#3B0F7A' : '#E7E2F0',
           rankBg: good ? '#147D44' : bad ? '#F04438' : '#5B21B6',
           rankEdge: good ? '#0F7A3A' : bad ? '#B42828' : '#3B0F7A',
-          lift: dragging ? 'translateY(' + s.dy + 'px) scale(1.03)' : 'none',
+          lift: dragging ? 'translateY(' + s.dy + 'px) scale(1.03)' : (shift ? 'translateY(' + shift + 'px)' : 'none'),
           up: () => { if (i > 0) move(i, -1); },
           down: () => { if (i < n - 1) move(i, 1); },
           upOff: i === 0, downOff: i === n - 1,
