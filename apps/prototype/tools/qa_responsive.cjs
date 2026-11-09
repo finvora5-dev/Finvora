@@ -28,6 +28,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
       if (document.documentElement.scrollWidth > iw + 1) out.push(['sideways scroll', 'page is ' + document.documentElement.scrollWidth + 'px wide']);
       const t = document.body.innerText;
       (t.match(/\{\{[^}]{0,30}\}\}/g) || []).slice(0, 2).forEach((x) => out.push(['template text showing', x]));
+      (t.match(/(style|class|href|aria-[a-z]+)="[^"]{0,40}|<\/?(div|section|main|span|a|p)[ >]/g) || []).slice(0, 2).forEach((x) => out.push(['code showing as text', x]));
       (t.match(/\b(undefined|NaN|\[object Object\])\b/g) || []).slice(0, 2).forEach((x) => out.push(['bad text showing', x]));
       const leaves = [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && e.textContent.trim() && vis(e) && !e.closest('svg'));
       leaves.forEach((e) => {
