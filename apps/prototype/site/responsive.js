@@ -47,6 +47,19 @@
   }
   // Admin on phones: the same pages as on a laptop, with a bottom navigation bar instead of the sidebar.
   var ADMIN_TABS = [["UAOverview", "Overview"], ["UAContent", "Content"], ["UAAskKoboReview", "Ask Fin"], ["UAAISummaries", "Summaries"]];
+  // Folded phones: the whole board is shrunk, so 44px buttons end up about 32px. Give small controls an invisible tap area back to 44px on screen.
+  function hitAreas(el, z) {
+    document.documentElement.style.setProperty("--fv-hit", z < 0.95 ? Math.ceil((44 / z - 44) / 2) + "px" : "0px");
+    if (z >= 0.95) return;
+    setTimeout(function () {
+      el.querySelectorAll("button, a[href], [role=button], [role=switch]").forEach(function (b) {
+        var r = b.getBoundingClientRect(); if (!r.width || (r.width >= 44 && r.height >= 44) || b.closest("p")) return;
+        if (getComputedStyle(b, "::after").content !== "none") return;
+        if (getComputedStyle(b).position === "static") b.style.position = "relative";
+        b.classList.add("fv-hit");
+      });
+    }, 300);
+  }
   function adminPhoneBar(el) {
     if (document.querySelector(".fv-abnav")) return;
     var links = [].slice.call(el.querySelectorAll("aside a[href^='UA']")).filter(function (a) { return a.querySelector("svg"); });
@@ -98,7 +111,7 @@
     if (!wide) {
       // Lesson path follows the phone's text size (D15): lay out narrower, so text renders larger.
       var ts = textScale(), lw = LESSON_PATH.test(location.pathname) && ts > 1.05 ? Math.round(designW / ts) : designW;
-      var z = vw / lw; el.style.zoom = String(z); el.style.width = lw + "px";
+      var z = vw / lw; el.style.zoom = String(z); el.style.width = lw + "px"; hitAreas(el, z);
       el.querySelectorAll('nav[aria-label="Main"]').forEach(function (n) { n.style.setProperty("width", lw + "px", "important"); });
       // Fill the visible screen, not the 844px drawing, so bottom buttons sit on the bottom edge.
       el.style.setProperty("min-height", (window.innerHeight / z) + "px", "important");

@@ -311,3 +311,4 @@ html.fv-admin-phone body .root:not(.root .root) > section[style*="translate(-50%
 @media (max-width: 1023px) { .fv-admin-rail .chip { min-height: 44px !important; min-width: 44px; } }
 /* Folded phones: five 12px labels don't fit in 280px, so only the current tab shows its label (screen readers still read every name). */
 @media (max-width: 340px) { .fv-abnav { padding-left: 2px; padding-right: 2px; } .fv-abnav > :not([aria-current]) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+.fv-hit::after { content: ""; position: absolute; inset: calc(-1 * var(--fv-hit, 0px)); }
