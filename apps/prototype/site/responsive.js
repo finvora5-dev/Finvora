@@ -369,4 +369,26 @@
     }, 700);
   }
   if (document.readyState === "complete") setTimeout(pathMoment, 600); else window.addEventListener("load", function () { setTimeout(pathMoment, 600); });
+
+  // ---- Phone top bars (mobile pattern): hide while scrolling down, come back as soon as you scroll up.
+  function revealHeader() {
+    var el = root(); if (!el || +el.dataset.fvW >= 600 || document.documentElement.clientWidth >= 600) return;
+    if (el.querySelector(':scope > [role="dialog"], :scope > [role="alertdialog"]')) return;
+    var h = el.querySelector(":scope > header") || el.querySelector(":scope > div > header");
+    if (!h || h.dataset.fvReveal || h.querySelector('[role="progressbar"]') || getComputedStyle(h).position !== "static") return;
+    h.dataset.fvReveal = "1"; h.classList.add("fv-reveal");
+    var last = window.scrollY, hidden = false, ticking = false;
+    window.addEventListener("scroll", function () {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () {
+        var y = window.scrollY, dy = y - last, hh = h.getBoundingClientRect().height;
+        if (y <= hh) { if (hidden) { h.classList.remove("fv-reveal-hide"); hidden = false; } }
+        else if (dy > 6 && !hidden) { h.classList.add("fv-reveal-hide"); hidden = true; }
+        else if (dy < -6 && hidden) { h.classList.remove("fv-reveal-hide"); hidden = false; }
+        if (Math.abs(dy) > 6) last = y; ticking = false;
+      });
+    }, { passive: true });
+    h.addEventListener("focusin", function () { h.classList.remove("fv-reveal-hide"); hidden = false; });
+  }
+  if (document.readyState === "complete") setTimeout(revealHeader, 400); else window.addEventListener("load", function () { setTimeout(revealHeader, 400); });
 })();

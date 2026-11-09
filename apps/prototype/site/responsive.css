@@ -286,3 +286,19 @@ html.fv-moment-open { overflow: hidden; }
 .fv-pm-tick { position: absolute; z-index: 30; width: 26px; height: 26px; border-radius: 50%; background: #16A34A; color: #FFFFFF; font: 800 15px 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; pointer-events: none; }
 .fv-pm-line { position: absolute; z-index: 25; pointer-events: none; overflow: visible; }
 .fv-pm-spark { position: absolute; z-index: 30; width: 8px; height: 8px; border-radius: 50%; background: #7C3AED; pointer-events: none; }
+
+/* Phone top bars: sticky, slide away on scroll down, back on scroll up. */
+.fv-reveal { position: sticky !important; top: 0; z-index: 30; background: #FFFFFF; transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s; }
+.fv-reveal-hide { transform: translateY(-110%); }
+@media (prefers-reduced-motion: reduce) { .fv-reveal { transition: none; } }
+
+/* Tap targets at least 44 px (mobile-app-qa). Small visuals keep their size; the touch area grows around them. */
+.root .sw, .root [role="switch"] { position: relative; }
+.root .sw::after, .root [role="switch"]::after { content: ""; position: absolute; inset: -9px -4px; }
+.root a[href*="Limit"], .root a[href="USimPlus.dc.html"] { min-height: 44px; display: inline-flex !important; align-items: center; }
+.root button[aria-label="Add"], .root button[aria-label="Attach a report"] { min-width: 44px !important; min-height: 44px !important; }
+/* Dictionary A to Z: 44 px letters in one swipeable row (mobile pattern) instead of tiny wrapped letters. */
+nav[aria-label="Jump to letter"] { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; gap: 2px !important; }
+nav[aria-label="Jump to letter"]::-webkit-scrollbar { display: none; }
+nav[aria-label="Jump to letter"] > a { flex: none; min-width: 44px !important; min-height: 44px !important; display: inline-flex !important; align-items: center; justify-content: center; border-radius: 12px; font-size: 15px !important; }
+nav[aria-label="Jump to letter"] > a[aria-disabled="true"] { opacity: .45; }

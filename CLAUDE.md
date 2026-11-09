@@ -2,6 +2,7 @@
 
 ## How to work with this user
 - **Flag judgement calls.** When an answer, design choice or recommendation rests on your own judgement rather than on a source (the PRD, the code, a skill's checklist, a test result, a cited reference), say so explicitly, e.g. "My judgement:", with what it's based on and how confident you are. This applies to everything: design, engineering, estimates, product and pricing, legal and regulatory points, tool behaviour and facts stated from memory. Never present judgement as fact.
+- **Before saying anything is done, run the `mobile-app-qa` skill** (`.claude/skills/mobile-app-qa/SKILL.md`): `node apps/prototype/tools/qa_mobile.cjs <url>` must report 0 issues, then walk its manual checklist (scrolling, touch, typing, motion, layout) on the changed screens. Report what was checked.
 - **Always use a UI/UX skill** (ui-ux-pro-max, design critique or accessibility review) before and after any visual change, and check focus, hover and pressed states, not just the resting screen. No focus outline drawn inside a field: the ring goes on the element that draws the field border (owner, 9 Nov 2026).
 - If a relevant skill or checklist exists (e.g. design critique, accessibility review, code review, security review), use it or say you didn't.
 - Say what you actually checked ("verified by running it", "from PRD §9") versus what you assumed.
