@@ -357,38 +357,109 @@
 
   // ---- Learn path: after finishing a lesson, the path shows you moving forward (owner, 9 Nov 2026; mock-up approved).
   // Plays once per newly finished lesson: the finished node pops, the path to the next lesson fills, Start slides down.
+  // Learn path moment (approved 9 Nov 2026): the finished lesson pops with a ring, confetti and +15 XP, a comet runs the real path lighting each dot, the next lesson bounces and the Start bubble springs in.
   function pathMoment() {
     if (!/U[PD]Journey\.dc/.test(location.pathname) || !window.FV) return;
+    placeStart();
     var done = FV.get().done || 0, seen = -1;
     try { seen = +(localStorage.getItem("fv.pathSeen") || -1); localStorage.setItem("fv.pathSeen", String(done)); } catch (e) { return; }
     if (seen < 0 || done <= seen || done < 1) return;
-    var nodes = [].slice.call(document.querySelectorAll('a[href*="LessonInfo"][aria-label]')).filter(function (a) { return /lesson \d+ of/.test(a.getAttribute("aria-label")); });
-    var prev = nodes.filter(function (a) { return /completed/.test(a.getAttribute("aria-label")); }).pop();
-    var next = nodes.filter(function (a) { return /current lesson/.test(a.getAttribute("aria-label")); })[0];
-    if (!prev) return;
-    var icon = function (a) { var el = a.querySelector("svg") || a; var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY, el: el }; };
-    var pr = prev.getBoundingClientRect(); window.scrollTo({ top: Math.max(0, pr.top + scrollY - innerHeight * 0.3), behavior: calm() ? "auto" : "smooth" });
-    if (calm() || !document.body.animate) return;
-    setTimeout(function () {
-      var A = icon(prev);
-      prev.animate([{ transform: "scale(1)" }, { transform: "scale(1.12)", offset: .4 }, { transform: "scale(1)" }], { duration: 450, easing: "ease-out" });
-      if (!next) return;
-      var B = icon(next), routes = [].slice.call(document.querySelectorAll("svg path[stroke-dasharray]")).filter(function (pth) { return pth.closest("svg").getBoundingClientRect().height > 400; });
-      routes.forEach(function (pth) {
-        var hr = pth.getBoundingClientRect(), top = hr.top + scrollY, hgt = hr.height || 1;
-        var c = pth.cloneNode(false); c.setAttribute("stroke", "#5B21B6"); c.setAttribute("class", "fv-pm-route"); pth.parentNode.appendChild(c);
-        var t0 = Math.max(0, (A.y - top) / hgt * 100), t1 = Math.max(0, 100 - (B.y - top) / hgt * 100);
-        c.style.clipPath = "inset(" + t0 + "% 0 100% 0)";
-        c.animate([{ clipPath: "inset(" + t0 + "% 0 " + (100 - t0) + "% 0)" }, { clipPath: "inset(" + t0 + "% 0 " + t1 + "% 0)" }], { duration: 700, delay: 350, easing: "ease-in-out", fill: "forwards" });
-        c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, delay: 2400, fill: "forwards" }).onfinish = function () { c.remove(); };
+
+  var nodes = [].slice.call(document.querySelectorAll('a[href*="LessonInfo"][aria-label]')).filter(function (a) { return /lesson \d+ of/.test(a.getAttribute("aria-label")); });
+  var prev = nodes.filter(function (a) { return /completed/.test(a.getAttribute("aria-label")); }).pop();
+  var next = nodes.filter(function (a) { return /current lesson/.test(a.getAttribute("aria-label")); })[0];
+  if (!prev || !next) return;
+  var box = function (a) { var el = a.querySelector("svg") || a, r = el.getBoundingClientRect(); return { x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY, w: r.width, el: el }; };
+  var A = box(prev), B = box(next);
+  var start = [].slice.call(document.querySelectorAll("a, span, div, p")).filter(function (e) { return [].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim() === "Start"; }) && e.getBoundingClientRect().width > 0; })[0];
+  var sb = start || null;
+
+  var hide = sb ? sb.animate([{ opacity: 0 }, { opacity: 0 }], { duration: 4000 }) : null;
+  var layer = document.createElement("div"); layer.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;z-index:5;pointer-events:none"; document.body.appendChild(layer);
+  var put = function (css) { var d = document.createElement("div"); d.style.cssText = "position:absolute;" + css; layer.appendChild(d); return d; };
+  var buzz = function () { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} };
+
+  // Route points along the real dotted path, in page coordinates.
+  var routes = [].slice.call(document.querySelectorAll("svg path[stroke-dasharray]")).filter(function (p) { return p.closest("svg").getBoundingClientRect().height > 400; });
+  var pts = [];
+  routes.forEach(function (p) { var m = p.getScreenCTM(), L = p.getTotalLength(); for (var l = 0; l <= L; l += 2) { var q = p.getPointAtLength(l); pts.push({ x: m.a * q.x + m.e + scrollX, y: m.d * q.y + m.f + scrollY }); } });
+  var near = function (P) { var bi = 0, bd = 1e9; pts.forEach(function (q, i) { var d = (q.x - P.x) * (q.x - P.x) + (q.y - P.y) * (q.y - P.y); if (d < bd) { bd = d; bi = i; } }); return bi; };
+  var iA = near(A), iB = near(B), seg = pts.slice(Math.min(iA, iB), Math.max(iA, iB) + 1);
+  // keep only the stretch outside the two node circles
+  seg = seg.filter(function (q) { return Math.hypot(q.x - A.x, q.y - A.y) > A.w / 2 + 6 && Math.hypot(q.x - B.x, q.y - B.y) > B.w / 2 + 6; });
+
+  // Camera: bring the finished lesson into view.
+  if (calm() || !document.body.animate) { if (hide) hide.cancel(); window.scrollTo({ top: Math.max(0, B.y - innerHeight * 0.45) }); return; }
+  window.scrollTo({ top: Math.max(0, A.y - innerHeight * 0.32), behavior: "smooth" });
+
+  setTimeout(function () {
+    // 1. Finished lesson: press, pop, green ring, confetti, +15 XP.
+    prev.animate([{ transform: "scale(1)" }, { transform: "scale(.88)", offset: .25 }, { transform: "scale(1.1)", offset: .6 }, { transform: "scale(1)" }], { duration: 520, easing: "ease-out" });
+    setTimeout(buzz, 150);
+    var ring = put("left:" + A.x + "px;top:" + A.y + "px;width:" + A.w + "px;height:" + A.w + "px;margin:-" + A.w / 2 + "px 0 0 -" + A.w / 2 + "px;border-radius:50%;border:4px solid #16A34A;box-sizing:border-box");
+    ring.animate([{ transform: "scale(.9)", opacity: .9 }, { transform: "scale(1.9)", opacity: 0 }], { duration: 650, delay: 140, easing: "cubic-bezier(.2,.7,.3,1)", fill: "both" });
+    var COL = ["#7C3AED", "#176EEB", "#16A34A", "#FF8FA3", "#0FA394", "#5B21B6"];
+    for (var k = 0; k < 18; k++) {
+      var c = put("left:" + A.x + "px;top:" + A.y + "px;width:" + (6 + (k % 3) * 2) + "px;height:" + (k % 2 ? 6 : 12) + "px;border-radius:" + (k % 4 === 0 ? "50%" : "2px") + ";background:" + COL[k % COL.length]);
+      var ang = -Math.PI / 2 + (Math.random() - .5) * 2.6, v = 90 + Math.random() * 70, dx = Math.cos(ang) * v, dy = Math.sin(ang) * v, rot = (Math.random() - .5) * 720;
+      c.animate([{ transform: "translate(-50%,-50%) rotate(0)", opacity: 1 }, { transform: "translate(calc(-50% + " + dx * .7 + "px), calc(-50% + " + dy * .8 + "px)) rotate(" + rot / 2 + "deg)", opacity: 1, offset: .45 }, { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + (dy + 110) + "px)) rotate(" + rot + "deg)", opacity: 0 }], { duration: 1100, delay: 160, easing: "cubic-bezier(.15,.6,.4,1)", fill: "both" });
+    }
+    var xp = put("left:" + (A.x + A.w / 2 + 4) + "px;top:" + (A.y - 18) + "px;padding:4px 10px;border-radius:999px;background:#F1EBFB;color:#5B21B6;font:800 14px 'Plus Jakarta Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 0 #DDD3F5");
+    xp.textContent = "+15 XP";
+    xp.animate([{ transform: "translateY(10px) scale(.6)", opacity: 0 }, { transform: "translateY(0) scale(1.08)", opacity: 1, offset: .2 }, { transform: "translateY(-6px) scale(1)", opacity: 1, offset: .75 }, { transform: "translateY(-26px) scale(.95)", opacity: 0 }], { duration: 1500, delay: 300, easing: "ease-out", fill: "both" });
+
+    // 2. Comet along the real path, lighting each dot; the screen follows it.
+    var dots = [], acc = 0;
+    for (var i = 1; i < seg.length; i++) { acc += Math.hypot(seg[i].x - seg[i - 1].x, seg[i].y - seg[i - 1].y); if (acc >= 16) { acc = 0; dots.push({ i: i, el: put("left:" + seg[i].x + "px;top:" + seg[i].y + "px;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#5B21B6;opacity:0"), lit: false }); } }
+    var comet = put("width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#FFFFFF 0,#C4B5FD 30%,#7C3AED 70%);box-shadow:0 0 20px 8px rgba(124,58,237,.5);opacity:0");
+    var segLen = 0; for (var j = 1; j < seg.length; j++) segLen += Math.hypot(seg[j].x - seg[j - 1].x, seg[j].y - seg[j - 1].y);
+    var T0 = performance.now() + 650, DUR = Math.max(650, Math.min(1100, segLen * 6)), lastTrail = 0;
+    if (sb) sb.animate([{ transform: "translateX(-24px) scale(.6)", opacity: 0 }, { transform: "translateX(4px) scale(1.08)", opacity: 1, offset: .55 }, { transform: "translateX(-2px) rotate(-3deg)", offset: .75 }, { transform: "translateX(0) rotate(2deg)", offset: .88 }, { transform: "none", opacity: 1 }], { duration: 750, delay: 650 + DUR + 280, easing: "ease-out", fill: "backwards" });
+    if (sb && hide) hide.cancel();
+    (function step(now) {
+      var t = (now - T0) / DUR;
+      if (t < 0) { requestAnimationFrame(step); return; }
+      var e = t >= 1 ? 1 : (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2), idx = Math.min(seg.length - 1, Math.floor(e * (seg.length - 1))), P = seg[idx];
+      comet.style.opacity = t >= 1 ? 0 : 1; comet.style.left = P.x + "px"; comet.style.top = P.y + "px";
+      window.scrollTo(0, Math.max(0, P.y - innerHeight * 0.45));
+      if (now - lastTrail > 28 && t < 1) { lastTrail = now; var tr = put("left:" + P.x + "px;top:" + P.y + "px;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#A78BFA"); tr.animate([{ transform: "scale(1)", opacity: .7 }, { transform: "scale(.2)", opacity: 0 }], { duration: 380, fill: "forwards" }).onfinish = function () { this.effect.target.remove(); }; }
+      dots.forEach(function (d) { if (!d.lit && d.i <= idx) { d.lit = true; d.el.animate([{ transform: "scale(0)", opacity: 1 }, { transform: "scale(1.8)", opacity: 1, offset: .4 }, { transform: "scale(1)", opacity: 1 }], { duration: 320, easing: "ease-out", fill: "forwards" }); } });
+      if (t < 1) requestAnimationFrame(step); else land();
+    })(T0);
+
+    // 3. Landing on the next lesson: bounce, ripple, shine, Start drops in.
+    function land() {
+      buzz();
+      next.animate([{ transform: "scale(1)" }, { transform: "scale(.86)", offset: .2 }, { transform: "scale(1.16)", offset: .55 }, { transform: "scale(.97)", offset: .8 }, { transform: "scale(1)" }], { duration: 650, easing: "ease-out" });
+      [0, 160].forEach(function (dl) {
+        var r2 = put("left:" + B.x + "px;top:" + B.y + "px;width:" + B.w + "px;height:" + B.w + "px;margin:-" + B.w / 2 + "px 0 0 -" + B.w / 2 + "px;border-radius:50%;border:3px solid #7C3AED;box-sizing:border-box");
+        r2.animate([{ transform: "scale(1)", opacity: .8 }, { transform: "scale(2.1)", opacity: 0 }], { duration: 800, delay: dl, easing: "cubic-bezier(.2,.7,.3,1)", fill: "both" });
       });
-      var start = [].slice.call(document.querySelectorAll("a, span, div, p")).filter(function (e) { return e.children.length === 0 && e.textContent.trim() === "Start" && e.getBoundingClientRect().width > 0; })[0];
-      var startBox = start ? (start.closest('[class*="bubble"]') || start.parentElement) : null;
-      if (startBox) { var dx = A.x - B.x, dy = A.y - B.y; startBox.animate([{ transform: "translate(" + dx + "px," + dy + "px)", opacity: .6 }, { transform: "translate(" + dx / 2 + "px," + dy / 2 + "px)", opacity: 1, offset: .5 }, { transform: "none" }], { duration: 700, delay: 750, easing: "cubic-bezier(.3,1.2,.5,1)", fill: "backwards" }); }
-      next.animate([{ transform: "scale(.85)" }, { transform: "scale(1.12)", offset: .6 }, { transform: "scale(1)" }], { duration: 500, delay: 1200, fill: "backwards" });
-      for (var k = 0; k < 8; k++) { (function (k) { var sp = document.createElement("span"); sp.className = "fv-pm-spark"; sp.style.left = B.x + "px"; sp.style.top = B.y + "px"; document.body.appendChild(sp); var a = k / 8 * Math.PI * 2;
-        sp.animate([{ transform: "translate(-50%,-50%) scale(.5)", opacity: 1 }, { transform: "translate(calc(-50% + " + Math.cos(a) * 80 + "px), calc(-50% + " + Math.sin(a) * 80 + "px)) scale(1)", opacity: 0 }], { duration: 700, delay: 1300, easing: "ease-out", fill: "both" }).onfinish = function () { sp.remove(); }; })(k); }
-    }, 700);
+      var sh = put("left:" + B.x + "px;top:" + B.y + "px;width:" + B.w + "px;height:" + B.w + "px;margin:-" + B.w / 2 + "px 0 0 -" + B.w / 2 + "px;border-radius:50%;overflow:hidden");
+      var band = document.createElement("div"); band.style.cssText = "position:absolute;top:-20%;left:-60%;width:40%;height:140%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);transform:rotate(20deg)"; sh.appendChild(band);
+      band.animate([{ left: "-60%" }, { left: "130%" }], { duration: 650, delay: 250, easing: "ease-in-out", fill: "both" });
+      if (false) sb.animate([{ transform: "translateX(-24px) scale(.6)", opacity: 0 }, { transform: "translateX(4px) scale(1.08)", opacity: 1, offset: .55 }, { transform: "translateX(-2px) rotate(-3deg)", offset: .75 }, { transform: "translateX(0) rotate(2deg)", offset: .88 }, { transform: "none", opacity: 1 }], { duration: 750, delay: 280, easing: "ease-out", fill: "both" }).onfinish = function () { sb.style.opacity = ""; };
+      setTimeout(function () { layer.remove(); }, 1600);
+    }
+  }, 700);
+  }
+  // The Start bubble sits beside the current lesson, on a side with room and no picture, so it never covers the label above.
+  function placeStart() {
+    var next = [].slice.call(document.querySelectorAll('a[href*="LessonInfo"][aria-label]')).filter(function (a) { return /current lesson/.test(a.getAttribute("aria-label")); })[0];
+    if (!next) return;
+    var sb = [].slice.call(next.querySelectorAll("span, div")).filter(function (e) { return [].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim() === "Start"; }); })[0];
+    if (!sb || sb.getAttribute("data-fv-placed")) return; sb.setAttribute("data-fv-placed", "1");
+  // Start bubble beside the lesson (on the roomier side) so it never covers the label above.
+  {
+    sb.style.width = "auto"; sb.style.padding = "0 14px";
+    var nr = next.getBoundingClientRect(), need = sb.offsetWidth + 16;
+    // prefer a side with room and no picture in the way
+    var clear = function (x) { var y = nr.top + nr.height / 2; return document.elementsFromPoint(x, y).every(function (e) { return !e.closest("svg g, img") || e.closest("a") === next; }); };
+    var right = innerWidth - nr.right >= need && clear(Math.min(innerWidth - 2, nr.right + need / 2));
+    if (!right && !(nr.left >= need && clear(nr.left - need / 2))) right = innerWidth - nr.right > nr.left;
+    sb.style.top = "50%"; sb.style.marginTop = (-sb.offsetHeight / 2) + "px"; sb.style.left = right ? "calc(100% + 10px)" : "auto"; sb.style.right = right ? "auto" : "calc(100% + 10px)"; sb.style.marginLeft = "0";
+    var ar = sb.querySelector("span"); if (ar) { ar.style.bottom = "auto"; ar.style.top = "50%"; ar.style.marginTop = "-7px"; ar.style.marginLeft = "0"; ar.style.left = right ? "-6px" : "auto"; ar.style.right = right ? "auto" : "-6px"; }
+  }
   }
   if (document.readyState === "complete") setTimeout(pathMoment, 600); else window.addEventListener("load", function () { setTimeout(pathMoment, 600); });
 
