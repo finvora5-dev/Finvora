@@ -87,8 +87,8 @@
     // Admin on phones (design Part 5): wide admin pages reflow at real size instead of shrinking.
     // Admin on tablets and small laptop windows: real size, with the sidebar folded to an icon strip.
     var adminBoard = designW >= 1200 && /\/UA[A-Za-z]+\.dc/.test(location.pathname);
-    html.classList.toggle("fv-admin-rail", adminBoard && !adminPhone() && vw < 1200);
-    if (adminBoard && !adminPhone() && vw < 1200) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; el.querySelectorAll("aside a.nav").forEach(function (a) { if (!a.title) a.title = a.textContent.trim(); a.setAttribute("aria-label", a.textContent.trim()); }); return; }
+    html.classList.toggle("fv-admin-rail", adminBoard && !adminPhone());
+    if (adminBoard && !adminPhone()) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; el.querySelectorAll("aside a.nav").forEach(function (a) { if (a.querySelector(".fv-nl")) return; var txt = a.textContent.trim(); a.setAttribute("aria-label", txt); [].slice.call(a.childNodes).forEach(function (n) { if (n.nodeType === 3 && n.textContent.trim()) { var sp = document.createElement("span"); sp.className = "fv-nl"; sp.textContent = n.textContent; a.replaceChild(sp, n); } }); }); return; }
     if (designW >= 1200 && /\/UA[A-Za-z]+\.dc/.test(location.pathname) && adminPhone()) { html.classList.add("fv-admin-phone"); el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; adminPhoneBar(el); return; }
     if (designW >= 1200 && vw >= DESK) { el.style.zoom = "1"; el.style.width = "100%"; stretchCharts(el); return; }
     // Fluid boards (the email previews) reflow at real size on every screen.
