@@ -217,7 +217,7 @@ class Component extends DCLogic {
   }
   fire(calm) {
     const fl = document.getElementById('flame'); fl.classList.remove('lit'); clearInterval(this.emb);
-    const lightUp = () => { fl.classList.add('lit'); if (calm()) return;
+    const lightUp = () => { fl.classList.add('lit'); if (window.fvSound) window.fvSound('streak'); if (calm()) return;
       for (let k = 0; k < 2; k++) { const rg = document.createElement('span'); rg.className = 'ring'; fl.appendChild(rg); rg.animate([{ transform: 'scale(.6)', opacity: .9 }, { transform: 'scale(1.6)', opacity: 0 }], { duration: 800, delay: k * 180, easing: 'ease-out', fill: 'forwards' }).onfinish = () => rg.remove(); }
       const ember = () => { if (document.getElementById('s2').hidden) { clearInterval(this.emb); return; } const e = document.createElement('span'); e.className = 'ember'; fl.appendChild(e); const dx = (Math.random() - .5) * 70, s = .5 + Math.random() * .9;
         e.animate([{ transform: 'translate(-50%,-50%) scale(' + s + ')', opacity: 1 }, { transform: 'translate(calc(-50% + ' + dx * .4 + 'px), -60px) scale(' + s * .8 + ')', opacity: .9, offset: .5 }, { transform: 'translate(calc(-50% + ' + dx + 'px), -120px) scale(.2)', opacity: 0 }], { duration: 1100 + Math.random() * 700, easing: 'ease-out', fill: 'forwards' }).onfinish = () => e.remove(); };
