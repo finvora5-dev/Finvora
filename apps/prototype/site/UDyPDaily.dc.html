@@ -127,7 +127,7 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const LP = this.LP(), D = LP ? LP.daily() : null;
-    const opts0 = [{"label": "Naira", "why": "The naira is Nigeria's currency. Ghana uses the cedi."}, {"label": "Cedi", "right": true, "explain": "Ghana uses the cedi (GH₵). Shares on the Ghana Stock Exchange are priced in cedis."}, {"label": "Rand", "why": "The rand is South Africa's currency. Ghana uses the cedi."}, {"label": "Shilling", "why": "Kenya uses the shilling. Ghana uses the cedi."}];
+    const opts0 = [{"label": "Naira", "right": true, "explain": "Shares on the Nigerian Exchange (NGX) are priced in naira (₦)."}, {"label": "US dollar", "why": "Some companies report results in dollars, but NGX share prices are in naira."}, {"label": "Pound", "why": "The pound is the UK's currency. NGX share prices are in naira."}, {"label": "Euro", "why": "The euro is used in much of Europe. NGX share prices are in naira."}];
     const opts = D ? D.opts.map((label, i) => (i === D.right ? { label, right: true } : { label, why: D.whys[i] })) : opts0;
     const picked = s.pick !== null ? opts[s.pick] : null;
     const right = !!(s.checked && picked && picked.right), wrong = !!(s.checked && picked && !picked.right);
@@ -143,7 +143,7 @@ class Component extends DCLogic {
           pick: () => this.setState({ pick: i, checked: false }) };
       }),
       showCheck: !s.checked && !(D && D.done), showWrong: wrong, showRight: right || !!(D && D.done && !s.checked),
-      wrongText: wrong ? picked.why : '', rightText: D ? (D.done && !s.checked ? 'You\'ve done today\'s question. Come back tomorrow for a new one.' : D.explain) : '', qText: D ? D.q : 'Which currency is used in Ghana?', doneLabel: 'See your streak',
+      wrongText: wrong ? picked.why : '', rightText: D ? (D.done && !s.checked ? 'You\'ve done today\'s question. Come back tomorrow for a new one.' : D.explain) : '', qText: D ? D.q : 'Which currency are shares on the NGX priced in?', doneLabel: 'See your streak',
       checkOff: s.pick === null, checkClass: s.pick === null ? 'btn btn-off' : 'btn',
       check: () => { if (s.pick !== null) { if (LP && !/[?&]dq=/.test(location.search)) LP.dailyAnswer(!!opts[s.pick].right); this.setState({ checked: true }); } },
       retry: () => this.setState({ pick: null, checked: false })

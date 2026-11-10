@@ -69,7 +69,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-0.02em;margin:0}
 <div class="root" style="width: 390px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; position: relative">
   <header style="padding: 12px 16px 0; display: flex; align-items: center; gap: 8px"><a href="UPMarkets.dc.html" class="press" aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="#0E0B14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><h1 style="font-size: 22px">Companies</h1></header>
   <main style="padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 14px">
-    <p class="muted" style="margin: 0; font-size: 14px">Learn how real African companies make money. For learning only, not advice.</p>
+    <p class="muted" style="margin: 0; font-size: 14px">Learn how real Nigerian companies make money. For learning only, not advice.</p>
     <div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{chips}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.tap}}" style="cursor: pointer; font: inherit">{{c.label}}</button></sc-for></div>
     <div class="card" style="overflow: hidden"><sc-for list="{{rows}}" as="r" hint-placeholder-count="3"><a href="{{r.href}}" class="li press"><span style="width: 44px; height: 44px; flex: none; border-radius: 12px; background: {{r.color}}; color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">{{r.t}}</span><span style="flex: 1"><strong style="display: block">{{r.name}}</strong><span class="muted" style="font-size: 13px">{{r.line}}</span></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="#8E879A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></sc-for></div>
   </main>
@@ -91,7 +91,7 @@ class Component extends DCLogic {
   renderVals() {
     const M = this.M(); if (!M) return {};
     const f = this.state.f, ok = (c) => f === 'All' || c.tag === f || c.country === f;
-    return { chips: ['All', 'Banking', 'Telecoms', 'Nigeria', 'Kenya'].map((label) => ({ label, on: String(label === f), cls: label === f ? 'chip chip-on' : 'chip', tap: () => this.setState({ f: label }) })),
+    return { chips: ['All', 'Banking', 'Telecoms'].map((label) => ({ label, on: String(label === f), cls: label === f ? 'chip chip-on' : 'chip', tap: () => this.setState({ f: label }) })),
       rows: M.COMPANIES.filter(ok).map((c) => ({ href: 'URCompany.dc.html?c=' + c.t, t: c.t, name: c.name, line: c.line, color: c.color })) };
   }
 }

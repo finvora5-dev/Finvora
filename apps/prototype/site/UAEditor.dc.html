@@ -89,7 +89,7 @@ class Component extends DCLogic {
     const set = (k) => (e) => this.setState({ f: Object.assign({}, s.f, { [k]: e.target.value }) });
     const checks = A ? A.checks(s.f) : [], ok = checks.every((c) => c.ok);
     const art = !s.isNew && L ? (window.FVD && window.FVD.ARTICLES || []).filter((x) => x.slug === s.id)[0] : null, deep = art && art.deep;
-    const SECS = { 'Key takeaways': deep ? deep.takeaways : [], 'African example': deep && deep.example ? [deep.example.line].concat(deep.example.rows.map((r) => r[0] + ': ' + r[1])) : [], Formula: deep && deep.formula ? [deep.formula.text || deep.formula.line || JSON.stringify(deep.formula).replace(/[{}"]/g, ' ')] : [] };
+    const SECS = { 'Key takeaways': deep ? deep.takeaways : [], 'Nigerian example': deep && deep.example ? [deep.example.line].concat(deep.example.rows.map((r) => r[0] + ': ' + r[1])) : [], Formula: deep && deep.formula ? [deep.formula.text || deep.formula.line || JSON.stringify(deep.formula).replace(/[{}"]/g, ' ')] : [] };
     const secs = Object.keys(SECS).filter((k) => SECS[k] && SECS[k].length);
     const notes = { Published: 'Live in the app.', Draft: 'Not live yet. Learners see the published version.', 'Sent back': 'Waiting for the writer to make changes.' };
     return { missing: false, found: true, heading: s.f.title || 'New article', f: s.f, isNew: s.isNew, notNew: !s.isNew, topics: L ? L.TOPICS.map((t) => t.name) : [],

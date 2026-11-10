@@ -235,7 +235,7 @@
   var TOPICS = [
     { name: "Money basics", cats: ["Money basics"], blurb: "from what money does to budgeting" },
     { name: "Investing", cats: ["Investing", "Decisions and risk"], blurb: "from first share to building a mix" },
-    { name: "Markets across Africa", cats: ["Markets", "Nigerian market"], blurb: "how exchanges and markets work" },
+    { name: "The Nigerian market", cats: ["Markets", "Nigerian market"], blurb: "how exchanges and markets work" },
     { name: "Companies and reports", cats: ["Company analysis"], blurb: "reading profit, dividends and value" }
   ];
   function libLoad() { try { var l = JSON.parse(localStorage.getItem(LIB_KEY) || "null"); if (l && Array.isArray(l.saved)) return l; } catch (e) {} return { saved: [], read: {}, recent: [] }; }
@@ -369,7 +369,7 @@
   };
   var REVIEW_SEED = [
     { id: "s1", q: "Which bank stock should I buy?", a: "I can't tell you what to buy. I can show you how people compare banks: look at profit over several years, dividend history and how much bad debt each bank has. Want a quick lesson on reading a bank's results?", tag: "Asks for a pick", ago: "12m", kind: "refusal" },
-    { id: "s2", q: "Explain P/E with a Ghana example", a: "P/E compares a share's price with the profit behind each share. If a share costs GH₵10 and earns GH₵1 a year, its P/E is 10.", tag: "Thumbs down", ago: "1h", kind: "answer" },
+    { id: "s2", q: "Explain P/E with a Nigerian example", a: "P/E compares a share's price with the profit behind each share. If a share costs ₦10 and earns ₦1 a year, its P/E is 10.", tag: "Thumbs down", ago: "1h", kind: "answer" },
     { id: "s3", q: "What is today's T-bill rate?", a: "I don't have today's rates. The Central Bank publishes the results of each T-bill sale on its website.", tag: "Number check", ago: "3h", kind: "insufficient" },
     { id: "s4", q: "Is crypto a good idea?", a: "I can't tell you whether to buy anything. Crypto prices can rise and fall very fast, and in Nigeria the rules for it are still changing. Want to learn how risk works first?", tag: "Thumbs down", ago: "5h", kind: "refusal" }
   ];
@@ -523,7 +523,7 @@
   function logEvent(s, kind, title, href, xp) { s.log = [{ at: Date.now(), day: lagosDay(), kind: kind, title: title, href: href, xp: xp || 0 }].concat(s.log || []).slice(0, 200); }
   function markDay(s) { var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d); }
   var DAILY = [
-    ["Which currency is used in Ghana?", ["Naira", "Cedi", "Rand", "Shilling"], 1, "Ghana uses the cedi (GH₵). Shares on the Ghana Stock Exchange are priced in cedis.", ["The naira is Nigeria's currency.", "", "The rand is South Africa's currency.", "Kenya uses the shilling."]],
+    ["Which currency are shares on the NGX priced in?", ["Naira", "US dollar", "Pound", "Euro"], 0, "Shares on the Nigerian Exchange (NGX) are priced in naira (₦).", ["", "Some companies report results in dollars, but NGX share prices are in naira.", "The pound is the UK's currency. NGX share prices are in naira.", "The euro is used in much of Europe. NGX share prices are in naira."]],
     ["What is ₦1 in kobo?", ["10 kobo", "50 kobo", "100 kobo", "1,000 kobo"], 2, "₦1 is 100 kobo.", ["Too small: ₦1 is 100 kobo.", "That's half a naira.", "", "Too big: ₦1 is 100 kobo."]],
     ["What does NGX stand for?", ["Nigerian Exchange", "National Gold Exchange", "New Growth Index", "Naira Global Exchange"], 0, "NGX is the Nigerian Exchange, where shares of listed companies are bought and sold.", ["", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange."]],
     ["In the 50/30/20 guide, what is the 20% for?", ["Rent", "Savings", "Wants", "Food"], 1, "20% goes to savings. 50% is needs and 30% is wants.", ["Rent is a need, in the 50%.", "", "Wants are the 30%.", "Food is a need, in the 50%."]],
@@ -574,23 +574,17 @@
     MICRO: MICRO
   };
 
-  // ---- Markets: real African companies and exchanges, described in plain words. No live prices or figures.
+  // ---- Markets: real Nigerian companies and the Nigerian Exchange, described in plain words. No live prices or figures.
   // Facts here are general knowledge for learning; check each exchange's own site before relying on them.
   var MK = {
     COMPANIES: [
       { t: "ZB", name: "Zenith Bank", tag: "Banking", country: "Nigeria", line: "Banking · NGX: ZENITHBANK", color: "#7B4AF0", how: "It lends money at a higher rate than it pays savers. The gap is its main income. It also earns fees on transfers and cards.", bank: true, learn: "price-to-earnings" },
-      { t: "DC", name: "Dangote Cement", tag: "Building materials", country: "Nigeria", line: "Building materials · NGX: DANGCEM", color: "#E8361C", how: "It sells cement to builders, governments and distributors, from plants in Nigeria and other African countries.", learn: "market-capitalisation" },
+      { t: "DC", name: "Dangote Cement", tag: "Building materials", country: "Nigeria", line: "Building materials · NGX: DANGCEM", color: "#E8361C", how: "It sells cement to builders, governments and distributors, from plants across Nigeria.", learn: "market-capitalisation" },
       { t: "MTN", name: "MTN Nigeria", tag: "Telecoms", country: "Nigeria", line: "Telecoms · NGX: MTNN", color: "#4C1D95", how: "Mostly from people paying for airtime and data, plus mobile money and other digital services.", learn: "revenue-and-profit" },
       { t: "NN", name: "Nestlé Nigeria", tag: "Food and drink", country: "Nigeria", line: "Food and drink · NGX: NESTLE", color: "#5B21B6", how: "It makes packaged foods and drinks and sells them through shops and distributors across Nigeria.", learn: "revenue-and-profit" },
-      { t: "SC", name: "Safaricom", tag: "Telecoms", country: "Kenya", line: "Telecoms · NSE Kenya: SCOM", color: "#0FA394", how: "Kenya's biggest mobile network. It earns from calls and data, and from M-Pesa, its mobile money service, which charges small fees on transfers and payments.", learn: "revenue-and-profit" },
-      { t: "MG", name: "MTN Ghana", tag: "Telecoms", country: "Ghana", line: "Telecoms · GSE: MTNGH", color: "#0B6A60", how: "Ghana's biggest mobile network. It earns from calls and data, and from MoMo, its mobile money service.", learn: "revenue-and-profit" }
     ],
     EXCHANGES: [
       { t: "NGX", name: "Nigerian Exchange", where: "Lagos · prices in naira (₦)", sub: "Lagos, Nigeria · Naira (₦)", about: "Nigeria's main stock exchange, where shares of listed companies are bought and sold. It was known as the Nigerian Stock Exchange until 2021.", currency: "Naira (₦)", regulator: "SEC Nigeria", micro: true },
-      { t: "JSE", name: "Johannesburg Stock Exchange", where: "Johannesburg · prices in rand (R)", sub: "South Africa · Rand (R)", about: "South Africa's main stock exchange and the largest in Africa. It started in 1887, during the gold rush.", currency: "Rand (R)", regulator: "FSCA (South Africa)" },
-      { t: "NSE", name: "Nairobi Securities Exchange", where: "Nairobi · prices in shillings (KSh)", sub: "Kenya · Shilling (KSh)", about: "Kenya's stock exchange. It was called the Nairobi Stock Exchange until 2011. Safaricom is one of its best-known companies.", currency: "Kenyan shilling (KSh)", regulator: "Capital Markets Authority (Kenya)" },
-      { t: "GSE", name: "Ghana Stock Exchange", where: "Accra · prices in cedis (GH₵)", sub: "Accra, Ghana · Cedi (GH₵)", about: "Ghana's stock exchange, where shares of companies like MTN Ghana are bought and sold.", currency: "Cedi (GH₵)", regulator: "SEC Ghana" },
-      { t: "BRVM", name: "BRVM", where: "Abidjan · prices in CFA francs", sub: "Abidjan, Côte d'Ivoire · CFA franc", about: "A regional stock exchange shared by 8 West African countries that use the CFA franc, including Côte d'Ivoire, Senegal and Mali.", currency: "West African CFA franc", regulator: "AMF-UMOA (regional)" }
     ],
     company: function (t) { var m = /[?&]c=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "ZB"); return MK.COMPANIES.filter(function (c) { return c.t === k; })[0] || MK.COMPANIES[0]; },
     exchange: function (t) { var m = /[?&]x=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "NGX"); return MK.EXCHANGES.filter(function (c) { return c.t === k; })[0] || MK.EXCHANGES[0]; }

@@ -43,6 +43,7 @@ Built so far: D1, D2, D3, D12, the Practice Market and Ask Fin label parts of D5
 | D21 | **Reviewer tools stay open as they are today.** No reviewer code and no demo copy. | Replaces D7 and D20. The owner tests the app personally and accepts that testers can find the tools. |
 | D22 | **Success toasts last 2.5 seconds** for every action, including the admin Undo toast. Parts 4 and 5 approved with their proposals (Plus tools on the Practice Market home, 10/5 XP, in-app watchlist alerts, phone admin below a 700 px shorter side, Undo on phone admin actions). | Owner, 9 Nov 2026. |
 | D23 | **Admin on phones shows the same pages as the laptop** with a bottom navigation bar, not a separate task list. Replaces the task-list part of D14. | Owner, 9 Nov 2026. |
+| D24 | **Nigeria only (client, 10 Nov 2026):** Finvora covers the NGX, investing and finance education only. Other countries and exchanges (Ghana, Kenya, South Africa, BRVM) are removed from the product: goal page shows Money basics, Investing and Nigerian market; Markets shows the NGX; examples are Nigerian. Airtel Africa stays (NGX-listed). | Replaces the pan-African scope in the PRD and build plan. |
 
 ## Phase 2: parked until the prototype is approved
 
