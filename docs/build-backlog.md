@@ -2,6 +2,8 @@
 
 These items came out of the design review of the Stage 1 mockups (14 Oct 2026). Each one says what the mockups now show and what the code phase must do. They sit alongside the week plan in [TECHNICAL_PROPOSAL.md](TECHNICAL_PROPOSAL.md) and the rules in [ux-principles.md](ux-principles.md).
 
+> **Design update (12 Nov 2026):** the client approved the **navy and emerald** design, light mode only. Where this file mentions dark mode, glass effects, "Premium" or the first mockups, read it against that design: the paid plan is called **Plus**; there is no dark theme; the Free vs Plus split, prices and the "Illustrative prices" label are decided in [open-questions.md](open-questions.md) (Q2 to Q4). Locked views for Free users (B1's `PremiumGate`) are Phase 2; Phase 1 shows the split on the plan screens only. [PROTOTYPE_BUILD_PLAN.md](PROTOTYPE_BUILD_PLAN.md) is the current build plan.
+
 > **Phase note (29 Oct 2026):** B5, B7, B9's payment parts, B10 and the Pre-launch checklist are **Phase 2**. They're recorded so nothing is lost, but they don't block the prototype. Open questions are tracked in [open-questions.md](open-questions.md): only its Phase 1 list needs answers now.
 
 ## B1. One plan value drives every locked or unlocked screen
@@ -261,7 +263,7 @@ Applies to every request that creates or changes something that matters: simulat
 | Double-tap "Confirm" on a trade | Idempotency key + account row lock (already in proposal §7) | Two identical requests at once → one trade |
 | Two trades from two tabs that together exceed the cash | Account row lock (`SELECT … FOR UPDATE`); cash checked inside the lock | Two different buys at once → second rejected with a clear message |
 | Simulator reset while a trade is in flight | Reset takes the same account row lock | Reset + trade at once → consistent final state, never a trade on a deleted account |
-| AI free limit (10 a day) checked by two questions at once | One atomic update: `UPDATE … SET used = used + 1 WHERE user_id = … AND used < 10 RETURNING …`; no row means the limit is reached | 11 questions at once → exactly 10 answered. A failed answer gives the count back. |
+| AI free limit (5 a day in the current design; was 10) checked by two questions at once | One atomic update: `UPDATE … SET used = used + 1 WHERE user_id = … AND used < :limit RETURNING …`; no row means the limit is reached | limit + 1 questions at once → exactly the limit answered. A failed answer gives the count back. |
 | Webhook and poller verifying the same payment at once | State changes only from pending: `… WHERE status = 'pending'`; the loser does nothing | Webhook + poll + checkout return at once → one transition, one unlock |
 | Renewal job vs the user cancelling, changing plan or paying | Lock the subscription row for every change; the job re-reads state after taking the lock | Cancel during renewal → no charge after cancel, or an automatic refund |
 | Two admins issuing the same refund | Idempotency key on the refund + maker-checker + unique refund per attempt | Two approvals at once → one refund |
@@ -365,4 +367,4 @@ Nothing goes live with real payments until every item is ticked and dated.
 
 (Now question 2 in [open-questions.md](open-questions.md), Phase 1.)
 
-- **Sample-price labelling.** PRD §4.1 says sample prices must be "clearly marked as demo data", but the mockups had that wording removed on request. Options: a small, consistent "Sample prices" label wherever prices show (recommended, judgement) or confirm with the client that no label is wanted.
+- **Sample-price labelling. Resolved 12 Nov 2026:** label made-up prices "Illustrative prices" (open-questions Q2). Original note: PRD §4.1 says sample prices must be "clearly marked as demo data", but the mockups had that wording removed on request. Options: a small, consistent "Sample prices" label wherever prices show (recommended, judgement) or confirm with the client that no label is wanted.
