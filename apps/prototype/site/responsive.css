@@ -20,3 +20,36 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
 /* Safe areas: the pinned nav and bottom sheets clear the home indicator. */
 #dc-root nav[aria-label="Main"] { bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
 #dc-root section[role="dialog"] { padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* Screen transitions (skill: animate). Full page loads, so cross-document view transitions:
+   CSS only, transform and opacity, compositor-driven. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+@view-transition { navigation: auto; }
+/* Every screen change: a quick cross-fade (preventing a jarring change). */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; animation-timing-function: var(--ease-out); }
+/* What stays on screen does not blink: the bottom nav and the navy header hold still (spatial consistency). */
+#dc-root nav[aria-label="Main"] { view-transition-name: main-nav; }
+#dc-root > .sc-host > :first-child > header[style*="background: #0B192C"] { view-transition-name: top-header; }
+::view-transition-group(main-nav), ::view-transition-group(top-header) { animation-duration: 0s; }
+/* Courses / Library toggle: the white pill slides to the tapped side (state indication). */
+#dc-root a[aria-current="page"][href="LearnNavy.dc.html"][style*="height: 38px"],
+#dc-root a[aria-current="page"][href="LibraryNavy.dc.html"][style*="height: 38px"] { view-transition-name: seg-pill; }
+::view-transition-group(seg-pill) { animation-duration: 240ms; animation-timing-function: var(--ease-in-out); }
+/* Lesson steps: the next step slides in from the right, the last one leaves to the left (spatial consistency). */
+@keyframes vt-step-out { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes vt-step-in { from { opacity: 0; transform: translateX(24px); } }
+html:active-view-transition-type(step)::view-transition-old(root) { animation: vt-step-out 220ms var(--ease-out) both; }
+html:active-view-transition-type(step)::view-transition-new(root) { animation: vt-step-in 220ms var(--ease-out) both; }
+/* Bottom result sheets rise from the bottom edge; the screen behind dims (modal, drawer timing). */
+#dc-root section[role="dialog"] { transition: transform 320ms var(--ease-drawer); @starting-style { transform: translateY(100%); } }
+#dc-root div[aria-hidden="true"][style*="rgba(17,28,45,.45)"] { transition: opacity 240ms var(--ease-out); @starting-style { opacity: 0; } }
+/* Reduced motion: keep the cross-fade, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  html:active-view-transition-type(step)::view-transition-old(root), html:active-view-transition-type(step)::view-transition-new(root) { animation: none; }
+  ::view-transition-group(seg-pill) { animation-duration: 0s; }
+  #dc-root section[role="dialog"] { transition: opacity 200ms var(--ease-out); @starting-style { transform: none; opacity: 0; } }
+}

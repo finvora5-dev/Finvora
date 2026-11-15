@@ -23,6 +23,12 @@
   }
   if (route()) return;
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
+  // Lesson steps get the 'step' transition type (slide), every other screen change cross-fades (skill: animate).
+  var STEP = /(Lesson(Info|Calc|Order|Scenario|Match)?|LearnMyth|LearnCompare|LessonDone|CourseReviewQ)Navy\.dc/;
+  window.addEventListener("pagereveal", function (e) {
+    try { var from = navigation.activation && navigation.activation.from && navigation.activation.from.url;
+      if (e.viewTransition && from && STEP.test(from) && STEP.test(location.pathname)) e.viewTransition.types.add("step"); } catch (x) {}
+  });
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { if (!route()) fit(); }, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
