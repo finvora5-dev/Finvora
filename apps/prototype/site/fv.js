@@ -301,7 +301,7 @@
     signIn: function (email, code) {
       email = String(email || "").trim().toLowerCase(); var a = admLoad();
       if ((a.lockUntil || 0) > Date.now()) return "locked";
-      if (!/^[^\s@]+@finvora\.app$/.test(email)) return "domain";
+      if (!/^[^\s@]+@finvora\.(ng|app)$/.test(email)) return "domain";
       if (!/^\d{6}$/.test(String(code))) return "short";
       if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) { a.lockUntil = Date.now() + 900000; a.wrong = 0; } admSave(a); return (a.lockUntil || 0) > Date.now() ? "locked" : "wrong"; }
       a.wrong = 0; admSave(a);
