@@ -72,7 +72,7 @@ if MARK not in s:
         m = re.search(r'<span role="switch" aria-checked="(true|false)" aria-label="' + re.escape(label) + r'" style="[^"]*"><span style="[^"]*"></span></span>', s)
         if not m: raise SystemExit('missing switch: ' + label)
         sw = ('<button type="button" role="switch" class="fv-sw" aria-checked="{{' + k + 'On}}" aria-label="' + label.replace('"', '&quot;') + '" onClick="{{' + k + 'Tog}}" style="width: 44px; height: 26px; border: 0; border-radius: 999px; padding: 3px; box-sizing: border-box; background: {{' + k + 'Bg}}; display: flex; cursor: pointer; transition: background-color 160ms ease, transform 160ms var(--ease-out)">'
-              '<span style="width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; transform: translateX({{' + k + 'X}}); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1)"></span></button>')
+              '<span style="width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; transform: translateX({{' + k + 'X}}); transition: transform 160ms var(--ease-out)"></span></button>')
         s = s[:m.start()] + sw + s[m.end():]
     s = logic(s, MARK + '''
   constructor(p) { super(p); this.state = { n: 0 }; }

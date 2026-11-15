@@ -50,6 +50,7 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 #dc-root section[role="dialog"] { transition: transform 320ms var(--ease-drawer); @starting-style { transform: translateY(100%); } }
 #dc-root section[role="dialog"].fv-leaving { transform: translateY(100%); transition-duration: 200ms; }
 #dc-root div[aria-hidden="true"][style*="rgba(17,28,45,.45)"] { transition: opacity 240ms var(--ease-out); @starting-style { opacity: 0; } }
+#dc-root div:has(+ section[role="dialog"].fv-leaving) { opacity: 0; transition-duration: 200ms; }
 /* Admin confirm dialog: centred modal, so it scales from the centre (scale .95 + fade, 200ms ease-out). */
 #dc-root .fv-confirm { transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out); @starting-style { transform: scale(0.95); opacity: 0; } }
 #dc-root div:has(> .fv-confirm) { transition: opacity 200ms var(--ease-out); @starting-style { opacity: 0; } }
