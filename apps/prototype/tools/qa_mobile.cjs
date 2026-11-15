@@ -1,12 +1,14 @@
-// Automated part of the mobile-app-qa skill. Usage: node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8791/
-// Checks every phone screen at 390 px: sideways scroll, tap targets under 44 px, top bar reveal on scroll up,
-// focus boxes inside fields, and content hidden under pinned bottom bars at the end of the scroll.
+// Automated part of the mobile-app-qa skill. Usage: node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/
+// Checks every navy phone screen (*Navy.dc.html drawn at 390 px; laptop boards at 1440 px are skipped) on an iPhone 13:
+// sideways scroll, tap targets under 44 px, inputs under 16 px (iOS zooms the page), top bar reveal on scroll up,
+// and content hidden under the pinned bottom navigation at the end of the scroll.
 const { chromium, devices } = require('playwright'); const fs = require('fs'); const path = require('path');
 (async () => {
   const B = process.argv[2] || 'http://127.0.0.1:8791/'; const site = path.join(__dirname, '..', 'site');
-  const pages = fs.readdirSync(site).filter((f) => /^U[POSRF][A-Za-z]+\.dc\.html$/.test(f)).map((f) => f.replace('.dc.html', ''));
+  const pages = fs.readdirSync(site).filter((f) => /Navy\.dc\.html$/.test(f) && !/"width":1440/.test(fs.readFileSync(path.join(site, f), 'utf8'))).map((f) => f.replace('.dc.html', ''));
   const b = await chromium.launch(); const p = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block' })).newPage();
-  await p.goto(B + 'UOHome.dc.html'); await p.evaluate(() => { localStorage.setItem('fv.schema', '2'); localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada' })); FV.REV.setProgress(3, false); });
+  // Signed-in learner with a few lessons done; staff signed in so the admin phone screens don't route to sign-in.
+  await p.goto(B + 'HomeNavy.dc.html'); await p.evaluate(() => { localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor' })); sessionStorage.setItem('fv.staff', JSON.stringify({ email: 'chidi@finvora.ng', name: 'Chidi Nwosu' })); try { FV.REV.setProgress(3, false); } catch (e) {} });
   const issues = [];
   for (const u of pages) {
     try { await p.goto(B + u + '.dc.html', { waitUntil: 'networkidle', timeout: 15000 }); await p.waitForTimeout(500); } catch (e) { continue; }
@@ -23,6 +25,8 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'); c
         return rc.width < 44 && rc.height < 44 || (rc.height < 32 && rc.width < 200);
       }).slice(0, 3).map((e) => (e.getAttribute('aria-label') || e.textContent.trim() || e.tagName).slice(0, 24) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height));
       if (small.length) out.push('small tap targets: ' + small.join(', '));
+      const tiny = [...document.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea, select')].filter((e) => e.offsetParent && parseFloat(getComputedStyle(e).fontSize) < 16).slice(0, 3).map((e) => (e.getAttribute('aria-label') || e.id || e.tagName) + ' ' + getComputedStyle(e).fontSize);
+      if (tiny.length) out.push('inputs under 16px (page zooms on focus): ' + tiny.join(', '));
       return out;
     });
     r.forEach((x) => issues.push(u + ': ' + x));
