@@ -126,7 +126,7 @@ if MARK not in s:
     const items = this.state.order.map((v, i) => { const it = d.items[v], held = this.state.held === i, dragging = !!(dr && dr.i === i);
       return { i: String(i), n: String(i + 1), t: it[0], sub: it[1] || '', hasSub: !!it[1], held: String(held), aria: it[0] + ', position ' + (i + 1) + ' of ' + d.items.length,
         bd: held || dragging ? '2px solid #0B192C' : '1px solid #D5D9E0', sh: held || dragging ? '0 10px 22px rgba(17,28,45,.14)' : 'none',
-        tf: dragging ? 'translateY(' + dr.dy + 'px)' : 'none', tr: dragging ? 'none' : 'transform 200ms cubic-bezier(.2,.8,.2,1)', z: dragging ? '2' : '0',
+        tf: dragging ? 'translateY(' + dr.dy + 'px)' : 'none', tr: dragging ? 'none' : 'transform 200ms var(--ease-out)', z: dragging ? '2' : '0',
         nb: held || dragging ? '#0B192C' : '#E8EBEF', nc: held || dragging ? '#FFFFFF' : '#5B6577',
         down: (e) => this.down(e, i), key: (e) => this.key(e, i) }; });
     return Object.assign(fl, { kicker: d.title + ' · Order', q: d.q, items, hasEnds: !!d.ends, endA: d.ends ? d.ends[0] : '', endB: d.ends ? d.ends[1] : '', live: this.state.live,
@@ -151,7 +151,7 @@ if MARK not in s:
     a = s.index('<div style="margin: 18px 24px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: none">'); b = s.index('<div style="margin: 14px 24px 0; display: flex; align-items: center; gap: 10px; flex: none">', a)
     tick = re.search(r'<span style="width: 18px; height: 18px; border-radius: 999px; background: #10B981;[^"]*">(<svg.*?</svg>)</span>', s[a:b], flags=re.S).group(1)
     s = s[:a] + '<div style="margin: 18px 24px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: none"><sc-for list="{{cells}}" as="x" hint-placeholder-count="8"><button type="button" onClick="{{x.tap}}" aria-pressed="{{x.sel}}" aria-disabled="{{x.doneS}}" style="min-height: 68px; padding: 10px 12px; border-radius: 14px; border: {{x.bd}}; background: {{x.bg}}; box-shadow: {{x.sh}}; font: inherit; font-size: 14px; font-weight: {{x.w}}; color: {{x.c}}; text-align: left; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background-color 160ms ease-out, border-color 160ms ease-out"><sc-if value="{{x.done}}" hint-placeholder-val="{{ false }}"><span style="width: 18px; height: 18px; border-radius: 999px; background: #10B981; display: flex; align-items: center; justify-content: center; flex: none">' + tick + '</span></sc-if><span>{{x.t}}</span></button></sc-for></div>' + s[b:]
-    s = sub1(s, '<span style="display: block; width: 25%; height: 100%;', '<span style="display: block; width: {{pct}}; height: 100%; transition: width 240ms ease-out;')
+    s = sub1(s, '<span style="display: block; width: 25%; height: 100%;', '<span style="display: block; width: 100%; height: 100%; transform: scaleX({{sx}}); transform-origin: left; transition: transform 240ms var(--ease-out);')
     s = sub1(s, '>1 of 4 matched<', '>{{count}}<')
     s = sub1(s, '<button style="flex: none; min-height: 54px;', '<button type="button" onClick="{{toggleHint}}" aria-expanded="{{hintOpen}}" style="cursor: pointer; flex: none; min-height: 54px;')
     s = sub1(s, '<p style="margin: 10px 24px 0; font-size: 13px; line-height: 1.6; color: #334155; flex: none">Tap a word, then its meaning.</p>', '<p role="status" aria-live="polite" style="margin: 10px 24px 0; font-size: 13px; line-height: 1.6; color: #334155; flex: none">{{tip}}</p>')
@@ -186,7 +186,7 @@ if MARK not in s:
       });
     }
     const all = done === n;
-    return Object.assign(fl, { kicker: d.title + ' · Match', cells, pct: Math.round(done / n * 100) + '%', count: done + ' of ' + n + ' matched',
+    return Object.assign(fl, { kicker: d.title + ' · Match', cells, pct: Math.round(done / n * 100) + '%', sx: (done / n).toFixed(3), count: done + ' of ' + n + ' matched',
       tip: all ? d.done : this.state.hint ? 'Start with the word you know best, then match what is left.' : 'Tap a word, then its meaning.',
       hintOpen: String(this.state.hint), toggleHint: () => this.setState({ hint: !this.state.hint }),
       notDone: String(!all), ctaBg: all ? '#0B192C' : '#334155', op: all ? '1' : '.4', go: (e) => { if (!all) e.preventDefault(); } });

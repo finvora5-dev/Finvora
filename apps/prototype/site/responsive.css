@@ -15,7 +15,7 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
 #dc-root button, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"] { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 #dc-root #chat, #dc-root [style*="overflow-y: auto"] { overscroll-behavior: contain; }
 /* Press feedback on touch and mouse, on press not release. */
-#dc-root button, #dc-root a[style*="border-radius"] { transition: transform 100ms cubic-bezier(.2, .8, .2, 1); }
+#dc-root button, #dc-root a[style*="border-radius"] { transition: transform 160ms var(--ease-out); }
 #dc-root button:active, #dc-root a[style*="border-radius"]:active { transform: scale(.97); }
 /* Safe areas: the pinned nav and bottom sheets clear the home indicator. */
 #dc-root nav[aria-label="Main"] { bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
@@ -40,12 +40,15 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
 #dc-root a[aria-current="page"][href="LibraryNavy.dc.html"][style*="height: 38px"] { view-transition-name: seg-pill; }
 ::view-transition-group(seg-pill) { animation-duration: 240ms; animation-timing-function: var(--ease-in-out); }
 /* Lesson steps: the next step slides in from the right, the last one leaves to the left (spatial consistency). */
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
 @keyframes vt-step-out { to { opacity: 0; transform: translateX(-24px); } }
 @keyframes vt-step-in { from { opacity: 0; transform: translateX(24px); } }
 html:active-view-transition-type(step)::view-transition-old(root) { animation: vt-step-out 220ms var(--ease-out) both; }
 html:active-view-transition-type(step)::view-transition-new(root) { animation: vt-step-in 220ms var(--ease-out) both; }
 /* Bottom result sheets rise from the bottom edge; the screen behind dims (modal, drawer timing). */
 #dc-root section[role="dialog"] { transition: transform 320ms var(--ease-drawer); @starting-style { transform: translateY(100%); } }
+#dc-root section[role="dialog"].fv-leaving { transform: translateY(100%); transition-duration: 200ms; }
 #dc-root div[aria-hidden="true"][style*="rgba(17,28,45,.45)"] { transition: opacity 240ms var(--ease-out); @starting-style { opacity: 0; } }
 /* Admin confirm dialog: centred modal, so it scales from the centre (scale .95 + fade, 200ms ease-out). */
 #dc-root .fv-confirm { transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out); @starting-style { transform: scale(0.95); opacity: 0; } }
@@ -60,8 +63,10 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 #dc-root aside + main > * { flex-shrink: 0; }
 /* Reduced motion: keep the cross-fade, drop movement. */
 @media (prefers-reduced-motion: reduce) {
-  html:active-view-transition-type(step)::view-transition-old(root), html:active-view-transition-type(step)::view-transition-new(root) { animation: none; }
+  html:active-view-transition-type(step)::view-transition-old(root) { animation: vt-fade-out 180ms var(--ease-out) both; }
+  html:active-view-transition-type(step)::view-transition-new(root) { animation: vt-fade-in 180ms var(--ease-out) both; }
   ::view-transition-group(seg-pill) { animation-duration: 0s; }
   #dc-root section[role="dialog"] { transition: opacity 200ms var(--ease-out); @starting-style { transform: none; opacity: 0; } }
   #dc-root .fv-confirm { @starting-style { transform: none; opacity: 0; } }
+  #dc-root section[role="dialog"].fv-leaving { transform: none; opacity: 0; }
 }

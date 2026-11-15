@@ -62,3 +62,18 @@
   function start() { mo.observe(document.body, { childList: true, subtree: true }); fit(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
+
+// Sheets that close in place (a "#" action such as Try again or Next) slide out the way they came in,
+// then the original click runs. Links to other pages are left to the page transition.
+(function () {
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('section[role="dialog"] a[href="#"]');
+    if (!a || a.__fvGo) return;
+    var sh = a.closest('section[role="dialog"]');
+    if (sh.classList.contains("fv-leaving")) { e.preventDefault(); e.stopPropagation(); return; }
+    e.preventDefault(); e.stopPropagation(); sh.classList.add("fv-leaving");
+    var done = false, go = function () { if (done) return; done = true; a.__fvGo = true; a.click(); a.__fvGo = false; sh.classList.remove("fv-leaving"); };
+    var end = function (ev) { if (ev.target === sh && ev.propertyName === "transform" || ev.target === sh && ev.propertyName === "opacity") { sh.removeEventListener("transitionend", end); go(); } };
+    sh.addEventListener("transitionend", end); setTimeout(go, 260);
+  }, true);
+})();

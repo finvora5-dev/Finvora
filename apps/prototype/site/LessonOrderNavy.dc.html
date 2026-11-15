@@ -76,7 +76,7 @@ class Component extends DCLogic {
     const items = this.state.order.map((v, i) => { const it = d.items[v], held = this.state.held === i, dragging = !!(dr && dr.i === i);
       return { i: String(i), n: String(i + 1), t: it[0], sub: it[1] || '', hasSub: !!it[1], held: String(held), aria: it[0] + ', position ' + (i + 1) + ' of ' + d.items.length,
         bd: held || dragging ? '2px solid #0B192C' : '1px solid #D5D9E0', sh: held || dragging ? '0 10px 22px rgba(17,28,45,.14)' : 'none',
-        tf: dragging ? 'translateY(' + dr.dy + 'px)' : 'none', tr: dragging ? 'none' : 'transform 200ms cubic-bezier(.2,.8,.2,1)', z: dragging ? '2' : '0',
+        tf: dragging ? 'translateY(' + dr.dy + 'px)' : 'none', tr: dragging ? 'none' : 'transform 200ms var(--ease-out)', z: dragging ? '2' : '0',
         nb: held || dragging ? '#0B192C' : '#E8EBEF', nc: held || dragging ? '#FFFFFF' : '#5B6577',
         down: (e) => this.down(e, i), key: (e) => this.key(e, i) }; });
     return Object.assign(fl, { kicker: d.title + ' · Order', q: d.q, items, hasEnds: !!d.ends, endA: d.ends ? d.ends[0] : '', endB: d.ends ? d.ends[1] : '', live: this.state.live,
