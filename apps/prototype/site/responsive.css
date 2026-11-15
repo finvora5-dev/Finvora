@@ -12,7 +12,7 @@ html.fv-wide #dc-root nav[aria-label="Main"] { left: 50% !important; right: auto
 /* Mobile-native baseline (skill: mobile-native). */
 html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
 #dc-root button, #dc-root a, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"] { touch-action: manipulation; }
-#dc-root button, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"] { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+#dc-root button, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"], #dc-root a[style*="border-radius"], #dc-root nav a { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 #dc-root #chat, #dc-root [style*="overflow-y: auto"] { overscroll-behavior: contain; }
 /* Switches: 26px tall visually, 44px tall to touch (invisible area around the track, nothing moves). */
 #dc-root [role="switch"] { position: relative; }

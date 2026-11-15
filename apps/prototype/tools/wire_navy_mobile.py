@@ -30,6 +30,16 @@ for n in names:
         s = re.sub(r'(<a [^>]*style=")(?!display: inline-block; padding: 14px)([^"]*">)' + re.escape(t), lambda m: m.group(1) + HIT + m.group(2) + t, s)
     # Dictionary letter index: a strip you can tap or drag along (responsive.js), wider to the screen edge.
     s = s.replace('aria-label="Letters" style="width: 28px; padding: 14px 6px 0 0;', 'aria-label="Letters" class="fv-index" style="width: 36px; padding: 14px 6px 0 0; touch-action: none;')
+    # Viewport baseline (§ Baseline): the keyboard resizes the layout on Android so bottom-pinned inputs stay visible.
+    s = s.replace('<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">', '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">')
+    # Light only (owner): say so, so Android's automatic dark mode doesn't invert the design (§10).
+    if '<meta name="color-scheme"' not in s: s = re.sub(r'(<meta name="theme-color" content="#[0-9A-Fa-f]{6}">)', r'\1<meta name="color-scheme" content="light">', s, count=1)
+    # Keyboards (§4): search fields get the search key; share counts the number pad; emails the email keyboard.
+    s = re.sub(r'<input (?![^>]*type=)([^>]*aria-label="Search[^"]*")', r'<input type="search" enterkeyhint="search" autocorrect="off" \1', s)
+    s = re.sub(r'<input (?![^>]*inputmode)([^>]*aria-label="Shares")', r'<input inputmode="numeric" enterkeyhint="done" \1', s)
+    s = s.replace('<input value="1,000" style=', '<input inputmode="numeric" enterkeyhint="done" aria-label="Shares" value="1,000" style=')
+    s = s.replace('<input value="ada@example.com" style=', '<input type="email" autocomplete="email" autocapitalize="none" autocorrect="off" enterkeyhint="send" aria-label="Email" value="ada@example.com" style=')
+    s = re.sub(r'<input (?![^>]*enterkeyhint)([^>]*aria-label="Ask (?:Finvora|a follow-up)")', r'<input enterkeyhint="send" \1', s)
     body = s[s.index('<x-dc>'):]
     top = re.search(r'<div style="width: \d+px;[^"]*">\s*<(?:div|header|aside)[^>]*style="[^"]*background: #0B192C', body)
     tc = '#0B192C' if top else '#F8F9FA'
