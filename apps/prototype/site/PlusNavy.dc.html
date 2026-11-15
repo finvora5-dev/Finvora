@@ -32,17 +32,20 @@
     </sc-for>
   </div>
   <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
-    <a href="#" style="height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue to payment</a>
+    <a href="#" onClick="{{pay}}" style="height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue to payment</a>
     <p style="margin: 0; text-align: center; font-size: 12px; color: #5B6577">Paid with Paystack. Cancel anytime in Settings.</p>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { g: 1 }; }
+/* navy-pay */
+  constructor(p) { super(p); this.state = { g: 1 }; if (window.FV && window.FV.PAY) window.FV.PAY.remember(); }
   renderVals() {
+    const pay = (e) => { e.preventDefault(); const PAY = window.FV && window.FV.PAY; if (!PAY) return; const r = PAY.start(this.state.g === 1 ? 'yearly' : 'monthly');
+      if (r.ok) location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else if (r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else location.href = 'YourPlanNavy.dc.html'; };
     const P = [['Monthly', 'Billed every month', '₦5,999'], ['Yearly', 'One month free · 11 × ₦5,999', '₦65,989']];
-    return {
+    return { pay,
       f: ['Unlimited Finvora AI questions', 'Compare companies side by side', 'Dividend history for every company', 'Full 5-year financial statements', 'Price alerts on your watchlist'].map(t => ({ t })),
       plans: P.map(([t, s, pr], i) => { const on = this.state.g === i; return { t, s, pr, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF' }; })
     };
