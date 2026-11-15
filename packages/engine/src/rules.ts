@@ -14,6 +14,11 @@ export const XP = {
   dailyComplete: 5,
   dailyCorrectBonus: 3,
   challengeFirst: 15,
+  /** Reading a Library article to the end, once per article. Decided 9 Nov 2026. */
+  articleRead: 3,
+  /** Plus learning tools (design Part 4), once each. */
+  crisisComplete: 10,
+  scenarioComplete: 5,
 } as const;
 
 export const THRESHOLDS = {

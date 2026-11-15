@@ -16,6 +16,8 @@ Where this plan differs from those documents, it says so and lists the decision 
 
 ## 1. What the prototype is
 
+**How it is built (owner decided 15 Nov 2026):** the earlier prototype is reused and restyled. The site in `apps/prototype/site` is the approved navy canvas boards run by the canvas runtime (`support.js`), fitted to each screen by `responsive.js`, deployed as static files to Cloudflare (`wrangler.jsonc`). The tested rules in `packages/domain` and `packages/sample-data` are wired into the boards screen by screen. The Next.js app below is the Stage 2 target.
+
 A responsive web app (Next.js) that the client opens from one link and uses like the real app. There is **no deployed backend** (ADR D1). Every screen talks to a typed `FinvoraApi` interface backed by `MockFinvoraApi`: sample JSON data, `localStorage` for user state, and a scripted AI. Stage 2 swaps in `HttpFinvoraApi` without touching screens.
 
 Out of scope for Stage 1: real sign-in, real payments, live prices, live AI, server, database, emails actually sent.
@@ -183,7 +185,7 @@ One key per domain, each `{ v, data }`, with a migration step on schema change. 
 
 ## 6. Design implementation
 
-- **Tokens first (client brand sheet, 15 Nov 2026):** page off-white `#F8F9FA`, surface `#FFFFFF`, navy (ink, primary buttons, headers) `#0B192C`, emerald on light `#10B981` (fills, icons, progress, brand), emerald on dark `#00E676`, emerald text on light `#047857`, muted `#5B6577`, lines `#E5E7EB`, red `#B9473F`, amber warnings `#B45309`. No yellow. Light mode only; no dark theme.
+- **Tokens first (client brand sheet, 15 Nov 2026):** page off-white `#F8F9FA`, surface `#FFFFFF`, navy (ink, primary buttons, headers) `#0B192C`, emerald on light `#10B981` (fills, icons, progress, brand), emerald on dark `#00E676`, emerald text on light `#047857` (owner decided 15 Nov 2026), muted `#5B6577`, lines `#E5E7EB`, red `#B9473F`, amber warnings `#B45309`. No yellow. Light mode only; no dark theme.
 - **Logo:** the leaf "F" mark in `docs/brand/` (navy and emerald on light; white and `#00E676` on navy). Small sizes use the app-icon form: the mark in a navy rounded square. Wordmark is "FINVORA" in capitals with wide letter spacing. My judgement: the SVGs were traced from the client's PDF, which is a flat image; ask the client for the original vector files before launch.
 - Main buttons are navy. A navy header is used only on main and research screens (Home, Markets, Companies, Company, Compare, Search, Learn, Library, Me, Ask Finvora, practice market list and watchlist, Welcome).
 - Font: Geist, with Geist Mono for numbers and tickers. Icons: inline stroke SVG set, no emoji. No mascot.
@@ -238,8 +240,8 @@ Decided since the first version: design direction, Plus price, the Free vs Plus 
 
 | # | Question | Default if no answer |
 |---|---|---|
-| 1 | Trade sheet: the approved design is shares-first; the earlier plan wanted amount-first | Build as designed (shares-first). My judgement: the client approved these screens, so the design wins |
-| 2 | Practice starting cash: ADR D4 says ₦100,000; the designs show a portfolio above ₦1,000,000 | Keep ₦100,000 in config and let the screens show real computed values |
+| 1 | Trade sheet | **Decided (owner, 15 Nov 2026):** number of shares, as designed |
+| 2 | Practice starting cash | **Decided (owner, 15 Nov 2026):** ₦100,000 (ADR D4); screens show real computed values |
 | 3 | "Course locked": does it mean "finish the earlier course first"? Free users get all courses | Yes, order only; never a Plus lock |
 | 4 | Original logo vector files (the client sent a flat image) | Use the traced SVGs in `docs/brand/` |
 | 5 | Context-aware Ask Finvora as a bottom sheet over the current screen is in this plan but has no navy design; the designs link to the full chat | Link to the full chat with the question prefilled |

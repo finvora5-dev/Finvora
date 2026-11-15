@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What interests you most</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B192C">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}a{color:#0B192C}a:hover{color: #047857}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F8F9FA; color: #0B192C; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; padding: 10px 24px 28px">
+  <div style="margin: -10px -24px 0; padding: 10px 24px 0"><div style="display: flex; align-items: center; gap: 12px"><a href="SignInNavy.dc.html" aria-label="Back" style="width: 44px; height: 44px; margin-left: -12px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a><span style="flex: 1; height: 4px; border-radius: 999px; background: #E2E5EA; overflow: hidden"><span style="display: block; width: 66%; height: 100%; background: #10B981"></span></span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">2/3</span></div></div>
+  <h1 style="margin: 28px 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">What interests you most?</h1>
+  <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #5B6577">We'll tailor your home screen. You can change this anytime.</p>
+  <div role="radiogroup" aria-label="Interest" style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px">
+    <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
+      <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 14px 16px; border-radius: 14px; border: {{o.bd}}; background: {{o.bg}}; font: inherit; text-align: left; cursor: pointer; color: #0B192C">
+        <span style="flex: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">{{o.t}}</span><span style="font-size: 13px; color: #5B6577">{{o.s}}</span></span>
+        <span style="width: 20px; height: 20px; border-radius: 999px; border: {{o.dot}}; box-sizing: border-box"></span>
+      </button>
+    </sc-for>
+  </div>
+  <a href="HomeNavy.dc.html" style="margin-top: auto; height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { g: 1 }; }
+  renderVals() {
+    const O = [['Money basics', 'Budgeting, saving and inflation'], ['Investing', 'Shares, risk and returns'], ['Nigerian market', 'Companies and prices on the NGX']];
+    return { opts: O.map(([t, s], i) => { const on = this.state.g === i; return { t, s, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF', dot: on ? '6px solid #0B192C' : '1.5px solid #C0C6D0' }; }) };
+  }
+}
+</script>
+</body>
+</html>

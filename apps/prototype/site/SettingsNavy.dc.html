@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B192C">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>body{margin:0}a{color:#0B192C}a:hover{color: #047857}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F8F9FA; color: #0B192C; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 10px 20px 0 8px; display: flex; align-items: center; gap: 4px"><a href="MeNavy.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a><h1 style="margin: 0; font-size: 20px; font-weight: 600">Settings</h1></div>
+  <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+    <section style="padding: 18px 20px 0">
+      <h2 style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">{{g.h}}</h2>
+      <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; justify-content: space-between; min-height: 52px; border-bottom: 1px solid #EDEFF2; font-size: 15px">
+          <span>{{r.t}}</span>
+          <span style="display: {{r.showV}}; font-size: 14px; color: #5B6577">{{r.v}}</span>
+          <button role="switch" aria-checked="{{r.on}}" aria-label="{{r.t}}" onClick="{{r.tog}}" style="display: {{r.showS}}; width: 44px; height: 26px; border-radius: 999px; border: 0; padding: 3px; background: {{r.bg}}; cursor: pointer; justify-content: {{r.j}}"><span style="width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(11,11,15,.2)"></span></button>
+        </div>
+      </sc-for>
+    </section>
+  </sc-for>
+  <a href="MainNavy.dc.html" style="margin: 24px 20px 0; height: 48px; border-radius: 12px; border: 1px solid #D5D9E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; text-decoration: none; color: #B9473F">Sign out</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { price: true, daily: true, news: false, sound: true }; }
+  renderVals() {
+    const sw = (t, k) => { const on = this.state[k]; return { t, on: String(on), showS: 'flex', showV: 'none', v: '', bg: on ? '#0B192C' : '#D5D9E0', j: on ? 'flex-end' : 'flex-start', tog: () => this.setState({ [k]: !on }) }; };
+    const val = (t, v) => ({ t, v, showS: 'none', showV: 'inline', on: 'false', bg: '', j: '', tog: () => {} });
+    return { groups: [
+      { h: 'Account', rows: [val('Email', 'ada@example.com'), val('Plan', 'Free'), val('Interest', 'Investing')] },
+      { h: 'Notifications', rows: [sw('Price alerts', 'price'), sw('Daily lesson reminder', 'daily'), sw('Market news', 'news')] },
+      { h: 'App', rows: [sw('Sounds', 'sound'), val('Text size', 'System'), val('Privacy and data', '')] }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

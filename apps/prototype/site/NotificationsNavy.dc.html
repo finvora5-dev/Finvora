@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notifications</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B192C">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>body{margin:0}a{color:#0B192C}a:hover{color: #047857}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F8F9FA; color: #0B192C; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 10px 20px 0 8px; display: flex; align-items: center; gap: 4px"><a href="HomeNavy.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a><h1 style="margin: 0; flex: 1; font-size: 20px; font-weight: 600">Notifications</h1><a href="#" style="font-size: 13px; color: #047857; text-decoration: none; min-height: 44px; display: flex; align-items: center">Mark all read</a></div>
+  <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+    <section style="padding: 16px 20px 0">
+      <h2 style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">{{g.h}}</h2>
+      <sc-for list="{{g.items}}" as="n" hint-placeholder-count="3">
+        <a href="{{n.href}}" style="display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #EDEFF2; text-decoration: none">
+          <span style="width: 8px; height: 8px; margin-top: 7px; flex: none; border-radius: 999px; background: {{n.dot}}"></span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: {{n.w}}">{{n.t}}</span><span style="font-size: 13px; line-height: 1.45; color: #5B6577">{{n.s}}</span><span style="font-size: 12px; color: #5B6577">{{n.time}}</span></span>
+        </a>
+      </sc-for>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const it = (t, s, time, unread, href) => ({ t, s, time, href, dot: unread ? '#10B981' : 'transparent', w: unread ? '600' : '500' });
+    return { groups: [
+      { h: 'Today', items: [it('Zenith Bank is up 3.4%', 'Your watchlist price alert for ZENITHBANK at ₦48.20. Illustrative.', '10:42', 1, 'Company.dc.html'), it('Dangote Cement full-year results', 'Revenue and profit figures are now on the company page.', '09:15', 1, 'Company.dc.html'), it('Keep your 7-day run going', 'Next lesson: Inflation and purchasing power · 5 min.', '08:00', 0, 'Lesson.dc.html')] },
+      { h: 'Earlier', items: [it('NGX All-Share closed higher', 'The index rose 0.7% on Friday. Illustrative.', 'Fri', 0, 'Markets.dc.html'), it('New guide: Reading an income statement', 'In Companies and reports · 4 min.', 'Thu', 0, 'Article.dc.html')] }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

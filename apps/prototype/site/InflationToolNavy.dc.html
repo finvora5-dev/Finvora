@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Inflation calculator</title>
+<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B192C">
+<link rel="stylesheet" href="./responsive.css">
+<script src="./responsive.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>body{margin:0}a{color:#0B192C}a:hover{color: #047857}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F8F9FA; color: #0B192C; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; position: relative; overflow: hidden; ">
+<div style="padding: 10px 16px 0 8px; display: flex; align-items: center; gap: 4px; flex: none"><a href="LearnNavy.dc.html" aria-label="Back" style="width: 44px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a><h1 style="margin: 0; flex: 1; font-size: 20px; font-weight: 600">Inflation calculator</h1></div><p style="margin: 8px 24px 0; font-size: 14px; line-height: 1.6; color: #334155; flex: none">See what money is worth after inflation. Rates are illustrative.</p><div style="padding: 18px 24px 0; display: flex; flex-direction: column; gap: 14px"><label style="font-size: 13px; font-weight: 500">Amount<span style="margin-top: 6px; height: 50px; border: 1px solid #D5D9E0; border-radius: 12px; display: flex; align-items: center; padding: 0 14px; font-family: 'Geist Mono', monospace; font-size: 18px">₦100,000</span></label><label style="font-size: 13px; font-weight: 500">Inflation a year<span style="margin-top: 6px; height: 50px; border: 1px solid #D5D9E0; border-radius: 12px; display: flex; align-items: center; padding: 0 14px; font-family: 'Geist Mono', monospace; font-size: 18px">25%</span></label><label style="font-size: 13px; font-weight: 500">Years<span style="margin-top: 10px; display: flex; gap: 6px"><span style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFFFFF; color: #0B192C; display: flex; align-items: center; justify-content: center; font-size: 14px">1</span><span style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #0B192C; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px">3</span><span style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFFFFF; color: #0B192C; display: flex; align-items: center; justify-content: center; font-size: 14px">5</span><span style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFFFFF; color: #0B192C; display: flex; align-items: center; justify-content: center; font-size: 14px">10</span></span></label></div><div style="padding: 18px; border: 1px solid #E5E7EB; border-radius: 16px; margin: 20px 24px 0; background: #EEF0F3; border: 0"><span style="font-size: 13px; color: #5B6577">In 3 years ₦100,000 buys what</span><div style="margin-top: 4px; font-family: 'Geist Mono', monospace; font-size: 30px; font-weight: 500">₦51,200</div><span style="font-size: 13px; color: #B9473F">buys today. It loses 48.8% of its value.</span></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

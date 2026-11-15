@@ -1,0 +1,7 @@
+/* Finvora prototype layout across screen sizes (see responsive.js). */
+html { background: #F8F9FA; }
+body { margin: 0; min-height: 100dvh; }
+#dc-root > .sc-host > :first-child { margin: 0 auto; }
+html.fv-wide #dc-root > .sc-host > :first-child { min-height: 100dvh !important; }
+html.fv-wide body { background: #F8F9FA; }
+html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1px #E5E7EB; }

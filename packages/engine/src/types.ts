@@ -161,4 +161,20 @@ export interface Article {
   lessonIds?: LessonId[];
   check?: { question: string; options: string[]; answer: number; explanation: string };
   sources?: { label: string; url?: string }[];
+  /** Full article sections, as in the designed Dividend article. Optional while articles are being expanded. */
+  deep?: ArticleDeep;
+  /** Everyday words learners might use for this topic; Ask Fin scores them like the definition. */
+  keywords?: string[];
+}
+
+export interface ArticleDeep {
+  /** Lead sentence split around the highlighted term: [before, term, after]. */
+  lead: [string, string, string];
+  takeaways: string[];
+  how: { title: string; intro: string; steps: string[] };
+  /** Worked example with made-up people or companies only. */
+  example: { line: string; rows: [string, string][]; note: string };
+  /** The key calculation, where the topic has one. */
+  formula?: { title: string; intro: string; rule: string; calc: string; note: string };
+  mistake?: { myth: string; fact: string };
 }
