@@ -34,6 +34,11 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
   #dc-root [style*="overflow-x: auto"], #dc-root [style*="overflow-x: scroll"], #dc-root [style*="overflow: auto"] { scrollbar-width: none; }
   #dc-root [style*="overflow-x: auto"]::-webkit-scrollbar, #dc-root [style*="overflow-x: scroll"]::-webkit-scrollbar, #dc-root [style*="overflow: auto"]::-webkit-scrollbar { display: none; }
 }
+/* Sideways rows snap like native carousels (skill: mobile-native §9, native scroll-snap, no JS):
+   card rows settle on a card edge; chip rows settle near a chip without forcing it. */
+#dc-root [style*="overflow-x: auto"] { scroll-snap-type: x proximity; scroll-padding-inline: 20px; overscroll-behavior-x: contain; }
+#dc-root [style*="overflow-x: auto"][style*="margin: 0 -20px"] { scroll-snap-type: x mandatory; }
+#dc-root [style*="overflow-x: auto"] > * { scroll-snap-align: start; }
 /* Press feedback on touch and mouse, on press not release. */
 #dc-root button, #dc-root a[style*="border-radius"] { transition: transform 160ms var(--ease-out); }
 #dc-root button:active, #dc-root a[style*="border-radius"]:active { transform: scale(.97); }
