@@ -19,7 +19,7 @@ GUARD = "  componentDidMount() { if (window.FV && !window.FV.ADMIN.staff()) loca
 # Sidebar name and initials come from the signed-in staff member.
 def staff_side(s):
     s = s.replace('font-size: 13px; font-weight: 600">CN</span>', 'font-size: 13px; font-weight: 600">{{sIni}}</span>', 1)
-    return s.replace('font-size: 14px; font-weight: 600">Chidi Nwosu</span>', 'font-size: 14px; font-weight: 600">{{sName}}</span>', 1)
+    return s.replace('font-size: 14px; font-weight: 600">Chidi Nwosu</span>', 'font-size: 14px; font-weight: 600" class="fv-staff" title="{{sName}}">{{sName}}</span>', 1)
 STAFF = "const st = (window.FV && window.FV.ADMIN.staff()) || { name: 'Chidi Nwosu' }; const sName = st.name, sIni = sName.split(/\\s+/).map((x) => x[0]).join('').slice(0, 2).toUpperCase();"
 
 # Sign-in
@@ -51,7 +51,7 @@ if MARK not in s:
     s = sub1(s, '>12 unread</p>', '>{{unread}}</p>')
     row = '<div style="display: grid; grid-template-columns: 1.1fr 0.8fr 1fr 2.4fr 0.7fr; gap: 12px; min-height: 54px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; font-size: 14px">'
     a = s.index(row)
-    live = (row.replace('font-size: 14px">', 'font-size: 14px; padding-block: 10px">') + '<span style="text-align: left; overflow-wrap: anywhere">{{r.from}}</span><span style="text-align: left"><span style="display: inline-flex; padding: 3px 8px; border-radius: 6px; background: {{r.bg}}; color: {{r.fg}}; font-size: 12px; font-weight: 600">{{r.type}}</span></span><span style="text-align: left; overflow-wrap: anywhere">{{r.about}}</span><span style="text-align: left"><span style="color: #334155; overflow-wrap: anywhere">{{r.msg}}</span></span><span style="text-align: left">{{r.when}}</span></div>')
+    live = (row.replace('font-size: 14px">', 'font-size: 14px; padding-block: 10px">') + '<span style="text-align: left; overflow-wrap: anywhere">{{r.from}}</span><span style="text-align: left"><span style="display: inline-flex; padding: 3px 8px; border-radius: 6px; background: {{r.bg}}; color: {{r.fg}}; font-size: 12px; font-weight: 600">{{r.type}}</span></span><span style="text-align: left; overflow-wrap: anywhere">{{r.about}}</span><span style="text-align: left"><span class="fv-clamp" title="{{r.msg}}" style="color: #334155; overflow-wrap: anywhere">{{r.msg}}</span></span><span style="text-align: left">{{r.when}}</span></div>')
     s = s[:a] + '<sc-for list="{{rows}}" as="r" hint-placeholder-count="1">' + live + '</sc-for>' + s[a:]
     s = logic(s, MARK + '\n' + GUARD + '''  renderVals() {
     ''' + STAFF + '''

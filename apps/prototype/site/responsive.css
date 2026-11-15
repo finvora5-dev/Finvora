@@ -52,6 +52,12 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 #dc-root div:has(> .fv-confirm) { transition: opacity 200ms var(--ease-out); @starting-style { opacity: 0; } }
 /* Admin switches: knob slides 160ms ease-out (set inline); press feedback like other controls. */
 #dc-root .fv-sw:active { transform: scale(0.97); }
+/* Admin (break-ui): long tables scroll inside the main column; long messages clamp to 3 lines (full text on hover/title);
+   a long staff name stays on one line in the sidebar. */
+#dc-root aside + main { overflow-y: auto; overscroll-behavior: contain; }
+#dc-root .fv-clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+#dc-root .fv-staff { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+#dc-root aside + main > * { flex-shrink: 0; }
 /* Reduced motion: keep the cross-fade, drop movement. */
 @media (prefers-reduced-motion: reduce) {
   html:active-view-transition-type(step)::view-transition-old(root), html:active-view-transition-type(step)::view-transition-new(root) { animation: none; }
