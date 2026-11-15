@@ -10,8 +10,10 @@ html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1px #E5E7EB;
 html.fv-wide #dc-root nav[aria-label="Main"] { left: 50% !important; right: auto !important; width: 366px !important; transform: translateX(-50%); }
 
 /* Mobile-native baseline (skill: mobile-native). */
-/* Light only (owner): "only light" tells Chrome and Samsung Internet not to force-darken the design. */
-:root { color-scheme: only light; }
+/* Light only (owner). Browsers that force dark mode (Samsung Internet) skip pages that handle dark themselves, so the
+   pages declare "light dark" and this answers the dark preference with the same light design. */
+:root { color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root { color-scheme: light; } html, body { background: #F8F9FA; color: #0B192C; } }
 html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
 #dc-root button, #dc-root a, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"] { touch-action: manipulation; }
 #dc-root button, #dc-root [role="button"], #dc-root [role="radio"], #dc-root [role="switch"], #dc-root a[style*="border-radius"], #dc-root nav a { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }

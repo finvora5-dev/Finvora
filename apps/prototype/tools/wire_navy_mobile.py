@@ -33,8 +33,10 @@ for n in names:
     # Viewport baseline (§ Baseline): the keyboard resizes the layout on Android so bottom-pinned inputs stay visible.
     s = s.replace('<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">', '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">')
     # Light only (owner): say so, so Android's automatic dark mode doesn't invert the design (§10).
-    s = s.replace('<meta name="color-scheme" content="light">', '<meta name="color-scheme" content="only light">')
-    if '<meta name="color-scheme"' not in s: s = re.sub(r'(<meta name="theme-color" content="#[0-9A-Fa-f]{6}">)', r'\1<meta name="color-scheme" content="only light">', s, count=1)
+    # Samsung Internet force-darkens pages that don't declare dark support and ignores "only light"; declaring
+    # "light dark" while every colour stays the light design (responsive.css) makes it leave the page alone.
+    s = s.replace('<meta name="color-scheme" content="light">', '<meta name="color-scheme" content="light dark">').replace('<meta name="color-scheme" content="only light">', '<meta name="color-scheme" content="light dark">')
+    if '<meta name="color-scheme"' not in s: s = re.sub(r'(<meta name="theme-color" content="#[0-9A-Fa-f]{6}">)', r'\1<meta name="color-scheme" content="light dark">', s, count=1)
     # Keyboards (§4): search fields get the search key; share counts the number pad; emails the email keyboard.
     s = re.sub(r'<input (?![^>]*type=)([^>]*aria-label="Search[^"]*")', r'<input type="search" enterkeyhint="search" autocorrect="off" \1', s)
     s = re.sub(r'<input (?![^>]*inputmode)([^>]*aria-label="Shares")', r'<input inputmode="numeric" enterkeyhint="done" \1', s)
