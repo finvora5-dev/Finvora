@@ -10,7 +10,7 @@ Checked on the live site, 15 Nov 2026: the front page opens the navy welcome scr
 
 ## What the prototype is
 
-A browser-only prototype of Finvora, a money and investing education app for Nigerian beginners. No backend, no real accounts, no real payments, no live AI and no live market data. Everything a visitor does is saved in that browser only (keys starting `fv.`). Made-up prices are labelled "Illustrative prices".
+A browser-only prototype of Finvora, a money and investing education app for Nigerian beginners. No backend, no real accounts, no real payments, no live AI and no live market data. Everything a visitor does is saved in that browser only (keys starting `fv.`). Prices are made up; by owner decision (15 Nov 2026) they carry no "Illustrative" label.
 
 ## How it is built
 

@@ -15,4 +15,4 @@
 - Duplicates, status checks and reconciliation follow `docs/build-backlog.md` §B7; security, audit, observability, incident and testing patterns follow §B8; idempotency keys and race conditions follow §B9; sign-in, age, market calendar, subscriptions, AI data handling and analytics follow §B10.
 - Nothing ships without the **Definition of done**; Stage 2 does not launch until the **Pre-launch checklist** in `docs/build-backlog.md` is complete.
 - Use the Fintech Engineering Handbook (handbook.fintechengineer.io) for engineering patterns only; verify its facts, and use Nigerian sources (Paystack docs, CBN, SEC Nigeria, NDPA) for rules.
-- Design: no yellow; no em dashes in copy; no "demo/prototype/sample" wording outside the simulator; label made-up prices "Illustrative prices" (open-questions Q2, decided 12 Nov 2026).
+- Design: no yellow; no em dashes in copy; no "demo/prototype/sample" wording outside the simulator; no "Illustrative" label or wording anywhere (owner, 15 Nov 2026; replaces open-questions Q2 of 12 Nov 2026). Prices are still made up; the "Simulated" tags and "Not financial advice" lines stay.

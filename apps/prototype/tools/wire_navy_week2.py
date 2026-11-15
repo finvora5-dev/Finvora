@@ -30,7 +30,7 @@ if MARK not in s:
   <div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.55">
     <sc-for list="{{m.paras}}" as="p" hint-placeholder-count="1"><p style="margin: 0; white-space: pre-line">{{p.t}}</p></sc-for>
     <sc-if value="{{m.hasSrc}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center"><span style="font-size: 12px; color: #5B6577">Sources</span><sc-for list="{{m.src}}" as="c" hint-placeholder-count="2"><a href="{{c.href}}" style="text-decoration: none; color: #0B192C">''' + src + '''</a></sc-for></div></sc-if>
-    <div style="display: flex; align-items: center; gap: 2px"><span style="margin-left: auto; font-size: 11px; color: #5B6577">Illustrative · not advice</span></div>
+    <div style="display: flex; align-items: center; gap: 2px"><span style="margin-left: auto; font-size: 11px; color: #5B6577">Not advice</span></div>
     <sc-if value="{{m.hasFollow}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{m.follow}}" as="c" hint-placeholder-count="2">''' + chip + '''</sc-for></div></sc-if>
   </div>
   </sc-for>

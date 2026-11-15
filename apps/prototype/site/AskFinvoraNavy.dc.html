@@ -30,7 +30,7 @@
   <div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.55">
     <sc-for list="{{m.paras}}" as="p" hint-placeholder-count="1"><p style="margin: 0; white-space: pre-line">{{p.t}}</p></sc-for>
     <sc-if value="{{m.hasSrc}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center"><span style="font-size: 12px; color: #5B6577">Sources</span><sc-for list="{{m.src}}" as="c" hint-placeholder-count="2"><a href="{{c.href}}" style="text-decoration: none; color: #0B192C"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #E8EBEF; font-size: 12px">{{c.t}}</span></a></sc-for></div></sc-if>
-    <div style="display: flex; align-items: center; gap: 2px"><span style="margin-left: auto; font-size: 11px; color: #5B6577">Illustrative · not advice</span></div>
+    <div style="display: flex; align-items: center; gap: 2px"><span style="margin-left: auto; font-size: 11px; color: #5B6577">Not advice</span></div>
     <sc-if value="{{m.hasFollow}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{m.follow}}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{c.go}}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #10B981; background: #FFFFFF; color: #047857; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-align: left">{{c.t}}</button></sc-for></div></sc-if>
   </div>
   </sc-for>

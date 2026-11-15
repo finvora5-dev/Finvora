@@ -201,7 +201,7 @@ One key per domain, each `{ v, data }`, with a migration step on schema change. 
 - Lessons: course 1 (Money Foundations) complete with every step type and its Course review; the P/E lesson in Understanding Investing with its real-company card; the other courses outline only.
 - Library: about 15 articles, topics, an A–Z glossary.
 - Companies: real names and tickers (ADR D8); figures marked "from latest annual report" until real data. The practice market uses the same real companies.
-- Prices: seeded daily series, labelled "Illustrative prices" wherever they show (open-questions Q2).
+- Prices: seeded daily series. No "Illustrative" label or wording (owner, 15 Nov 2026, replacing open-questions Q2).
 - Scripted Ask Finvora answers for every Library topic, plus refusal and insufficient-evidence cases.
 
 ---
