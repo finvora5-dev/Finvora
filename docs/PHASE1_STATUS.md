@@ -45,6 +45,7 @@ Checks: `node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/` and `no
 *   **Plus and checkout:** simulated Paystack checkout with pending, confirmed success and confirmed failed states (build-backlog §B5); receipt reads "Paid with Paystack".
 *   **Me and settings:** account, settings pages, saved, history, feedback (500 characters at most).
 *   **Admin (browser-only demonstration):** staff sign-in (work email @finvora.ng, any 6-digit code except 000000; 3 wrong codes lock for 15 minutes), overview counts, feedback inbox and settings with confirm and audit log, AI summary approvals, Finvora AI review, content editor publish, question builder, audit log. On phones, admin opens the phone task list.
+*   **Appearance:** Settings > App > Appearance: Match phone (default), Light or Dark, remembered on the device. Dark colours come from the brand sheet and canvas; `tools/build_dark.py` writes them into `responsive.css`. Checked: every phone and laptop screen in dark has no new low-contrast text.
 *   **Motion:** smooth screen transitions; bottom-nav tabs switch instantly; sheets rise and slide back down; reduced motion respected. Reviewed with `/review-animations`: approved, 15 Nov 2026.
 *   **Phones and screens:** `qa_mobile` passes on all 99 phone screens; `qa_responsive` at 280, 390, 820 and 1440 has no layout faults (remaining items are recorded decisions, below).
 
