@@ -21,6 +21,7 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'); c
         const rc = e.getBoundingClientRect(); if (!rc.width) return false;
         if (e.closest('p, li') && e.tagName === 'A' && e.closest('p')) return false; // inline text links
         if (rc.width <= 2 && rc.height <= 2) return false; // visually hidden keyboard-only controls
+        if (e.closest('.fv-index')) return false; // letter index: one drag strip, not separate taps (iOS index pattern)
         const af = getComputedStyle(e, '::after'); if (af.content !== 'none' && af.position === 'absolute' && rc.height + 18 >= 44) return false; // touch area extended around a small visual
         return rc.width < 44 && rc.height < 44 || (rc.height < 32 && rc.width < 200);
       }).slice(0, 3).map((e) => (e.getAttribute('aria-label') || e.textContent.trim() || e.tagName).slice(0, 24) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height));

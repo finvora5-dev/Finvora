@@ -77,3 +77,23 @@
     sh.addEventListener("transitionend", end); setTimeout(go, 260);
   }, true);
 })();
+
+// Dictionary letter index: tap a letter or drag along the strip (as in the iOS contacts index) to jump to
+// that letter's section, or the next letter that has terms. No animation: it follows the finger.
+(function () {
+  function jump(nav, x, y) {
+    var el = document.elementFromPoint(nav.getBoundingClientRect().left + nav.offsetWidth / 2, y), a = el && el.closest && el.closest(".fv-index a");
+    if (!a || a === nav.__fvLast) return; nav.__fvLast = a;
+    var L = a.textContent.trim(), hs = [].slice.call(document.querySelectorAll("main h2, #dc-root h2"));
+    var h = hs.filter(function (x) { return x.textContent.trim().length === 1 && x.textContent.trim() >= L; })[0];
+    if (h) h.scrollIntoView({ block: "start" });
+  }
+  document.addEventListener("pointerdown", function (e) {
+    var nav = e.target.closest && e.target.closest(".fv-index"); if (!nav) return;
+    e.preventDefault(); nav.__fvLast = null; try { nav.setPointerCapture(e.pointerId); } catch (x) {}
+    jump(nav, e.clientX, e.clientY);
+    var move = function (ev) { jump(nav, ev.clientX, ev.clientY); }, up = function () { nav.removeEventListener("pointermove", move); nav.removeEventListener("pointerup", up); nav.removeEventListener("pointercancel", up); };
+    nav.addEventListener("pointermove", move); nav.addEventListener("pointerup", up); nav.addEventListener("pointercancel", up);
+  });
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".fv-index a")) e.preventDefault(); }, true);
+})();
