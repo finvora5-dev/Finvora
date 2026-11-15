@@ -53,7 +53,14 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
-class Component extends DCLogic { renderVals() { return {}; } }
+class Component extends DCLogic {
+/* navy-markets */
+  S() { return window.FV && window.FV.SIM; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  px() { const S = this.S(), v = { p: {}, c: {}, bg: {}, fg: {} }; if (!S) return v;
+    S.COMPANIES.forEach((co) => { const ch = S.change(co.t); v.p[co.t] = this.n(S.price(co.t)); v.c[co.t] = (ch >= 0 ? '▲ ' : '▼ ') + Math.abs(ch).toFixed(1) + '%'; v.bg[co.t] = ch >= 0 ? '#DDF3E6' : '#FCEDEB'; v.fg[co.t] = ch >= 0 ? '#047857' : '#B9473F'; }); return v; }
+  renderVals() { return this.px(); }
+}
 </script>
 </body>
 </html>

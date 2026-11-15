@@ -58,7 +58,7 @@ class Component extends DCLogic {
     const r = this.res(), c = this.co(this.state.q);
     const g = r.results.filter((x) => x.kind === 'article').slice(0, 5);
     return { q: this.state.q, onQ: (e) => this.setState({ q: e.target.value }), hasCo: !!c.length, hasG: !!g.length,
-      co: c.map(([n, t, p, d, up]) => ({ n, t, p, d, col: up ? '#10B981' : '#B9473F' })),
+      co: c.map(([n, t, p, d, up]) => { const S = window.FV && window.FV.SIM, has = S && S.COMPANIES.some((x) => x.t === t), ch = has ? S.change(t) : 0; return has ? { n, t, p: '₦' + (S.price(t) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 }), d: (ch >= 0 ? '▲ ' : '▼ ') + Math.abs(ch).toFixed(1) + '%', col: ch >= 0 ? '#10B981' : '#B9473F' } : { n, t, p, d, col: up ? '#10B981' : '#B9473F' }; }), pxS: 1,
       guides: g.map((x) => ({ t: x.title, s: x.subtitle.replace('Term · ', ''), href: 'ArticleNavy.dc.html?a=' + x.id })),
       askHref: 'AskFinvoraNavy.dc.html?q=' + encodeURIComponent(this.state.q), askLabel: 'Ask Finvora AI: "' + this.state.q.trim() + '"' };
   }

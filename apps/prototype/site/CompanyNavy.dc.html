@@ -24,14 +24,14 @@ a{color:#0B192C}a:hover{color: #047857}
   <div style="background: #0B192C; color: #FFFFFF; padding-bottom: 14px; padding: 10px 10px 0; display: flex; align-items: center; justify-content: space-between">
     <a href="MarketsNavy.dc.html" aria-label="Back to Markets" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a>
     <span style="display: flex; gap: 2px">
-      <button aria-label="Add to watchlist" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"></path></svg></button>
+      <button type="button" aria-label="{{watchLabel}}" aria-pressed="{{watched}}" onClick="{{toggleWatch}}" style="cursor: pointer; opacity: {{watchOp}}; width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"></path></svg></button>
       <button aria-label="Share" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"></path></svg></button>
     </span>
   </div>
   <div style="padding: 4px 20px 0; display: flex; flex-direction: column; gap: 4px">
-    <span style="display: flex; align-items: center; gap: 8px"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; padding: 3px 7px; border: 1px solid #D5D9E0; border-radius: 6px">ZENITHBANK</span><span style="font-size: 12px; color: #5B6577">NGX · Banking</span></span>
-    <h1 style="margin: 6px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em">Zenith Bank Plc</h1>
-    <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 6px"><span style="font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 500; letter-spacing: -0.02em">₦48.20</span><span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #047857">▲ 1.58 (3.4%)</span></div>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; padding: 3px 7px; border: 1px solid #D5D9E0; border-radius: 6px">{{t}}</span><span style="font-size: 12px; color: #5B6577">NGX · {{sector}}</span></span>
+    <h1 style="margin: 6px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em">{{name}}</h1>
+    <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 6px"><span style="font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 500; letter-spacing: -0.02em">{{price}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: {{fg}}">{{chg}}</span></div>
     <span style="font-size: 12px; color: #5B6577">Today · closed 2:30 pm · illustrative data</span>
   </div>
   <div style="padding: 14px 20px 0">
@@ -50,9 +50,9 @@ a{color:#0B192C}a:hover{color: #047857}
     </div>
   </div>
   <div style="padding: 16px 20px 0">
-    <a href="AskFinvoraNavy.dc.html" style="height: 50px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"></path></svg>Ask Finvora about Zenith Bank</a>
+    <a href="{{askHref}}" style="height: 50px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"></path></svg>{{askT}}</a>
   </div>
-  <section style="padding: 26px 20px 0">
+  <sc-if value="{{isZen}}" hint-placeholder-val="{{ true }}"><section style="padding: 26px 20px 0">
     <h2 style="margin: 0 0 12px; font-size: 16px; font-weight: 600">Key statistics</h2>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #E5E7EB; border-radius: 14px; overflow: hidden">
       <sc-for list="{{stats}}" as="s" hint-placeholder-count="8">
@@ -84,15 +84,30 @@ a{color:#0B192C}a:hover{color: #047857}
     <a href="#" style="display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: #0B192C"><span style="font-size: 14px; font-weight: 500">Interim dividend of ₦1.00 per share declared</span><span style="font-size: 12px; color: #5B6577">Corporate disclosure · 2 days ago</span></a>
     <a href="#" style="display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: #0B192C"><span style="font-size: 14px; font-weight: 500">Q3 results: profit before tax up year on year</span><span style="font-size: 12px; color: #5B6577">Earnings · 1 week ago</span></a>
     <p style="margin: 14px 0 0; font-size: 12px; color: #5B6577">All figures are illustrative. Finvora explains companies; it does not tell you what to buy or sell.</p>
-  </section>
+  </section></sc-if><sc-if value="{{notZen}}" hint-placeholder-val="{{ false }}"><section style="padding: 26px 20px 0"><h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">About</h2><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #334155">{{about}}</p><h2 style="margin: 20px 0 8px; font-size: 16px; font-weight: 600">How it makes money</h2><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #334155">{{how}}</p><p style="margin: 14px 0 0; font-size: 12px; color: #5B6577">All figures are illustrative. Finvora explains companies; it does not tell you what to buy or sell.</p></section></sc-if>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1720}}'>
 class Component extends DCLogic {
-  renderVals() {
+/* navy-markets */
+  S() { return window.FV && window.FV.SIM; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  px() { const S = this.S(), v = { p: {}, c: {}, bg: {}, fg: {} }; if (!S) return v;
+    S.COMPANIES.forEach((co) => { const ch = S.change(co.t); v.p[co.t] = this.n(S.price(co.t)); v.c[co.t] = (ch >= 0 ? '▲ ' : '▼ ') + Math.abs(ch).toFixed(1) + '%'; v.bg[co.t] = ch >= 0 ? '#DDF3E6' : '#FCEDEB'; v.fg[co.t] = ch >= 0 ? '#047857' : '#B9473F'; }); return v; }
+  tk() { const m = /[?&]t=([A-Z]+)/.exec(location.search); return m ? m[1] : 'ZENITHBANK'; }
+  constructor(p) { super(p); this.state = { n: 0 }; try { const k = 'fv.activity.v1', a = JSON.parse(localStorage.getItem(k) || '{}'), d = new Date(Date.now() + 3600000).toISOString().slice(0, 10), t = this.tk(); a.views = a.views || {}; a.views[t] = (a.views[t] || []).concat([d]).slice(-50); localStorage.setItem(k, JSON.stringify(a)); } catch (e) {} }
+  drawn() {
     const S = [['Market cap', '₦3.22tn'], ['P/E ratio', '3.1'], ['Dividend yield', '8.3%'], ['EPS', '₦15.40'], ['52-week high', '₦52.80'], ['52-week low', '₦32.10'], ['Volume', '28.4M'], ['Shares out', '66.8bn']];
     const F = [['Gross earnings', '2,133', '3,172'], ['Net interest income', '1,101', '1,624'], ['Operating expenses', '612', '889'], ['Profit before tax', '676', '1,330'], ['Profit after tax', '565', '1,028']];
     return { stats: S.map(([k, v], i) => ({ k, v, br: i % 2 === 0 ? '1px solid #F0F0F3' : '0' })), fin: F.map(([k, a, b]) => ({ k, a, b })) };
+  }
+  renderVals() {
+    const S = this.S(), t = this.tk(), base = this.drawn(); if (!S) return base;
+    const co = (window.FVD.COMPANIES || []).filter((x) => x.ticker === t)[0] || {}, p = S.price(t), q = S.prev(t), ch = S.change(t), P = window.FV.PLUS, w = P ? P.lists()[0].tickers.indexOf(t) >= 0 : false;
+    return Object.assign(base, { t, sector: co.sector || '', name: co.name || t, price: this.n(p), chg: (p >= q ? '▲ ' : '▼ ') + (Math.abs(p - q) / 100).toFixed(2) + ' (' + Math.abs(ch).toFixed(1) + '%)', fg: ch >= 0 ? '#047857' : '#B9473F',
+      isZen: t === 'ZENITHBANK', notZen: t !== 'ZENITHBANK', about: co.about || '', how: co.howItMakesMoney || '',
+      askT: 'Ask Finvora about ' + (co.name || t), askHref: 'AskFinvoraNavy.dc.html?q=' + encodeURIComponent('How does ' + (co.name || t) + ' make money?'),
+      watched: String(w), watchLabel: w ? 'Remove from watchlist' : 'Add to watchlist', watchOp: w ? '1' : '.75', toggleWatch: () => { if (P) P.toggle(0, t); this.setState({ n: this.state.n + 1 }); } });
   }
 }
 </script>
