@@ -37,8 +37,8 @@ class Component extends DCLogic {
   renderVals() {
     const it = (t, s, time, unread, href) => ({ t, s, time, href, dot: unread ? '#10B981' : 'transparent', w: unread ? '600' : '500' });
     return { groups: [
-      { h: 'Today', items: [it('Zenith Bank is up 3.4%', 'Your watchlist price alert for ZENITHBANK at ₦48.20. Illustrative.', '10:42', 1, 'Company.dc.html'), it('Dangote Cement full-year results', 'Revenue and profit figures are now on the company page.', '09:15', 1, 'Company.dc.html'), it('Keep your 7-day run going', 'Next lesson: Inflation and purchasing power · 5 min.', '08:00', 0, 'Lesson.dc.html')] },
-      { h: 'Earlier', items: [it('NGX All-Share closed higher', 'The index rose 0.7% on Friday. Illustrative.', 'Fri', 0, 'Markets.dc.html'), it('New guide: Reading an income statement', 'In Companies and reports · 4 min.', 'Thu', 0, 'Article.dc.html')] }
+      { h: 'Today', items: [it('Zenith Bank is up 3.4%', 'Your watchlist price alert for ZENITHBANK at ₦48.20. Illustrative.', '10:42', 1, 'CompanyNavy.dc.html'), it('Dangote Cement full-year results', 'Revenue and profit figures are now on the company page.', '09:15', 1, 'CompanyNavy.dc.html'), it('Keep your 7-day run going', 'Next lesson: Inflation and purchasing power · 5 min.', '08:00', 0, 'Lesson.dc.html')] },
+      { h: 'Earlier', items: [it('NGX All-Share closed higher', 'The index rose 0.7% on Friday. Illustrative.', 'Fri', 0, 'MarketsNavy.dc.html'), it('New guide: Reading an income statement', 'In Companies and reports · 4 min.', 'Thu', 0, 'ArticleNavy.dc.html')] }
     ] };
   }
 }

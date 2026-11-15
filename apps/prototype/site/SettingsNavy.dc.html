@@ -31,17 +31,18 @@
       </sc-for>
     </section>
   </sc-for>
-  <a href="MainNavy.dc.html" style="margin: 24px 20px 0; height: 48px; border-radius: 12px; border: 1px solid #D5D9E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; text-decoration: none; color: #B9473F">Sign out</a>
+  <a href="SignOutNavy.dc.html" style="margin: 24px 20px 0; height: 48px; border-radius: 12px; border: 1px solid #D5D9E0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; text-decoration: none; color: #B9473F">Sign out</a>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { price: true, daily: true, news: false, sound: true }; }
+/* navy-me */
+  constructor(p) { super(p); const P = window.FV ? window.FV.ME.prefs() : {}; this.state = { price: P.price !== false, daily: P.daily !== false, news: !!P.news, sound: P.sound !== false }; }
   renderVals() {
-    const sw = (t, k) => { const on = this.state[k]; return { t, on: String(on), showS: 'flex', showV: 'none', v: '', bg: on ? '#0B192C' : '#D5D9E0', j: on ? 'flex-end' : 'flex-start', tog: () => this.setState({ [k]: !on }) }; };
+    const sw = (t, k) => { const on = this.state[k]; return { t, on: String(on), showS: 'flex', showV: 'none', v: '', bg: on ? '#0B192C' : '#D5D9E0', j: on ? 'flex-end' : 'flex-start', tog: () => { if (window.FV) window.FV.ME.setPref(k, !on); this.setState({ [k]: !on }); } }; };
     const val = (t, v) => ({ t, v, showS: 'none', showV: 'inline', on: 'false', bg: '', j: '', tog: () => {} });
     return { groups: [
-      { h: 'Account', rows: [val('Email', 'ada@example.com'), val('Plan', 'Free'), val('Interest', 'Investing')] },
+      { h: 'Account', rows: [val('Email', (window.FV && window.FV.AUTH.get().email) || 'Not signed in'), val('Plan', window.FV && window.FV.billing().sub.plan === 'plus' ? 'Plus' : 'Free'), val('Interest', (window.FV && window.FV.AUTH.get().goal) || 'Investing')] },
       { h: 'Notifications', rows: [sw('Price alerts', 'price'), sw('Daily lesson reminder', 'daily'), sw('Market news', 'news')] },
       { h: 'App', rows: [sw('Sounds', 'sound'), val('Text size', 'System'), val('Privacy and data', '')] }
     ] };
