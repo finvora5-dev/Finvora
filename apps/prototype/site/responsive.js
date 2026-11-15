@@ -25,7 +25,7 @@
   }
   if (route()) return;
   // Lesson sounds (approved 9 Nov 2026, brought over from the earlier prototype): right or wrong when an answer is
-  // checked, a sound per pair in matching, and the lesson-complete sound. Off when Settings > Sound effects is off.
+  // checked and a sound per pair in matching (no lesson-complete sound: owner, 15 Nov 2026). Off when Settings > Sound effects is off.
   var SFX = {};
   function sfxOn() { try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null"); return !p || p.sound !== false; } catch (e) { return true; } }
   function sfxGet(n) { if (!SFX[n]) { try { SFX[n] = new Audio("sfx/" + n + ".mp3"); SFX[n].preload = "auto"; } catch (e) { return null; } } return SFX[n]; }
@@ -37,7 +37,6 @@
   (function () {
     var pth = location.pathname;
     if (/(Lesson(Calc|Order|Scenario|Match)?|LearnMyth|LearnCompare)Navy\.dc/.test(pth) && sfxOn()) ["correct", "wrong", "pairok", "pairno"].forEach(sfxGet);
-    if (/LessonDone(Laptop)?Navy\.dc/.test(pth)) window.fvSound("complete", 0.15);
     // Right or wrong: the moment the answer is checked (FV.answer runs in the Check handler). Matching plays its own per pair.
     var hook = function () { var F = window.FV; if (!F || !F.answer || F.answer.fvSound) return; var o = F.answer; F.answer = function (q, correct) { if (q !== "match") window.fvSound(correct ? "correct" : "wrong"); return o.apply(this, arguments); }; F.answer.fvSound = 1; };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", hook); else hook();
