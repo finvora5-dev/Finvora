@@ -28,6 +28,12 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
   #dc-root aside + main [style*="grid-template-columns: repeat(4"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   #dc-root aside + main [style*="grid-template-columns: 2fr 1fr"], #dc-root aside + main [style*="grid-template-columns: 1.4fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
 }
+/* Sideways card rows (Your companies, chips, tabs): no visible scroll bar on phones and tablets; they still
+   scroll by swipe (owner, 15 Nov 2026). Laptops with a mouse keep the bar, as they can't swipe. */
+@media (pointer: coarse) {
+  #dc-root [style*="overflow-x: auto"], #dc-root [style*="overflow-x: scroll"], #dc-root [style*="overflow: auto"] { scrollbar-width: none; }
+  #dc-root [style*="overflow-x: auto"]::-webkit-scrollbar, #dc-root [style*="overflow-x: scroll"]::-webkit-scrollbar, #dc-root [style*="overflow: auto"]::-webkit-scrollbar { display: none; }
+}
 /* Press feedback on touch and mouse, on press not release. */
 #dc-root button, #dc-root a[style*="border-radius"] { transition: transform 160ms var(--ease-out); }
 #dc-root button:active, #dc-root a[style*="border-radius"]:active { transform: scale(.97); }
