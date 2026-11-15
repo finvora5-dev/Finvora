@@ -2,6 +2,7 @@
 
 ## How to work with this user
 - **Flag judgement calls.** When an answer, design choice or recommendation rests on your own judgement rather than on a source (the PRD, the code, a skill's checklist, a test result, a cited reference), say so explicitly, e.g. "My judgement:", with what it's based on and how confident you are. This applies to everything: design, engineering, estimates, product and pricing, legal and regulatory points, tool behaviour and facts stated from memory. Never present judgement as fact.
+- **Use the design engineering skills on all UI work** (in `.claude/skills/`, from emilkowalski/skills): `emil-design-eng` for every UI build or change; `mobile-native` and `gestures` for phone screens and bottom sheets; `animate` for any motion; `animation-performance` and `break-ui` before saying a screen is done; `review-animations` before each handover; `ask-sonner` for toasts and Undo; `learn-taste` when the owner corrects a design, to turn it into a rule (owner, 15 Nov 2026).
 - If a relevant skill or checklist exists (e.g. design critique, accessibility review, code review, security review), use it or say you didn't.
 - Say what you actually checked ("verified by running it", "from PRD §9") versus what you assumed.
 
