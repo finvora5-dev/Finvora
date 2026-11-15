@@ -179,9 +179,9 @@ if MARK not in s:
             if (isDone) return; const s0 = this.state.sel;
             if (!s0 || s0.side === side) { this.setState({ sel: { side, i }, miss: null }); return; }
             const term = side === 't' ? i : s0.i, mean = side === 'm' ? i : s0.i;
-            if (term === mean) { const mm = Object.assign({}, m); mm[term] = mean; this.setState({ matched: mm, sel: null, miss: null });
+            if (term === mean) { const mm = Object.assign({}, m); mm[term] = mean; if (window.fvSound) window.fvSound(Object.keys(mm).length === n ? 'correct' : 'pairok'); this.setState({ matched: mm, sel: null, miss: null });
               if (Object.keys(mm).length === n && this.F() && this.inL()) this.F().answer('match', !this.state.missed, 'all'); }
-            else { this.setState({ miss: { side, i }, sel: null, missed: true }); setTimeout(() => this.setState({ miss: null }), 700); }
+            else { if (window.fvSound) window.fvSound('pairno'); this.setState({ miss: { side, i }, sel: null, missed: true }); setTimeout(() => this.setState({ miss: null }), 700); }
           } });
       });
     }

@@ -5,6 +5,8 @@ so the cache version changes. Usage: python3 build_sw.py <site folder>"""
 import hashlib, os, sys, json
 SITE = sys.argv[1]
 files = sorted(f for f in os.listdir(SITE) if f.endswith(('.dc.html', '.js', '.css')) and f not in ('sw.js',))
+# Lesson sounds, so they also play offline.
+if os.path.isdir(os.path.join(SITE, 'sfx')): files += sorted('sfx/' + f for f in os.listdir(os.path.join(SITE, 'sfx')) if f.endswith('.mp3'))
 h = hashlib.sha256()
 for f in files: h.update(open(os.path.join(SITE, f), 'rb').read())
 version = h.hexdigest()[:12]
