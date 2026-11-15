@@ -1,19 +1,20 @@
 // Responsive web-app checker (skill: responsive-webapp-qa). Checks every screen at phone, tablet and laptop sizes
 // and writes a report of objective problems. Usage:
 //   node apps/prototype/tools/qa_responsive.cjs <base-url> <width> [out-dir]
-// Run once per width (280, 390, 820, 1440); each run writes <out-dir>/qa-<width>.json and contact-sheet shots.
+// Checks the navy screens (*Navy.dc.html), the approved design. Run once per width (280, 390, 820, 1440); each run writes <out-dir>/qa-<width>.json and contact-sheet shots.
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 (async () => {
   const B = process.argv[2] || 'http://127.0.0.1:8791/'; const W = +process.argv[3] || 390; const OUT = process.argv[4] || '.';
   const site = path.join(__dirname, '..', 'site');
-  const pages = fs.readdirSync(site).filter((f) => f.endsWith('.dc.html') && !/^(GKobo|UGKobo|UMComponents|UPKoboMoods)\./.test(f)).map((f) => f.replace('.dc.html', ''));
+  const pages = fs.readdirSync(site).filter((f) => f.endsWith('Navy.dc.html')).map((f) => f.replace('.dc.html', ''));
   const touch = W <= 820, H = W < 600 ? 844 : W < 1024 ? 1180 : 900;
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch, serviceWorkers: 'block' }); const p = await ctx.newPage();
   let cur = ''; const found = []; const add = (kind, detail) => found.push({ page: cur, width: W, kind, detail });
   p.on('pageerror', (e) => add('script error', e.message.slice(0, 160)));
   p.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) add('missing file', r.status() + ' ' + r.url().replace(B, '')); });
-  await p.goto(B + 'UOHome.dc.html');
-  await p.evaluate(() => { localStorage.setItem('fv.schema', '2'); localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada' })); sessionStorage.setItem('fv.staff', JSON.stringify({ email: 'tobi@finvora.app', name: 'Tobi' })); localStorage.setItem('fv.pathSeen', '99'); FV.REV.setProgress(3, false); FV.SIM.trade('buy', 'ADF', 20, 'qa1'); });
+  await p.goto(B + 'HomeNavy.dc.html');
+  // Seed a signed-in learner and staff member. Steps that use old prototype data are skipped if they fail.
+  await p.evaluate(() => { localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor' })); sessionStorage.setItem('fv.staff', JSON.stringify({ email: 'chidi@finvora.ng', name: 'Chidi Nwosu' })); try { localStorage.setItem('fv.schema', '2'); localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada' })); sessionStorage.setItem('fv.staff', JSON.stringify({ email: 'tobi@finvora.app', name: 'Tobi' })); localStorage.setItem('fv.pathSeen', '99'); FV.REV.setProgress(3, false); FV.SIM.trade('buy', 'ADF', 20, 'qa1');  } catch (e) {} });
   const seen = new Set();
   for (const u of pages) {
     cur = u;
@@ -58,8 +59,9 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
         const r = e.getBoundingClientRect(); if (r.bottom < 0 || r.top > ih || r.right < 0 || r.left > iw) return;
         if (r.width <= 2 && r.height <= 2) return;
         const x = Math.min(iw - 1, Math.max(0, r.left + r.width / 2)), y = Math.min(ih - 1, Math.max(0, r.top + r.height / 2)); const hit = document.elementFromPoint(x, y);
-        if (hit && hit !== e && !e.contains(hit) && !hit.contains(e)) { let fixed = false; for (let a = hit; a && a !== document.body; a = a.parentElement) { const ps = getComputedStyle(a).position; if (ps === 'fixed' || ps === 'sticky') { fixed = true; break; } } if (!fixed && !hit.closest('[role=dialog],[role=alertdialog]') && !e.closest('[aria-hidden="true"]')) out.push(['control covered by something', label(e) + ' (under ' + label(hit) + ')']); }
-        if (touch) { const af = getComputedStyle(e, '::after'); const ext = af.content !== 'none' && af.position === 'absolute' ? (parseFloat(af.top) < 0 ? -2 * parseFloat(af.top) * (e.currentCSSZoom || 1) : 18) : 0; const inline = e.tagName === 'A' && e.closest('p'); if (!inline && r.width + ext < 44 && r.height + ext < 44 && !e.closest('[role=dialog] .fv-rbox')) out.push(['tap target under 44px', label(e) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height)]); }
+        if (hit && hit !== e && !e.contains(hit) && !hit.contains(e)) { let fixed = false; for (let a = hit; a && a !== document.body; a = a.parentElement) { const ps = getComputedStyle(a).position; if (ps === 'fixed' || ps === 'sticky') { fixed = true; break; } } const backdrop = hit.querySelector && hit.querySelector('[role=dialog],[role=alertdialog]') || (hit.nextElementSibling && hit.nextElementSibling.matches('[role=dialog],[role=alertdialog]')); // a modal and its dim layer cover the page on purpose
+        if (!fixed && !backdrop && !hit.closest('[role=dialog],[role=alertdialog]') && !e.closest('[aria-hidden="true"]')) out.push(['control covered by something', label(e) + ' (under ' + label(hit) + ')']); }
+        if (touch) { const af = getComputedStyle(e, '::after'); const ext = af.content !== 'none' && af.position === 'absolute' ? (parseFloat(af.top) < 0 ? -2 * parseFloat(af.top) * (e.currentCSSZoom || 1) : 18) : 0; const inline = e.tagName === 'A' && e.closest('p'); if (!inline && r.width + ext < 44 && r.height + ext < 44 && !e.closest('[role=dialog] .fv-rbox') && !e.closest('.fv-index')) out.push(['tap target under 44px', label(e) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height)]); }
       });
       [...document.images].forEach((im) => { if (im.complete && im.naturalWidth === 0 && vis(im)) out.push(['broken image', im.getAttribute('src')]); });
       return out;

@@ -17,6 +17,8 @@
     var name = m[1], vw = document.documentElement.clientWidth, target = null;
     if (vw >= DESK && PAIRS[name]) target = PAIRS[name];
     if (vw < DESK && BACK[name]) target = BACK[name];
+    // Admin on a phone (shorter side under 700px): the phone task list, as drawn ("Bigger edits on a laptop").
+    if (/^Admin(?!Phone|SignIn)\w*Navy$/.test(name) && Math.min(innerWidth, innerHeight) < 700) target = "AdminPhoneTasksNavy";
     if (!target) return false;
     location.replace(location.pathname.replace(name + ".dc", target + ".dc") + location.search + location.hash);
     return true;
@@ -43,7 +45,9 @@
     html.classList.toggle("fv-wide", phoneBoard && wide);
     html.style.overflowX = "hidden";
     if (!phoneBoard) {
-      if (vw >= DESK || vw >= 700) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0"; return; }
+      if (vw >= DESK || vw >= 700) { el.style.zoom = "1"; el.style.width = "100%"; el.style.minWidth = "0";
+        // Fill the window height so the sidebar reaches the bottom on tall tablets; the main column scrolls.
+        el.style.setProperty("height", window.innerHeight + "px", "important"); return; }
       el.style.zoom = String(Math.min(1, vw / designW)); return;
     }
     if (!wide) {

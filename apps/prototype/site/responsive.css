@@ -17,6 +17,17 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
 /* Switches: 26px tall visually, 44px tall to touch (invisible area around the track, nothing moves). */
 #dc-root [role="switch"] { position: relative; }
 #dc-root [role="switch"]::after { content: ""; position: absolute; inset: -9px -4px; }
+/* Admin on touch screens (tablets): 44px sidebar button; small table links (Edit, Open) get a 44px touch area. */
+@media (any-pointer: coarse) {
+  #dc-root aside button[aria-label="Collapse sidebar"] { width: 44px !important; height: 44px !important; }
+  #dc-root aside + main section a:not([style*="height"]) { display: inline-block; padding: 14px 10px; margin: -14px -10px; }
+}
+/* Laptop admin boards on tablets (under 1024px): four stat cards go two by two, and side-by-side panels
+   (chart and attention list, editor and details, question and phone preview) stack, so nothing is cut off. */
+@media (max-width: 1023px) {
+  #dc-root aside + main [style*="grid-template-columns: repeat(4"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #dc-root aside + main [style*="grid-template-columns: 2fr 1fr"], #dc-root aside + main [style*="grid-template-columns: 1.4fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
+}
 /* Press feedback on touch and mouse, on press not release. */
 #dc-root button, #dc-root a[style*="border-radius"] { transition: transform 160ms var(--ease-out); }
 #dc-root button:active, #dc-root a[style*="border-radius"]:active { transform: scale(.97); }
