@@ -26,8 +26,8 @@ a{color:#0B192C}a:hover{color: #047857}
   <section style="margin: 14px 20px 0; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
     <span style="font-size: 12px; color: #5B6577; font-weight: 500; text-transform: uppercase; letter-spacing: .06em">Course 1 of 6</span>
     <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Money Foundations</span>
-    <span style="display: flex; align-items: center; gap: 10px"><span style="flex: 1; height: 6px; border-radius: 999px; background: #E2E5EA; overflow: hidden"><span style="display: block; width: 33%; height: 100%; background: #10B981"></span></span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">2/6</span></span>
-    <a href="#" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px; margin-top: 4px">Continue: Budgeting · 4 min</a>
+    <span style="display: flex; align-items: center; gap: 10px"><span style="flex: 1; height: 6px; border-radius: 999px; background: #E2E5EA; overflow: hidden"><span style="display: block; width: {{donePct}}; height: 100%; background: #10B981"></span></span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">{{doneN}}</span></span>
+    <a href="LessonInfoNavy.dc.html" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px; margin-top: 4px">{{cont}}</a>
   </section>
   <section style="padding: 20px 20px 0">
     <h2 style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">Lessons</h2>
@@ -47,9 +47,13 @@ a{color:#0B192C}a:hover{color: #047857}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
+/* navy-lessons */
   renderVals() {
-    const L = [['What money does', 'done', '3 min'], ['Income and expenses', 'done', '4 min'], ['Budgeting', 'next', '4 min'], ['Inflation and purchasing power', 'locked', '5 min'], ['Simple and compound interest', 'locked', '5 min'], ['Emergency funds', 'locked', '4 min'], ['Course review', 'locked', '8 questions']];
-    return { lessons: L.map(([t, st, d], i) => ({
+    const F = window.FV, st = F ? F.get() : { done: 2 }, done = st.done || 0, LS = F ? F.LESSONS : [];
+    const L = LS.map((x, i) => [x.title, i < done ? 'done' : i === done ? 'next' : 'locked', x.min + ' min']).concat([['Course review', done >= LS.length ? 'next' : 'locked', '8 questions']]);
+    const cur = LS[done];
+    return { cont: cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + ' · ' + cur.min + ' min' : 'Start the course review', donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
+      lessons: L.map(([t, st, d], i) => ({
       t, s: st === 'done' ? 'Completed · ' + d : st === 'next' ? 'Up next · ' + d : d,
       mark: st === 'done' ? '✓' : String(i + 1),
       bg: st === 'done' ? '#DDF3E6' : st === 'next' ? '#0B192C' : '#FFFFFF',

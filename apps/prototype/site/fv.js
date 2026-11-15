@@ -627,16 +627,17 @@
   applyPrefs();
 
   // ---- Lesson steps: each lesson lists its screens; every screen links to the next one.
-  var STEP_BOARD = { info: "UPLessonInfo", compare: "UPLearnCompare", term: "UPLearnTerm", steps: "UPLearnSteps", market: "UPLearnMarket", myth: "UPLearnMyth", choice: "UPLessonChoice", order: "UPLessonOrder", match: "UPLessonMatch", scenario: "UPLessonScenario", calc: "UPLessonCalc" };
+  var STEP_BOARD = { info: "LessonInfoNavy", compare: "LearnCompareNavy", term: "LearnTermNavy", steps: "LearnStepsNavy", market: "LearnMarketNavy", myth: "LearnMythNavy", choice: "LessonNavy", order: "LessonOrderNavy", match: "LessonMatchNavy", scenario: "LessonScenarioNavy", calc: "LessonCalcNavy" };
+  var NAVY_STEPS = ["info", "choice", "calc"];
   /** True when a screen is being played inside a lesson (not on its own as a micro module). */
-  function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
-  function flowOf(id) { var c = CONTENT[id]; return (c && c.flow) || (id === "interest" ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]); }
+  function inLesson() { return /[?&]in=1/.test(location.search) || /(Lesson(Info|Calc|Order|Scenario|Match)?|LearnMyth|LearnCompare)Navy/.test(location.pathname); }
+  function flowOf(id) { var c = CONTENT[id], fl = (c && c.flow) || (id === "interest" ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]); return fl.filter(function (k) { return NAVY_STEPS.indexOf(k) >= 0; }); }
   function flowVals(kind) {
     var L = lessonNow(), run = load().run, rev = run && run.review, f = rev || flowOf(L.id), i = f.indexOf(kind);
     if (i < 0) i = 0;
     var nx = f[i + 1], total = f.length;
     return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
-      fText: (rev ? "Review step " : "Step ") + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : (rev ? "UPReviewDone.dc.html" : "UPCelebrate.dc.html") };
+      fText: (rev ? "Review step " : "Step ") + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : "LessonDoneNavy.dc.html" };
   }
   // End of a review: clear fixed misses, pay the practice reward once a day and the all-fixed bonus once ever.
   function finishReview(s, lesson, answers) {
@@ -680,7 +681,7 @@
       // ?review=1 with ?l=<finished lesson>: play only that lesson's missed steps (design Part 2).
       if (R && /[?&]review=1/.test(location.search)) { var plan = D().planReview(flowOf(L.id), (s.misses || {})[L.id]); if (plan.length) { s.run.review = plan; s.run.replay = false; } }
       save(s);
-      if (s.run.review && /LessonInfo/.test(location.pathname)) location.replace(STEP_BOARD[s.run.review[0]] + ".dc.html?in=1"); },
+      if (s.run.review && /LessonInfoNavy/.test(location.pathname)) location.replace(STEP_BOARD[s.run.review[0]] + ".dc.html?in=1"); },
     answer: function (q, correct, given) {
       var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
       if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
