@@ -247,3 +247,5 @@ Decided since the first version: design direction, Plus price, the Free vs Plus 
 | 5 | Context-aware Ask Finvora as a bottom sheet over the current screen is in this plan but has no navy design; the designs link to the full chat | Link to the full chat with the question prefilled |
 | 6 | Historical calculator (proposal §7.6) has no navy screen; the inflation calculator does | Build the inflation calculator only in Phase 1 |
 | 7 | NGX trading hours used in the market-closed sheet | Confirm before Week 3 |
+| 8 | Text under 12px (responsive QA): 11px ticker badges, card labels, A to Z letters, "Admin" label; three 10px items, all drawn on the canvas | **Decided (owner, 15 Nov 2026):** keep as designed; listed as known items in the QA report |
+| 9 | Tap targets at 280px (folded phones): the 390px board is scaled to 72%, so 44px controls render about 32px | **Decided (owner, 15 Nov 2026):** keep scaling; nothing is cut off and 280px is rare. Revisit if real users on folded phones report trouble |
