@@ -51,6 +51,8 @@ if MARK not in s:
     s = sub1(s, "rows: [val('Email', 'ada@example.com'), val('Plan', 'Free'), val('Interest', 'Investing')]", "rows: [val('Email', (window.FV && window.FV.AUTH.get().email) || 'Not signed in'), val('Plan', window.FV && window.FV.billing().sub.plan === 'plus' ? 'Plus' : 'Free'), val('Interest', (window.FV && window.FV.AUTH.get().goal) || 'Investing')]")
     s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1)
     s = s.replace('<a href="MainNavy.dc.html"', '<a href="SignOutNavy.dc.html"', 1)
+    # Break UI fix 1: long emails wrap inside the value column instead of crowding the label.
+    s = s.replace('        <div style="display: flex; align-items: center; justify-content: space-between; min-height: 52px; border-bottom: 1px solid #EDEFF2; font-size: 15px">\n          <span>{{r.t}}</span>\n          <span style="display: {{r.showV}}; font-size: 14px; color: #5B6577">{{r.v}}</span>', '        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; border-bottom: 1px solid #EDEFF2; font-size: 15px">\n          <span style="flex: none">{{r.t}}</span>\n          <span style="display: {{r.showV}}; min-width: 0; text-align: right; overflow-wrap: anywhere; font-size: 14px; color: #5B6577">{{r.v}}</span>', 1)
     wr('SettingsNavy', s)
 
 # Email change, interest, sign out, delete
@@ -144,9 +146,11 @@ for name, kind, sendText, picks in [('RateNavy', 'rate', 'Send', ['Poor', 'OK', 
         for i, pk in enumerate(picks):
             s = re.sub(r'<button aria-label="' + pk + r'" style="([^"]*)border: 1px solid #D5D9E0; background: #FFFFFF;', r'<button type="button" aria-label="' + pk + r'" aria-pressed="{{on' + str(i) + r'}}" onClick="{{pick' + str(i) + r'}}" style="\1border: {{bd' + str(i) + r'}}; background: {{bg' + str(i) + r'}}; cursor: pointer;', s, count=1)
     s = onclick_text(s, sendText, 'send')
+    # Break UI fix 4: free text limited to 500 characters (owner, 15 Nov 2026).
+    s = re.sub(r'<(textarea|input) aria-label=', r'<\1 maxlength="500" aria-label=', s)
     js = MARK + '''
   constructor(p) { super(p); this.state = { g: null }; }
-  renderVals() { const v = { send: () => { const A = window.FV && window.FV.ADMIN; if (A) A.submit('KIND', document.title, this.state.g === null ? '' : String(this.state.g), ''); } };
+  renderVals() { const v = { send: () => { const A = window.FV && window.FV.ADMIN, el = document.querySelector('#dc-root textarea, #dc-root input'); if (A) A.submit('KIND', document.title, this.state.g === null ? '' : String(this.state.g), el ? el.value.slice(0, 500) : ''); } };
     for (let i = 0; i < 4; i++) { const on = this.state.g === i; v['on' + i] = String(on); v['bd' + i] = on ? '2px solid #0B192C' : '1px solid #D5D9E0'; v['bg' + i] = on ? '#EEF0F3' : '#FFFFFF'; v['pick' + i] = () => this.setState({ g: i }); }
     return v; }'''.replace('KIND', kind)
     s = logic(s, js)

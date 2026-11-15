@@ -26,7 +26,7 @@
 class Component extends DCLogic {
 /* navy-pay */
   P() { return window.FV && window.FV.PAY; }
-  o() { const P = this.P(); return P ? P.current() : null; }
+  o() { const P = this.P(); if (!P) return null; const c = P.current(); if (c) return c; const b = window.FV.billing(); return b.orders[0] || null; }
   oid() { const m = /[?&]o=([\w-]+)/.exec(location.search); return m ? m[1] : ''; }
   n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
   d(day) { return day ? new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }

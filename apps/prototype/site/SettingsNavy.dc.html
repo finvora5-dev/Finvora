@@ -23,9 +23,9 @@
     <section style="padding: 18px 20px 0">
       <h2 style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">{{g.h}}</h2>
       <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
-        <div style="display: flex; align-items: center; justify-content: space-between; min-height: 52px; border-bottom: 1px solid #EDEFF2; font-size: 15px">
-          <span>{{r.t}}</span>
-          <span style="display: {{r.showV}}; font-size: 14px; color: #5B6577">{{r.v}}</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; border-bottom: 1px solid #EDEFF2; font-size: 15px">
+          <span style="flex: none">{{r.t}}</span>
+          <span style="display: {{r.showV}}; min-width: 0; text-align: right; overflow-wrap: anywhere; font-size: 14px; color: #5B6577">{{r.v}}</span>
           <button role="switch" aria-checked="{{r.on}}" aria-label="{{r.t}}" onClick="{{r.tog}}" style="display: {{r.showS}}; width: 44px; height: 26px; border-radius: 999px; border: 0; padding: 3px; background: {{r.bg}}; cursor: pointer; justify-content: {{r.j}}"><span style="width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(11,11,15,.2)"></span></button>
         </div>
       </sc-for>

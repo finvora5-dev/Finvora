@@ -16,7 +16,7 @@ def logic(s, js):
     return s[:a] + 'class Component extends DCLogic {\n' + js + '\n}\n' + s[b:]
 MARK = '/* navy-pay */'
 H = '''  P() { return window.FV && window.FV.PAY; }
-  o() { const P = this.P(); return P ? P.current() : null; }
+  o() { const P = this.P(); if (!P) return null; const c = P.current(); if (c) return c; const b = window.FV.billing(); return b.orders[0] || null; }
   oid() { const m = /[?&]o=([\\w-]+)/.exec(location.search); return m ? m[1] : ''; }
   n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
   d(day) { return day ? new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
@@ -116,6 +116,7 @@ if MARK not in s:
     wr('CancelPlanNavy', s)
 s = rd('ReceiptNavy')
 if MARK not in s:
+    s = sub1(s, '>Card •••• 4081<', '>Paid with Paystack<')
     for old, new in [('>Thanks, Ada<', '>Thanks, {{name}}<'), ('>Plus monthly<', '>{{planName}}<'), ('>₦5,999.00<', '>{{amt}}<'), ('>FV-24117<', '>{{orderNo}}<'), ('>10 Nov 2026<', '>{{paid}}<'), ('>10 Dec 2026<', '>{{next}}<')]:
         s = sub1(s, old, new)
     s = logic(s, MARK + '\n' + H + '''  renderVals() {
