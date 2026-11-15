@@ -28,7 +28,10 @@
   window.addEventListener("pagereveal", function (e) {
     try { var from = navigation.activation && navigation.activation.from && navigation.activation.from.url;
       if (e.viewTransition && from && STEP.test(from) && STEP.test(location.pathname)) e.viewTransition.types.add("step"); } catch (x) {}
+    // Bottom nav and sidebar tabs switch instantly: tapped many times a day, so no animation (skill: animate, frequency gate; owner, 15 Nov 2026).
+    try { if (e.viewTransition && sessionStorage.getItem("fv.tab") === "1") e.viewTransition.skipTransition(); sessionStorage.removeItem("fv.tab"); } catch (x) {}
   });
+  document.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest('nav[aria-label="Main"] a, aside a'); try { if (a) sessionStorage.setItem("fv.tab", "1"); } catch (x) {} }, true);
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { if (!route()) fit(); }, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }

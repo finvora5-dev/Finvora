@@ -15,6 +15,13 @@ for n in names:
         s = s.replace('id="ne" type="email"', 'id="ne" type="email" inputmode="email" autocapitalize="none" autocorrect="off" enterkeyhint="send"', 1)
     if 'id="dc" autocomplete="off"' in s and 'autocorrect' not in s:
         s = s.replace('id="dc" autocomplete="off"', 'id="dc" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"', 1)
+    # Keyboard hints (mobile-native §4): what the return key does, no auto-capitals on emails and codes.
+    for a, b in [('<input id="em" type="email"', '<input id="em" type="email" autocapitalize="none" autocorrect="off" enterkeyhint="next"'),
+                 ('<input id="code" inputmode="numeric"', '<input id="code" inputmode="numeric" enterkeyhint="go"'),
+                 ('<input id="ans" inputmode="numeric"', '<input id="ans" inputmode="numeric" enterkeyhint="done"'),
+                 ('<textarea id="ask" rows="1"', '<textarea id="ask" rows="1" enterkeyhint="send"'),
+                 ('<textarea id="hq" rows="3"', '<textarea id="hq" rows="3" enterkeyhint="send"')]:
+        if a in s and b not in s: s = s.replace(a, b, 1)
     body = s[s.index('<x-dc>'):]
     top = re.search(r'<div style="width: \d+px;[^"]*">\s*<(?:div|header|aside)[^>]*style="[^"]*background: #0B192C', body)
     tc = '#0B192C' if top else '#F8F9FA'
