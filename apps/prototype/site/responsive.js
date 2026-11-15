@@ -3,26 +3,6 @@
 // Phones (< 600px): the 390px board is scaled to the screen width, so folded phones (280px) fit too.
 // Wider screens without a laptop board: the phone column is shown centred (build plan §6).
 // Laptops (>= 1024px): the laptop board is used when one exists; 1440px boards fill the window.
-// Appearance (owner approved 15 Nov 2026): Match phone (default), Light or Dark, kept in fv.prefs.v1 "appearance" on this
-// device. Applied before the board draws so a dark-mode visitor never sees a white flash. Dark colours: responsive.css DARK block.
-(function () {
-  var mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
-  function pref() { try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null"); return (p && p.appearance) || "system"; } catch (e) { return "system"; } }
-  function apply() {
-    var a = pref(), dark = a === "dark" || (a === "system" && mq && mq.matches), h = document.documentElement;
-    if (dark) h.setAttribute("data-fv-theme", "dark"); else h.removeAttribute("data-fv-theme");
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (m) { if (!m.dataset.light) m.dataset.light = m.getAttribute("content"); m.setAttribute("content", dark ? "#0B192C" : m.dataset.light); }
-  }
-  apply();
-  if (mq && mq.addEventListener) mq.addEventListener("change", apply);
-  // Changing the choice crossfades the whole screen in 200ms (the app's screen transition); instant with reduced motion.
-  window.fvTheme = { pref: pref, set: function (v) {
-    try { var p = JSON.parse(localStorage.getItem("fv.prefs.v1") || "null") || {}; p.appearance = v; localStorage.setItem("fv.prefs.v1", JSON.stringify(p)); } catch (e) {}
-    var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (document.startViewTransition && !calm) document.startViewTransition(apply); else apply();
-  } };
-})();
 (function () {
   var DESK = 1024;
   var PAIRS = { HomeNavy: "HomeLaptopNavy", MarketsNavy: "MarketsLaptopNavy", CompanyNavy: "CompanyLaptopNavy", AskFinvoraNavy: "AskLaptopNavy",
