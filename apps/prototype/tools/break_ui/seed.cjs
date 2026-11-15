@@ -1,0 +1,37 @@
+// Break UI fixtures (skill: break-ui), dev-only. Seeds the browser store through the same boundary the app uses
+// (localStorage keys read by fv.js), so screens render worst-case data without touching their markup.
+// Usage: node tools/break_ui/seed.cjs <base url> <state: demo|worst|one|empty> <out dir> <boards...>
+const { chromium } = require('playwright');
+const [B, state, out, ...boards] = process.argv.slice(2);
+const now = Date.now(), day = (n) => new Date(now + 3600000 - n * 86400000).toISOString().slice(0, 10);
+function fixture(state) {
+  if (state === 'empty') return {};
+  const worst = state === 'worst', one = state === 'one';
+  const auth = { email: worst ? 'bartholomew.fitzgerald@northwind-industries-holdings.example.com' : one ? 'jo@x.ng' : 'ada@example.com', name: worst ? 'Aleksandra Wiśniewska-Kowalczyk' : one ? 'Jo' : 'Ada Okafor', goal: 'Investing' };
+  const orders = [], n = worst ? 12 : 1;
+  for (let i = 0; i < n; i++) orders.push({ id: 'ord-' + (100000 + i).toString(36) + 'x' + i, period: 'monthly', amountKobo: 599900, status: 'confirmedSuccess', attempts: 1, createdAt: new Date(now - i * 30 * 86400000).toISOString(), updatedAt: new Date(now - i * 30 * 86400000).toISOString() });
+  const bill = { sub: { plan: 'plus', period: 'monthly', renewsOn: day(-30) }, orders };
+  const slugs = ['what-is-money', 'inflation', 'saving-vs-investing', 'compound-interest', 'risk-and-return', 'diversification', 'budgeting', 'what-is-a-share', 'stock-exchange', 'dividend', 'price-to-earnings', 'revenue-and-profit', 'treasury-bills', 'market-capitalisation', 'fees-and-costs'];
+  const lib = { saved: worst ? slugs : one ? ['price-to-earnings'] : slugs.slice(0, 2), read: {}, recent: [] };
+  const plus = { lists: [{ name: 'My watchlist', tickers: worst ? ['MTNN', 'DANGCEM', 'ZENITHBANK', 'GTCO', 'NESTLE', 'AIRTELAFRI', 'SEPLAT', 'NB'] : one ? ['NB'] : ['ZENITHBANK'], notes: {} }], alertBps: 500, seenAlerts: {}, crises: {}, scenarios: {}, run: null };
+  const log = [];
+  const k = worst ? 60 : one ? 1 : 3;
+  for (let i = 0; i < k; i++) log.push({ at: now - i * 3600000 * 9, day: day(Math.floor(i / 3)), kind: ['lesson', 'daily', 'article'][i % 3], title: ['Inflation and purchasing power', 'Daily question', 'Price-to-earnings (P/E) ratio'][i % 3], href: 'UPArticle.dc.html?a=price-to-earnings', xp: 0 });
+  const proto = { done: worst ? 6 : one ? 1 : 2, best: [], xp: 0, bossPassed: false, days: [day(0)], run: null, log, misses: {} };
+  return { 'fv.auth.v1': auth, 'fv.bill.v1': bill, 'fv.lib.v1': lib, 'fv.plus.v1': plus, 'fv.proto.v1': proto };
+}
+(async () => {
+  const b = await chromium.launch(); const errs = [];
+  for (const w of [390, 320, 820]) {
+    const p = await b.newPage({ viewport: { width: w, height: w > 600 ? 1180 : 844 } }); p.on('pageerror', (e) => errs.push(w + ' ' + p.url().split('/').pop() + ': ' + e.message));
+    await p.goto(B + 'index.html'); await p.waitForTimeout(300);
+    await p.evaluate((f) => { localStorage.clear(); const billKey = Object.keys(f).find((k) => k === 'fv.bill.v1'); Object.entries(f).forEach(([k, v]) => localStorage.setItem(k, JSON.stringify(v))); }, fixture(state));
+    // the billing key name used by fv.js
+    await p.evaluate(() => { const v = localStorage.getItem('fv.bill.v1'); if (v) { const keys = ['fv.billing.v1', 'fv.bill.v1']; keys.forEach((k) => localStorage.setItem(k, v)); } });
+    for (const bd of boards) { await p.goto(B + bd + '.dc.html'); await p.waitForTimeout(1100);
+      const r = await p.evaluate(() => ({ hs: document.documentElement.scrollWidth > document.documentElement.clientWidth, u: location.pathname.split('/').pop() }));
+      if (r.hs) errs.push(w + ' ' + bd + ': scrolls sideways'); await p.screenshot({ path: out + '/' + state + '_' + w + '_' + bd + '.png', fullPage: true }); }
+    await p.close();
+  }
+  console.log(errs.length ? errs.join('\n') : 'no errors or sideways scroll'); await b.close();
+})();
