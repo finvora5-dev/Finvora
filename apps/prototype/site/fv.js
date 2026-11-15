@@ -45,8 +45,8 @@
   // packages/domain via fvd.js. Prices move once a day on a fixed made-up path.
   var SIM_KEY = "fv.sim.v1", SIM_START = Date.UTC(2026, 9, 1), SIM_DAYS = 800;
   // The Practice Market's made-up companies, from packages/sample-data (design Part 4: one list for every screen).
-  var COMPANIES = window.FVD.PRACTICE_COMPANIES.map(function (c) { var y = c.years[c.years.length - 1];
-    return { t: c.ticker, name: c.name, sector: c.sector, label: c.label, base: c.basePriceKobo, div: y.dividendPerShareKobo, color: c.color }; });
+  /* NAVY_COMPANIES: the real NGX list (owner, 15 Nov 2026), illustrative seeded prices. */
+  var COMPANIES = window.FVD.COMPANIES.map(function (c) { return { t: c.ticker, name: c.name, sector: c.sector, label: c.sector, base: c.demoBasePriceKobo, div: 0, color: "#0B192C" }; });
   var series = {};
   function D() { return window.FVD; }
   // ---- Stored data upgrades (design Part 1, section 4). Add fields with defaults; never rename or drop
@@ -82,10 +82,10 @@
     return (sign ? (neg ? "−" : "+") : (neg ? "−" : "")) + s;
   }
   var SIM = {
-    COMPANIES: COMPANIES, naira: naira, day: simDay,
+    COMPANIES: COMPANIES, naira: naira, day: simDay, get: function () { return simLoad(); },
     company: function (t) { return COMPANIES.filter(function (x) { return x.t === t; })[0] || COMPANIES[0]; },
     /** The company the page is about: ?t=ADF in the address, else Adire Foods. */
-    current: function () { var m = /[?&]t=([A-Z]{3})/.exec(location.search); return SIM.company(m ? m[1] : "ADF"); },
+    current: function () { var m = /[?&]t=([A-Z]+)/.exec(location.search); return SIM.company(m ? m[1] : "ZENITHBANK"); },
     price: function (t) { return pathOf(t)[simDay()]; },
     prev: function (t) { return pathOf(t)[simDay() - 1]; },
     history: function (t, n) { var d = simDay(); return pathOf(t).slice(Math.max(0, d - n + 1), d + 1); },
