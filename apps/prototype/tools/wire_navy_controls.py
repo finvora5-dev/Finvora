@@ -1,0 +1,50 @@
+"""Make drawn-but-dead controls work (owner, 15 Nov 2026: 'i don't need anybody not working').
+Switches on Privacy and laptop Settings save to preferences; Report reasons select; Pay failed Close goes back to plans
+as drawn. Chip filters and the sidebar collapse live in responsive.js. Usage: python3 wire_navy_controls.py <site folder>"""
+import os, re, sys
+SITE = sys.argv[1]; MARK = '/* navy-controls */'
+def rd(n): return open(os.path.join(SITE, n + '.dc.html')).read()
+def wr(n, s): open(os.path.join(SITE, n + '.dc.html'), 'w').write(s)
+def logic(s, js):
+    a = s.index('class Component extends DCLogic'); b = s.index('</script>', a)
+    return s[:a] + 'class Component extends DCLogic {\n' + js + '\n}\n' + s[b:]
+PREF = {'Usage analytics': ('analytics', True), 'Save Finvora AI chats': ('saveChats', True), 'Price alerts': ('price', True),
+        'Daily lesson reminder': ('daily', True), 'Market news': ('news', False), 'Sounds': ('sound', True)}
+for n in ['SetPrivacyNavy', 'SettingsLaptopNavy']:
+    s = rd(n)
+    if MARK in s: continue
+    keys = []
+    def rep(m):
+        lab = m.group(2); k, d = PREF[lab]; keys.append((k, d)); st = m.group(3)
+        st = re.sub(r'background: #[0-9A-F]{6}', 'background: {{%s_bg}}' % k, st, count=1); st = re.sub(r'justify-content: flex-(end|start)', 'justify-content: {{%s_j}}' % k, st, count=1)
+        return '<button type="button" role="switch" aria-checked="{{%s_on}}" aria-label="%s" onClick="{{%s_tog}}" style="border: 0; cursor: pointer; %s">%s</button>' % (k, lab, k, st, m.group(4))
+    s = re.sub(r'<span role="switch" aria-checked="(true|false)" aria-label="([^"]+)" style="([^"]*)">(<span style="[^"]*"></span>)</span>', rep, s)
+    ks = ', '.join("['%s', %s]" % (k, 'true' if d else 'false') for k, d in keys)
+    s = logic(s, MARK + '''
+  constructor(p) { super(p); const P = window.FV ? window.FV.ME.prefs() : {}, st = {}; [''' + ks + '''].forEach(([k, d]) => { st[k] = P[k] === undefined ? d : !!P[k]; }); this.state = st; }
+  renderVals() { const v = {}; Object.keys(this.state).forEach((k) => { const on = this.state[k]; v[k + '_on'] = String(on); v[k + '_bg'] = on ? '#0B192C' : '#D5D9E0'; v[k + '_j'] = on ? 'flex-end' : 'flex-start';
+    v[k + '_tog'] = () => { if (window.FV) window.FV.ME.setPref(k, !on); this.setState({ [k]: !on }); }; }); return v; }''')
+    wr(n, s)
+s = rd('ReportNavy')
+if MARK not in s:
+    i = [0]
+    def rr(m):
+        k = i[0]; i[0] += 1
+        if k > 3: return m.group(0)
+        st = re.sub(r'border: [^;]+;', 'border: {{bd%d}};' % k, m.group(1), count=1); st = re.sub(r'background: #FFFFFF', 'background: {{bg%d}}' % k, st, count=1)
+        return '<button type="button" role="radio" aria-checked="{{on%d}}" onClick="{{pick%d}}" style="cursor: pointer; %s">' % (k, k, st)
+    s = re.sub(r'<button role="radio" aria-checked="false" style="([^"]*)">', rr, s)
+    s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1); wr('ReportNavy', s)
+s = rd('PayFailedNavy')
+if MARK not in s:
+    s = s.replace('<a href="#" onClick="{{retry}}" aria-label="Close"', '<a href="PlusNavy.dc.html" aria-label="Close"', 1).replace('onClick="{{retry}}" onClick="{{retry}}"', 'onClick="{{retry}}"')
+    s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1); wr('PayFailedNavy', s)
+# Laptop Markets: each company row opens that company (adds ?t=TICKER from the row's own ticker), which the chips filter by.
+s = rd('MarketsLaptopNavy')
+if MARK not in s:
+    def tick(m):
+        t = re.search(r'>([A-Z]{2,12})<', m.group(2))
+        return '<a href="CompanyLaptopNavy.dc.html' + ('?t=' + t.group(1) if t else '') + '"' + m.group(1) + '>' + m.group(2) + '</a>'
+    s = re.sub(r'<a href="CompanyLaptopNavy\.dc\.html"([^>]*)>(.*?)</a>', tick, s, flags=re.S)
+    s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1); wr('MarketsLaptopNavy', s)
+print('controls wired')

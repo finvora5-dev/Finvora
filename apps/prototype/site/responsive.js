@@ -127,3 +127,48 @@
   });
   document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".fv-index a")) e.preventDefault(); }, true);
 })();
+
+// Chip filters on company lists (Markets, Practice market, laptop Markets): All / a sector, or Most traded / Risers / Fallers.
+// Rows are the drawn company links (…?t=TICKER); sectors and today's change come from the practice data (FV.SIM).
+(function () {
+  var SECT = { "Banking": ["Banking"], "Telecoms": ["Telecoms"], "Consumer goods": ["Consumer goods", "Food"], "Consumer": ["Consumer goods", "Food"], "Industrial": ["Industrial goods"], "Oil and gas": ["Oil and gas", "Energy"] };
+  function rowsNear(chip) {
+    for (var box = chip.parentElement; box && box.id !== "dc-root"; box = box.parentElement) {
+      var rows = [].slice.call(box.querySelectorAll('a[href*="t="]')).filter(function (a) { return /[?&]t=[A-Z]+/.test(a.getAttribute("href")) && !a.contains(chip); });
+      if (rows.length > 2) return rows;
+    }
+    return [];
+  }
+  function tk(a) { var m = /[?&]t=([A-Z]+)/.exec(a.getAttribute("href")); return m ? m[1] : ""; }
+  document.addEventListener("click", function (e) {
+    var chip = e.target.closest && e.target.closest('#dc-root [style*="overflow-x: auto"] > button, #dc-root [style*="overflow-x: auto"] > a[href="#"], #dc-root div > button[style*="border-radius: 999px"]');
+    if (!chip) return; var label = chip.textContent.trim(), S = window.FV && window.FV.SIM;
+    var known = label === "All" || label === "Most traded" || label === "Risers" || label === "Fallers" || SECT[label]; if (!known) return;
+    e.preventDefault();
+    // Selected look: swap the drawn styles of the selected chip and the tapped one.
+    var row = chip.parentElement, cur = [].slice.call(row.children).filter(function (c) { return /background: (rgb\(11, 25, 44\)|#0B192C)/.test(c.getAttribute("style") || ""); })[0];
+    if (cur && cur !== chip) { var a = cur.getAttribute("style"), b = chip.getAttribute("style"); cur.setAttribute("style", b); chip.setAttribute("style", a); cur.setAttribute("aria-pressed", "false"); }
+    chip.setAttribute("aria-pressed", "true");
+    var rows = rowsNear(chip); if (!rows.length) return; var parent = rows[0].parentElement;
+    if (!parent.__fvOrder) parent.__fvOrder = rows.slice();
+    var list = parent.__fvOrder.slice();
+    if (S && (label === "Risers" || label === "Fallers")) list.sort(function (x, y) { var d = S.change(tk(y)) - S.change(tk(x)); return label === "Risers" ? d : -d; });
+    list.forEach(function (r) {
+      var co = S && S.company ? S.company(tk(r)) : null, show = true;
+      if (SECT[label]) show = !!co && SECT[label].indexOf(co.sector) >= 0;
+      if (label === "Risers") show = !S || S.change(tk(r)) >= 0;
+      if (label === "Fallers") show = !S || S.change(tk(r)) < 0;
+      r.style.display = show ? "" : "none"; if (r.parentElement === parent) parent.appendChild(r);
+    });
+  });
+})();
+
+// Laptop sidebar: the drawn collapse button shrinks the sidebar to its icons and back. Remembered on this device.
+(function () {
+  function set(aside, on) { aside.classList.toggle("fv-collapsed", on); var b = aside.querySelector('button[aria-label="Collapse sidebar"], button[aria-label="Expand sidebar"]'); if (b) b.setAttribute("aria-label", on ? "Expand sidebar" : "Collapse sidebar"); }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest('aside button[aria-label="Collapse sidebar"], aside button[aria-label="Expand sidebar"]'); if (!b) return;
+    var aside = b.closest("aside"), on = !aside.classList.contains("fv-collapsed"); set(aside, on); try { localStorage.setItem("fv.sidebar", on ? "1" : "0"); } catch (x) {}
+  });
+  var tries = 0, t = setInterval(function () { var a = document.querySelector("#dc-root aside"); if (a || ++tries > 40) { clearInterval(t); try { if (a && localStorage.getItem("fv.sidebar") === "1") set(a, true); } catch (x) {} } }, 50);
+})();

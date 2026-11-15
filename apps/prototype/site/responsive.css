@@ -98,3 +98,11 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
   #dc-root .fv-confirm { @starting-style { transform: none; opacity: 0; } }
   #dc-root section[role="dialog"].fv-leaving { transform: none; opacity: 0; }
 }
+/* Collapsed laptop sidebar: icons only, instant (it is a frequent action, so no width animation; skill: animate). */
+#dc-root aside.fv-collapsed { width: 76px !important; padding-left: 10px !important; padding-right: 10px !important; }
+#dc-root aside.fv-collapsed a { font-size: 0 !important; justify-content: center; gap: 0 !important; padding: 0 !important; }
+#dc-root aside.fv-collapsed a svg { flex: none; }
+#dc-root aside.fv-collapsed > span:not([style*="flex: 1"]):not([style*="border-top"]) { display: none !important; }
+#dc-root aside.fv-collapsed > div:first-child { flex-direction: column; gap: 10px; }
+#dc-root aside.fv-collapsed > div:first-child > span > span:last-child { display: none; }
+#dc-root aside.fv-collapsed button[aria-label="Expand sidebar"] svg { transform: scaleX(-1); }
