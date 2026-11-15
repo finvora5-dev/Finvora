@@ -5,3 +5,6 @@ body { margin: 0; min-height: 100dvh; }
 html.fv-wide #dc-root > .sc-host > :first-child { min-height: 100dvh !important; }
 html.fv-wide body { background: #F8F9FA; }
 html.fv-wide #dc-root > .sc-host > :first-child { box-shadow: 0 0 0 1px #E5E7EB; }
+/* The main nav stays pinned to the bottom of the screen (as in the earlier prototype). */
+#dc-root nav[aria-label="Main"] { position: fixed !important; z-index: 20; }
+html.fv-wide #dc-root nav[aria-label="Main"] { left: 50% !important; right: auto !important; width: 366px !important; transform: translateX(-50%); }

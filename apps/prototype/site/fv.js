@@ -1,0 +1,808 @@
+// Finvora prototype progress store. Saved in this browser only (localStorage).
+// Boards read it through window.FV; nothing here is sent anywhere.
+(function () {
+  var KEY = "fv.proto.v1";
+  var LESSONS = [
+    { id: "money", title: "What money does", min: 3 },
+    { id: "income", title: "Income and expenses", min: 3 },
+    { id: "budget", title: "Budgeting", min: 4 },
+    { id: "inflation", title: "Inflation and purchasing power", min: 4 },
+    { id: "interest", title: "Simple and compound interest", min: 4 },
+    { id: "emergency", title: "Emergency funds", min: 3 }
+  ];
+  var BOSS = { id: "boss", title: "The ₦100,000 plan" };
+  function lagosDay(d) { return new Date((d || new Date()).getTime() + 3600000).toISOString().slice(0, 10); }
+  function fresh() { return { done: 0, best: [], xp: 0, bossPassed: false, days: [], run: null }; }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (!s || typeof s.done !== "number" || !Array.isArray(s.best) || !Array.isArray(s.days)) return fresh();
+      s.done = Math.max(0, Math.min(LESSONS.length, s.done | 0));
+      return s;
+    } catch (e) { return fresh(); }
+  }
+  function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+  // Streak in Lagos days. One rest day a week (Monday to Sunday) keeps it going, as the Streak screen says.
+  function iso(t) { return t.toISOString().slice(0, 10); }
+  function weekOf(t) { var d = new Date(t.getTime()); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return iso(d); }
+  function runEnding(set, start, openToday) {
+    var t = new Date(start + "T00:00:00Z"), n = 0, rest = {}, restDays = [];
+    if (openToday && !set[iso(t)]) t = new Date(t.getTime() - 86400000);
+    for (var guard = 0; guard < 4000; guard++) {
+      if (set[iso(t)]) { n++; }
+      else {
+        var prev = new Date(t.getTime() - 86400000), wk = weekOf(t);
+        if (rest[wk] || !set[iso(prev)] || n === 0 && !openToday) break;
+        rest[wk] = true; restDays.push(iso(t)); n++;
+      }
+      t = new Date(t.getTime() - 86400000);
+    }
+    return { n: n, rest: restDays };
+  }
+  function streak(days) { var set = {}; days.forEach(function (d) { set[d] = 1; }); return runEnding(set, lagosDay(), true).n; }
+
+  // ---- Simulator: virtual money, made-up companies. Rules (fees, trades, valuation) come from
+  // packages/domain via fvd.js. Prices move once a day on a fixed made-up path.
+  var SIM_KEY = "fv.sim.v1", SIM_START = Date.UTC(2026, 9, 1), SIM_DAYS = 800;
+  // The Practice Market's made-up companies, from packages/sample-data (design Part 4: one list for every screen).
+  var COMPANIES = window.FVD.PRACTICE_COMPANIES.map(function (c) { var y = c.years[c.years.length - 1];
+    return { t: c.ticker, name: c.name, sector: c.sector, label: c.label, base: c.basePriceKobo, div: y.dividendPerShareKobo, color: c.color }; });
+  var series = {};
+  function D() { return window.FVD; }
+  // ---- Stored data upgrades (design Part 1, section 4). Add fields with defaults; never rename or drop
+  // what the code does not know; never crash on old or broken data.
+  var SCHEMA = 2;
+  (function upgrade() {
+    try {
+      var v = +localStorage.getItem("fv.schema") || 1; if (v >= SCHEMA) return;
+      var a = JSON.parse(localStorage.getItem("fv.admin.v1") || "null"), OLD = [150000, 1500000, 250000, 2500000];
+      if (a && a.prices && OLD.indexOf(a.prices.monthly) >= 0 && OLD.indexOf(a.prices.yearly) >= 0) { delete a.prices; localStorage.setItem("fv.admin.v1", JSON.stringify(a)); }
+      var g = JSON.parse(localStorage.getItem("fv.proto.v1") || "null");
+      if (g && typeof g === "object" && !g.misses) { g.misses = {}; localStorage.setItem("fv.proto.v1", JSON.stringify(g)); }
+      localStorage.setItem("fv.schema", String(SCHEMA));
+    } catch (e) {}
+  })();
+  function dayShift() { try { return +localStorage.getItem("fv.sim.shift") || 0; } catch (e) { return 0; } }
+  function simDay() { return Math.max(1, Math.min(SIM_DAYS - 1, D().tradingDaysBetween(new Date(SIM_START).toISOString().slice(0, 10), D().lagosParts(Date.now()).day) + dayShift())); }
+  function pathOf(t) {
+    if (!series[t]) { var c = COMPANIES.filter(function (x) { return x.t === t; })[0]; series[t] = D().priceSeries(t, c.base, SIM_DAYS, 0.016); }
+    return series[t];
+  }
+  function simLoad() {
+    try {
+      var a = JSON.parse(localStorage.getItem(SIM_KEY) || "null");
+      if (a && typeof a.cashKobo === "number" && Array.isArray(a.holdings) && Array.isArray(a.trades)) return a;
+    } catch (e) {}
+    return D().newAccount("sim-" + Date.now(), new Date().toISOString());
+  }
+  function simSave(a) { try { localStorage.setItem(SIM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function naira(k, sign) {
+    var neg = k < 0; k = Math.abs(Math.round(k));
+    var s = "₦" + Math.floor(k / 100).toLocaleString("en-NG") + (k % 100 ? "." + String(k % 100).padStart(2, "0") : "");
+    return (sign ? (neg ? "−" : "+") : (neg ? "−" : "")) + s;
+  }
+  var SIM = {
+    COMPANIES: COMPANIES, naira: naira, day: simDay,
+    company: function (t) { return COMPANIES.filter(function (x) { return x.t === t; })[0] || COMPANIES[0]; },
+    /** The company the page is about: ?t=ADF in the address, else Adire Foods. */
+    current: function () { var m = /[?&]t=([A-Z]{3})/.exec(location.search); return SIM.company(m ? m[1] : "ADF"); },
+    price: function (t) { return pathOf(t)[simDay()]; },
+    prev: function (t) { return pathOf(t)[simDay() - 1]; },
+    history: function (t, n) { var d = simDay(); return pathOf(t).slice(Math.max(0, d - n + 1), d + 1); },
+    change: function (t) { var p = SIM.price(t), q = SIM.prev(t); return (p - q) / q * 100; },
+    account: simLoad,
+    started: function () { return !!localStorage.getItem(SIM_KEY); },
+    held: function (t) { var h = simLoad().holdings.filter(function (x) { return x.ticker === t; })[0]; return h ? h.quantity : 0; },
+    fee: function (gross) { return D().feeFor(gross); },
+    valuation: function () { return D().valuePortfolio(simLoad(), SIM.price, SIM.prev); },
+    /** Places one trade. The key stops a double tap placing it twice. */
+    trade: function (side, t, qty, key) {
+      var a = simLoad(), p = SIM.price(t);
+      var r = D().executeTrade(a, { side: side, ticker: t, quantity: qty, quotedPriceKobo: p, currentPriceKobo: p, idempotencyKey: key, day: simDay(), at: new Date().toISOString(), tradeId: "tr-" + Date.now() });
+      if (r.ok && !r.duplicate) { simSave(r.account); try { localStorage.setItem(SIM_KEY + ".last", JSON.stringify(r.trade)); } catch (e) {} }
+      return r;
+    },
+    last: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".last") || "null"); } catch (e) { return null; } },
+    reset: function () { try { localStorage.removeItem(SIM_KEY); localStorage.removeItem(SIM_KEY + ".last"); localStorage.removeItem(SIM_KEY + ".queue"); } catch (e) {} },
+    /** The practice market follows trading hours from packages/domain config (weekdays, Lagos time). */
+    isOpen: function () {
+      try { if (JSON.parse(localStorage.getItem("fv.prefs.v1") || "{}").alwaysOpen) return true; } catch (e) {}
+      return D().isMarketOpen(Date.now());
+    },
+    /** When the market next opens, for example "Mon 10:00" (Lagos time). */
+    nextOpen: function () { return D().nextMarketOpen(Date.now()).label; },
+    hours: function () { var C = D().CONFIG; return "weekdays " + C.MARKET_OPEN + " to " + C.MARKET_CLOSE + ", Lagos time"; },
+    queued: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".queue") || "[]"); } catch (e) { return []; } },
+    queue: function (side, t, qty) { var q = SIM.queued(); q.push({ side: side, t: t, qty: qty, key: "q-" + Date.now() }); try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(q)); } catch (e) {} },
+    cancelQueued: function (key) { try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(SIM.queued().filter(function (o) { return o.key !== key; }))); } catch (e) {} },
+    /** Places queued orders once the market is open. Returns how many were placed. */
+    runQueue: function () {
+      if (!SIM.isOpen()) return 0; var q = SIM.queued(), n = 0; if (!q.length) return 0;
+      q.forEach(function (o) { if (SIM.trade(o.side, o.t, o.qty, o.key).ok) n++; });
+      try { localStorage.setItem(SIM_KEY + ".queue", "[]"); } catch (e) {} return n;
+    }
+  };
+
+  // ---- Plan (free or Plus). Set only by the simulated checkout; read by Ask Fin and Plus features.
+  var BILL_KEY = "fv.billing.v1";
+  function billLoad() {
+    try { var b = JSON.parse(localStorage.getItem(BILL_KEY) || "null"); if (b && b.sub && Array.isArray(b.orders)) return b; } catch (e) {}
+    return { sub: { plan: "free" }, orders: [] };
+  }
+  function billSave(b) { try { localStorage.setItem(BILL_KEY, JSON.stringify(b)); } catch (e) {} }
+  function plan() { return D().effectivePlan(billLoad().sub, lagosDay()); }
+
+  // ---- Ask Fin: scripted answers and refusals from packages/domain, free daily limit, saved chat.
+  // The Practice Market's own companies (COMPANIES above) plus the real NGX companies, for Ask Fin.
+  function askCos() {
+    return D().askCompanies();
+  }
+  var ASK_KEY = "fv.ask.v1";
+  function askLoad() {
+    try { var a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); if (a && Array.isArray(a.msgs)) return a; } catch (e) {}
+    return { usage: null, msgs: [] };
+  }
+  function askSave(a) { try { localStorage.setItem(ASK_KEY, JSON.stringify(a)); } catch (e) {} }
+  var ASK = {
+    status: function () { return D().canAsk(askLoad().usage, lagosDay(), D().entitlements(plan()).askFinDailyLimit); },
+    limit: function () { return D().entitlements(plan()).askFinDailyLimit; },
+    messages: function () { return askLoad().msgs; },
+    suggestions: function () { return D().suggestedPrompts(null); },
+    /** Answers one question, or returns null when today's free questions are used up. */
+    ask: function (q) {
+      q = String(q || "").trim(); if (!q) return null;
+      if (!ASK.status().allowed) return null;
+      // Design Part 3: answers come from hand-written answers, the Library as this browser shows it, and company data.
+      var r = D().answerQuestion(q, null, { scripts: D().SCRIPTED_ANSWERS, articles: LIB.all(), companies: askCos() });
+      var a = askLoad(); if (D().countsTowardLimit(r.kind)) a.usage = D().recordAsk(a.usage, lagosDay());
+      a.msgs = a.msgs.concat([{ q: q, r: r, at: new Date().toISOString() }]).slice(-30); askSave(a);
+      return r;
+    },
+    clear: function () { var a = askLoad(); a.msgs = []; askSave(a); }
+  };
+
+  // ---- Simulated checkout (build-backlog B5). No card details, no real payment. Order rules come
+  // from packages/domain: one order per purchase, retries reuse it, only our "server check" decides.
+  // Reviewers can pick the next check result by opening a plan page with ?outcome=failed|slow|offline.
+  var PRICE = { monthly: D().CONFIG.PLUS_PRICE_KOBO.monthly, yearly: D().CONFIG.PLUS_PRICE_KOBO.yearly }; // D1, from packages/domain config
+  var PAY = {
+    PRICE: PRICE,
+    order: function (id) { return billLoad().orders.filter(function (o) { return o.id === id; })[0] || null; },
+    orderNo: function (o) { return o ? "FV-" + o.id.slice(-5).toUpperCase() : ""; },
+    current: function () { var m = /[?&]o=([\w-]+)/.exec(location.search); return m ? PAY.order(m[1]) : null; },
+    remember: function () { var m = /[?&]outcome=(success|failed|slow|offline)/.exec(location.search); if (m) try { localStorage.setItem("fv.checkout.next", m[1]); } catch (e) {} },
+    /** Starts a purchase, or returns what already exists (Plus, or an order still being checked). */
+    start: function (period) {
+      var b = billLoad(), can = D().canStartPurchase(b.sub, b.orders);
+      if (!can.ok) return can;
+      var o = D().createOrder("ord-" + Date.now().toString(36), period, PRICE[period], new Date().toISOString());
+      b.orders = [o].concat(b.orders); billSave(b); return { ok: true, orderId: o.id };
+    },
+    /** Our server's check with the payment provider (simulated). Returns the order after the check. */
+    check: function (id, slowAlready) {
+      var next = "success"; try { next = localStorage.getItem("fv.checkout.next") || "success"; } catch (e) {}
+      var result = next === "slow" ? (slowAlready ? "success" : "pending") : next;
+      if (next !== "slow" || slowAlready) try { localStorage.removeItem("fv.checkout.next"); } catch (e) {}
+      var b = billLoad(), o = b.orders.filter(function (x) { return x.id === id; })[0]; if (!o) return null;
+      if (result === "offline") return { order: o, offline: true };
+      var n = D().applyCheck(o, result, new Date().toISOString());
+      if (n.status === "confirmedSuccess" && o.status !== "confirmedSuccess") b.sub = { plan: "plus", period: o.period, renewsOn: D().addPeriod(lagosDay(), o.period) };
+      b.orders = b.orders.map(function (x) { return x.id === id ? n : x; }); billSave(b);
+      return { order: n, offline: false };
+    },
+    retry: function (id) {
+      var b = billLoad(), o = b.orders.filter(function (x) { return x.id === id; })[0];
+      if (!o || o.status !== "confirmedFailed") return o;
+      var n = D().retry(o, new Date().toISOString()); b.orders = b.orders.map(function (x) { return x.id === id ? n : x; }); billSave(b); return n;
+    },
+    cancel: function () { var b = billLoad(); b.sub.cancelled = true; billSave(b); },
+    resume: function () { var b = billLoad(); b.sub.cancelled = false; billSave(b); },
+    renewsOn: function (period) { return D().addPeriod(lagosDay(), period); },
+    date: function (day) { return new Date(day + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  };
+
+  // ---- Sign-in (simulated, no email is sent). Any 6 digits sign you in, except the reviewer
+  // codes 000000 (wrong) and 111111 (expired). Three wrong codes lock the form for 15 minutes.
+  var AUTH_KEY = "fv.auth.v1";
+  function authLoad() { try { var a = JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); if (a && typeof a === "object") return a; } catch (e) {} return {}; }
+  function authSave(a) { try { localStorage.setItem(AUTH_KEY, JSON.stringify(a)); } catch (e) {} }
+  var AUTH = {
+    get: authLoad,
+    signedIn: function () { return !!authLoad().email; },
+    setGoal: function (g) { var a = authLoad(); a.goal = g; authSave(a); },
+    validEmail: function (e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || "").trim()); },
+    sendCode: function (email, changing) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.code = String(234567 + Math.floor(Math.random() * 700000)); a.wrong = 0; a.lockUntil = 0; a.changing = !!changing; authSave(a); },
+    resendIn: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.sentAt || 0) + 60000 - Date.now()) / 1000)); },
+    lockedFor: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.lockUntil || 0) - Date.now()) / 1000)); },
+    triesLeft: function () { return Math.max(0, 3 - (authLoad().wrong || 0)); },
+    /** The code in the latest sign-in email (shown in the in-app email preview). */
+    code: function () { return authLoad().code || ""; },
+    /** "ok", "wrong", "expired" or "locked". */
+    verify: function (code) {
+      var a = authLoad();
+      if (AUTH.lockedFor() > 0) return "locked";
+      if (code === "111111" || Date.now() - (a.sentAt || 0) > 600000) return "expired";
+      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) a.lockUntil = Date.now() + 900000; authSave(a); return a.wrong >= 3 ? "locked" : "wrong"; }
+      var keepName = a.changing && a.name; a.email = a.pending; a.name = keepName || (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0; authSave(a); return "ok";
+    },
+    setBirth: function (d) { var a = authLoad(); a.birth = d; authSave(a); },
+    setReminder: function (on) { var a = authLoad(); a.reminder = on ? "19:00" : null; a.asked = true; authSave(a); },
+    signOut: function () { var a = authLoad(); delete a.email; delete a.pending; authSave(a); }
+  };
+
+  // ---- Library: the 15 articles in packages/sample-data, saved articles, reading progress, search.
+  var LIB_KEY = "fv.lib.v1";
+  var TOPICS = [
+    { name: "Money basics", cats: ["Money basics"], blurb: "from what money does to budgeting" },
+    { name: "Investing", cats: ["Investing", "Decisions and risk"], blurb: "from first share to building a mix" },
+    { name: "The Nigerian market", cats: ["Markets", "Nigerian market"], blurb: "how exchanges and markets work" },
+    { name: "Companies and reports", cats: ["Company analysis"], blurb: "reading profit, dividends and value" }
+  ];
+  function libLoad() { try { var l = JSON.parse(localStorage.getItem(LIB_KEY) || "null"); if (l && Array.isArray(l.saved)) return l; } catch (e) {} return { saved: [], read: {}, recent: [] }; }
+  function libSave(l) { try { localStorage.setItem(LIB_KEY, JSON.stringify(l)); } catch (e) {} }
+  function arts() {
+    var a = admLoad(), list = D().ARTICLES.map(function (x) { var e = a.edits[x.slug]; return e && e.pub ? applyEdit(x, e.pub) : x; });
+    a.fresh.forEach(function (f) { if (f.status !== "Published") return; var t = TOPICS.filter(function (z) { return z.name === f.form.topic; })[0] || TOPICS[0];
+      list.push({ slug: f.id, title: f.form.title, category: t.cats[0], definition: f.form.definition, explanation: [f.form.howIntro], example: "", whyItMatters: "", misconceptions: [], related: [], keywords: String(f.form.askWords || "").split(",").map(function (w) { return w.trim(); }).filter(Boolean) }); });
+    return list; }
+  var LIB = {
+    TOPICS: TOPICS,
+    all: arts,
+    article: function (slug) { return arts().filter(function (a) { return a.slug === slug; })[0] || null; },
+    /** The article the page is about: ?a=slug in the address, else Dividend (the designed example). */
+    current: function () { var m = /[?&]a=([\w-]+)/.exec(location.search); return LIB.article(m ? m[1] : "dividend") || LIB.article("dividend"); },
+    minutes: function (a) { var w = [a.definition, a.example, a.whyItMatters, a.deep ? JSON.stringify(a.deep).replace(/["{}\[\],:]/g, " ") : ""].concat(a.explanation, a.misconceptions || []).join(" ").split(/\s+/).length; return Math.max(1, Math.round(w / 120)); },
+    topicOf: function (a) { return TOPICS.filter(function (t) { return t.cats.indexOf(a.category) >= 0; })[0] || TOPICS[0]; },
+    inTopic: function (name) { var t = TOPICS.filter(function (x) { return x.name === name; })[0] || TOPICS[1]; return { topic: t, items: arts().filter(function (a) { return t.cats.indexOf(a.category) >= 0; }) }; },
+    wordOfDay: function () { var n = Math.floor((Date.now() + 3600000) / 86400000); return arts()[n % arts().length]; },
+    isSaved: function (slug) { return libLoad().saved.indexOf(slug) >= 0; },
+    toggleSave: function (slug) { var l = libLoad(), i = l.saved.indexOf(slug); if (i >= 0) l.saved.splice(i, 1); else l.saved.unshift(slug); libSave(l); return i < 0; },
+    saved: function () { return libLoad().saved.map(LIB.article).filter(Boolean); },
+    setRead: function (slug, pct) { var l = libLoad(); l.read = l.read || {}; var old = l.read[slug]; if (!old) { var a0 = LIB.article(slug), m0 = load(); logEvent(m0, 'article', a0 ? a0.title : slug, 'UPArticle.dc.html?a=' + slug, 0); save(m0); } if (!old || pct > old.pct) { l.read[slug] = { pct: pct, at: Date.now(), xp: old && old.xp }; libSave(l); } else if (old) { old.at = Date.now(); libSave(l); }
+      var r = l.read[slug];
+      if (pct >= 90 && !r.xp) { r.xp = 3; libSave(l); var m1 = load(), a1 = LIB.article(slug), fresh = m1.days.indexOf(lagosDay()) < 0; addXp(m1, 3); markDay(m1); logEvent(m1, 'article', (a1 ? a1.title : slug) + ' (read)', 'UPArticle.dc.html?a=' + slug, 3); save(m1);
+        if (window.fvXpBurst) window.fvXpBurst(3, 'Article read: +3 XP' + (fresh ? '. Your streak is safe today.' : '')); return 3; }
+      return 0; },
+    reading: function () { var r = libLoad().read || {}; return Object.keys(r).filter(function (k) { return r[k].pct < 90 && LIB.article(k); }).sort(function (a, b) { return r[b].at - r[a].at; }).map(function (k) { return { a: LIB.article(k), pct: r[k].pct }; }); },
+    addRecent: function (q) { q = String(q).trim(); if (!q) return; var l = libLoad(); l.recent = [q].concat((l.recent || []).filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); })).slice(0, 5); libSave(l); },
+    recent: function () { return libLoad().recent || []; },
+    index: function () {
+      var items = arts().map(function (a) { return { kind: "article", id: a.slug, title: a.title, subtitle: "Term · " + a.category, href: "UPArticle.dc.html?a=" + a.slug, keywords: a.definition }; });
+      LESSONS.forEach(function (l, i) { items.push({ kind: "lesson", id: l.id, title: l.title, subtitle: "Lesson " + (i + 1) + " · " + l.min + " min", href: "UPJourney.dc.html", keywords: l.title }); });
+      return items;
+    },
+    search: function (q) { var idx = LIB.index(); return { results: D().search(idx, q), didYouMean: D().suggest(idx, q) }; }
+  };
+
+  // ---- Admin (a demonstration in this browser, not real staff access): feedback prompt settings,
+  // the feedback inbox and an append-only audit log of admin changes.
+  var ADM_KEY = "fv.admin.v1";
+  function admLoad() {
+    var d = { on: { rate: true, report: true, suggest: true, review: true }, n: 3, audit: [], inbox: [], rates: 0, edits: {}, fresh: [], qs: {}, review: {}, sums: {}, prices: null };
+    try { var a = JSON.parse(localStorage.getItem(ADM_KEY) || "null"); if (a && a.on) { for (var k in d) if (!(k in a)) a[k] = d[k]; return a; } } catch (e) {} return d; }
+  function admSave(a) { try { localStorage.setItem(ADM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function stamp() { return new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).replace(",", ","); }
+  var ADMIN = {
+    settings: admLoad,
+    on: function (k) { return admLoad().on[k] !== false; },
+    /** Rating prompt shows on 1 in N finished lessons. */
+    showRate: function () { var a = admLoad(); return a.on.rate !== false && (load().done % Math.max(1, a.n || 1) === 0); },
+    log: function (area, what) { var a = admLoad(); a.audit.unshift({ when: stamp(), who: "You (admin)", area: area, what: what }); admSave(a); },
+    set: function (k, on) { var a = admLoad(); a.on[k] = on; admSave(a); },
+    setN: function (n) { var a = admLoad(); a.n = n; admSave(a); },
+    submit: function (kind, where, what, note) { var a = admLoad(); a.inbox.unshift({ id: "fb-" + Date.now(), kind: kind, where: where, what: what, note: note || "", at: Date.now(), done: false }); admSave(a); },
+    markDone: function (id) { var a = admLoad(); a.inbox.forEach(function (x) { if (x.id === id) x.done = true; }); admSave(a); },
+    inbox: function () { return admLoad().inbox; },
+    audit: function () { return admLoad().audit; },
+
+    // Staff sign-in (simulated, kept for this browser tab only). Work emails end in @finvora.app.
+    // Any 6 digits sign in, except 000000 (wrong). Three wrong codes lock the form for 15 minutes.
+    staff: function () { try { return JSON.parse(sessionStorage.getItem("fv.staff") || "null"); } catch (e) { return null; } },
+    signIn: function (email, code) {
+      email = String(email || "").trim().toLowerCase(); var a = admLoad();
+      if ((a.lockUntil || 0) > Date.now()) return "locked";
+      if (!/^[^\s@]+@finvora\.app$/.test(email)) return "domain";
+      if (!/^\d{6}$/.test(String(code))) return "short";
+      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) { a.lockUntil = Date.now() + 900000; a.wrong = 0; } admSave(a); return (a.lockUntil || 0) > Date.now() ? "locked" : "wrong"; }
+      a.wrong = 0; admSave(a);
+      var nm = email.split("@")[0].split(/[._-]/).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ");
+      try { sessionStorage.setItem("fv.staff", JSON.stringify({ email: email, name: nm })); } catch (e) {}
+      ADMIN.log("Sign-in", nm + " signed in"); return "ok";
+    },
+    triesLeft: function () { return 3 - (admLoad().wrong || 0); },
+    signOut: function () { try { sessionStorage.removeItem("fv.staff"); } catch (e) {} },
+
+    // Content: edits to Library articles. Drafts stay here; publishing changes the article in the app.
+    contentRows: function () {
+      var a = admLoad(), rows = D().ARTICLES.map(function (x) { var e = a.edits[x.slug] || {}; return { id: x.slug, title: (e.pub && e.pub.title) || x.title, type: "Article", topic: LIB.topicOf(x).name, status: e.status || "Published", at: e.at || 0 }; });
+      a.fresh.forEach(function (x) { rows.unshift({ id: x.id, title: x.form.title || "Untitled article", type: "Article", topic: x.form.topic, status: x.status, at: x.at }); });
+      Object.keys(MICRO).forEach(function (k) { rows.push({ id: "", title: MICRO[k], type: "Micro module", topic: "World 1", status: "Published", at: 0 }); });
+      return rows;
+    },
+    /** The form for an article: its saved draft, else what learners see now. */
+    form: function (id) {
+      var a = admLoad(), f = a.fresh.filter(function (x) { return x.id === id; })[0];
+      if (f) return { id: id, isNew: true, status: f.status, form: f.form };
+      var x = D().ARTICLES.filter(function (y) { return y.slug === id; })[0]; if (!x) return null;
+      var e = a.edits[id] || {}, base = e.pub || {}, live = applyEdit(x, base);
+      return { id: id, isNew: false, status: e.status || "Published", form: e.draft || { title: live.title, definition: live.definition, howTitle: (live.deep && live.deep.how && live.deep.how.title) || "", howIntro: (live.deep && live.deep.how && live.deep.how.intro) || (live.explanation || [])[0] || "", topic: LIB.topicOf(x).name } };
+    },
+    newArticle: function () { var a = admLoad(), id = "new-" + Date.now().toString(36); a.fresh.unshift({ id: id, status: "Draft", at: Date.now(), form: { title: "", definition: "", howTitle: "", howIntro: "", topic: "Money basics" } }); admSave(a); return id; },
+    checks: function (f) {
+      var all = [f.title, f.definition, f.howTitle, f.howIntro].join(" ");
+      return [
+        { ok: !/\b(you should (buy|sell|invest)|buy now|sell now|guaranteed|can't lose|best stock)\b/i.test(all), text: "No advice to buy or sell" },
+        { ok: !!(String(f.title).trim() && String(f.definition).trim() && String(f.howIntro).trim()), text: "Title, definition and body filled in" },
+        { ok: String(f.definition).length <= 160, text: "Definition is one short line (160 characters at most)" }
+      ];
+    },
+    saveArticle: function (id, form, status) {
+      var a = admLoad(), f = a.fresh.filter(function (x) { return x.id === id; })[0], title = form.title || "Untitled article";
+      if (f) { f.form = form; f.status = status; f.at = Date.now(); }
+      else { var e = a.edits[id] = a.edits[id] || {}; e.status = status; e.at = Date.now(); if (status === "Published") { e.pub = { title: form.title, definition: form.definition, howTitle: form.howTitle, howIntro: form.howIntro }; delete e.draft; } else e.draft = form; }
+      admSave(a);
+      ADMIN.log("Content", (status === "Published" ? "Published: " : status === "Sent back" ? "Sent back: " : "Draft saved: ") + title);
+    },
+    published: function () { return admLoad().fresh.filter(function (x) { return x.status === "Published"; }); },
+
+    // Daily questions (the learner's Daily question). Saved edits replace the question for learners.
+    questions: function () { var q = admLoad().qs; return DAILY.map(function (d, i) { return q[i] ? q[i] : { q: d[0], opts: d[1].slice(), right: d[2], explain: d[3], whys: d[4], hint: "" }; }); },
+    saveQuestion: function (i, q) { var a = admLoad(); a.qs[i] = q; admSave(a); ADMIN.log("Questions", "Daily question " + (i + 1) + " saved: " + q.q); },
+
+    // Ask Fin review: learners' answers that Fin refused or couldn't answer in this browser, then older flags.
+    reviewQueue: function () {
+      var a = admLoad(), items = [];
+      askLoad().msgs.forEach(function (m) { if (m.r && m.r.kind !== "answer") items.push({ id: "m-" + m.at, q: m.q, a: m.r.answer || "", tag: ({ refusal: "Asks for a pick", decline: "Off topic", didyoumean: "Unsure" })[m.r.kind] || "No answer", at: Date.parse(m.at) || Date.now(), mine: true, kind: m.r.kind }); });
+      items.reverse();
+      return items.concat(REVIEW_SEED).filter(function (x) { return !a.review[x.id]; });
+    },
+    decide: function (id, q, d, note) { var a = admLoad(); a.review[id] = { d: d, note: note || "", at: Date.now() }; admSave(a); ADMIN.log("Ask Fin review", d + ': "' + q + '"' + (note ? " (note: " + note + ")" : "")); },
+
+    // AI summary approvals: nothing reaches learners without a person approving it.
+    sumQueue: function () { var a = admLoad(); return SUM_SEED.filter(function (x) { return !a.sums[x.id]; }); },
+    decideSum: function (x, d, text) { var a = admLoad(); a.sums[x.id] = { d: d, text: text, at: Date.now() }; admSave(a); ADMIN.log("AI summaries", d + ": " + x.title); },
+
+    // Plan prices in kobo. A saved price is what new checkouts charge.
+    prices: function () { return admLoad().prices || { monthly: D().CONFIG.PLUS_PRICE_KOBO.monthly, yearly: D().CONFIG.PLUS_PRICE_KOBO.yearly }; },
+    savePrices: function (p) { var a = admLoad(), old = ADMIN.prices(); a.prices = p; admSave(a); PRICE.monthly = p.monthly; PRICE.yearly = p.yearly;
+      ["monthly", "yearly"].forEach(function (k) { if (old[k] !== p[k]) ADMIN.log("Plans", "Plus " + k + " price changed from " + D().formatNaira(old[k]) + " to " + D().formatNaira(p[k])); }); }
+  };
+  var REVIEW_SEED = [
+    { id: "s1", q: "Which bank stock should I buy?", a: "I can't tell you what to buy. I can show you how people compare banks: look at profit over several years, dividend history and how much bad debt each bank has. Want a quick lesson on reading a bank's results?", tag: "Asks for a pick", ago: "12m", kind: "refusal" },
+    { id: "s2", q: "Explain P/E with a Nigerian example", a: "P/E compares a share's price with the profit behind each share. If a share costs ₦10 and earns ₦1 a year, its P/E is 10.", tag: "Thumbs down", ago: "1h", kind: "answer" },
+    { id: "s3", q: "What is today's T-bill rate?", a: "I don't have today's rates. The Central Bank publishes the results of each T-bill sale on its website.", tag: "Number check", ago: "3h", kind: "insufficient" },
+    { id: "s4", q: "Is crypto a good idea?", a: "I can't tell you whether to buy anything. Crypto prices can rise and fall very fast, and in Nigeria the rules for it are still changing. Want to learn how risk works first?", tag: "Thumbs down", ago: "5h", kind: "refusal" }
+  ];
+  var SUM_SEED = [
+    { id: "a1", kind: "Article", title: "Treasury bills", ago: "10m", source: "Article · Treasury bills (approved version 3)", text: "A treasury bill is a short loan you give the government. You pay less than its face value now and get the full amount back when it matures, often in 91, 182 or 364 days.", flag: "Mentions durations: confirm against source" },
+    { id: "a2", kind: "Dictionary", title: "Ex-dividend date", ago: "1h", source: "Dictionary · Ex-dividend date", text: "The ex-dividend date is the cut-off for a dividend. If you buy shares on or after this date, the next dividend goes to the seller.", flag: "" },
+    { id: "a3", kind: "Company", title: "Nupe Trust Bank", ago: "3h", source: "Company profile · Nupe Trust Bank (made-up company)", text: "Nupe Trust Bank makes most of its money from the interest it charges on loans, plus fees for transfers and cards.", flag: "Company is made up: keep the label" },
+    { id: "a4", kind: "Article", title: "Pension basics (RSA)", ago: "1d", source: "Article · Pension basics (draft)", text: "A Retirement Savings Account holds money you and your employer put aside for when you stop working. A licensed pension fund administrator invests it for you.", flag: "Source is still a draft" }
+  ];
+  function applyEdit(x, p) {
+    if (!p || !p.title) return x; var y = Object.assign({}, x, { title: p.title, definition: p.definition });
+    var aw = String(p.askWords || "").split(",").map(function (w) { return w.trim(); }).filter(Boolean); if (aw.length) y.keywords = (x.keywords || []).concat(aw);
+    if (x.deep && x.deep.how) {
+      y.deep = Object.assign({}, x.deep, { how: Object.assign({}, x.deep.how, { title: p.howTitle, intro: p.howIntro }) });
+      if (p.definition !== x.definition) { var d = p.definition, i = d.toLowerCase().indexOf(String(p.title).toLowerCase().replace(/s$/, "")), n = i >= 0 ? (/^\w+/.exec(d.slice(i)) || [""])[0] : "";
+        y.deep.lead = i >= 0 && n ? [d.slice(0, i), d.slice(i, i + n.length), d.slice(i + n.length)] : ["", "", d]; }
+    }
+    else y.explanation = [p.howIntro].concat((x.explanation || []).slice(1));
+    return y;
+  }
+  (function () { var p = admLoad().prices; if (p) { PRICE.monthly = p.monthly; PRICE.yearly = p.yearly; } })();
+
+  // ---- Lesson content for World 1. "interest" is the designed lesson; the other five reuse its
+  // screens with their own words. Amounts are naira; every example is made up for learning.
+  var CONTENT = {
+    money: {
+      match: { terms: ["Paying", "Comparing", "Keeping value", "Kobo"], means: ["Handing over money for something now", "Using prices to see what costs more", "Putting money aside to use later", "One hundredth of a naira"], done: "These are money's three jobs, plus the smallest unit of the naira." },
+      flow: ["info", "myth", "choice", "order", "match", "scenario", "calc"],
+      myth: { title: "Myth or fact?", lead: "A common idea about money that isn't quite right.", myth: "Money is only coins and notes.", fact: "Money in your bank account or mobile wallet is money too. It still pays for things, compares prices and keeps value.", tip: "What makes something money is that people accept it." },
+      order: { q: "Order these from the smallest amount to the largest.", items: [["50 kobo", "Half a naira", "₦0.50"], ["₦5", "500 kobo", "₦5.00"], ["₦50", "5,000 kobo", "₦50.00"]], start: [2, 0, 1],
+        wrong: "Change everything to kobo first: ₦1 is 100 kobo. Then compare. Move the items and check again.", right: ["50 kobo is half of ₦1.", "₦5 is 500 kobo.", "₦50 is 5,000 kobo, the largest."], note: "₦1 = 100 kobo.", ends: ["Smallest", "Largest"] },
+      scenario: { q: "Which job of money is Bisi using?", say: ["I'm keeping ", "₦10,000", " in my savings box for ", "next month", "."],
+        opts: [{ name: "Option A", rate: "Paying", access: "Buying something now", why: "Bisi isn't buying anything yet. She's putting money aside for later." },
+               { name: "Option B", rate: "Keeping value", access: "Saving it for later", right: true, why: "Putting money aside for next month uses money to keep value for later. Over time, inflation can shrink that value." }],
+        note: "A made-up example for this lesson." },
+      lead: "Money does three jobs: you pay with it, you compare prices with it, and you keep value in it for later.",
+      exTitle: "Money's three jobs", rows: [["Paying ₦500 for a danfo ride", "Paying"], ["A shirt is ₦8,000, jeans are ₦12,000", "Comparing"], ["Keeping ₦20,000 for next month", "Keeping value"]],
+      tip: "The naira is Nigeria's money. ₦1 is 100 kobo.",
+      q: "Ada compares two phones by their prices in naira to see which costs less. Which job of money is she using?",
+      opts: [["Paying for things", "Paying is when money changes hands. Ada hasn't bought anything yet."], ["Comparing prices", ""], ["Keeping value for later", "Keeping value means saving money to use later. Ada is comparing, not saving."], ["Borrowing", "Borrowing isn't one of money's three jobs. Ada is using prices to compare."]], right: 1,
+      rightText: "Prices in naira give everything the same measuring stick, so you can see which phone costs less.",
+      calc: "How many kobo are in ₦25?", unit: "kobo", answer: 2500, hint: "₦1 is 100 kobo, so multiply the naira by 100.",
+      wrongs: { 25: "That's the amount in naira. Multiply by 100 to get kobo.", 250: "Close. ₦1 is 100 kobo, not 10, so multiply by 100." },
+      calcRight: "₦25 × 100 = 2,500 kobo.", calcNote: "Prices in kobo are why some prices end in .50, like ₦1.50.",
+      learned: ["Money helps you pay for things.", "Prices in naira let you compare things.", "Money can keep value for later, though inflation can shrink it."], article: "what-is-money"
+    },
+    income: {
+      match: { terms: ["Income", "Expense", "Salary", "Left over"], means: ["Money that comes in", "Money that goes out", "Pay from a job, often monthly", "Income minus expenses"], done: "Every budget starts with these four words." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
+      compare: { title: "Income vs expenses", lead: "Every month, money comes in and money goes out.", a: { name: "Income (in)", items: ["Salary or wages", "Profit from a business", "Gifts and support", "Interest on savings"] }, b: { name: "Expenses (out)", items: ["Rent and food", "Transport and data", "School fees", "Loan repayments"] }, tip: "What's left after expenses is what you can save." },
+      order: { q: "Kemi earns ₦100,000 a month. Order these months from least to most left over.", items: [["Month A", "Spends ₦95,000", "₦5,000 left"], ["Month B", "Spends ₦80,000", "₦20,000 left"], ["Month C", "Spends ₦70,000", "₦30,000 left"]], start: [1, 2, 0],
+        wrong: "Left over is income minus expenses. The more Kemi spends, the less is left. Move the items and check again.", right: ["A: ₦100,000 − ₦95,000 = ₦5,000.", "B: ₦100,000 − ₦80,000 = ₦20,000.", "C: ₦100,000 − ₦70,000 = ₦30,000."], note: "Made-up figures.", ends: ["Least left over", "Most left over"] },
+      scenario: { q: "Amaka spends more than she earns. What should she do first?", say: ["I earn ", "₦80,000", " but spend about ", "₦90,000", " a month."],
+        opts: [{ name: "Option A", rate: "Borrow", access: "Take a loan each month", why: "Borrowing to cover a monthly gap builds debt, and the repayments make next month's gap bigger." },
+               { name: "Option B", rate: "Track and cut", access: "List spending, cut wants", right: true, why: "Writing down every expense shows where the money goes. Cutting wants first can close the ₦10,000 gap without new debt." }],
+        note: "A made-up example, not personal advice." },
+      lead: "Income is money coming in. Expenses are money going out. What's left over is what you can save.",
+      exTitle: "Tunde's month", rows: [["Salary (income)", "₦150,000"], ["Rent and food (expenses)", "−₦95,000"], ["Transport (expense)", "−₦25,000"], ["Left over", "₦30,000"]],
+      tip: "Writing both down for one month shows where your money really goes.",
+      q: "Which of these is an expense?",
+      opts: [["Your salary from work", "A salary is money coming in, so it's income."], ["Profit from a small shop", "Profit is money coming in, so it's income."], ["Your monthly data bundle", ""], ["A gift from your aunt", "A gift is money coming in, so it counts as income."]], right: 2,
+      rightText: "A data bundle is money going out every month, so it's an expense.",
+      calc: "Tunde earns ₦120,000 a month and spends ₦95,000. How much is left over in naira?", unit: "naira", answer: 25000, hint: "Take the expenses away from the income.",
+      wrongs: { 215000: "It looks like you added them. Left over is income minus expenses.", 95000: "That's what Tunde spends. Take it away from ₦120,000." },
+      calcRight: "₦120,000 − ₦95,000 = ₦25,000.", calcNote: "If expenses are bigger than income, the gap usually becomes debt.",
+      learned: ["Income is money coming in.", "Expenses are money going out.", "Income minus expenses is what you can save."], article: "budgeting"
+    },
+    budget: {
+      match: { terms: ["Budget", "Needs", "Wants", "Savings"], means: ["A plan for your money before you spend it", "Things you must pay for, like rent and food", "Nice-to-haves you could skip", "Money you keep for later"], done: "A budget sorts your money into needs, wants and savings." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
+      compare: { title: "Needs vs wants", lead: "A budget sorts spending into what you must pay and what's nice to have.", a: { name: "Needs", items: ["Rent", "Food", "Transport to work", "Electricity"] }, b: { name: "Wants", items: ["Eating out", "New clothes", "Streaming", "Weekend trips"] }, tip: "Some things can be both: basic food is a need, a restaurant meal is a want." },
+      order: { q: "Ada earns ₦150,000. Using 50/30/20, order the parts from smallest to largest.", items: [["Savings (20%)", "For your future", "₦30,000"], ["Wants (30%)", "Nice to have", "₦45,000"], ["Needs (50%)", "Must pay", "₦75,000"]], start: [2, 0, 1],
+        wrong: "Work out each part: 20%, 30% and 50% of ₦150,000. Move the items and check again.", right: ["Savings: 20% = ₦30,000.", "Wants: 30% = ₦45,000.", "Needs: 50% = ₦75,000."], note: "50/30/20 is a guide, not a rule.", ends: ["Smallest", "Largest"] },
+      scenario: { q: "Ada's rent goes up. Which change keeps her budget working?", say: ["My rent went up by ", "₦15,000", ". I save ", "₦30,000", " a month."],
+        opts: [{ name: "Option A", rate: "Stop saving", access: "Move all ₦30,000 to rent", why: "Stopping savings completely leaves Ada with no cushion. Wants are the first place to look." },
+               { name: "Option B", rate: "Cut wants", access: "Spend ₦15,000 less on wants", right: true, why: "Rent is a need, so the extra comes from wants first. Ada keeps saving ₦30,000 a month." }],
+        note: "A made-up example. Change the split to fit your life." },
+      lead: "A budget is a plan for your income before you spend it. A simple guide splits it 50% needs, 30% wants and 20% savings.",
+      exTitle: "50/30/20 on ₦150,000", rows: [["Needs: rent, food, transport (50%)", "₦75,000"], ["Wants: outings, new clothes (30%)", "₦45,000"], ["Savings (20%)", "₦30,000"]],
+      tip: "It's a starting point. Change the split to fit your life.",
+      q: "Using the 50/30/20 guide, which of these is a want?",
+      opts: [["Rent", "Rent is a need: you have to pay it to have a home."], ["Electricity bill", "Electricity is a need for most homes."], ["Weekend suya with friends", ""], ["School fees", "School fees are a need if you or your children are in school."]], right: 2,
+      rightText: "Suya with friends is nice to have but not essential, so it's a want.",
+      calc: "Ada earns ₦200,000 a month. How much is 20% for savings, in naira?", unit: "naira", answer: 40000, hint: "20% is the same as one fifth. Divide by 5.",
+      wrongs: { 20000: "That's 10%. Twenty percent is double that.", 4000: "Check the zeros. 20% of ₦200,000 is a five-figure amount." },
+      calcRight: "₦200,000 × 20% = ₦40,000.", calcNote: "Saving first, before spending on wants, makes the plan easier to keep.",
+      learned: ["A budget is a plan for your income.", "50/30/20 splits it into needs, wants and savings.", "Change the split to fit your life."], article: "budgeting"
+    },
+    inflation: {
+      lead: "Inflation is when prices rise over time, so each naira buys a little less than before.",
+      exTitle: "A bag of rice", rows: [["Last year", "₦50,000"], ["This year", "₦60,000"], ["Price rise", "20%"]],
+      tip: "If your savings grow slower than prices, you can buy less with them.",
+      q: "Prices rise 20% this year and your savings earn 5%. What happens to what your savings can buy?",
+      opts: [["It goes up", "Your savings grow by 5%, but prices grow by 20%, so you can buy less."], ["It stays the same", "Prices rose faster than your savings, so it doesn't stay the same."], ["It goes down", ""], ["It doubles", "Nothing here doubles. Prices rose faster than your savings."]], right: 2,
+      rightText: "Your money grew 5% but prices grew 20%, so the same savings buy less.",
+      calc: "A ₦2,000 meal goes up 15% in a year. What does it cost now, in naira?", unit: "naira", answer: 2300, hint: "15% of ₦2,000 is ₦300. Add it to the old price.",
+      wrongs: { 300: "That's the increase. Add it to the old price of ₦2,000.", 1700: "It looks like you took the 15% away. Prices went up." },
+      calcRight: "₦2,000 + 15% = ₦2,300.", calcNote: "Inflation is usually given as a yearly percentage.",
+      learned: ["Inflation means prices rise over time.", "It lowers what each naira can buy.", "Savings growing slower than inflation lose buying power."], article: "inflation",
+      match: { terms: ["Inflation", "Purchasing power", "Real return", "NBS"], means: ["Prices rising over time", "How much your money can buy", "Your return after inflation", "Publishes Nigeria's inflation figures each month"], done: "Inflation shrinks purchasing power, so real return is what counts." },
+      flow: ["info", "compare", "choice", "order", "match", "scenario", "calc"],
+      compare: { title: "Cash vs savings when prices rise", lead: "In a year when prices rise 20%, here is what happens to ₦100,000.",
+        a: { name: "Cash at home", items: ["Stays ₦100,000", "Buys about ₦83,333 of today's goods", "Loses about a sixth of its buying power", "Earns no interest"] },
+        b: { name: "Savings at 10% a year", items: ["Grows to ₦110,000", "Buys about ₦91,667 of today's goods", "Still loses some buying power", "Loses much less than cash"] },
+        tip: "To keep up, your money has to grow at least as fast as prices." },
+      order: { q: "Prices rise 20% this year. Start with ₦100,000. Order these from least to most buying power after one year.",
+        items: [["Keep it as cash", "No interest", "Buys ₦83,333"], ["Savings at 10% a year", "Grows to ₦110,000", "Buys ₦91,667"], ["Savings at 25% a year", "Grows to ₦125,000", "Buys ₦104,167"]], start: [0, 2, 1],
+        wrong: "Buying power depends on how fast your money grows compared with prices. Cash doesn't grow at all, so it buys the least. The faster it grows, the more it buys. Move the items and check again.",
+        right: ["Cash: buys ₦83,333 of today's goods (₦100,000 ÷ 1.2).", "10%: buys ₦91,667 (₦110,000 ÷ 1.2).", "25%: buys ₦104,167 (₦125,000 ÷ 1.2). It beat inflation."],
+        note: "Made-up rates. Assumes prices rise exactly 20% and ignores tax and fees.", ends: ["Least buying power", "Most buying power"] },
+      scenario: { q: "Where should Ada keep ₦50,000 for a year?", say: ["I have ", "₦50,000", ". Prices are rising about ", "15%", " a year."],
+        opts: [{ name: "Option A", rate: "0% a year", access: "Cash at home", why: "Cash at home earns nothing. After a year of 15% price rises, ₦50,000 buys only about ₦43,478 of today's goods." },
+               { name: "Option B", rate: "12% a year", access: "Savings, withdraw any time", right: true, why: "Ada's money grows to ₦56,000. With prices up 15%, that buys about ₦48,696 of today's goods. She still loses a little, but far less than with cash." }],
+        note: "Both options are made up for this lesson. Rates are fixed; tax and fees are ignored." }
+    },
+    emergency: {
+      match: { terms: ["Emergency fund", "Easy to reach", "Target", "Top up"], means: ["Money kept for surprises", "You can get it quickly when needed", "A few months of your costs", "Add back what you used"], done: "These four ideas make an emergency fund work." },
+      flow: ["info", "myth", "choice", "order", "match", "scenario", "calc"],
+      myth: { title: "Myth or fact?", lead: "A common mistake about emergency money.", myth: "An emergency fund should be invested so it grows fast.", fact: "Its job is to be there when you need it. Keep it safe and easy to reach, even if it grows slowly.", tip: "Growth matters for long-term goals, not for emergencies." },
+      order: { q: "Order these places from least to most suitable for an emergency fund.", items: [["Shares", "Can fall in value", "Least suitable"], ["Fixed deposit, locked 1 year", "Safe but hard to reach", "Better"], ["Savings account", "Safe and easy to reach", "Most suitable"]], start: [1, 2, 0],
+        wrong: "An emergency fund needs to be safe and quick to reach. Move the items and check again.", right: ["Shares can fall just when you need the money.", "A locked deposit is safe, but reaching it early can cost you.", "A savings account is safe and quick to reach."], note: "A general guide, not personal advice.", ends: ["Least suitable", "Most suitable"] },
+      scenario: { q: "Bimpe's phone breaks. How should she pay for the repair?", say: ["I have ", "₦150,000", " in an emergency fund and need ", "₦60,000", " today."],
+        opts: [{ name: "Option A", rate: "Borrow", access: "Take a quick loan", why: "A quick loan adds interest and repayments when Bimpe already has money set aside for this." },
+               { name: "Option B", rate: "Use the fund", access: "Then top it up monthly", right: true, why: "This is what the fund is for. She uses ₦60,000, keeps ₦90,000, and rebuilds it a little each month." }],
+        note: "A made-up example." },
+      lead: "An emergency fund is money kept safe and easy to reach for surprises, like a medical bill or losing your income.",
+      exTitle: "Building a fund", rows: [["Monthly costs", "₦80,000"], ["Goal: 3 months of costs", "₦240,000"], ["Where to keep it", "Savings you can reach fast"]],
+      tip: "Many people aim for 3 to 6 months of costs, built up a little at a time.",
+      q: "Where is the best place to keep an emergency fund?",
+      opts: [["In shares that can fall", "Shares can drop just when you need the money, so they're risky for emergencies."], ["In savings you can reach quickly", ""], ["Lent to a friend", "A friend may not be able to pay it back when you need it."], ["Locked away for 2 years", "You can't reach locked money in an emergency."]], right: 1,
+      rightText: "An emergency fund needs to be safe and easy to reach, which is what savings give you.",
+      calc: "Your costs are ₦60,000 a month. How much is 3 months of emergency savings, in naira?", unit: "naira", answer: 180000, hint: "Multiply the monthly costs by 3.",
+      wrongs: { 20000: "It looks like you divided. Multiply ₦60,000 by 3.", 63000: "Multiply by 3 rather than adding 3,000." },
+      calcRight: "₦60,000 × 3 = ₦180,000.", calcNote: "Start small: even one month of costs is a good first goal.",
+      learned: ["An emergency fund is for surprises.", "Keep it safe and easy to reach.", "Aim for a few months of costs, built up over time."], article: "saving-vs-investing"
+    }
+  };
+  /** The lesson being played: the one started in this run, else the next one to do (else the designed one). */
+  function lessonNow() {
+    var s = load(), id = s.run && s.run.l;
+    var L = LESSONS.filter(function (x) { return x.id === id; })[0] || (function () { var m = /[?&]l=(\w+)/.exec(location.search); return m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0]; })() || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]);
+    var i = LESSONS.indexOf(L);
+    return { id: L.id, index: i, title: L.title, min: L.min, designed: L.id === "interest", c: CONTENT[L.id] || null };
+  }
+
+  // ---- Learning loop: levels, streak details, daily question, boss challenge, challenges, micro modules.
+  var LEVELS = [{ n: 1, name: "Money Explorer", at: 0 }, { n: 2, name: "Finance Learner", at: 100 }, { n: 3, name: "Market Explorer", at: 250 }, { n: 4, name: "Company Detective", at: 500 }, { n: 5, name: "Financial Analyst in Training", at: 900 }];
+  function lvOf(xp) { var L = LEVELS[0]; LEVELS.forEach(function (x) { if (xp >= x.at) L = x; }); return L; }
+  function addXp(s, n) { var before = lvOf(s.xp).n; s.xp += n; if (lvOf(s.xp).n > before) s.levelUp = lvOf(s.xp).n; }
+  // Activity log (newest first): drives History, the weekly XP chart, badges and notifications.
+  function logEvent(s, kind, title, href, xp) { s.log = [{ at: Date.now(), day: lagosDay(), kind: kind, title: title, href: href, xp: xp || 0 }].concat(s.log || []).slice(0, 200); }
+  function markDay(s) { var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d); }
+  var DAILY = [
+    ["Which currency are shares on the NGX priced in?", ["Naira", "US dollar", "Pound", "Euro"], 0, "Shares on the Nigerian Exchange (NGX) are priced in naira (₦).", ["", "Some companies report results in dollars, but NGX share prices are in naira.", "The pound is the UK's currency. NGX share prices are in naira.", "The euro is used in much of Europe. NGX share prices are in naira."]],
+    ["What is ₦1 in kobo?", ["10 kobo", "50 kobo", "100 kobo", "1,000 kobo"], 2, "₦1 is 100 kobo.", ["Too small: ₦1 is 100 kobo.", "That's half a naira.", "", "Too big: ₦1 is 100 kobo."]],
+    ["What does NGX stand for?", ["Nigerian Exchange", "National Gold Exchange", "New Growth Index", "Naira Global Exchange"], 0, "NGX is the Nigerian Exchange, where shares of listed companies are bought and sold.", ["", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange.", "Not quite. NGX is the Nigerian Exchange."]],
+    ["In the 50/30/20 guide, what is the 20% for?", ["Rent", "Savings", "Wants", "Food"], 1, "20% goes to savings. 50% is needs and 30% is wants.", ["Rent is a need, in the 50%.", "", "Wants are the 30%.", "Food is a need, in the 50%."]],
+    ["If prices rise faster than your savings, what happens?", ["You can buy more", "Nothing changes", "You can buy less", "Your savings double"], 2, "When prices rise faster than your savings, each naira buys less.", ["Prices rose faster, so you can buy less.", "Prices rose faster, so you can buy less.", "", "Nothing doubles here."]],
+    ["What is a dividend?", ["A loan from a bank", "Part of profit paid to shareholders", "A tax on shares", "A type of savings account"], 1, "A dividend is part of a company's profit paid to the people who own its shares.", ["That's borrowing.", "", "A dividend is a payment to owners, not a tax.", "That's a bank product."]],
+    ["Which is the safest place for an emergency fund?", ["Shares", "Savings you can reach quickly", "A friend", "A 2-year fixed deposit"], 1, "An emergency fund should be safe and easy to reach.", ["Shares can fall when you need the money.", "", "A friend may not pay it back in time.", "You can't reach locked money quickly."]],
+    ["Compound interest earns interest on...", ["Only the first amount", "The amount plus interest already earned", "Only the interest", "Nothing"], 1, "Compound interest is paid on your money and on the interest already earned.", ["That's simple interest.", "", "It earns on both the amount and the interest.", "It does earn interest."]],
+    ["Which of these is income?", ["Rent", "A salary", "A data bundle", "School fees"], 1, "A salary is money coming in, so it's income.", ["Rent is an expense.", "", "A data bundle is an expense.", "School fees are an expense."]],
+    ["Using the Rule of 72, how long does money take to double at 8% a year?", ["4 years", "8 years", "9 years", "72 years"], 2, "72 ÷ 8 = 9 years.", ["Divide 72 by 8.", "Divide 72 by 8.", "", "Divide 72 by the rate."]]
+  ];
+  var BOSS_Q = [
+    { q: "Tolu earns ₦100,000 a month. Using the 50/30/20 guide, how much is for needs?", opts: [["₦20,000", "₦20,000 is the 20% for savings."], ["₦30,000", "₦30,000 is the 30% for wants."], ["₦50,000", ""], ["₦70,000", "50% of ₦100,000 is ₦50,000."]], right: 2, explain: "Needs are 50%, so ₦100,000 × 50% = ₦50,000." },
+    { q: "Tolu's rent, food and transport come to ₦70,000 a month. Which plan builds an emergency fund fastest without missing a bill?", card: true, opts: [["Spend the ₦30,000 and save next year", "Waiting means no cushion if something goes wrong. Saving a little each month starts the fund now."], ["Save ₦20,000 a month, keep ₦10,000 for wants", ""], ["Save ₦30,000 and cut food to ₦0", "Food is a need. A plan that skips needs will not last."], ["Borrow ₦210,000 now to fill the fund", "An emergency fund built with debt adds repayments, which makes emergencies harder, not easier."]], right: 1, explain: "₦20,000 a month builds a ₦210,000 cushion, three months of needs, in about 11 months, while still leaving room for wants." },
+    { q: "Prices rise 20% this year but Tolu's ₦100,000 salary stays the same. What happens?", opts: [["Tolu can buy more", "Prices went up, so the same salary buys less."], ["Nothing changes", "Prices went up, so the same salary buys less."], ["Tolu can buy less", ""], ["Tolu's salary doubles", "The salary stays the same."]], right: 2, explain: "When prices rise and income doesn't, each naira buys less. That's inflation." },
+    { q: "Tolu saves ₦50,000 at 10% a year, compounded yearly. How much after 2 years?", opts: [["₦55,000", "That's after one year only."], ["₦60,000", "That's simple interest. Year 2 also earns on the ₦5,000 of interest."], ["₦60,500", ""], ["₦100,000", "Doubling at 10% takes about 7 years."]], right: 2, explain: "₦50,000 × 1.1 × 1.1 = ₦60,500." },
+    { q: "Tolu keeps ₦20,000 aside to use next month. Which job of money is that?", opts: [["Paying for things", "Nothing is being bought yet."], ["Comparing prices", "Tolu isn't comparing anything."], ["Keeping value for later", ""], ["Borrowing", "Borrowing isn't one of money's jobs."]], right: 2, explain: "Keeping money for later uses money as a store of value." }
+  ];
+  var CHALLENGES = [{ id: "inflation", title: "The inflation challenge", xp: 15 }];
+  var MICRO = { term: "Dividend", steps: "How a share price moves", compare: "Saving vs investing", market: "Meet the NGX", myth: "Myth or fact?" };
+  var LOOP = {
+    LEVELS: LEVELS, BOSS_Q: BOSS_Q,
+    levelInfo: function (xp) { var L = lvOf(xp), nx = LEVELS[L.n] || null; return { n: L.n, name: L.name, at: L.at, next: nx, pct: nx ? Math.round((xp - L.at) / (nx.at - L.at) * 100) : 100 }; },
+    pendingLevelUp: function () { return load().levelUp || 0; },
+    clearLevelUp: function () { var s = load(); delete s.levelUp; save(s); },
+    streakInfo: function () {
+      var s = load(), set = {}; s.days.forEach(function (d) { set[d] = 1; });
+      var r = runEnding(set, lagosDay(), true), today = new Date(lagosDay() + "T00:00:00Z"), mon = new Date(today.getTime() - ((today.getUTCDay() + 6) % 7) * 86400000), week = [];
+      for (var i = 0; i < 7; i++) { var d = iso(new Date(mon.getTime() + i * 86400000)); week.push({ d: d, learned: !!set[d], rest: r.rest.indexOf(d) >= 0, today: d === lagosDay(), future: d > lagosDay() }); }
+      return { n: r.n, week: week, restUsed: week.some(function (w) { return w.rest; }), learnedToday: !!set[lagosDay()] };
+    },
+    /** A streak that ended since the last visit: its length, once per break. */
+    lostStreak: function () {
+      var s = load(); if (!s.days.length || streak(s.days) > 0) return 0;
+      var last = s.days.slice().sort().pop(); if (s.lostSeen === last) return 0;
+      var set = {}; s.days.forEach(function (d) { set[d] = 1; }); return runEnding(set, last, false).n;
+    },
+    seenLost: function () { var s = load(); s.lostSeen = s.days.slice().sort().pop(); save(s); },
+    daily: function () { var n = Math.floor(new Date(lagosDay() + "T00:00:00Z").getTime() / 86400000); var m = /[?&]dq=(\d+)/.exec(location.search), all = ADMIN.questions(), q = all[m ? (+m[1]) % all.length : n % all.length]; return { q: q.q, opts: q.opts, right: q.right, explain: q.explain, whys: q.whys, hint: q.hint || "", done: !m && load().dailyDay === lagosDay() }; },
+    dailyAnswer: function (correct) { var s = load(); if (s.dailyDay === lagosDay()) return false; s.dailyDay = lagosDay(); addXp(s, 5 + (correct ? 3 : 0)); markDay(s); logEvent(s, 'daily', 'Daily question', 'UPDaily.dc.html', 5 + (correct ? 3 : 0)); s.dailyCount = (s.dailyCount || 0) + 1; save(s); return true; }, // XP rules from packages/engine: daily 5, +3 if right
+    startBoss: function () { var s = load(); s.boss = { i: 0, score: 0, first: {} }; save(s); },
+    bossState: function () { var s = load(); return s.boss || { i: 0, score: 0, first: {} }; },
+    bossAnswer: function (i, correct) { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; if (!(i in s.boss.first)) { s.boss.first[i] = !!correct; if (correct) s.boss.score++; } save(s); },
+    bossNext: function () { var s = load(); s.boss = s.boss || { i: 0, score: 0, first: {} }; s.boss.i++; save(s); return s.boss.i; },
+    challenge: function (id) { return (load().challenges || {})[id] || null; },
+    finishChallenge: function (id) { var s = load(), c = CHALLENGES.filter(function (x) { return x.id === id; })[0]; s.challenges = s.challenges || {}; var first = !s.challenges[id]; if (first && c) addXp(s, c.xp); s.challenges[id] = { at: Date.now() }; markDay(s); logEvent(s, 'challenge', c ? c.title : 'Challenge', 'UPInflation.dc.html', first && c ? c.xp : 0); save(s); return first ? (c ? c.xp : 0) : 0; },
+    micro: function (k) { return !!((load().micro || {})[k]); },
+    finishMicro: function (k) { var s = load(); s.micro = s.micro || {}; var first = !s.micro[k]; if (first) addXp(s, 15); s.micro[k] = Date.now(); markDay(s); logEvent(s, 'micro', MICRO[k] || 'Micro module', 'UPLearn' + k.charAt(0).toUpperCase() + k.slice(1) + '.dc.html', first ? 15 : 0); save(s); return first ? 15 : 0; },
+    MICRO: MICRO
+  };
+
+  // ---- Markets: real Nigerian companies and the Nigerian Exchange, described in plain words. No live prices or figures.
+  // Facts here are general knowledge for learning; check each exchange's own site before relying on them.
+  var MK = {
+    COMPANIES: [
+      { t: "ZB", name: "Zenith Bank", tag: "Banking", country: "Nigeria", line: "Banking · NGX: ZENITHBANK", color: "#7B4AF0", how: "It lends money at a higher rate than it pays savers. The gap is its main income. It also earns fees on transfers and cards.", bank: true, learn: "price-to-earnings" },
+      { t: "DC", name: "Dangote Cement", tag: "Building materials", country: "Nigeria", line: "Building materials · NGX: DANGCEM", color: "#E8361C", how: "It sells cement to builders, governments and distributors, from plants across Nigeria.", learn: "market-capitalisation" },
+      { t: "MTN", name: "MTN Nigeria", tag: "Telecoms", country: "Nigeria", line: "Telecoms · NGX: MTNN", color: "#4C1D95", how: "Mostly from people paying for airtime and data, plus mobile money and other digital services.", learn: "revenue-and-profit" },
+      { t: "NN", name: "Nestlé Nigeria", tag: "Food and drink", country: "Nigeria", line: "Food and drink · NGX: NESTLE", color: "#5B21B6", how: "It makes packaged foods and drinks and sells them through shops and distributors across Nigeria.", learn: "revenue-and-profit" },
+    ],
+    EXCHANGES: [
+      { t: "NGX", name: "Nigerian Exchange", where: "Lagos · prices in naira (₦)", sub: "Lagos, Nigeria · Naira (₦)", about: "Nigeria's main stock exchange, where shares of listed companies are bought and sold. It was known as the Nigerian Stock Exchange until 2021.", currency: "Naira (₦)", regulator: "SEC Nigeria", micro: true },
+    ],
+    company: function (t) { var m = /[?&]c=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "ZB"); return MK.COMPANIES.filter(function (c) { return c.t === k; })[0] || MK.COMPANIES[0]; },
+    exchange: function (t) { var m = /[?&]x=([A-Z]+)/.exec(location.search), k = t || (m ? m[1] : "NGX"); return MK.EXCHANGES.filter(function (c) { return c.t === k; })[0] || MK.EXCHANGES[0]; }
+  };
+
+  // ---- Me: badges (rules from packages/engine where they exist), weekly XP, history, notifications, settings.
+  var BADGES = [
+    { id: "first", title: "First step", desc: "Complete your first lesson.", ok: function (s) { return s.done >= 1; } },
+    { id: "clean", title: "Clean sheet", desc: "Every answer right first time.", ok: function (s) { return s.best.some(function (b) { return b === 100; }); } },
+    { id: "found", title: "Foundations laid", desc: "Pass the Money Foundations boss.", ok: function (s) { return !!s.bossPassed; } },
+    { id: "week", title: "A week of learning", desc: "Learn on 7 days in a row.", ok: function (s) { return Math.max(s.bestStreak || 0, streak(s.days)) >= 7; } },
+    { id: "daily", title: "Daily habit", desc: "Complete 3 daily questions.", ok: function (s) { return (s.dailyCount || 0) >= 3; } },
+    { id: "solver", title: "Problem solver", desc: "Complete 3 practical challenges.", ok: function (s) { return Object.keys(s.challenges || {}).length >= 3; } },
+    { id: "curious", title: "Curious mind", desc: "Read 5 library articles.", ok: function (s) { return Object.keys((libLoad().read) || {}).length >= 5; } },
+    { id: "back", title: "Came back stronger", desc: "Fix every question you missed in a lesson.", ok: function () { return !!Object.keys(load().fixed || {}).length; } },
+    { id: "investor", title: "Investor's mindset", desc: "Pass the Investing boss.", ok: function () { return false; } }
+  ];
+  var PREF_KEY = "fv.prefs.v1";
+  var ME = {
+    BADGES: BADGES,
+    badges: function () { var s = load(); return BADGES.map(function (b) { return { id: b.id, title: b.title, desc: b.desc, earned: !!b.ok(s) }; }); },
+    log: function () { return load().log || []; },
+    weekXp: function () {
+      var log = load().log || [], today = new Date(lagosDay() + "T00:00:00Z"), mon = new Date(today.getTime() - ((today.getUTCDay() + 6) % 7) * 86400000), out = [];
+      for (var i = 0; i < 7; i++) { var d = iso(new Date(mon.getTime() + i * 86400000)); out.push({ d: d, xp: log.filter(function (e) { return e.day === d; }).reduce(function (n, e) { return n + (e.xp || 0); }, 0), future: d > lagosDay(), today: d === lagosDay() }); }
+      return out;
+    },
+    clearHistory: function () { var s = load(); s.log = []; save(s); },
+    prefs: function () { try { var p = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); if (p) return p; } catch (e) {} return { sound: true, reduceMotion: false }; },
+    setPref: function (k, v) { var p = ME.prefs(); p[k] = v; try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} applyPrefs(); },
+    notifications: function () {
+      var s = load(), out = [], log = s.log || [];
+      if (s.dailyDay !== lagosDay()) out.push({ title: "Today's question is ready", sub: "1 minute, +5 XP.", at: new Date(lagosDay() + "T07:00:00+01:00").getTime(), href: "UPDaily.dc.html" });
+      log.filter(function (e) { return e.kind === "boss" && e.xp; }).forEach(function (e) { out.push({ title: "New badge: Foundations laid", sub: "You passed the World 1 boss.", at: e.at, href: "UPAchievements.dc.html" }); });
+      log.filter(function (e) { return e.kind === "lesson"; }).slice(0, 3).forEach(function (e) { out.push({ title: "Lesson done: " + e.title, sub: "+" + e.xp + " XP earned.", at: e.at, href: "UPProgress.dc.html" }); });
+      return out.sort(function (a, b) { return b.at - a.at; }).slice(0, 8);
+    }
+  };
+  function applyPrefs() { try { document.documentElement.classList.toggle("fv-reduce", !!ME.prefs().reduceMotion); } catch (e) {} }
+  applyPrefs();
+
+  // ---- Lesson steps: each lesson lists its screens; every screen links to the next one.
+  var STEP_BOARD = { info: "UPLessonInfo", compare: "UPLearnCompare", term: "UPLearnTerm", steps: "UPLearnSteps", market: "UPLearnMarket", myth: "UPLearnMyth", choice: "UPLessonChoice", order: "UPLessonOrder", match: "UPLessonMatch", scenario: "UPLessonScenario", calc: "UPLessonCalc" };
+  /** True when a screen is being played inside a lesson (not on its own as a micro module). */
+  function inLesson() { return /[?&]in=1/.test(location.search) || /UPLesson(Info|Choice|Calc|Order|Scenario|Match)/.test(location.pathname); }
+  function flowOf(id) { var c = CONTENT[id]; return (c && c.flow) || (id === "interest" ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]); }
+  function flowVals(kind) {
+    var L = lessonNow(), run = load().run, rev = run && run.review, f = rev || flowOf(L.id), i = f.indexOf(kind);
+    if (i < 0) i = 0;
+    var nx = f[i + 1], total = f.length;
+    return { fN: String(i + 1), fTotal: String(total), fPct: (Math.round((i + 1) / total * 1000) / 10) + "%", fFrom: (Math.round(i / total * 1000) / 10) + "%", fLabel: (i + 1) + "/" + total,
+      fText: (rev ? "Review step " : "Step ") + (i + 1) + " of " + total, nextHref: nx ? STEP_BOARD[nx] + ".dc.html?in=1" : (rev ? "UPReviewDone.dc.html" : "UPCelebrate.dc.html") };
+  }
+  // End of a review: clear fixed misses, pay the practice reward once a day and the all-fixed bonus once ever.
+  function finishReview(s, lesson, answers) {
+    s.misses = s.misses || {}; s.fixed = s.fixed || {}; s.practice = s.practice || {};
+    var r = D().applyReview(s.misses[lesson.id], answers), pk = lesson.id + "@" + lagosDay();
+    var w = D().reviewReward({ lastFixed: r.lastFixed, bonusPaidBefore: !!s.fixed[lesson.id], practicePaidToday: !!s.practice[pk] });
+    var newDay = s.days.indexOf(lagosDay()) < 0, firstBadge = w.bonus > 0 && !Object.keys(s.fixed).length;
+    if (Object.keys(r.remaining).length) s.misses[lesson.id] = r.remaining; else delete s.misses[lesson.id];
+    s.practice[pk] = 1; if (w.bonus) s.fixed[lesson.id] = true;
+    var xp = w.practice + w.bonus; addXp(s, xp); markDay(s);
+    logEvent(s, 'review', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
+    s.run = null; save(s);
+    var res = { review: true, lesson: lesson, fixed: r.fixed, stillMissed: r.stillMissed, allFixed: !Object.keys(r.remaining).length, practice: w.practice, bonus: w.bonus, xp: xp, firstBadge: firstBadge, newDay: newDay, streak: streak(s.days), totalXp: s.xp };
+    try { sessionStorage.setItem('fv.lastReview', JSON.stringify(res)); } catch (e) {}
+    return res;
+  }
+  var FV = {
+    lastReview: function () { try { return JSON.parse(sessionStorage.getItem('fv.lastReview') || 'null'); } catch (e) { return null; } },
+    LESSONS: LESSONS, BOSS: BOSS,
+    get: load,
+    streak: function () { return streak(load().days); },
+    level: function (xp) { return xp >= 900 ? 5 : xp >= 500 ? 4 : xp >= 250 ? 3 : xp >= 100 ? 2 : 1; },
+    current: function () { var s = load(); return s.done < LESSONS.length ? LESSONS[s.done] : null; },
+    // A lesson run: started on the first lesson screen, scored on the questions, committed on Lesson complete.
+    lesson: lessonNow, flowVals: flowVals, inLesson: inLesson,
+    lastRun: function () { try { return JSON.parse(sessionStorage.getItem('fv.lastRun') || 'null'); } catch (e) { return null; } },
+    levelInfo: function (n) { var L = LEVELS.filter(function (x) { return x.n === n; })[0] || LEVELS[0], nx = LEVELS.filter(function (x) { return x.n === n + 1; })[0] || null; return { n: L.n, name: L.name, at: L.at, next: nx }; },
+    /** The current run's first-try answers in order, for the "in a row" label. */
+    runCombo: function () { var s = load(), a = s.run && s.run.answers ? s.run.answers : {}, k = Object.keys(a), c = 0; for (var i = k.length - 1; i >= 0 && a[k[i]]; i--) c++; return c; },
+    /** Fin's halfway cheer shows once per run. */
+    /** For the lesson moments: answers in a row, whether the last answer recovered from a miss, and which moments have shown. */
+    momentState: function () { var s = load(), r = s.run; if (!r) return null; var a = r.answers || {}, k = Object.keys(a), c = 0;
+      for (var i = k.length - 1; i >= 0 && a[k[i]]; i--) c++;
+      return { combo: c, back: k.length >= 2 && !!a[k[k.length - 1]] && !a[k[k.length - 2]], backKey: "back" + k.length, shown: r.moments || {}, review: !!r.review }; },
+    markMoment: function (key) { var s = load(); if (!s.run) return; s.run.moments = s.run.moments || {}; s.run.moments[key] = 1; save(s); },
+    hypeOnce: function () { var s = load(); if (!s.run || s.run.hyped) return false; s.run.hyped = true; save(s); return true; },
+    startRun: function () {
+      // ?l=<lesson id> replays a finished lesson; otherwise the next lesson starts.
+      var s = load(), m = /[?&]l=(\w+)/.exec(location.search), R = m && LESSONS.filter(function (x, i) { return x.id === m[1] && i < s.done; })[0];
+      var L = R || (s.done < LESSONS.length ? LESSONS[s.done] : LESSONS[4]); s.run = { answers: {}, given: {}, l: L.id, replay: !!R, t0: Date.now() };
+      // ?review=1 with ?l=<finished lesson>: play only that lesson's missed steps (design Part 2).
+      if (R && /[?&]review=1/.test(location.search)) { var plan = D().planReview(flowOf(L.id), (s.misses || {})[L.id]); if (plan.length) { s.run.review = plan; s.run.replay = false; } }
+      save(s);
+      if (s.run.review && /LessonInfo/.test(location.pathname)) location.replace(STEP_BOARD[s.run.review[0]] + ".dc.html?in=1"); },
+    answer: function (q, correct, given) {
+      var s = load(); if (!s.run) s.run = { answers: {}, given: {} };
+      if (!(q in s.run.answers)) { s.run.answers[q] = !!correct; s.run.given = s.run.given || {}; s.run.given[q] = given; } // first try counts
+      save(s);
+    },
+    finishRun: function () {
+      var s = load(); if (!s.run) return null;
+      var lesson = lessonNow(), given = s.run.given || {};
+      var a = s.run.answers, keys = Object.keys(a), right = keys.filter(function (k) { return a[k]; }).length;
+      var pct = keys.length ? Math.round(right / keys.length * 100) : 100;
+      if (s.run.review) return finishReview(s, lesson, a);
+      s.misses = s.misses || {}; s.misses[lesson.id] = D().recordMisses(s.misses[lesson.id], a, given); if (!Object.keys(s.misses[lesson.id]).length) delete s.misses[lesson.id];
+      var wrong = keys.length - right, replay = !!s.run.replay, xp, newDay = s.days.indexOf(lagosDay()) < 0, lvBefore = lvOf(s.xp).n, t0 = s.run.t0 || 0;
+      if (replay) {
+        // Engine rule lessonPractice: replaying earns 2 XP, once per lesson per day. The best score is kept.
+        s.practice = s.practice || {}; var pk = lesson.id + "@" + lagosDay(); xp = s.practice[pk] ? 0 : 2; s.practice[pk] = 1;
+        s.best[lesson.index] = Math.max(s.best[lesson.index] || 0, pct);
+      } else { xp = 10 + Math.round(5 * pct / 100); if (s.done < LESSONS.length) { s.best[s.done] = pct; s.done += 1; } }
+      addXp(s, xp); var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
+      logEvent(s, replay ? 'practice' : 'lesson', lesson.title, 'UPJourney.dc.html', xp); s.bestStreak = Math.max(s.bestStreak || 0, streak(s.days));
+      s.run = null; save(s);
+      var res = { xp: xp, pct: pct, wrong: wrong, right: right, total: keys.length, answers: a, given: given, lesson: lesson, streak: streak(s.days), replay: replay, best: s.best[lesson.index], newDay: newDay, totalXp: s.xp, lvBefore: lvBefore, lvAfter: lvOf(s.xp).n, secs: t0 ? Math.round((Date.now() - t0) / 1000) : 0 };
+      try { sessionStorage.setItem('fv.lastRun', JSON.stringify(res)); } catch (e) {}
+      return res;
+    },
+    /** Missed steps waiting for review in a lesson. */
+    missCount: function (id) { var m = (load().misses || {})[id]; return m ? Object.keys(m).length : 0; },
+    missList: function (id) { var m = (load().misses || {})[id] || {}; return D().planReview(flowOf(id), m); },
+    passBoss: function (score) {
+      var s = load(); var passed = score >= 4;
+      if (passed && !s.bossPassed) { s.bossPassed = true; addXp(s, 55); }
+      var d = lagosDay(); if (s.days.indexOf(d) < 0) s.days.push(d);
+      logEvent(s, 'boss', 'Boss challenge: ' + score + ' of 5', 'UPBossIntro.dc.html', passed && s.bossPassed && !s.bossLogged ? 55 : 0); if (passed) s.bossLogged = true;
+      save(s); return passed;
+    },
+    SIM: SIM, ASK: ASK, PAY: PAY, AUTH: AUTH, LIB: LIB, ADMIN: ADMIN, LOOP: LOOP, MK: MK, ME: ME,
+    plan: plan, billing: billLoad, saveBilling: billSave, LABELS: D().LABELS,
+    reset: function () { save(fresh()); },
+    // Reviewer tools: shortcuts for people checking the app. Everything stays in this browser.
+    REV: {
+      plan: function () { return plan(); },
+      setPlan: function (p) { var b = billLoad(); b.sub = p === "plus" ? { plan: "plus", period: "monthly", renewsOn: D().addPeriod(lagosDay(), "monthly") } : { plan: "free" }; billSave(b); },
+      next: function () { try { return localStorage.getItem("fv.checkout.next") || "success"; } catch (e) { return "success"; } },
+      setNext: function (o) { try { if (o === "success") localStorage.removeItem("fv.checkout.next"); else localStorage.setItem("fv.checkout.next", o); } catch (e) {} },
+      alwaysOpen: function () { return !!ME.prefs().alwaysOpen; },
+      setAlwaysOpen: function (on) { ME.setPref("alwaysOpen", !!on); },
+      day: simDay,
+      nextDay: function () { try { localStorage.setItem("fv.sim.shift", String(dayShift() + 1)); } catch (e) {} return simDay(); },
+      signInAs: function (email, name) { var a = authLoad(); a.email = email; a.name = name; delete a.pending; authSave(a); },
+      setProgress: function (done, boss) { var s = load(); s.done = done; s.best = [100, 100, 100, 100, 100, 100].slice(0, done); s.bossPassed = !!boss; s.run = null; markDay(s); save(s); },
+      staff: function () { try { sessionStorage.setItem("fv.staff", JSON.stringify({ email: "tobi@finvora.app", name: "Tobi" })); } catch (e) {} ADMIN.log("Sign-in", "Tobi signed in from reviewer tools"); },
+      resetAll: function () { try { Object.keys(localStorage).filter(function (k) { return /^fv\./.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); sessionStorage.clear(); } catch (e) {} }
+    }
+  };
+
+  // ---- Plus learning tools (design Part 4). Rules in packages/domain/src/plus.ts; this is browser state and glue.
+  var PLUS_KEY = "fv.plus.v1";
+  function plusLoad() {
+    try { var p = JSON.parse(localStorage.getItem(PLUS_KEY) || "null"); if (p && Array.isArray(p.lists)) return p; } catch (e) {}
+    return { lists: [{ name: "My watchlist", tickers: [], notes: {} }], alertBps: 500, seenAlerts: {}, crises: {}, scenarios: {}, run: null };
+  }
+  function plusSave(p) { try { localStorage.setItem(PLUS_KEY, JSON.stringify(p)); } catch (e) {} }
+  function pc(t) { return D().PRACTICE_COMPANIES.filter(function (c) { return c.ticker === t; })[0]; }
+  function plusXp(kind, id, n, title) {
+    var p = plusLoad(); if (p[kind][id]) return 0; p[kind][id] = true; plusSave(p);
+    var s = load(); addXp(s, n); markDay(s); logEvent(s, "plus", title, "USimPlus.dc.html", n); save(s);
+    if (window.fvXpBurst) window.fvXpBurst(n, title + ": +" + n + " XP"); return n;
+  }
+  var PLUS = {
+    on: function () { return D().entitlements(plan()).plusTools; },
+    companies: function () { return D().PRACTICE_COMPANIES; },
+    company: pc,
+    measures: function (t) {
+      var all = D().PRACTICE_COMPANIES.map(function (c) { return { t: c.ticker, m: D().measures(c, SIM.price(c.ticker), SIM.history(c.ticker, 30)) }; });
+      var me = all.filter(function (x) { return x.t === t; })[0].m, col = function (k) { return all.map(function (x) { return x.m[k]; }); };
+      return { m: me, pos: { pe: D().positionOf(me.pe, col("pe")), debtToEquity: D().positionOf(me.debtToEquity, col("debtToEquity")), swingPct: D().positionOf(me.swingPct, col("swingPct")), dividendCover: D().positionOf(me.dividendCover, col("dividendCover")) } };
+    },
+    mix: function () { return D().portfolioMix(SIM.account(), D().PRACTICE_COMPANIES, SIM.price); },
+    dividends: function () { return D().dividendCalendar(SIM.account(), D().PRACTICE_COMPANIES, simDay()); },
+    history: function (t) { return D().companyHistory(pc(t)); },
+    day: simDay,
+    // Crisis practice: runs on a copy of the practice portfolio; the real one is never changed.
+    crisis: function (id) { return D().CRISES.filter(function (c) { return c.id === id; })[0]; },
+    run: function () { return plusLoad().run; },
+    startCrisis: function (id) {
+      var a = SIM.account(), values = {};
+      a.holdings.forEach(function (h) { if (h.quantity > 0) values[h.ticker] = h.quantity * SIM.price(h.ticker); });
+      var own = Object.keys(values).length > 0;
+      // No practice shares yet: an example ₦100,000 portfolio, said so on screen.
+      if (!own) values = { ADF: 3000000, NTB: 3000000, ZLT: 2000000 };
+      var start = { cashKobo: own ? a.cashKobo : 2000000, values: values, example: !own };
+      var p = plusLoad(); p.run = { id: id, step: 0, pos: start, still: start, start: D().totalOf(start), path: [] }; plusSave(p); return p.run;
+    },
+    choose: function (choice) {
+      var p = plusLoad(), r = p.run; if (!r) return null; var c = PLUS.crisis(r.id), st = c.steps[r.step];
+      var sec = function (t) { return pc(t) ? pc(t).sector : ""; };
+      r.pos = D().crisisStep(r.pos, sec, st, choice); r.still = D().crisisStep(r.still, sec, st, "keep");
+      r.path.push(choice); r.step++; plusSave(p);
+      if (r.step >= c.steps.length) plusXp("crises", r.id, 10, "Crisis practice: " + c.title);
+      return r;
+    },
+    total: function (pos) { return D().totalOf(pos); },
+    scenarioDone: function (id, title) { return plusXp("scenarios", id, 5, "Money scenario: " + title); },
+    // Watchlists
+    lists: function () { return plusLoad().lists; },
+    addList: function (name) { var p = plusLoad(); p.lists.push({ name: name || "New list", tickers: [], notes: {} }); plusSave(p); },
+    toggle: function (i, t) { var p = plusLoad(), l = p.lists[i]; if (!l) return; var k = l.tickers.indexOf(t); if (k < 0) l.tickers.push(t); else l.tickers.splice(k, 1); plusSave(p); },
+    note: function (i, t, text) { var p = plusLoad(); if (p.lists[i]) { p.lists[i].notes[t] = text; plusSave(p); } },
+    alertBps: function () { return plusLoad().alertBps; },
+    setAlert: function (bps) { var p = plusLoad(); p.alertBps = bps; plusSave(p); },
+    /** Companies on any list that moved more than the alert size since the last trading day; each shown once a day. */
+    alerts: function () {
+      var p = plusLoad(), d = simDay(), seen = {}, out = [];
+      p.lists.forEach(function (l) { l.tickers.forEach(function (t) { if (seen[t]) return; seen[t] = 1; var ch = SIM.change(t); if (Math.abs(ch) * 100 >= p.alertBps && p.seenAlerts[t] !== d) out.push({ t: t, change: ch }); }); });
+      if (out.length) { out.forEach(function (o) { p.seenAlerts[o.t] = d; }); plusSave(p); }
+      return out;
+    },
+  };
+  FV.PLUS = PLUS;
+  window.FV = FV;
+  // Admin pages need a staff sign-in in this tab (a demonstration: the check runs in the browser).
+  (function () { var m = /\/(UA\w+\.dc\.html)$/.exec(location.pathname); if (m && m[1] !== "UASignIn.dc.html" && !ADMIN.staff()) location.replace("UASignIn.dc.html?next=" + encodeURIComponent(m[1] + location.search)); })();
+  // Queued practice orders are placed as soon as the market is open.
+  try { var placed = SIM.runQueue(); if (placed) sessionStorage.setItem("fv.flash", placed + (placed === 1 ? " queued order was" : " queued orders were") + " placed now that the market is open."); } catch (e) {}
+})();

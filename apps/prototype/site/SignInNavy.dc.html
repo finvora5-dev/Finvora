@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#0B192C">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -20,25 +22,46 @@
   <h1 style="margin: 24px 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Sign in to Finvora</h1>
   <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #5B6577">We'll email you a 6-digit code. No password needed.</p>
   <label for="em" style="margin-top: 28px; font-size: 13px; font-weight: 500">Email</label>
-  <input id="em" type="email" value="ada@example.com" style="margin-top: 6px; height: 50px; border: 1px solid #D5D9E0; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; color: #0B192C; outline: none">
-  <label style="margin-top: 20px; font-size: 13px; font-weight: 500">6-digit code</label>
-  <div style="margin-top: 6px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
-    <span style="height: 54px; border: 1px solid #0B192C; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 20px">4</span>
-    <span style="height: 54px; border: 1px solid #0B192C; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 20px">8</span>
-    <span style="height: 54px; border: 1px solid #0B192C; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 20px">2</span>
-    <span style="height: 54px; border: 2px solid #10B981; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 20px"></span>
-    <span style="height: 54px; border: 1px solid #D5D9E0; border-radius: 12px"></span>
-    <span style="height: 54px; border: 1px solid #D5D9E0; border-radius: 12px"></span>
-  </div>
-  <div style="margin-top: 12px; display: flex; justify-content: space-between; font-size: 13px; color: #5B6577"><span>Sent to ada@example.com</span><span>Resend in 0:42</span></div>
+  <input id="em" type="email" autocomplete="email" inputmode="email" placeholder="ada@example.com" value="{{email}}" onInput="{{onEmail}}" aria-invalid="{{bad}}" aria-describedby="em-err" style="margin-top: 6px; height: 50px; border: 1px solid #D5D9E0; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; color: #0B192C; outline: none">
+  <sc-if value="{{bad}}" hint-placeholder-val="{{false}}"><p id="em-err" role="alert" style="margin: 6px 0 0; font-size: 13px; color: #B9473F">Enter a valid email address, like ada@example.com.</p></sc-if>
+  <label for="code" style="margin-top: 20px; font-size: 13px; font-weight: 500">6-digit code</label>
+  <div style="margin-top: 6px; position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px"><sc-for list="{{boxes}}" as="x" hint-placeholder-count="6"><span aria-hidden="true" style="height: 54px; border: {{x.bd}}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 20px">{{x.d}}</span></sc-for><input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="6-digit code" value="{{code}}" onInput="{{onCode}}" onKeyDown="{{onKey}}" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; border: 0; padding: 0"></div>
+  <div style="margin-top: 12px; display: flex; justify-content: space-between; font-size: 13px; color: #5B6577"><span>{{sentTo}}</span><a href="#" onClick="{{resend}}" style="color: #5B6577">{{resendLabel}}</a></div>
   <div style="margin-top: auto; display: flex; flex-direction: column; gap: 12px">
-    <a href="GoalNavy.dc.html" style="height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue</a>
+    <a href="#" onClick="{{go}}" style="height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue</a>
     <p style="margin: 0; text-align: center; font-size: 12px; line-height: 1.5; color: #5B6577">By continuing you agree to the Terms and Privacy Policy.</p>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
-class Component extends DCLogic { renderVals() { return {}; } }
+class Component extends DCLogic {
+  A() { return window.FV && window.FV.AUTH; }
+  boxes(code) { return [0, 1, 2, 3, 4, 5].map((i) => ({ d: code[i] || '', bd: code[i] ? '1px solid #0B192C' : (i === code.length ? '2px solid #10B981' : '1px solid #D5D9E0') })); }
+  tick() { clearTimeout(this.t); this.t = setTimeout(() => { if (this.A() && this.A().resendIn() > 0) { this.setState({ n: Date.now() }); this.tick(); } }, 1000); }
+  resendLabel() { const A = this.A(), r = A ? A.resendIn() : 0; return r > 0 ? 'Resend in 0:' + String(r).padStart(2, '0') : 'Resend code'; }
+  check(code) {
+    const A = this.A(); if (!A || code.length < 6) return;
+    const r = A.verify(code);
+    if (r === 'ok') { location.href = 'GoalNavy.dc.html'; return; }
+    try { sessionStorage.setItem('fv.lastCode', code); } catch (e) {}
+    location.href = 'CodeErrorNavy.dc.html?why=' + r;
+  }
+  constructor(p) { super(p); const a = window.FV ? window.FV.AUTH.get() : {}; this.state = { email: a.pending || '', code: '', tried: false }; }
+  componentDidMount() { this.tick(); }
+  send() { const A = this.A(); if (!A || !A.validEmail(this.state.email)) { this.setState({ tried: true }); return false; } A.sendCode(this.state.email); this.setState({ n: Date.now() }); this.tick(); setTimeout(() => { const c = document.getElementById('code'); if (c) c.focus(); }, 0); return true; }
+  go() { const A = this.A(); if (!A) return; const a = A.get(); if (!A.validEmail(this.state.email)) { this.setState({ tried: true }); return; } if (a.pending !== this.state.email.trim().toLowerCase() || !a.sentAt) { this.send(); return; } this.check(this.state.code); }
+  renderVals() {
+    const A = this.A(), a = A ? A.get() : {}, bad = !!A && this.state.tried && !A.validEmail(this.state.email);
+    return { email: this.state.email, bad, boxes: this.boxes(this.state.code), code: this.state.code,
+      sentTo: a.pending && a.sentAt ? 'Sent to ' + a.pending : 'We will email you a code',
+      resendLabel: a.sentAt ? this.resendLabel() : 'Send code',
+      onEmail: (e) => this.setState({ email: e.target.value }),
+      onCode: (e) => { const c = e.target.value.replace(/\D/g, '').slice(0, 6); this.setState({ code: c }); if (c.length === 6) this.check(c); },
+      onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.go(); } },
+      resend: (e) => { e.preventDefault(); if (A && A.resendIn() > 0) return; this.send(); },
+      go: (e) => { e.preventDefault(); this.go(); } };
+  }
+}
 </script>
 </body>
 </html>

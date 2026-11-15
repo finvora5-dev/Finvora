@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#0B192C">
 <link rel="stylesheet" href="./responsive.css">
 <script src="./responsive.js"></script>
+<script src="./fvd.js"></script>
+<script src="./fv.js"></script>
 </head>
 <body>
 <x-dc>
@@ -27,15 +29,17 @@
       </button>
     </sc-for>
   </div>
-  <a href="HomeNavy.dc.html" style="margin-top: auto; height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue</a>
+  <a href="HomeNavy.dc.html" onClick="{{save}}" style="margin-top: auto; height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue</a>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { g: 1 }; }
+    A() { return window.FV && window.FV.AUTH; }
+  constructor(p) { super(p); const g = window.FV ? window.FV.AUTH.get().goal : null, i = ['Money basics', 'Investing', 'Nigerian market'].indexOf(g); this.state = { g: i < 0 ? 1 : i }; }
   renderVals() {
     const O = [['Money basics', 'Budgeting, saving and inflation'], ['Investing', 'Shares, risk and returns'], ['Nigerian market', 'Companies and prices on the NGX']];
-    return { opts: O.map(([t, s], i) => { const on = this.state.g === i; return { t, s, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF', dot: on ? '6px solid #0B192C' : '1.5px solid #C0C6D0' }; }) };
+    const T = ['Money basics', 'Investing', 'Nigerian market'];
+    return { save: () => { if (this.A()) this.A().setGoal(T[this.state.g]); }, opts: O.map(([t, s], i) => { const on = this.state.g === i; return { t, s, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF', dot: on ? '6px solid #0B192C' : '1.5px solid #C0C6D0' }; }) };
   }
 }
 </script>
