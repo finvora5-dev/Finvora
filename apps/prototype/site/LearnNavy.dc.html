@@ -27,7 +27,7 @@ a{color:#0B192C}a:hover{color: #047857}
     <span style="font-size: 12px; color: #5B6577; font-weight: 500; text-transform: uppercase; letter-spacing: .06em">Course 1 of 6</span>
     <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Money Foundations</span>
     <span style="display: flex; align-items: center; gap: 10px"><span style="flex: 1; height: 6px; border-radius: 999px; background: #E2E5EA; overflow: hidden"><span style="display: block; width: {{donePct}}; height: 100%; background: #10B981"></span></span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">{{doneN}}</span></span>
-    <a href="LessonInfoNavy.dc.html" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px; margin-top: 4px">{{cont}}</a>
+    <a href="{{contHref}}" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px; margin-top: 4px">{{cont}}</a>
   </section>
   <section style="padding: 20px 20px 0">
     <h2 style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">Lessons</h2>
@@ -51,8 +51,10 @@ class Component extends DCLogic {
   renderVals() {
     const F = window.FV, st = F ? F.get() : { done: 2 }, done = st.done || 0, LS = F ? F.LESSONS : [];
     const L = LS.map((x, i) => [x.title, i < done ? 'done' : i === done ? 'next' : 'locked', x.min + ' min']).concat([['Course review', done >= LS.length ? 'next' : 'locked', '8 questions']]);
+    let rv = {}; try { rv = JSON.parse(localStorage.getItem('fv.review.v1') || 'null') || {}; } catch (e) {}
+    const passed = (rv.best || 0) >= 6; if (passed) L[L.length - 1][1] = 'done';
     const cur = LS[done];
-    return { cont: cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + ' · ' + cur.min + ' min' : 'Start the course review', donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
+    return { contHref: cur ? 'LessonInfoNavy.dc.html' : 'CourseReviewNavy.dc.html', cont: passed ? 'Review the course again' : cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + ' · ' + cur.min + ' min' : 'Start the course review', donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
       lessons: L.map(([t, st, d], i) => ({
       t, s: st === 'done' ? 'Completed · ' + d : st === 'next' ? 'Up next · ' + d : d,
       mark: st === 'done' ? '✓' : String(i + 1),
