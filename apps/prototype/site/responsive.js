@@ -41,13 +41,13 @@
       var z = vw / designW; el.style.zoom = String(z); el.style.width = designW + "px";
       // Fill the visible screen, not the 844px drawing, so bottom buttons sit on the bottom edge.
       el.style.setProperty("min-height", (window.innerHeight / z) + "px", "important");
-      el.style.setProperty("height", "auto", "important");
+      el.style.setProperty("height", el.querySelector("#chat") ? (window.innerHeight / z) + "px" : "auto", "important");
       return;
     }
     // Wider screens without a laptop board: the phone column, centred at its designed width (build plan §6).
     el.style.zoom = "1"; el.style.width = designW + "px";
     el.style.setProperty("min-height", window.innerHeight + "px", "important");
-    el.style.setProperty("height", "auto", "important");
+    el.style.setProperty("height", el.querySelector("#chat") ? window.innerHeight + "px" : "auto", "important");
   }
   var mo = new MutationObserver(function () { if (root()) { fit(); } });
   function start() { mo.observe(document.body, { childList: true, subtree: true }); fit(); }
