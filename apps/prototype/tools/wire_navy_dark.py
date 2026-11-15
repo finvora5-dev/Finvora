@@ -29,3 +29,15 @@ if MARK not in s:
     s = sub1(s, "    return { groups: [", "    return { open: this.state.open, opts, close: () => this.setState({ open: false }), groups: [")
     s = sub1(s, "{ h: 'App', rows: [sw('Sounds', 'sound'),", "{ h: 'App', rows: [val('Appearance', AP[this.state.ap] || 'Match phone', openAp), sw('Sounds', 'sound'),")
     open(P, 'w').write(s); print('appearance wired')
+
+# Sheet focus (accessibility): focus moves to the selected option on open, Escape closes, focus returns to the row.
+MARK2 = '/* navy-appearance-focus */'
+s = open(P).read()
+if MARK2 not in s:
+    s = sub1(s, "openAp = () => this.setState({ open: true });", "openAp = () => { this.setState({ open: true }); setTimeout(() => { const r = document.querySelector('section[role=dialog] [aria-checked=\"true\"]'); if (r) r.focus(); }, 30); };")
+    s = sub1(s, "close: () => this.setState({ open: false }),", "close: () => this.shut(),")
+    s = sub1(s, "this.setState({ ap: k, open: false }); }", "this.setState({ ap: k }); this.shut(); }")
+    s = sub1(s, "  renderVals() {\n    const sw =", "  " + MARK2 + "\n  shut() { this.setState({ open: false }); setTimeout(() => { const r = document.querySelector('[aria-haspopup=\"dialog\"]'); if (r) r.focus(); }, 30); }\n"
+             "  componentDidMount() { this.esc = (e) => { if (e.key === 'Escape' && this.state.open) this.shut(); }; document.addEventListener('keydown', this.esc); }\n"
+             "  componentWillUnmount() { document.removeEventListener('keydown', this.esc); }\n  renderVals() {\n    const sw =")
+    open(P, 'w').write(s); print('sheet focus wired')

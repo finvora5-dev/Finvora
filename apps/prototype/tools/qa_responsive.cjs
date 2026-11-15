@@ -8,7 +8,8 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const site = path.join(__dirname, '..', 'site');
   const pages = fs.readdirSync(site).filter((f) => f.endsWith('Navy.dc.html')).map((f) => f.replace('.dc.html', ''));
   const touch = W <= 820, H = W < 600 ? 844 : W < 1024 ? 1180 : 900;
-  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch, serviceWorkers: 'block' }); const p = await ctx.newPage();
+  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch, serviceWorkers: 'block' }); const THEME = process.env.FV_THEME || 'light'; // FV_THEME=dark checks the dark theme
+  await ctx.addInitScript((t) => { try { const k = 'fv.prefs.v1', v = JSON.parse(localStorage.getItem(k) || '{}'); v.appearance = t; localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, THEME); const p = await ctx.newPage();
   let cur = ''; const found = []; const add = (kind, detail) => found.push({ page: cur, width: W, kind, detail });
   p.on('pageerror', (e) => add('script error', e.message.slice(0, 160)));
   p.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) add('missing file', r.status() + ' ' + r.url().replace(B, '')); });
@@ -67,9 +68,9 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
       return out;
     }, touch);
     const uniq = new Set(); r.forEach(([k, d]) => { const key = k + d; if (!uniq.has(key)) { uniq.add(key); add(k, d); } });
-    try { await p.screenshot({ path: path.join(OUT, 'qa-' + W + '-' + landed + '.png') }); } catch (e) {}
+    try { await p.screenshot({ path: path.join(OUT, 'qa-' + (process.env.FV_THEME === 'dark' ? 'dark-' : '') + W + '-' + landed + '.png') }); } catch (e) {}
   }
-  fs.writeFileSync(path.join(OUT, 'qa-' + W + '.json'), JSON.stringify(found, null, 1));
+  fs.writeFileSync(path.join(OUT, 'qa-' + (process.env.FV_THEME === 'dark' ? 'dark-' : '') + W + '.json'), JSON.stringify(found, null, 1));
   const byKind = {}; found.forEach((f) => { byKind[f.kind] = (byKind[f.kind] || 0) + 1; });
   console.log('width', W, 'screens', seen.size, 'problems', found.length, JSON.stringify(byKind));
   await b.close();

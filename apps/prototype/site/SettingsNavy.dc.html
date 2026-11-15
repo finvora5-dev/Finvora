@@ -40,12 +40,16 @@ class Component extends DCLogic {
 /* navy-me */
 /* navy-appearance */
   constructor(p) { super(p); const P = window.FV ? window.FV.ME.prefs() : {}; this.state = { price: P.price !== false, daily: P.daily !== false, news: !!P.news, sound: P.sound !== false, open: false, ap: window.fvTheme ? window.fvTheme.pref() : 'system' }; }
+  /* navy-appearance-focus */
+  shut() { this.setState({ open: false }); setTimeout(() => { const r = document.querySelector('[aria-haspopup="dialog"]'); if (r) r.focus(); }, 30); }
+  componentDidMount() { this.esc = (e) => { if (e.key === 'Escape' && this.state.open) this.shut(); }; document.addEventListener('keydown', this.esc); }
+  componentWillUnmount() { document.removeEventListener('keydown', this.esc); }
   renderVals() {
     const sw = (t, k) => { const on = this.state[k]; return { t, on: String(on), showS: 'flex', showV: 'none', v: '', bg: on ? '#0B192C' : '#D5D9E0', j: on ? 'flex-end' : 'flex-start', tog: () => { if (window.FV) window.FV.ME.setPref(k, !on); this.setState({ [k]: !on }); }, role: 'none', tab: '-1', pop: 'false', cur: 'default', act: () => {}, key: () => {} }; };
     const val = (t, v, act) => ({ t, v, showS: 'none', showV: 'inline', on: 'false', bg: '', j: '', tog: () => {}, role: act ? 'button' : 'none', tab: act ? '0' : '-1', pop: act ? 'dialog' : 'false', cur: act ? 'pointer' : 'default', act: act || (() => {}), key: act ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } } : () => {} });
-    const AP = { system: 'Match phone', light: 'Light', dark: 'Dark' }, openAp = () => this.setState({ open: true });
-    const opts = ['system', 'light', 'dark'].map((k) => { const on = this.state.ap === k; return { t: AP[k], s: 'Dark when your phone is in dark mode', showS: k === 'system' ? 'inline' : 'none', on: String(on), bd: on ? '2px solid #0B192C' : '1px solid #D5D9E0', dot: on ? '6px solid #0B192C' : '2px solid #D5D9E0', pick: () => { if (window.fvTheme) window.fvTheme.set(k); this.setState({ ap: k, open: false }); } }; });
-    return { open: this.state.open, opts, close: () => this.setState({ open: false }), groups: [
+    const AP = { system: 'Match phone', light: 'Light', dark: 'Dark' }, openAp = () => { this.setState({ open: true }); setTimeout(() => { const r = document.querySelector('section[role=dialog] [aria-checked="true"]'); if (r) r.focus(); }, 30); };
+    const opts = ['system', 'light', 'dark'].map((k) => { const on = this.state.ap === k; return { t: AP[k], s: 'Dark when your phone is in dark mode', showS: k === 'system' ? 'inline' : 'none', on: String(on), bd: on ? '2px solid #0B192C' : '1px solid #D5D9E0', dot: on ? '6px solid #0B192C' : '2px solid #D5D9E0', pick: () => { if (window.fvTheme) window.fvTheme.set(k); this.setState({ ap: k }); this.shut(); } }; });
+    return { open: this.state.open, opts, close: () => this.shut(), groups: [
       { h: 'Account', rows: [val('Email', (window.FV && window.FV.AUTH.get().email) || 'Not signed in'), val('Plan', window.FV && window.FV.billing().sub.plan === 'plus' ? 'Plus' : 'Free'), val('Interest', (window.FV && window.FV.AUTH.get().goal) || 'Investing')] },
       { h: 'Notifications', rows: [sw('Price alerts', 'price'), sw('Daily lesson reminder', 'daily'), sw('Market news', 'news')] },
       { h: 'App', rows: [val('Appearance', AP[this.state.ap] || 'Match phone', openAp), sw('Sounds', 'sound'), val('Text size', 'System'), val('Privacy and data', '')] }
