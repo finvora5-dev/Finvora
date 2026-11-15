@@ -54,8 +54,17 @@
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { if (!route()) fit(); }, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
+  // Pinned bottom nav (mobile-native §7, content insets): every tab screen reserves room under its last line for
+  // the nav, its gap above the home indicator and 16px air, so the last content can be read and tapped.
+  function fvNavPad(el, z) {
+    var nav = el.querySelector('nav[aria-label="Main"]'); if (!nav || el.querySelector("#chat")) return; // chat already sits its input above the nav
+    var r = nav.getBoundingClientRect(); if (!r.height) return;
+    el.style.setProperty("padding-bottom", Math.ceil((window.innerHeight - r.top + 16) / (z || 1)) + "px", "important");
+    el.style.setProperty("box-sizing", "border-box", "important");
+  }
   function fit() {
     var el = root(); if (!el) return;
+    setTimeout(function () { var e2 = root(); if (e2) fvNavPad(e2, parseFloat(e2.style.zoom) || 1); }, 0);
     if (!el.dataset.fvW) el.dataset.fvW = String(parseFloat(el.style.width) || 390);
     var designW = +el.dataset.fvW, vw = document.documentElement.clientWidth, html = document.documentElement;
     var phoneBoard = designW < 600, wide = vw >= 600;

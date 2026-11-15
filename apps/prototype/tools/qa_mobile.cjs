@@ -43,9 +43,10 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'); c
       const under = await p.evaluate(async () => {
         window.scrollTo(0, document.documentElement.scrollHeight); await new Promise((r) => setTimeout(r, 300));
         const nav = document.querySelector('nav[aria-label="Main"]'); if (!nav) return false;
-        const nt = nav.getBoundingClientRect().top; const main = document.querySelector('main'); if (!main) return false;
-        const last = [...main.querySelectorAll('a, button, p, h2, h3, li')].filter((e) => e.offsetParent).pop();
-        return last && last.getBoundingClientRect().bottom > nt + 2;
+        // Any visible text or control outside the nav (not only inside <main>, which some boards lack).
+        const nt = nav.getBoundingClientRect().top;
+        const els = [...document.querySelectorAll('#dc-root *')].filter((e) => !nav.contains(e) && !e.closest('.fv-index') && e.offsetParent && e.children.length === 0 && e.textContent.trim() && getComputedStyle(e).position !== 'fixed');
+        return els.some((e) => e.getBoundingClientRect().bottom > nt + 2);
       });
       if (under) issues.push(u + ': last content ends under the bottom navigation');
     }
