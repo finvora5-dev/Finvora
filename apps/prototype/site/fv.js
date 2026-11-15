@@ -628,7 +628,7 @@
 
   // ---- Lesson steps: each lesson lists its screens; every screen links to the next one.
   var STEP_BOARD = { info: "LessonInfoNavy", compare: "LearnCompareNavy", term: "LearnTermNavy", steps: "LearnStepsNavy", market: "LearnMarketNavy", myth: "LearnMythNavy", choice: "LessonNavy", order: "LessonOrderNavy", match: "LessonMatchNavy", scenario: "LessonScenarioNavy", calc: "LessonCalcNavy" };
-  var NAVY_STEPS = ["info", "choice", "calc"];
+  var NAVY_STEPS = ["info", "compare", "myth", "choice", "order", "match", "scenario", "calc"];
   /** True when a screen is being played inside a lesson (not on its own as a micro module). */
   function inLesson() { return /[?&]in=1/.test(location.search) || /(Lesson(Info|Calc|Order|Scenario|Match)?|LearnMyth|LearnCompare)Navy/.test(location.pathname); }
   function flowOf(id) { var c = CONTENT[id], fl = (c && c.flow) || (id === "interest" ? ["info", "choice", "order", "match", "scenario", "calc"] : ["info", "choice", "calc"]); return fl.filter(function (k) { return NAVY_STEPS.indexOf(k) >= 0; }); }
