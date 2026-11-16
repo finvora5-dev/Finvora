@@ -98,13 +98,20 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
   #dc-root .fv-confirm { @starting-style { transform: none; opacity: 0; } }
   #dc-root section[role="dialog"].fv-leaving { transform: none; opacity: 0; }
 }
-/* Collapsed laptop sidebar: icons only, instant (it is a frequent action, so no width animation; skill: animate). */
-#dc-root aside.fv-collapsed { width: 76px !important; padding-left: 10px !important; padding-right: 10px !important; }
-#dc-root aside.fv-collapsed a { font-size: 0 !important; justify-content: center; gap: 0 !important; padding: 0 !important; }
+/* Collapsed laptop sidebar: icons only, instant (it is a frequent action, so no width animation; skill: animate).
+   Shows the logo mark, the profile initials and the nav icons; every label, heading and wordmark is hidden. */
+#dc-root aside.fv-collapsed { width: 76px !important; padding-left: 10px !important; padding-right: 10px !important; align-items: center; }
+#dc-root aside.fv-collapsed a { font-size: 0 !important; justify-content: center; gap: 0 !important; padding: 0 !important; width: 44px; }
 #dc-root aside.fv-collapsed a svg { flex: none; }
-#dc-root aside.fv-collapsed > span:not([style*="flex: 1"]):not([style*="border-top"]) { display: none !important; }
-#dc-root aside.fv-collapsed > div:first-child { flex-direction: column; gap: 10px; }
-#dc-root aside.fv-collapsed > div:first-child > span > span:last-child { display: none; }
+#dc-root aside.fv-collapsed > span:not([style*="flex: 1"]):not([style*="border-top"]):not([style*="background: rgb(26, 39, 64)"]) { display: none !important; }
+#dc-root aside.fv-collapsed > span[style*="border-top"] { align-self: stretch; }
+#dc-root aside.fv-collapsed > div:first-child { flex-direction: column; gap: 10px; padding-left: 0 !important; padding-right: 0 !important; align-self: stretch; align-items: center; }
+#dc-root aside.fv-collapsed > div:first-child > span > span:not([role="img"]) { display: none !important; }
+/* Profile cards (learner link, admin card): initials badge only. */
+#dc-root aside.fv-collapsed > a[href^="MeLaptopNavy"], #dc-root aside.fv-collapsed > span[style*="background: rgb(26, 39, 64)"] { width: 44px; height: 44px; padding: 0 !important; justify-content: center; background: transparent !important; }
+#dc-root aside.fv-collapsed > a[href^="MeLaptopNavy"] > :not(:first-child), #dc-root aside.fv-collapsed > span[style*="background: rgb(26, 39, 64)"] > :not(:first-child) { display: none !important; }
+#dc-root aside.fv-collapsed > a[href^="MeLaptopNavy"] > :first-child { font-size: 13px !important; }
 #dc-root aside.fv-collapsed button[aria-label="Expand sidebar"] svg { transform: scaleX(-1); }
+
 /* Filtered-out rows and inactive views (keeps each element's own layout when shown again). */
 #dc-root .fv-hide { display: none !important; }
