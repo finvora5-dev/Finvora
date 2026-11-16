@@ -182,8 +182,12 @@
   function toast(msg) {
     var t = el("div", "position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);box-sizing:border-box;padding:12px 16px;border-radius:12px;background:#0B192C;color:#FFFFFF;font:500 14px 'Geist',system-ui,sans-serif;box-shadow:0 10px 24px rgba(17,28,45,.25);transition:opacity 400ms ease,transform 400ms ease", msg);
     t.setAttribute("role", "status"); document.body.appendChild(t);
-    t.animate([{ opacity: 0, transform: "translate(-50%,12px)" }, { opacity: 1, transform: "translate(-50%,0)" }], { duration: 400, easing: "ease" });
-    setTimeout(function () { t.style.opacity = "0"; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
+    // Enters and leaves on the same path with the inline 400ms ease transition (interruptible, unlike keyframes; skill: review-animations).
+    // Reduced motion keeps the fade and drops the 12px move.
+    var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches, off = still ? "translate(-50%,0)" : "translate(-50%,12px)";
+    t.style.opacity = "0"; t.style.transform = off; t.getBoundingClientRect();
+    requestAnimationFrame(function () { t.style.opacity = "1"; t.style.transform = "translate(-50%,0)"; });
+    setTimeout(function () { t.style.opacity = "0"; t.style.transform = off; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
   }
   function sheet(title, fill) {
     var host = document.getElementById("dc-root") || document.body, back = el("div", "position:fixed;inset:0;background:rgba(17,28,45,.45);z-index:50");
