@@ -43,7 +43,7 @@ class Component extends DCLogic {
     const val = (t, v) => ({ t, v, showS: 'none', showV: 'inline', on: 'false', bg: '', j: '', tog: () => {} });
     return { groups: [
       { h: 'Account', rows: [val('Email', (window.FV && window.FV.AUTH.get().email) || 'Not signed in'), val('Plan', window.FV && window.FV.billing().sub.plan === 'plus' ? 'Plus' : 'Free'), val('Interest', (window.FV && window.FV.AUTH.get().goal) || 'Investing')] },
-      { h: 'Notifications', rows: [sw('Price alerts', 'price'), sw('Daily lesson reminder', 'daily'), sw('Market news', 'news')] },
+      { h: 'Notifications', rows: [sw('Price alerts', 'price'), sw('Daily lesson reminder', 'daily')] },
       { h: 'App', rows: [sw('Sounds', 'sound'), val('Text size', 'System'), val('Privacy and data', '')] }
     ] };
   }
