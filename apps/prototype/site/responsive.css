@@ -136,7 +136,9 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
   /* Tabs and segmented controls that are not selected: navy text. */
   #dc-root [role="tab"][aria-selected="false"]:hover, #dc-root [role="tab"]:not([aria-selected]):hover { color: #0B192C !important; background-color: rgba(255, 255, 255, .6) !important; }
   /* Answer options and radio cards. */
-  #dc-root button[role="radio"][aria-checked="false"]:hover { border-color: #0B192C !important; }
+  /* Only while the question is open: once an option shows green (right) or red (wrong), nothing in that group reacts
+     to the mouse, so the marked answers never flicker (owner report, 16 Nov 2026). */
+  #dc-root :not(:has(> button[role="radio"][style*="rgb(16, 185, 129)"], > button[role="radio"][style*="rgb(185, 71, 63)"])) > button[role="radio"][aria-checked="false"]:hover { border-color: #0B192C !important; }
   /* Disabled-looking actions never react. */
   #dc-root [aria-disabled="true"]:hover { background-color: inherit; box-shadow: none; }
 }
@@ -163,3 +165,6 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
   .fv-drawer { transition: opacity 200ms var(--ease-out); @starting-style { transform: none; opacity: 0; } }
   .fv-drawer.fv-leaving { transform: none; opacity: 0; }
 }
+
+/* Answered questions: options showing the result no longer shrink on press (owner report, 16 Nov 2026). */
+#dc-root :has(> button[role="radio"][style*="rgb(16, 185, 129)"], > button[role="radio"][style*="rgb(185, 71, 63)"]) > button[role="radio"]:active { transform: none; }

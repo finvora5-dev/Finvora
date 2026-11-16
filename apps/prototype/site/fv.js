@@ -292,7 +292,10 @@
     article: function (slug) { return arts().filter(function (a) { return a.slug === slug; })[0] || null; },
     /** The article the page is about: ?a=slug in the address, else Dividend (the designed example). */
     current: function () { var m = /[?&]a=([\w-]+)/.exec(location.search); return LIB.article(m ? m[1] : "dividend") || LIB.article("dividend"); },
-    minutes: function (a) { var w = [a.definition, a.example, a.whyItMatters, a.deep ? JSON.stringify(a.deep).replace(/["{}\[\],:]/g, " ") : ""].concat(a.explanation, a.misconceptions || []).join(" ").split(/\s+/).length; return Math.max(1, Math.round(w / 120)); },
+    /** Minutes to read the article as the screen shows it: 200 words a minute, at least 1 (owner report, 16 Nov 2026). */
+    minutes: function (a) { var d = a.deep || {}, h = d.how || {}, x = d.example || {}, f = d.formula || {}, m = d.mistake || {};
+      var parts = [a.definition, a.whyItMatters].concat(d.takeaways || [], [h.title, h.intro], h.steps || [], [x.line, x.note], (x.rows || []).map(function (r) { return r.join(" "); }), [f.intro, f.rule, f.calc, f.note, m.myth, m.fact]);
+      var w = parts.filter(Boolean).join(" ").split(/\s+/).filter(Boolean).length; return Math.max(1, Math.ceil(w / 200)); },
     topicOf: function (a) { return TOPICS.filter(function (t) { return t.cats.indexOf(a.category) >= 0; })[0] || TOPICS[0]; },
     inTopic: function (name) { var t = TOPICS.filter(function (x) { return x.name === name; })[0] || TOPICS[1]; return { topic: t, items: arts().filter(function (a) { return t.cats.indexOf(a.category) >= 0; }) }; },
     wordOfDay: function () { var n = Math.floor((Date.now() + 3600000) / 86400000); return arts()[n % arts().length]; },

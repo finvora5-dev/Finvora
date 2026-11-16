@@ -52,7 +52,9 @@
   });
   document.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest('nav[aria-label="Main"] a, aside a'); try { if (a) sessionStorage.setItem("fv.tab", "1"); } catch (x) {} }, true);
   var resizeTimer = null;
-  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { if (!route()) fit(); }, 250); });
+  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { if (!route()) fit();
+    // Charts redraw for the new width.
+    document.querySelectorAll("#dc-root svg").forEach(function (g) { if (g._pts && window.fvDraw) window.fvDraw(g, g._pts, g._label); }); }, 250); });
   function root() { return document.querySelector("#dc-root > .sc-host > :first-child"); }
   // Pinned bottom nav (mobile-native §7, content insets): every tab screen reserves room under its last line for
   // the nav, its gap above the home indicator and 16px air, so the last content can be read and tapped.
@@ -251,8 +253,13 @@
     for (var i = 1; i <= need; i++) out.unshift(Math.max(1, Math.round(first * back[i] / back[0])));
     return out.concat(real);
   }
+  window.fvDraw = function (g, p, l) { draw(g, p, l); };
   function draw(svg, pts, label) {
     var vb = (svg.getAttribute("viewBox") || "0 0 350 180").split(/\s+/).map(Number), W = vb[2] || 350, H = vb[3] || 180;
+    // Fill the box at any screen width (owner, 16 Nov 2026): the drawing area takes the box's own proportions, so a
+    // chart drawn for a phone stretches across a wide laptop column instead of sitting small in the middle.
+    var box = svg.getBoundingClientRect(); if (box.width > 0 && box.height > 0) { W = Math.round(H * box.width / box.height); svg.setAttribute("viewBox", "0 0 " + W + " " + H); }
+    svg._pts = pts; svg._label = label;
     var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1, n = pts.length;
     var xy = pts.map(function (v, i) { return [Math.round(i * W / Math.max(1, n - 1) * 10) / 10, Math.round((H * 0.89 - (v - lo) / sp * H * 0.72) * 10) / 10]; });
     var line = "M" + xy.map(function (p) { return p[0] + " " + p[1]; }).join(" L");

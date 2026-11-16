@@ -40,8 +40,8 @@
         <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #334155">{{fNote}}</p>
       </div>
     </figure></sc-if>
-    <h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">Why it matters</h2>
-    <p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #334155">{{why}}</p>
+    <sc-if value="{{hasKeys}}" hint-placeholder-val="{{ true }}"><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">Key points</h2><ul style="margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px"><sc-for list="{{keys}}" as="k"><li style="font-size: 16px; line-height: 1.6; color: #334155">{{k.t}}</li></sc-for></ul></sc-if><sc-if value="{{hasHow}}" hint-placeholder-val="{{ true }}"><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">{{howT}}</h2><p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #334155">{{howI}}</p><ol style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px"><sc-for list="{{steps}}" as="st"><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 16px; line-height: 1.6; color: #334155"><span style="width: 26px; height: 26px; flex: none; border-radius: 999px; background: #E8EBEF; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 12px; color: #0B192C">{{st.n}}</span><span style="padding-top: 1px">{{st.t}}</span></li></sc-for></ol></sc-if><sc-if value="{{hasXe}}" hint-placeholder-val="{{ true }}"><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">Example</h2><p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #334155">{{xeLine}}</p><div style="margin-top: 10px; border: 1px solid #E5E7EB; border-radius: 14px; background: #FFFFFF; overflow: hidden"><sc-for list="{{xeRows}}" as="r"><div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #EDEFF2; font-size: 15px"><span style="color: #334155">{{r.k}}</span><span style="font-family: 'Geist Mono', monospace; color: #0B192C">{{r.v}}</span></div></sc-for><p style="margin: 0; padding: 12px 16px; font-size: 13px; line-height: 1.5; color: #5B6577">{{xeNote}}</p></div></sc-if><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">Why it matters</h2>
+    <p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #334155">{{why}}</p><sc-if value="{{hasMk}}" hint-placeholder-val="{{ true }}"><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">A common mistake</h2><p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #334155"><strong style="font-weight: 600; color: #B9473F">Myth:</strong> {{myth}}</p><p style="margin: 6px 0 0; font-size: 16px; line-height: 1.6; color: #334155"><strong style="font-weight: 600; color: #047857">Fact:</strong> {{fact}}</p></sc-if>
     <sc-if value="{{showCo}}" hint-placeholder-val="{{ false }}"><h2 style="margin: 24px 0 0; font-size: 18px; font-weight: 600">On the NGX</h2>
     <a href="CompanyNavy.dc.html?t=ZENITHBANK" style="margin-top: 10px; display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #E5E7EB; border-radius: 14px; text-decoration: none">
       <span style="width: 36px; height: 36px; border-radius: 10px; background: #E8EBEF; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 500">ZEN</span>
@@ -72,7 +72,13 @@ class Component extends DCLogic {
       const L3 = sp(f.rule), V3 = sp(f.calc);
       if (L3.length === 3 && V3.length === 3) fig = { hasFig: true, rule: L3[2] + ' = ' + L3[0] + ' ' + op + ' ' + L3[1], op, l1: L3[0], l2: L3[1], l3: L3[2], v1: V3[0], v2: V3[1], v3: V3[2], fNote: f.note || f.intro || '' };
     }
-    return Object.assign({ rule: '', op: '÷', l1: '', l2: '', l3: '', v1: '', v2: '', v3: '', fNote: '' }, fig, {
+
+    /* article-full */ const dd = a.deep || {}, hw = dd.how || {}, xe = dd.example || {}, mk = dd.mistake || {};
+    const full = { keys: (dd.takeaways || []).map((t) => ({ t })), hasKeys: !!(dd.takeaways || []).length,
+      hasHow: !!(hw.steps || []).length, howT: hw.title || 'How it works', howI: hw.intro || '', steps: (hw.steps || []).map((t, i) => ({ n: String(i + 1), t })),
+      hasXe: !!(xe.rows || []).length, xeLine: xe.line || '', xeRows: (xe.rows || []).map((r) => ({ k: r[0], v: r[1] })), xeNote: xe.note || '',
+      hasMk: !!mk.myth, myth: mk.myth || '', fact: mk.fact || '' };
+    return Object.assign({ rule: '', op: '÷', l1: '', l2: '', l3: '', v1: '', v2: '', v3: '', fNote: '' }, full, fig, {
       kicker: L.topicOf(a).name + ' · ' + L.minutes(a) + ' min read', title: a.title, def: a.definition, why: a.whyItMatters || (a.explanation || []).join(' '),
       showCo: a.slug === 'dividend', saved: String(saved), saveLabel: saved ? 'Saved. Remove from saved' : 'Save', saveC: saved ? '#047857' : '#0B192C',
       toggle: (e) => { e.preventDefault(); L.toggleSave(a.slug); this.setState({ n: this.state.n + 1 }); },
