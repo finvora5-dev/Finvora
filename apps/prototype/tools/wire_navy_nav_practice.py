@@ -1,17 +1,17 @@
 """Phone navigation change (owner, 16 Nov 2026): Me moves to a button beside the notification bell on Home, and the
-bottom bar's Me tab becomes "Practice market" (the laptop sidebar's Practice market icon), opening the Practice portfolio.
+bottom bar's Me tab becomes "Practice" (owner chose the short label so the bar stays even) (the laptop sidebar's Practice market icon), opening the Practice portfolio.
 Idempotent. Usage: wire_navy_nav_practice.py <site>"""
 import glob, os, re, sys
 SITE = sys.argv[1]
-TAB = ('<a href="PracticeNavy.dc.html" style="flex: 1; height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 15px; box-sizing: border-box; gap: 4px; text-decoration: none; position: relative">'
+TAB = ('<a href="PracticeNavy.dc.html" style="flex: 1; height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; position: relative">'
        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8E9AAE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18M7 15h4"></path></svg>'
-       '<span style="font-size: 12px; font-weight: 500; color: #C7D0DD; text-align: center; line-height: 1.15">Practice market</span></a>')
+       '<span style="font-size: 12px; font-weight: 500; color: #C7D0DD; white-space: nowrap">Practice</span></a>')
 ME_TAB = re.compile(r'<a href="MeNavy\.dc\.html"(?: aria-current="page")? style="flex: 1; height: 72px;.*?</a>', re.S)
 n = 0
 for f in sorted(glob.glob(os.path.join(SITE, '*Navy.dc.html'))):
     if 'Laptop' in f: continue
     s = open(f).read()
-    if 'aria-label="Main"' not in s or '>Practice market</span></a>' in s: continue
+    if 'aria-label="Main"' not in s or '>Practice</span></a>' in s: continue
     s2, k = ME_TAB.subn(TAB, s, count=1)
     if k: open(f, 'w').write(s2); n += 1
 print('bottom bars changed:', n)
