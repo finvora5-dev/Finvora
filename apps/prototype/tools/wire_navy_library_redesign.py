@@ -154,3 +154,19 @@ if '<!-- library-phone-redesign -->' not in s:
     a = s[s.index('class Component extends DCLogic {'):s.index('</script>', s.index('data-dc-script'))].rstrip() + '\n'
     s = s.replace(a, js + '\n', 1)
     wr('LibraryNavy.dc.html', s); print('redesigned LibraryNavy.dc.html')
+
+# ---- Phone Learn header in line with the redesigned Library (owner, 16 Nov 2026): the switch first, then a light title,
+# so moving between Courses and Library no longer changes the look.
+s = rd('LearnNavy.dc.html')
+OLD_HEAD = '<div style="background: #0B192C; color: #FFFFFF; padding-bottom: 14px; padding: 18px 20px 0; display: flex; align-items: baseline; justify-content: space-between"><h1 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">Learn</h1><span style="font-size: 13px; color: #B6C0CF">6 courses</span></div>'
+OLD_SEG = s[s.index('<div style="margin: 12px 20px 0; display: flex; background: #E8EBEF; border-radius: 10px; padding: 3px">'):] if OLD_HEAD in s else ''
+if OLD_HEAD in s:
+    OLD_SEG = OLD_SEG[:OLD_SEG.index('</div>') + 6]
+    NEW = ('<header style="padding: 18px 20px 4px; display: flex; flex-direction: column; gap: 12px; flex: none">'
+           '<div style="display: flex; background: #E8EBEF; border-radius: 12px; padding: 3px"><a href="LearnNavy.dc.html" aria-current="page" style="flex: 1; height: 38px; border-radius: 9px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(11,25,44,.12); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #0B192C">Courses</a>'
+           '<a href="LibraryNavy.dc.html" style="flex: 1; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 500; color: #5B6577">Library</a></div>'
+           '<div><h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Learn</h1><p style="margin: 4px 0 0; font-size: 14px; color: #5B6577">6 courses</p></div></header>')
+    s = s.replace(OLD_HEAD + '\n  ' + OLD_SEG, NEW, 1) if (OLD_HEAD + '\n  ' + OLD_SEG) in s else s
+    assert NEW in s, 'Learn header not replaced'
+    s = s.replace('<section style="margin: 14px 20px 0; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px;', '<section style="margin: 10px 16px 0; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px;', 1)
+    wr('LearnNavy.dc.html', s); print('Learn header in line with Library')
