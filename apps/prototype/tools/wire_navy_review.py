@@ -114,4 +114,11 @@ if 'href: st ===' not in s:
     s = sub1(s, '<a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 54px; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: {{l.ink}}">', '<a href="{{l.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 54px; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: {{l.ink}}">')
     s = sub1(s, '<a href="{{contHref}}" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center;', '<a href="{{contHref}}" style="min-height: 48px; padding: 12px 16px; box-sizing: border-box; line-height: 1.3; text-align: center; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center;')
     wr('LearnNavy', s)
+# Lesson done: the Next button's long lesson title wraps with padding instead of touching the edges.
+s = rd('LessonDoneNavy')
+s = s.replace('<a href="{{nextHref}}" style="height: 54px; border-radius: 14px;', '<a href="{{nextHref}}" style="min-height: 54px; padding: 12px 16px; box-sizing: border-box; line-height: 1.3; text-align: center; border-radius: 14px;')
+wr('LessonDoneNavy', s)
+# Button labels: keep "· 4 min" together so "min" never sits alone on a line.
+for n, a in (('LessonDoneNavy', "' · ' + nx.min + ' min'"), ('LearnNavy', "' · ' + cur.min + ' min'")):
+    s = rd(n); s = s.replace(a, a.replace("' · '", "'\\u00a0·\\u00a0'").replace("' min'", "'\\u00a0min'")); wr(n, s)
 print('wired')

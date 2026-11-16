@@ -54,7 +54,7 @@ class Component extends DCLogic {
     let rv = {}; try { rv = JSON.parse(localStorage.getItem('fv.review.v1') || 'null') || {}; } catch (e) {}
     const passed = (rv.best || 0) >= 6; if (passed) L[L.length - 1][1] = 'done';
     const cur = LS[done];
-    return { contHref: cur ? 'LessonInfoNavy.dc.html' : 'CourseReviewNavy.dc.html', cont: passed ? 'Review the course again' : cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + ' · ' + cur.min + ' min' : 'Start the course review', donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
+    return { contHref: cur ? 'LessonInfoNavy.dc.html' : 'CourseReviewNavy.dc.html', cont: passed ? 'Review the course again' : cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + '\u00a0·\u00a0' + cur.min + '\u00a0min' : 'Start the course review', donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
       lessons: L.map(([t, st, d], i) => ({
       href: st === 'locked' ? '#' : i === LS.length ? 'CourseReviewNavy.dc.html' : st === 'next' ? 'LessonInfoNavy.dc.html' : 'LessonInfoNavy.dc.html?l=' + LS[i].id,
       t, s: st === 'done' ? 'Completed · ' + d : st === 'next' ? 'Up next · ' + d : d,
