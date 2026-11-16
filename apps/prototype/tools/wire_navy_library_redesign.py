@@ -126,3 +126,31 @@ if '<!-- library-redesign -->' not in s:
     a = s[s.index('class Component extends DCLogic {'):s.index('</script>', s.index('data-dc-script'))].rstrip() + '\n'
     s = s.replace(a, LIB_JS + '\n', 1)
     wr('LibraryLaptopNavy.dc.html', s); print('redesigned LibraryLaptopNavy.dc.html')
+
+# ---- Phone Library (owner approved, 16 Nov 2026: match the laptop design; the Courses/Library switch stays).
+PH_MAIN = ('<!-- library-phone-redesign --><header style="padding: 18px 20px 4px; display: flex; flex-direction: column; gap: 12px; flex: none">'
+    '<div style="display: flex; background: #E8EBEF; border-radius: 12px; padding: 3px"><a href="LearnNavy.dc.html" style="flex: 1; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 500; color: #5B6577">Courses</a>'
+    '<a href="LibraryNavy.dc.html" aria-current="page" style="flex: 1; height: 38px; border-radius: 9px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(11,25,44,.12); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #0B192C">Library</a></div>'
+    '<div><h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Library</h1><p style="margin: 4px 0 0; font-size: 14px; color: #5B6577">{{sub}}</p></div>'
+    '<label for="lib" style="height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid #D5D9E0; border-radius: 12px; background: #FFFFFF">' + SEARCH_ICON +
+    '<input id="lib" type="search" enterkeyhint="search" autocorrect="off" aria-label="Search the library" placeholder="Search any money word" value="{{q}}" onInput="{{onQ}}" onKeyDown="{{onKey}}" style="flex: 1; min-width: 0; border: 0; font: inherit; font-size: 16px; outline: none; background: transparent">'
+    '<a href="DictionaryNavy.dc.html" style="font-family: ' + MONO + '; font-size: 12px; padding: 3px 8px; border-radius: 6px; background: #F1F3F5; color: #334155; text-decoration: none">A–Z</a></label></header>'
+    '<div style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 12px; flex: none">'
+    '<a href="{{wHref}}" style="border-radius: 20px; background: #0B192C; color: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 10px; text-decoration: none"><span style="' + LABEL + '; color: #00E676">Word of the day</span><span style="font-size: 24px; font-weight: 600; letter-spacing: -0.02em">{{wTitle}}</span><span style="font-size: 15px; line-height: 1.5; color: #C7D0DD">{{wDef}}</span><span style="margin-top: 4px; align-self: flex-start; height: 40px; padding: 0 16px; border-radius: 10px; background: #10B981; color: #FFFFFF; font-weight: 600; font-size: 14px; display: flex; align-items: center">{{wCta}}</span></a>'
+    '<a href="{{cHref}}" style="' + CARD + '; padding: 16px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #0B192C"><span style="' + LABEL + '">{{cLabel}}</span><span style="font-size: 17px; font-weight: 600">{{cTitle}}</span><span style="display: flex; align-items: center; gap: 10px"><span style="flex: 1; height: 6px; border-radius: 999px; background: #EDEFF2; overflow: hidden"><span style="display: block; height: 100%; width: {{cPct}}; background: #10B981"></span></span><span style="font-family: ' + MONO + '; font-size: 12px; color: #5B6577">{{cPct}}</span></span></a>'
+    '<section style="margin-top: 8px; display: flex; flex-direction: column; gap: 10px"><h2 style="margin: 0; padding: 0 4px; ' + LABEL + '">Browse by topic</h2><sc-for list="{{topics}}" as="tp" hint-placeholder-count="4">'
+    '<a href="{{tp.href}}" style="' + CARD + '; padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #0B192C"><span style="width: 40px; height: 40px; flex: none; border-radius: 12px; background: #E8EBEF; display: flex; align-items: center; justify-content: center">' + icon('tp.i', 20) + '</span>'
+    '<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">{{tp.name}}</span><span style="font-size: 12px; color: #5B6577">{{tp.meta}}</span><span style="font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{tp.line}}</span></span>' + CHEV + '</a></sc-for></section>'
+    '<section style="margin-top: 8px; display: flex; flex-direction: column; gap: 10px"><h2 style="margin: 0; padding: 0 4px; ' + LABEL + '">Popular this week</h2><sc-for list="{{pop}}" as="pp" hint-placeholder-count="3">'
+    '<a href="{{pp.href}}" style="' + CARD + '; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; text-decoration: none; color: #0B192C"><span style="font-family: ' + MONO + '; font-size: 24px; line-height: 1; color: #C0C6D0; width: 16px; flex: none">{{pp.n}}</span><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 16px; font-weight: 600">{{pp.t}}</span>'
+    '<span style="font-size: 13px; line-height: 1.45; color: #5B6577; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{pp.d}}</span><span style="font-size: 12px; color: #5B6577">{{pp.s}}</span></span></a></sc-for></section></div>')
+
+s = rd('LibraryNavy.dc.html')
+if '<!-- library-phone-redesign -->' not in s:
+    i = s.index('<header'); j = s.index('<nav aria-label="Main"')
+    s = s[:i] + PH_MAIN + '\n  ' + s[j:]
+    js = LIB_JS.replace('/* navy-laptop */ /* library-redesign */', '/* navy-library */ /* library-phone-redesign */').replace("sub: all.length + ' short guides on money, investing and the NGX, in plain words.',", "sub: all.length + ' short guides in plain words.',")
+    js = js.replace("more: '+ ' + (it.length - 3) + ' more' };", "more: '+ ' + (it.length - 3) + ' more', line: it.slice(0, 3).map((x) => x.title).join(' · ') };")
+    a = s[s.index('class Component extends DCLogic {'):s.index('</script>', s.index('data-dc-script'))].rstrip() + '\n'
+    s = s.replace(a, js + '\n', 1)
+    wr('LibraryNavy.dc.html', s); print('redesigned LibraryNavy.dc.html')
