@@ -52,4 +52,13 @@ for f in glob.glob(os.path.join(SITE, '*Navy.dc.html')):
         return '<a href="' + m.group(1) + '.dc.html?t=' + found[0] + '"' + m.group(2) + '>' + m.group(3) + '</a>'
     s = re.sub(r'<a href="(Company(?:Laptop)?Navy)\.dc\.html"([^>]*)>(.*?)</a>', tick, s, flags=re.S)
     if s != o: open(f, 'w').write(s)
+# Laptop Settings account rows (phone: SettingsNavy): name, email, plan and interest from the account (break-ui fix).
+s = rd('SettingsLaptopNavy')
+if '/* settings-account */' not in s:
+    for a, b in [('>Ada Okafor</span></div>', '>{{acName}}</span></div>'), ('>ada@example.com</span></div>', '>{{acEmail}}</span></div>'), ('>Free · Upgrade to Plus</span></div>', '>{{acPlan}}</span></div>'), ('>Investing</span></div></section>', '>{{acGoal}}</span></div></section>')]:
+        if a not in s: raise SystemExit('settings anchor ' + a)
+        s = s.replace(a, b, 1)
+    s = s.replace('<span style="font-size: 14px; color: #5B6577">{{acEmail}}', '<span style="font-size: 14px; color: #5B6577; min-width: 0; overflow-wrap: anywhere; text-align: right">{{acEmail}}', 1)
+    s = s.replace("renderVals() { const v = {};", "renderVals() { /* settings-account */ const F = window.FV, A = F ? F.AUTH.get() : {}, plus = F && F.billing().sub.plan === 'plus'; const v = { acName: A.name || 'Not set', acEmail: A.email || 'Not signed in', acPlan: plus ? 'Plus' : 'Free · Upgrade to Plus', acGoal: A.goal || 'Investing' };", 1)
+    wr('SettingsLaptopNavy', s)
 print('controls wired')

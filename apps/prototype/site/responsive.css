@@ -141,3 +141,6 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
   #dc-root [aria-disabled="true"]:hover { background-color: inherit; box-shadow: none; }
 }
 /* HOVER:end */
+/* Sidebar profile card (break-ui): a long name stays on one line with an ellipsis; the full name is in its title. */
+#dc-root aside a[href^="MeLaptopNavy"] > span:nth-child(2) { min-width: 0; }
+#dc-root aside a[href^="MeLaptopNavy"] > span:nth-child(2) > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
