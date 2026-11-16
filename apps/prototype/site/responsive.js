@@ -192,6 +192,41 @@
     setTimeout(function () { t.style.opacity = "0"; t.style.transform = off; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
   }
   window.fvToast = function (m) { toast(m); };
+  // Closing a lesson part-way asks first (the "Leave this lesson?" screen from the design); Keep going returns to the same
+  // question (owner, 16 Nov 2026: check X and Back routing).
+  document.addEventListener("click", function (e) {
+    var x = e.target.closest && e.target.closest('#dc-root a[aria-label="Close lesson"]'); if (!x || e.defaultPrevented) return;
+    var F = window.FV, inRun = false; try { inRun = !!(F && F.get().run); } catch (er) {}
+    if (!inRun || /LeaveLesson/.test(location.pathname)) return;
+    e.preventDefault(); e.stopPropagation();
+    location.href = "LeaveLessonNavy.dc.html?back=" + encodeURIComponent(location.pathname.replace(/^.*\//, "") + location.search);
+  }, true);
+  (function () { if (!/LeaveLesson/.test(location.pathname)) return; var m = /[?&]back=([^&]+)/.exec(location.search); if (!m) return;
+    var back = decodeURIComponent(m[1]); if (!/^[\w]+\.dc(\.html)?(\?[\w=&%.+-]*)?$/.test(back)) return; // a page of this app only
+    var fix = function () { var keep = [].slice.call(document.querySelectorAll("#dc-root a")).filter(function (l) { return /Keep going/.test(l.textContent); })[0];
+      if (keep) keep.setAttribute("href", back); var fr = document.querySelector("iframe[data-fv-behind]"); if (fr && fr.getAttribute("src") !== back) fr.setAttribute("src", back); return !!keep; };
+    var n = 0, t = setInterval(function () { if (fix() || ++n > 40) clearInterval(t); }, 100); })();
+  // Back and Close go where you came from (owner, 16 Nov 2026). Each page visited in this tab is remembered; a Back arrow or
+  // Close returns to the previous page when there is one, and falls back to its own link otherwise. Flows that must not be
+  // re-entered (payment checks, sign-in codes, finished lessons and reviews, a placed trade) keep their fixed links, and
+  // steps of such flows are never returned to.
+  var FIXED_HERE = /^(Pay\w*|SignIn\w*|CodeError|Intro|Goal|AgeCheck|CourseReview\w*|LessonDone|LessonPEDone|PracticeDone|Deleted|Main|Welcome)(Laptop)?Navy$/;
+  var NO_RETURN = /^(Pay\w*|SignIn\w*|CodeError|Intro|Goal|AgeCheck|NotifAsk|Trade|Sell|PracticeSell|MarketClosed|SimReset|Lesson\w*|Learn(Myth|Compare|Term|Steps|Market)|CourseReviewQ|Daily|SignOut|DeleteAccount|CancelPlan|LeaveLesson|Rate|Review|Upgrade|AskLimit|Locked|Offline|Error|Loading|CompanyLoading)(Laptop)?Navy$/;
+  var pageName = function (u) { var m = /\/(\w+)\.dc(?:\.html)?(?:[?#].*)?$/.exec(u || ""); return m ? m[1] : ""; };
+  var navStack = function () { try { return JSON.parse(sessionStorage.getItem("fv.navstack") || "[]"); } catch (e) { return []; } };
+  (function () { var here = location.pathname.replace(/^.*\//, "") + location.search, st = navStack();
+    if (st.length && st[st.length - 1] === here) return;
+    if (st.length > 1 && st[st.length - 2] === here) st.pop(); else st.push(here); // a step back
+    try { sessionStorage.setItem("fv.navstack", JSON.stringify(st.slice(-30))); } catch (e) {} })();
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('#dc-root a[aria-label="Back"], #dc-root a[aria-label^="Back to"], #dc-root a[aria-label="Close"]');
+    if (!a || a.closest('[role="dialog"], [role="alertdialog"]') || FIXED_HERE.test(pageName(location.pathname)) || e.defaultPrevented) return;
+    var st = navStack(), prev = null; for (var i = st.length - 2; i >= 0; i--) { if (!NO_RETURN.test(pageName("/" + st[i]))) { prev = st[i]; break; } if (pageName("/" + st[i]) !== pageName(location.pathname)) break; }
+    if (!prev || pageName("/" + prev) === pageName(location.pathname) && prev === location.pathname.replace(/^.*\//, "") + location.search) return;
+    e.preventDefault(); e.stopPropagation();
+    try { sessionStorage.setItem("fv.navstack", JSON.stringify(st.slice(0, st.lastIndexOf(prev) + 1))); } catch (x) {}
+    location.href = prev;
+  }, true);
   // Laptop lesson results appear as a card in the page: bring it into view when it appears (owner report, 16 Nov 2026).
   (function () { var seen = null; new MutationObserver(function () { var r = document.querySelector("#dc-root [data-fv-result]");
     if (r && r !== seen) { seen = r; var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; r.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" }); } else if (!r) seen = null; })

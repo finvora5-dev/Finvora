@@ -100,3 +100,12 @@ for n in ('DeleteAccountNavy', 'DeleteAccountLaptopNavy'):
               ("plusLine: sub.plan === 'plus' && sub.renewsOn ? 'Cancel first; you keep it until '", "plusLine: sub.plan === 'plus' && sub.cancelled && sub.renewsOn ? 'Plus ends ' + new Date(sub.renewsOn + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : sub.plan === 'plus' && sub.renewsOn ? 'Cancel first; you keep it until '"),
               ("try { Object.keys(localStorage)", "try { const paid = F.billing().orders.filter((o) => o.status === 'confirmedSuccess'); if (paid.length) localStorage.setItem('finvora.records.v1', JSON.stringify(paid)); Object.keys(localStorage)")], mark='/* cancel-first */')
 print('done')
+
+# 9. Leave lesson: the count is the lesson in progress, not the drawn "3 of 5" (owner, 16 Nov 2026).
+for n in ('LeaveLessonNavy', 'LeaveLessonLaptopNavy'):
+    t = rd(n)
+    if '{{answered}}' in t: continue
+    t = t.replace('You have answered 3 of 5. Your progress in this lesson will not be saved.', 'You have answered {{answered}}. Your progress in this lesson will not be saved.', 1)
+    t = t.replace('class Component extends DCLogic { renderVals() { return {}; } }', "class Component extends DCLogic {\n  renderVals() { const F = window.FV; let n = 0, tot = 0; try { const r = F.get().run || {}; n = Object.keys(r.answers || {}).length; tot = +F.flowVals('info').fTotal - 1; } catch (e) {}\n    return { answered: n + ' of ' + Math.max(n, tot || n) }; }\n}", 1)
+    assert '{{answered}}' in t and "answered: n + ' of '" in t, n
+    wr(n, t); print('live count on', n)
