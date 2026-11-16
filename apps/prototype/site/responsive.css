@@ -147,3 +147,19 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 
 /* Chart price-and-date tip (tap or drag along a chart). */
 .fvScrub { position: absolute; z-index: 5; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 10px; background: #0B192C; box-shadow: 0 8px 20px rgba(17,28,45,.25); white-space: nowrap; }
+
+/* Conversations side panel on phones (owner, 16 Nov 2026): in from the left on the drawer curve, out faster; the backdrop fades.
+   Colours are the laptop sidebar's. Reduced motion: fade only. */
+.fv-drawer { position: fixed; top: 0; bottom: 0; left: 0; z-index: 51; width: min(82vw, 320px); box-sizing: border-box; display: flex; flex-direction: column;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px)); background: #0B192C; color: #FFFFFF;
+  font-family: 'Geist', system-ui, sans-serif; box-shadow: 12px 0 32px rgba(17, 28, 45, .28); touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  transition: transform 320ms var(--ease-drawer); @starting-style { transform: translateX(-100%); } }
+.fv-drawer.fv-leaving { transform: translateX(-100%); transition-duration: 200ms; }
+.fv-drawer-back { position: fixed; inset: 0; z-index: 50; background: rgba(17, 28, 45, .45); transition: opacity 240ms var(--ease-out); @starting-style { opacity: 0; } }
+.fv-drawer-back.fv-leaving { opacity: 0; transition-duration: 200ms; }
+.fv-drawer button:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .fv-drawer button[style*="transparent"]:hover { background-color: #1A2740 !important; color: #FFFFFF !important; } }
+@media (prefers-reduced-motion: reduce) {
+  .fv-drawer { transition: opacity 200ms var(--ease-out); @starting-style { transform: none; opacity: 0; } }
+  .fv-drawer.fv-leaving { transform: none; opacity: 0; }
+}
