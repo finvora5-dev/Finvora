@@ -307,6 +307,8 @@
       if (pct >= 90 && !r.xp) { r.xp = 3; libSave(l); var m1 = load(), a1 = LIB.article(slug), fresh = m1.days.indexOf(lagosDay()) < 0; addXp(m1, 3); markDay(m1); logEvent(m1, 'article', (a1 ? a1.title : slug) + ' (read)', 'UPArticle.dc.html?a=' + slug, 3); save(m1);
         if (window.fvXpBurst) window.fvXpBurst(3, 'Article read: +3 XP' + (fresh ? '. Your streak is safe today.' : '')); return 3; }
       return 0; },
+    /** How far this guide has been read, 0 to 100 (90 or more counts as read). */
+    readPct: function (slug) { var r = (libLoad().read || {})[slug]; return r ? r.pct : 0; },
     reading: function () { var r = libLoad().read || {}; return Object.keys(r).filter(function (k) { return r[k].pct < 90 && LIB.article(k); }).sort(function (a, b) { return r[b].at - r[a].at; }).map(function (k) { return { a: LIB.article(k), pct: r[k].pct }; }); },
     addRecent: function (q) { q = String(q).trim(); if (!q) return; var l = libLoad(); l.recent = [q].concat((l.recent || []).filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); })).slice(0, 5); libSave(l); },
     recent: function () { return libLoad().recent || []; },
