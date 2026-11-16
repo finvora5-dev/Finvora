@@ -1,12 +1,21 @@
 # Phase 1 prototype: status and reviewer guide
 
-**Updated:** 15 Nov 2026 · **Branch:** `awesome-bardeen-2pkwcl` (Cloudflare deploys from it) · **Live:** https://finvora.ehigiatorpowell1.workers.dev
+**Updated:** 16 Nov 2026 · **Branch:** `awesome-bardeen-2pkwcl` (Cloudflare deploys from it) · **Live:** https://finvora.ehigiatorpowell1.workers.dev
 
 ## What changed on 15 Nov 2026
 
 The live site is now the **navy and emerald redesign** (the client's approved canvas, "Finvora: Intelligence Redesign"). It replaced the earlier prototype on this branch. The earlier prototype is kept, unchanged, on the branch `old-website-backup`.
 
 Checked on the live site, 15 Nov 2026: the front page opens the navy welcome screen on a phone with no script errors, the latest build is served, and old-prototype pages no longer exist. Cloudflare serves pages without `.html` (`MainNavy.dc.html` redirects to `MainNavy.dc`).
+
+## What changed on 16 Nov 2026: laptop screens
+
+Every phone screen a visitor can reach now has its own laptop screen at 1440 px (95 `*LaptopNavy.dc.html` boards), built to match its canvas mock-up (owner rule, 16 Nov 2026). The only phone screens without one are LessonCorrect and LessonWrong, which nothing links to.
+
+*   **How they are built:** the `laptop-build` skill (`.claude/skills/laptop-build`). Canvas originals and the approved drafts are in `apps/prototype/mockups/`. Screens the canvas did not draw were drafted by `tools/design_laptop_steps.py` (lesson steps, Daily, Course review) and `tools/design_laptop_pages.py` (markets, practice, account, states, screens, codes, dialogs, learning). The owner approved each batch before it went live; `--site` builds the working versions.
+*   **Controls:** `tools/wire_navy_laptop.py` and `tools/wire_navy_controls.py` wire them like the phone versions. `responsive.js` sends a laptop to the laptop screen and adds the sidebar profile card, chip filters, sheets, toasts, chart ranges and the letter strip. Hover states and the collapsible sidebar live in `responsive.css`. The Courses/Library toggle was removed (owner). Put in order also works by tapping two items to swap them.
+*   **Checks run:** `qa_mockup.cjs` (matches the mock-up) and `qa_controls.cjs` (no dead controls) pass on every laptop screen. break-ui ran at 1440 with worst-case data (a long name and email, long Ask questions, 24 Ask messages, a Plus user). It found three faults, all fixed: Settings account rows showed fixed sample details instead of the signed-in user, a long name wrapped onto 2 to 3 lines in the sidebar (it now shows one line with an ellipsis and the full name on hover), and the sidebar sometimes said "Free plan" for a Plus user. Re-checked with no script errors and no sideways scrolling (`tools/break_ui/seed.cjs`).
+*   **Not done yet on laptop:** notifications are as drawn, Big moves is not wired, Error, Offline and Upgrade use plain links, dialogs open over a fixed background page, and `/review-animations` has not been run on the laptop screens.
 
 ## What the prototype is
 
@@ -17,7 +26,8 @@ A browser-only prototype of Finvora, a money and investing education app for Nig
 | Path | What it holds |
 |---|---|
 | `apps/prototype/site` | The live site: the navy canvas boards (`*Navy.dc.html`) run by `support.js`, `responsive.js` (fits each screen, picks phone or laptop boards, screen transitions, lesson sounds), `responsive.css`, `fv.js` (browser state and glue), `fvd.js` (compiled domain rules), `sfx/` (lesson sounds), `sw.js` (offline cache). |
-| `apps/prototype/tools` | Wiring scripts (`wire_navy_*.py`), `build_sw.py` (always last), and the checkers `qa_mobile.cjs` and `qa_responsive.cjs`. |
+| `apps/prototype/tools` | Wiring scripts (`wire_navy_*.py`), `build_sw.py` (always last), the laptop draft generators (`design_laptop_*.py`), and the checkers `qa_mobile.cjs`, `qa_responsive.cjs`, `qa_mockup.cjs`, `qa_controls.cjs` and `break_ui/seed.cjs`. |
+| `apps/prototype/mockups` | Canvas originals and approved laptop drafts that each laptop screen must match. |
 | `packages/domain`, `packages/engine`, `packages/sample-data` | Tested rules and data: money in integer kobo, checkout states (build-backlog §B5), companies, lessons. These carry into Phase 2. |
 | `wrangler.jsonc` | Cloudflare static-assets deploy of `apps/prototype/site`. |
 
@@ -54,7 +64,8 @@ Checks: `node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/` and `no
 *   Admin checks run in the browser and are not real security.
 *   Text under 12px drawn on the canvas (ticker badges, card labels) is kept as designed, and folded phones (280px) show the 390px design scaled, so controls render about 32px (owner, 15 Nov 2026; build plan §10).
 *   Not yet checked on a real phone: the on-screen keyboard, touch feel of drags and sheets, and sound on iPhone.
-*   Not wired yet: notifications are as drawn; Top riser and faller and the index are static.
+*   Not wired yet: notifications are as drawn; Top riser and faller, Big moves and the index are static.
+*   Light mode only: dark mode was removed by the owner.
 *   Sound effects come from Mixkit (`apps/prototype/site/sfx`). Confirm the Mixkit licence (mixkit.co/license) before launch.
 *   Lesson and article content needs review by a finance educator.
 
