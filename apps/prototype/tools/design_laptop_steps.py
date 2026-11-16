@@ -11,6 +11,8 @@ STEPS = [('LessonInfoNavy', 'Lesson: read (laptop)'), ('LearnCompareNavy', 'Less
          ('LearnStepsNavy', 'Lesson: steps (laptop)'), ('LearnMarketNavy', 'Lesson: market example (laptop)'), ('LearnMythNavy', 'Lesson: myth or fact (laptop)'),
          ('LessonOrderNavy', 'Lesson: put in order (laptop)'), ('LessonMatchNavy', 'Lesson: match (laptop)'), ('LessonScenarioNavy', 'Lesson: scenario (laptop)'),
          ('LessonCalcNavy', 'Lesson: calculation (laptop)')]
+if '--focus' in sys.argv:  # learning batch: other close-and-progress screens use the same approved lesson frame
+    STEPS = [('DailyNavy', 'Daily question (laptop)'), ('CourseReviewNavy', 'Course review (laptop)'), ('CourseReviewQNavy', 'Course review question (laptop)'), ('CourseReviewDoneNavy', 'Course review result (laptop)')]
 frame = open(os.path.join(M, 'LessonLaptopNavy.dc.html')).read()
 col_start = frame.index('<div style="max-width: 640px;') if '<div style="max-width: 640px;' in frame else frame.index('<div style="width: 100%; margin: 20px 0 0;'); col_open_end = frame.index('>', col_start) + 1
 col_end = frame.index('</main>')
