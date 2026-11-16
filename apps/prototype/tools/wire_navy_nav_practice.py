@@ -25,3 +25,12 @@ if 'aria-label="Me"' not in s:
           '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"></circle><circle cx="12" cy="10" r="3"></circle><path d="M6.3 18.6c1.3-2.1 3.3-3.3 5.7-3.3s4.4 1.2 5.7 3.3"></path></svg></a>')
     s = s[:i] + '<span style="display: flex; align-items: center">' + bell + me + '</span>' + s[j:]
     open(P, 'w').write(s); print('Home: Me button added')
+
+# Welcome (phone): the canvas drew both buttons pointing at Home. Get started opens the intro (its Back returns here and its
+# Continue opens Sign in); "I already have an account" opens Sign in (its Back returns here), as on the laptop welcome.
+P = os.path.join(SITE, 'MainNavy.dc.html'); s = open(P).read()
+m = re.search(r'<a href="HomeNavy\.dc\.html"([^>]*)>Get started', s)
+if m: s = s.replace(m.group(0), '<a href="IntroNavy.dc.html"' + m.group(1) + '>Get started')
+m = re.search(r'<a href="HomeNavy\.dc\.html"([^>]*)>I already have an account', s)
+if m: s = s.replace(m.group(0), '<a href="SignInNavy.dc.html"' + m.group(1) + '>I already have an account')
+open(P, 'w').write(s)
