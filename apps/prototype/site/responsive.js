@@ -192,6 +192,10 @@
     setTimeout(function () { t.style.opacity = "0"; t.style.transform = off; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
   }
   window.fvToast = function (m) { toast(m); };
+  // Laptop lesson results appear as a card in the page: bring it into view when it appears (owner report, 16 Nov 2026).
+  (function () { var seen = null; new MutationObserver(function () { var r = document.querySelector("#dc-root [data-fv-result]");
+    if (r && r !== seen) { seen = r; var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; r.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" }); } else if (!r) seen = null; })
+    .observe(document.documentElement, { childList: true, subtree: true }); })();
   function sheet(title, fill) {
     var host = document.getElementById("dc-root") || document.body, back = el("div", "position:fixed;inset:0;background:rgba(17,28,45,.45);z-index:50");
     back.setAttribute("aria-hidden", "true");
