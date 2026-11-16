@@ -211,6 +211,9 @@ describe("Ask Fin (grounded answers, design Part 3)", () => {
     expect(countsTowardLimit("answer")).toBe(true);
     for (const k of ["didyoumean", "insufficient", "decline", "refusal"] as const) expect(countsTowardLimit(k)).toBe(false);
     expect(isAdviceRequest("What is a share?")).toBe(false);
+    // Indirect advice wording is refused too (logic audit, 16 Nov 2026); plain learning questions are not.
+    for (const q of ["Should I buy Zenith Bank?", "Should I put my money in GTCO?", "Is MTN a good investment?", "Is now the time to sell Seplat?", "Will Dangote Cement rise next week?", "Is Zenith Bank undervalued?", "Can I make money from Nestle shares?"]) expect(isAdviceRequest(q)).toBe(true);
+    for (const q of ["What is a dividend?", "What makes a good investment?", "How do I buy shares?", "What is inflation?", "Explain MTN Nigeria's results", "How did Zenith Bank do this year?", "Why is inflation high?", "What does undervalue mean in accounting?"]) expect(isAdviceRequest(q)).toBe(false);
   });
   it("counts daily usage per Lagos day", () => {
     let u = recordAsk(undefined, "d1");

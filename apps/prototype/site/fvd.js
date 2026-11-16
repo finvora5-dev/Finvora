@@ -347,7 +347,9 @@ function entitlements(plan) {
 function countsTowardLimit(kind) {
     return kind === "answer";
 }
-const ADVICE = /\b(should i (buy|sell|invest)|which (stock|share|company) (should|to)|what (stock|share)s? (should|to) (buy|sell)|buy or sell|is it a good (time|buy)|tell me (what|which) to (buy|sell)|recommend (a|some)? ?(stock|share)s?|best (stock|share)s? to buy)\b/i;
+// Widened 16 Nov 2026 (logic audit): indirect wording asks for the same thing ("Should I put my money in X?",
+// "Is X a good investment?", "Is now the time to sell X?", "Will X rise next week?", "Is X undervalued?").
+const ADVICE = /\b(should i (buy|sell|invest|put|hold|keep)|(is|are) [\w .&'-]{1,40} a good (investment|buy|stock|share)|worth (buying|investing in)|(the|a good|right) time to (buy|sell|invest)|will [\w .&'-]{1,40} (rise|fall|go up|go down|drop|crash|increase|recover)|(undervalued|overvalued|underpriced|overpriced)|(can|will) i make money|which (stock|share|company) (should|to)|what (stock|share)s? (should|to) (buy|sell)|buy or sell|is it a good (time|buy)|tell me (what|which) to (buy|sell)|recommend (a|some)? ?(stock|share)s?|best (stock|share)s? to buy)\b/i;
 function isAdviceRequest(q) {
     return ADVICE.test(q);
 }
@@ -980,14 +982,14 @@ const PRACTICE_COMPANIES = [
 // ---- sd:companies
 
 const COMPANIES = [
-    { ticker: "MTNN", name: "MTN Nigeria", sector: "Telecoms", exchange: "NGX", about: "A mobile network company offering calls, data and mobile money services.", howItMakesMoney: "Mostly from people paying for airtime and data, plus fintech and other digital services.", learnSlugs: ["revenue-and-profit", "dividend"], demoBasePriceKobo: 22000, paysDividends: true },
-    { ticker: "DANGCEM", name: "Dangote Cement", sector: "Industrial goods", exchange: "NGX", about: "Nigeria's biggest cement maker, listed on the NGX.", howItMakesMoney: "Selling cement to builders, governments and distributors.", learnSlugs: ["market-capitalisation", "revenue-and-profit"], demoBasePriceKobo: 45000, paysDividends: true },
-    { ticker: "ZENITHBANK", name: "Zenith Bank", sector: "Banking", exchange: "NGX", about: "A commercial bank serving individuals and businesses.", howItMakesMoney: "Interest on loans, plus fees for transfers, cards and other services.", learnSlugs: ["price-to-earnings", "dividend"], demoBasePriceKobo: 4500, paysDividends: true },
-    { ticker: "GTCO", name: "Guaranty Trust Holding Co.", sector: "Banking", exchange: "NGX", about: "A financial group whose main business is GTBank.", howItMakesMoney: "Interest on loans and fees on banking services.", learnSlugs: ["price-to-earnings"], demoBasePriceKobo: 5500, paysDividends: true },
-    { ticker: "NESTLE", name: "Nestlé Nigeria", sector: "Consumer goods", exchange: "NGX", about: "Makes food and drinks sold across Nigeria.", howItMakesMoney: "Selling packaged foods and beverages through shops and distributors.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 90000, paysDividends: true },
-    { ticker: "AIRTELAFRI", name: "Airtel Africa", sector: "Telecoms", exchange: "NGX", about: "A mobile network operator listed on the NGX, with millions of customers in Nigeria.", howItMakesMoney: "Airtime, data and mobile money.", learnSlugs: ["diversification"], demoBasePriceKobo: 200000, paysDividends: true },
-    { ticker: "SEPLAT", name: "Seplat Energy", sector: "Oil and gas", exchange: "NGX", about: "An energy company producing oil and gas in Nigeria.", howItMakesMoney: "Selling crude oil and natural gas.", learnSlugs: ["risk-and-return"], demoBasePriceKobo: 500000, paysDividends: true },
-    { ticker: "NB", name: "Nigerian Breweries", sector: "Consumer goods", exchange: "NGX", about: "Brews and sells beers and soft drinks.", howItMakesMoney: "Selling drinks through distributors, bars and shops.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 3500, paysDividends: true },
+    { ticker: "MTNN", name: "MTN Nigeria", sector: "Telecoms", exchange: "NGX", about: "A mobile network company offering calls, data and mobile money services.", howItMakesMoney: "Mostly from people paying for airtime and data, plus fintech and other digital services.", learnSlugs: ["revenue-and-profit", "dividend"], demoBasePriceKobo: 220_00, paysDividends: true },
+    { ticker: "DANGCEM", name: "Dangote Cement", sector: "Industrial goods", exchange: "NGX", about: "Nigeria's biggest cement maker, listed on the NGX.", howItMakesMoney: "Selling cement to builders, governments and distributors.", learnSlugs: ["market-capitalisation", "revenue-and-profit"], demoBasePriceKobo: 450_00, paysDividends: true },
+    { ticker: "ZENITHBANK", name: "Zenith Bank", sector: "Banking", exchange: "NGX", about: "A commercial bank serving individuals and businesses.", howItMakesMoney: "Interest on loans, plus fees for transfers, cards and other services.", learnSlugs: ["price-to-earnings", "dividend"], demoBasePriceKobo: 45_00, paysDividends: true },
+    { ticker: "GTCO", name: "Guaranty Trust Holding Co.", sector: "Banking", exchange: "NGX", about: "A financial group whose main business is GTBank.", howItMakesMoney: "Interest on loans and fees on banking services.", learnSlugs: ["price-to-earnings"], demoBasePriceKobo: 55_00, paysDividends: true },
+    { ticker: "NESTLE", name: "Nestlé Nigeria", sector: "Consumer goods", exchange: "NGX", about: "Makes food and drinks sold across Nigeria.", howItMakesMoney: "Selling packaged foods and beverages through shops and distributors.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 900_00, paysDividends: true },
+    { ticker: "AIRTELAFRI", name: "Airtel Africa", sector: "Telecoms", exchange: "NGX", about: "A mobile network operator listed on the NGX, with millions of customers in Nigeria.", howItMakesMoney: "Airtime, data and mobile money.", learnSlugs: ["diversification"], demoBasePriceKobo: 2_000_00, paysDividends: true },
+    { ticker: "SEPLAT", name: "Seplat Energy", sector: "Oil and gas", exchange: "NGX", about: "An energy company producing oil and gas in Nigeria.", howItMakesMoney: "Selling crude oil and natural gas.", learnSlugs: ["risk-and-return"], demoBasePriceKobo: 5_000_00, paysDividends: true },
+    { ticker: "NB", name: "Nigerian Breweries", sector: "Consumer goods", exchange: "NGX", about: "Brews and sells beers and soft drinks.", howItMakesMoney: "Selling drinks through distributors, bars and shops.", learnSlugs: ["revenue-and-profit"], demoBasePriceKobo: 35_00, paysDividends: true },
 ];
 /** Not used by the prototype: the Practice Market uses PRACTICE_COMPANIES (practice.ts). Kept for apps/web. */
 const SIM_COMPANIES = [

@@ -26,10 +26,10 @@
 class Component extends DCLogic {
 /* navy-me */
   constructor(p) { super(p); this.state = { v: '' }; }
-  renderVals() { const F = window.FV, ok = this.state.v.trim() === 'DELETE', sub = F ? F.billing().sub : {};
+  renderVals() { const F = window.FV, sub = F ? F.billing().sub : {}, active = !!F && F.plan() === 'plus' && !sub.cancelled, ok = this.state.v.trim() === 'DELETE' && !active; /* cancel-first */
     return { v: this.state.v, onV: (e) => this.setState({ v: e.target.value }), off: String(!ok), op: ok ? '1' : '.4',
-      plusLine: sub.plan === 'plus' && sub.renewsOn ? 'Cancel first; you keep it until ' + new Date(sub.renewsOn + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'You are on Free',
-      del: (e) => { e.preventDefault(); if (!ok) return; try { Object.keys(localStorage).filter((k) => /^fv\./.test(k)).forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); } catch (x) {} location.href = 'DeletedNavy.dc.html'; } }; }
+      plusLine: sub.plan === 'plus' && sub.cancelled && sub.renewsOn ? 'Plus ends ' + new Date(sub.renewsOn + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : sub.plan === 'plus' && sub.renewsOn ? 'Cancel first; you keep it until ' + new Date(sub.renewsOn + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'You are on Free',
+      del: (e) => { e.preventDefault(); if (!ok) return; try { const paid = F.billing().orders.filter((o) => o.status === 'confirmedSuccess'); if (paid.length) localStorage.setItem('finvora.records.v1', JSON.stringify(paid)); Object.keys(localStorage).filter((k) => /^fv\./.test(k)).forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); } catch (x) {} location.href = 'DeletedNavy.dc.html'; } }; }
 }
 </script>
 </body>

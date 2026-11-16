@@ -320,6 +320,23 @@
     return null;
   }
   var tries2 = 0, it2 = setInterval(function () { if (initPractice() || ++tries2 > 60) clearInterval(it2); }, 100);
+  // Launch-rule fixes (audit, 16 Nov 2026). Market status lines follow the real trading hours (B10) instead of always
+  // reading "closed"; queued-order news is shown once; drawn Plus prices follow the one price setting.
+  function liveText() {
+    var Fv = F(), Dm = D(); if (!Fv || !Dm || !document.querySelector("#dc-root > .sc-host")) return false;
+    var open = Fv.SIM.isOpen(), next = Fv.SIM.nextOpen(), cl = Dm.CONFIG.MARKET_CLOSE.split(":"), h = +cl[0], at = (h > 12 ? h - 12 : h) + ":" + cl[1] + (h >= 12 ? " pm" : " am");
+    var line = open ? "Open until " + at : "Closed · opens " + next;
+    var MAP = { "Today · closed 2:30 pm": open ? "Today · open until " + at : line, "Closed 2:30 pm": line, "Delayed 15 min": line, "NGX closed · 2:30 pm": open ? "NGX open · closes " + at : "NGX closed · opens " + next };
+    var P = Fv.PAY.PRICE, C = Dm.CONFIG.PLUS_PRICE_KOBO, nn = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); }, swap = P.monthly !== C.monthly || P.yearly !== C.yearly;
+    var w = document.createTreeWalker(document.getElementById("dc-root"), NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) { var t = n.nodeValue, k = t.trim();
+      if (MAP[k]) n.nodeValue = t.replace(k, MAP[k]);
+      else if (swap && /₦(5,999|65,989)/.test(t)) n.nodeValue = t.replace(/₦65,989/g, nn(P.yearly)).replace(/₦5,999/g, nn(P.monthly)); }
+    return true;
+  }
+  // The queued-order news is written by fv.js, which loads after this file, so it is read once the screen is up.
+  function flash() { try { var fl = sessionStorage.getItem("fv.flash"); if (fl) { sessionStorage.removeItem("fv.flash"); toast(fl); } } catch (e) {} }
+  var tries3 = 0, it3 = setInterval(function () { if (liveText() || ++tries3 > 60) { clearInterval(it3); setTimeout(liveText, 800); setTimeout(flash, 300); } }, 100);
 
   document.addEventListener("click", function (e) {
     var t = e.target.closest ? e.target : null; if (!t) return;

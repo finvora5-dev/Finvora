@@ -38,7 +38,7 @@ class Component extends DCLogic {
 /* navy-laptop */
   constructor(p) { super(p); if (window.FV && window.FV.PAY) window.FV.PAY.remember(); }
   renderVals() { const go = (per) => (e) => { e.preventDefault(); const PAY = window.FV && window.FV.PAY; if (!PAY) return; const r = PAY.start(per);
-      if (r.ok || r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else location.href = 'YourPlanNavy.dc.html'; };
+      if (r.ok || r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else if (r.reason === 'age') location.href = 'AgeCheckNavy.dc.html?then=PlusNavy'; /* age-gate */ else location.href = 'YourPlanNavy.dc.html'; };
     return { payM: go('monthly'), payY: go('yearly') }; }
 }
 </script>

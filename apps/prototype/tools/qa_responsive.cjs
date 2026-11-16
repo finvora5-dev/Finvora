@@ -8,7 +8,8 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const site = path.join(__dirname, '..', 'site');
   const pages = fs.readdirSync(site).filter((f) => f.endsWith('Navy.dc.html')).map((f) => f.replace('.dc.html', ''));
   const touch = W <= 820, H = W < 600 ? 844 : W < 1024 ? 1180 : 900;
-  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch, serviceWorkers: 'block' }); const p = await ctx.newPage();
+  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: W, height: H }, hasTouch: touch, serviceWorkers: 'block' }); await ctx.addInitScript(() => { try { if (!localStorage.getItem('fv.auth.v1')) localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor', goal: 'Investing', birth: '2001-03-14', asked: true })); } catch (e) {} }); // signed in: pages are guarded
+  const p = await ctx.newPage();
   let cur = ''; const found = []; const add = (kind, detail) => found.push({ page: cur, width: W, kind, detail });
   p.on('pageerror', (e) => add('script error', e.message.slice(0, 160)));
   p.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) add('missing file', r.status() + ' ' + r.url().replace(B, '')); });

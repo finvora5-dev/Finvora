@@ -97,6 +97,7 @@
     valuation: function () { return D().valuePortfolio(simLoad(), SIM.price, SIM.prev); },
     /** Places one trade. The key stops a double tap placing it twice. */
     trade: function (side, t, qty, key) {
+      if (navigator.onLine === false) { location.href = "OfflineNavy.dc.html"; return { ok: false, error: { code: "offline" } }; } // B2: no trades offline
       var a = simLoad(), p = SIM.price(t);
       var r = D().executeTrade(a, { side: side, ticker: t, quantity: qty, quotedPriceKobo: p, currentPriceKobo: p, idempotencyKey: key, day: simDay(), at: new Date().toISOString(), tradeId: "tr-" + Date.now() });
       if (r.ok && !r.duplicate) { simSave(r.account); try { localStorage.setItem(SIM_KEY + ".last", JSON.stringify(r.trade)); } catch (e) {} }
@@ -117,8 +118,8 @@
     cancelQueued: function (key) { try { localStorage.setItem(SIM_KEY + ".queue", JSON.stringify(SIM.queued().filter(function (o) { return o.key !== key; }))); } catch (e) {} },
     /** Places queued orders once the market is open. Returns how many were placed. */
     runQueue: function () {
-      if (!SIM.isOpen()) return 0; var q = SIM.queued(), n = 0; if (!q.length) return 0;
-      q.forEach(function (o) { if (SIM.trade(o.side, o.t, o.qty, o.key).ok) n++; });
+      if (!SIM.isOpen() || navigator.onLine === false) return 0; var q = SIM.queued(), n = 0; if (!q.length) return 0;
+      q.forEach(function (o) { if (SIM.trade(o.side, o.t, o.qty, o.key).ok) n++; }); SIM.queueMissed = q.length - n;
       try { localStorage.setItem(SIM_KEY + ".queue", "[]"); } catch (e) {} return n;
     }
   };
@@ -131,6 +132,18 @@
   }
   function billSave(b) { try { localStorage.setItem(BILL_KEY, JSON.stringify(b)); } catch (e) {} }
   function plan() { return D().effectivePlan(billLoad().sub, lagosDay()); }
+  // Renewal dates (B10, simulated): a plan that reaches its renewal date renews (a paid order is recorded and the date
+  // moves on); a cancelled plan ends there and the account is Free again.
+  function settlePlan() {
+    var b = billLoad(), sub = b.sub, today = lagosDay(), n = 0; if (sub.plan !== "plus" || !sub.renewsOn) return;
+    if (sub.cancelled) { if (today >= sub.renewsOn) { b.sub = { plan: "free" }; billSave(b); } return; }
+    while (today >= sub.renewsOn && n++ < 36) {
+      var at = sub.renewsOn + "T09:00:00.000Z", price = D().CONFIG.PLUS_PRICE_KOBO[sub.period] || D().CONFIG.PLUS_PRICE_KOBO.monthly;
+      b.orders = [{ id: "ord-r" + sub.renewsOn.replace(/-/g, "") + n, period: sub.period, amountKobo: price, status: "confirmedSuccess", attempts: 1, createdAt: at, updatedAt: at, renewal: true }].concat(b.orders);
+      sub.renewsOn = D().addPeriod(sub.renewsOn, sub.period);
+    }
+    if (n) billSave(b);
+  }
 
   // ---- Ask Fin: scripted answers and refusals from packages/domain, free daily limit, saved chat.
   // The Practice Market's own companies (COMPANIES above) plus the real NGX companies, for Ask Fin.
@@ -138,11 +151,18 @@
     return D().askCompanies();
   }
   var ASK_KEY = "fv.ask.v1";
+  function keepChats() { try { return (JSON.parse(localStorage.getItem("fv.prefs.v1") || "{}")).saveChats !== false; } catch (e) { return true; } }
   function askLoad() {
-    try { var a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); if (a && Array.isArray(a.msgs)) return a; } catch (e) {}
-    return { usage: null, msgs: [] };
+    var a = null; try { a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); } catch (e) {}
+    if (!a || !Array.isArray(a.msgs)) a = { usage: null, msgs: [] };
+    // "Save Finvora AI chats" off: the conversation lives in this tab only and is gone when it closes.
+    if (!keepChats()) { a.msgs = []; try { a.msgs = JSON.parse(sessionStorage.getItem(ASK_KEY) || "[]"); } catch (e) {} }
+    return a;
   }
-  function askSave(a) { try { localStorage.setItem(ASK_KEY, JSON.stringify(a)); } catch (e) {} }
+  function askSave(a) {
+    try { if (keepChats()) { localStorage.setItem(ASK_KEY, JSON.stringify(a)); return; }
+      sessionStorage.setItem(ASK_KEY, JSON.stringify(a.msgs)); localStorage.setItem(ASK_KEY, JSON.stringify({ usage: a.usage, msgs: [] })); } catch (e) {}
+  }
   var ASK = {
     status: function () { return D().canAsk(askLoad().usage, lagosDay(), D().entitlements(plan()).askFinDailyLimit); },
     limit: function () { return D().entitlements(plan()).askFinDailyLimit; },
@@ -151,6 +171,7 @@
     /** Answers one question, or returns null when today's free questions are used up. */
     ask: function (q) {
       q = String(q || "").trim(); if (!q) return null;
+      if (navigator.onLine === false) { location.href = "OfflineNavy.dc.html"; return null; } // B2: no questions offline
       if (!ASK.status().allowed) return null;
       // Design Part 3: answers come from hand-written answers, the Library as this browser shows it, and company data.
       var r = D().answerQuestion(q, null, { scripts: D().SCRIPTED_ANSWERS, articles: LIB.all(), companies: askCos() });
@@ -174,7 +195,13 @@
     /** Starts a purchase, or returns what already exists (Plus, or an order still being checked). */
     start: function (period) {
       var b = billLoad(), can = D().canStartPurchase(b.sub, b.orders);
+      // A cancelled plan still runs to its end date: no second purchase on top of paid time (B10); Keep Plus resumes it.
+      if (plan() === "plus") return { ok: false, reason: "already-plus" };
       if (!can.ok) return can;
+      // Checkout needs a confirmed 18+ date of birth (B10, minimum age).
+      if (!AUTH.adult()) return { ok: false, reason: "age" };
+      // A retry is never a new purchase (B5): paying again for the plan that just failed is a new attempt on that order.
+      var last = b.orders[0]; if (last && last.status === "confirmedFailed" && last.period === period) { PAY.retry(last.id); return { ok: true, orderId: last.id }; }
       var o = D().createOrder("ord-" + Date.now().toString(36), period, PRICE[period], new Date().toISOString());
       b.orders = [o].concat(b.orders); billSave(b); return { ok: true, orderId: o.id };
     },
@@ -202,7 +229,8 @@
   };
 
   // ---- Sign-in (simulated, no email is sent). Any 6 digits sign you in, except the reviewer
-  // codes 000000 (wrong) and 111111 (expired). Three wrong codes lock the form for 15 minutes.
+  // codes 000000 (wrong) and 111111 (expired). build-backlog B10 (owner, 16 Nov 2026): 5 wrong tries end a code,
+  // then a new code is needed; a new code at most once a minute; a code works once.
   var AUTH_KEY = "fv.auth.v1";
   function authLoad() { try { var a = JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); if (a && typeof a === "object") return a; } catch (e) {} return {}; }
   function authSave(a) { try { localStorage.setItem(AUTH_KEY, JSON.stringify(a)); } catch (e) {} }
@@ -211,23 +239,36 @@
     signedIn: function () { return !!authLoad().email; },
     setGoal: function (g) { var a = authLoad(); a.goal = g; authSave(a); },
     validEmail: function (e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || "").trim()); },
-    sendCode: function (email, changing) { var a = authLoad(); a.pending = String(email).trim().toLowerCase(); a.sentAt = Date.now(); a.code = String(234567 + Math.floor(Math.random() * 700000)); a.wrong = 0; a.lockUntil = 0; a.changing = !!changing; authSave(a); },
+    /** Sends a new code. False when one was sent to this address less than a minute ago (nothing is sent). */
+    sendCode: function (email, changing) { var a = authLoad(), to = String(email).trim().toLowerCase();
+      if (a.pending === to && a.sentAt && AUTH.resendIn() > 0) return false;
+      a.pending = to; a.sentAt = Date.now(); a.code = String(234567 + Math.floor(Math.random() * 700000)); a.wrong = 0; delete a.lockUntil; a.changing = !!changing; authSave(a); return true; },
     resendIn: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.sentAt || 0) + 60000 - Date.now()) / 1000)); },
-    lockedFor: function () { var a = authLoad(); return Math.max(0, Math.ceil(((a.lockUntil || 0) - Date.now()) / 1000)); },
-    triesLeft: function () { return Math.max(0, 3 - (authLoad().wrong || 0)); },
+    /** True when this code has had 5 wrong tries: it no longer works and a new code is needed. */
+    spent: function () { return (authLoad().wrong || 0) >= 5; },
+    lockedFor: function () { return AUTH.spent() ? AUTH.resendIn() : 0; },
+    triesLeft: function () { return Math.max(0, 5 - (authLoad().wrong || 0)); },
     /** The code in the latest sign-in email (shown in the in-app email preview). */
     code: function () { return authLoad().code || ""; },
     /** "ok", "wrong", "expired" or "locked". */
     verify: function (code) {
       var a = authLoad();
-      if (AUTH.lockedFor() > 0) return "locked";
-      if (code === "111111" || Date.now() - (a.sentAt || 0) > 600000) return "expired";
-      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; if (a.wrong >= 3) a.lockUntil = Date.now() + 900000; authSave(a); return a.wrong >= 3 ? "locked" : "wrong"; }
-      var keepName = a.changing && a.name; a.email = a.pending; a.name = keepName || (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0; authSave(a); return "ok";
+      if (AUTH.spent()) return "locked";
+      if (!a.pending || !a.sentAt || code === "111111" || Date.now() - a.sentAt > 600000) return "expired";
+      if (code === "000000") { a.wrong = (a.wrong || 0) + 1; authSave(a); return a.wrong >= 5 ? "locked" : "wrong"; }
+      var keepName = a.changing && a.name; a.email = a.pending; a.name = keepName || (a.email || "").split("@")[0].replace(/^\w/, function (c) { return c.toUpperCase(); }); a.wrong = 0;
+      a.wasChanging = !!a.changing; a.changing = false; delete a.sentAt; delete a.code; delete a.pending; authSave(a); return "ok"; // the code is used up
     },
+    /** Where a successful sign-in goes: back to Settings after an email change, Home for someone already set up, else onboarding. */
+    next: function () { var a = authLoad(); return a.wasChanging ? "SettingsNavy.dc.html" : a.goal && AUTH.adult() ? "HomeNavy.dc.html" : "GoalNavy.dc.html"; },
+    /** Age in whole years on a date of birth (YYYY-MM-DD), today in Lagos. */
+    ageOf: function (d) { var t = lagosDay(), y = +t.slice(0, 4) - +String(d).slice(0, 4); return t.slice(5) < String(d).slice(5) ? y - 1 : y; },
+    adult: function () { var b = authLoad().birth; return !!b && AUTH.ageOf(b) >= 18; },
+    /** After the interest step: age check (once), then the notification step (once), then Home. */
+    onboardNext: function () { var a = authLoad(); return !AUTH.adult() ? "AgeCheckNavy.dc.html" : !a.asked ? "NotifAskNavy.dc.html" : "HomeNavy.dc.html"; },
     setBirth: function (d) { var a = authLoad(); a.birth = d; authSave(a); },
     setReminder: function (on) { var a = authLoad(); a.reminder = on ? "19:00" : null; a.asked = true; authSave(a); },
-    signOut: function () { var a = authLoad(); delete a.email; delete a.pending; authSave(a); }
+    signOut: function () { var a = authLoad(); delete a.email; delete a.pending; delete a.sentAt; delete a.code; authSave(a); }
   };
 
   // ---- Library: the 15 articles in packages/sample-data, saved articles, reading progress, search.
@@ -614,7 +655,7 @@
     },
     clearHistory: function () { var s = load(); s.log = []; save(s); },
     prefs: function () { try { var p = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); if (p) return p; } catch (e) {} return { sound: true, reduceMotion: false }; },
-    setPref: function (k, v) { var p = ME.prefs(); p[k] = v; try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} applyPrefs(); },
+    setPref: function (k, v) { var p = ME.prefs(); p[k] = v; if (k === "saveChats" && !v) { try { var q0 = JSON.parse(localStorage.getItem("fv.ask.v1") || "null"); if (q0) { q0.msgs = []; localStorage.setItem("fv.ask.v1", JSON.stringify(q0)); } } catch (e) {} } try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} applyPrefs(); },
     notifications: function () {
       var s = load(), out = [], log = s.log || [];
       if (s.dailyDay !== lagosDay()) out.push({ title: "Today's question is ready", sub: "1 minute, +5 XP.", at: new Date(lagosDay() + "T07:00:00+01:00").getTime(), href: "UPDaily.dc.html" });
@@ -802,8 +843,16 @@
   };
   FV.PLUS = PLUS;
   window.FV = FV;
+  try { settlePlan(); } catch (e) {}
+  // Signed-out visitors only see the welcome, sign-in and status screens (B10). Staff pages have their own sign-in.
+  (function () { var m = /\/(\w+)\.dc(\.html)?$/.exec(location.pathname), n = m ? m[1] : "";
+    if (!n || AUTH.signedIn() || /^(Main|Welcome|Intro|SignIn|CodeError|Deleted|Offline|Error|Admin|SetTerms)/.test(n) || !/Navy$/.test(n)) return;
+    location.replace("MainNavy.dc.html"); })();
   // Admin pages need a staff sign-in in this tab (a demonstration: the check runs in the browser).
   (function () { var m = /\/(UA\w+\.dc\.html)$/.exec(location.pathname); if (m && m[1] !== "UASignIn.dc.html" && !ADMIN.staff()) location.replace("UASignIn.dc.html?next=" + encodeURIComponent(m[1] + location.search)); })();
   // Queued practice orders are placed as soon as the market is open.
-  try { var placed = SIM.runQueue(); if (placed) sessionStorage.setItem("fv.flash", placed + (placed === 1 ? " queued order was" : " queued orders were") + " placed now that the market is open."); } catch (e) {}
+  try { var placed = SIM.runQueue(); var missed = SIM.queueMissed || 0, msg = [];
+    if (placed) msg.push(placed + (placed === 1 ? " queued order was" : " queued orders were") + " placed now that the market is open.");
+    if (missed) msg.push(missed + (missed === 1 ? " queued order was" : " queued orders were") + " not placed: not enough cash or shares.");
+    if (msg.length) sessionStorage.setItem("fv.flash", msg.join(" ")); } catch (e) {}
 })();

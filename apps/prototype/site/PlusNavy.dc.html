@@ -43,8 +43,9 @@ class Component extends DCLogic {
   constructor(p) { super(p); this.state = { g: 1 }; if (window.FV && window.FV.PAY) window.FV.PAY.remember(); }
   renderVals() {
     const pay = (e) => { e.preventDefault(); const PAY = window.FV && window.FV.PAY; if (!PAY) return; const r = PAY.start(this.state.g === 1 ? 'yearly' : 'monthly');
-      if (r.ok) location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else if (r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else location.href = 'YourPlanNavy.dc.html'; };
-    const P = [['Monthly', 'Billed every month', '₦5,999'], ['Yearly', 'One month free · 11 × ₦5,999', '₦65,989']];
+      if (r.ok) location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else if (r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else if (r.reason === 'age') location.href = 'AgeCheckNavy.dc.html?then=PlusNavy'; else location.href = 'YourPlanNavy.dc.html'; };
+    const PR = (window.FV && window.FV.PAY) ? window.FV.PAY.PRICE : { monthly: 599900, yearly: 6598900 }, nn = (k) => '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); /* live-prices */
+    const P = [['Monthly', 'Billed every month', nn(PR.monthly)], ['Yearly', 'One month free · 11 × ' + nn(PR.monthly), nn(PR.yearly)]];
     return { pay,
       f: ['Unlimited Finvora AI questions', 'Compare companies side by side', 'Dividend history for every company', 'Full 5-year financial statements', 'Price alerts on your watchlist'].map(t => ({ t })),
       plans: P.map(([t, s, pr], i) => { const on = this.state.g === i; return { t, s, pr, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF' }; })

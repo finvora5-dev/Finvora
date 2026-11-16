@@ -33,7 +33,7 @@ class Component extends DCLogic {
   check(code) {
     const A = this.A(); if (!A || code.length < 6) return;
     const r = A.verify(code);
-    if (r === 'ok') { location.href = 'GoalNavy.dc.html'; return; }
+    if (r === 'ok') { location.href = A.next(); return; }
     try { sessionStorage.setItem('fv.lastCode', code); } catch (e) {}
     location.href = 'CodeErrorNavy.dc.html?why=' + r;
   }

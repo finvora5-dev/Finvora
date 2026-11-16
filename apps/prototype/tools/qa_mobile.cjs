@@ -6,7 +6,8 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'); c
 (async () => {
   const B = process.argv[2] || 'http://127.0.0.1:8791/'; const site = path.join(__dirname, '..', 'site');
   const pages = fs.readdirSync(site).filter((f) => /Navy\.dc\.html$/.test(f) && !/"width":1440/.test(fs.readFileSync(path.join(site, f), 'utf8'))).map((f) => f.replace('.dc.html', ''));
-  const b = await chromium.launch(); const p = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block' })).newPage();
+  const b = await chromium.launch(); const ctx0 = await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block' }); await ctx0.addInitScript(() => { try { if (!localStorage.getItem('fv.auth.v1')) localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor', goal: 'Investing', birth: '2001-03-14', asked: true })); } catch (e) {} }); // signed in: pages are guarded
+  const p = await ctx0.newPage();
   // Signed-in learner with a few lessons done; staff signed in so the admin phone screens don't route to sign-in.
   await p.goto(B + 'HomeNavy.dc.html'); await p.evaluate(() => { localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor' })); sessionStorage.setItem('fv.staff', JSON.stringify({ email: 'chidi@finvora.ng', name: 'Chidi Nwosu' })); try { FV.REV.setProgress(3, false); } catch (e) {} });
   const issues = [];

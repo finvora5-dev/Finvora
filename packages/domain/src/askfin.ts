@@ -62,7 +62,9 @@ export function countsTowardLimit(kind: AskKind): boolean {
   return kind === "answer";
 }
 
-const ADVICE = /\b(should i (buy|sell|invest)|which (stock|share|company) (should|to)|what (stock|share)s? (should|to) (buy|sell)|buy or sell|is it a good (time|buy)|tell me (what|which) to (buy|sell)|recommend (a|some)? ?(stock|share)s?|best (stock|share)s? to buy)\b/i;
+// Widened 16 Nov 2026 (logic audit): indirect wording asks for the same thing ("Should I put my money in X?",
+// "Is X a good investment?", "Is now the time to sell X?", "Will X rise next week?", "Is X undervalued?").
+const ADVICE = /\b(should i (buy|sell|invest|put|hold|keep)|(is|are) [\w .&'-]{1,40} a good (investment|buy|stock|share)|worth (buying|investing in)|(the|a good|right) time to (buy|sell|invest)|will [\w .&'-]{1,40} (rise|fall|go up|go down|drop|crash|increase|recover)|(undervalued|overvalued|underpriced|overpriced)|(can|will) i make money|which (stock|share|company) (should|to)|what (stock|share)s? (should|to) (buy|sell)|buy or sell|is it a good (time|buy)|tell me (what|which) to (buy|sell)|recommend (a|some)? ?(stock|share)s?|best (stock|share)s? to buy)\b/i;
 
 export function isAdviceRequest(q: string): boolean {
   return ADVICE.test(q);

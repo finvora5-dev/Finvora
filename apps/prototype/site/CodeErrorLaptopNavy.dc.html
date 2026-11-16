@@ -29,10 +29,10 @@ class Component extends DCLogic {
   A() { return window.FV && window.FV.AUTH; }
   renderVals() {
     const A = this.A(), why = (/why=(\w+)/.exec(location.search) || [])[1], left = A ? A.triesLeft() : 3, lock = A ? A.lockedFor() : 0;
-    const msg = lock > 0 ? 'Too many wrong codes. Try again in ' + Math.ceil(lock / 60) + ' minutes.' : why === 'expired' ? 'That code has expired. Send a new code to try again.' : 'That code is wrong. You have ' + left + (left === 1 ? ' try' : ' tries') + ' left.';
+    const msg = (A && A.spent()) ? 'Too many wrong codes. Send a new code to try again.' : why === 'expired' ? 'That code has expired. Send a new code to try again.' : 'That code is wrong. You have ' + left + (left === 1 ? ' try' : ' tries') + ' left.';
     let last = ''; try { last = sessionStorage.getItem('fv.lastCode') || ''; } catch (e) {}
     const a0 = A ? A.get() : {};
-    return { msg, email: a0.pending || 'your email', digits: [0, 1, 2, 3, 4, 5].map((i) => ({ d: last[i] || '' })), again: (e) => { e.preventDefault(); if (!A || A.lockedFor() > 0) return; const a = A.get(); if (a.pending) A.sendCode(a.pending); location.href = 'SignInCodeNavy.dc.html'; } };
+    return { msg, email: a0.pending || 'your email', digits: [0, 1, 2, 3, 4, 5].map((i) => ({ d: last[i] || '' })), again: (e) => { e.preventDefault(); if (!A) return; const a = A.get(); /* one-a-minute */ if (a.pending) A.sendCode(a.pending); location.href = 'SignInCodeNavy.dc.html'; } };
   }
 }
 </script>

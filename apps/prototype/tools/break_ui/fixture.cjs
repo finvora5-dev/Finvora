@@ -1,9 +1,9 @@
 // Shared break-ui fixtures: demo, worst, one, empty.
 const now = Date.now(), day = (n) => new Date(now + 3600000 - n * 86400000).toISOString().slice(0, 10);
 function fixture(state) {
-  if (state === 'empty') return {};
+  if (state === 'empty') return { 'fv.auth.v1': { email: 'ada@example.com', name: 'Ada Okafor', goal: 'Investing', birth: '2001-03-14', asked: true } }; // signed in: pages are guarded
   const worst = state === 'worst', one = state === 'one';
-  const auth = { email: worst ? 'bartholomew.fitzgerald@northwind-industries-holdings.example.com' : one ? 'jo@x.ng' : 'ada@example.com', name: worst ? 'Aleksandra Wiśniewska-Kowalczyk' : one ? 'Jo' : 'Ada Okafor', goal: 'Investing' };
+  const auth = { email: worst ? 'bartholomew.fitzgerald@northwind-industries-holdings.example.com' : one ? 'jo@x.ng' : 'ada@example.com', name: worst ? 'Aleksandra Wiśniewska-Kowalczyk' : one ? 'Jo' : 'Ada Okafor', goal: 'Investing', birth: '2001-03-14', asked: true };
   const orders = [], n = worst ? 12 : 1;
   for (let i = 0; i < n; i++) orders.push({ id: 'ord-' + (100000 + i).toString(36) + 'x' + i, period: 'monthly', amountKobo: 599900, status: 'confirmedSuccess', attempts: 1, createdAt: new Date(now - i * 30 * 86400000).toISOString(), updatedAt: new Date(now - i * 30 * 86400000).toISOString() });
   const bill = { sub: { plan: 'plus', period: 'monthly', renewsOn: day(-30) }, orders };

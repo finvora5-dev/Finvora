@@ -18,6 +18,8 @@ const LIMIT = +(process.env.FV_MOCKUP_LIMIT || 6); // percent of pixels allowed 
     await p.goto(MB + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(500); const a = await p.screenshot();
     const drawn = await p.evaluate(() => { const r = document.getElementById('dc-root'); return r ? r.innerText.trim().length : 0; });
     if (drawn < 20) { res.push({ board: name, differsPct: null, ok: true, note: 'mock-up file does not render, compare by eye' }); continue; }
+    // Plan screens need a Plus plan, or they open the Plus page: give the account the mock-up's monthly plan.
+    if (/^(YourPlan|CancelPlan)/.test(name)) { await p.goto(B + 'HelpLaptopNavy.dc.html', { waitUntil: 'networkidle' }); await p.evaluate(() => { if (!localStorage.getItem('fv.billing.v1')) localStorage.setItem('fv.billing.v1', JSON.stringify({ sub: { plan: 'plus', period: 'monthly', renewsOn: '2027-06-12' }, orders: [] })); }); }
     // Practice screens need practice shares, or they open the empty Practice screen: place the mock-up's holdings once.
     if (/^Practice(?!Empty)/.test(name)) { await p.goto(B + 'PracticeEmptyLaptopNavy.dc.html', { waitUntil: 'networkidle' }); await p.evaluate(() => { const S = window.FV && window.FV.SIM; if (S && !S.get().trades.length) { S.trade('buy', 'ZENITHBANK', 500, 'qa1'); S.trade('buy', 'DANGCEM', 50, 'qa2'); S.trade('buy', 'MTNN', 70, 'qa3'); } }); }
     await p.goto(B + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(700); const routed = !p.url().includes(name); const c = await p.screenshot();
