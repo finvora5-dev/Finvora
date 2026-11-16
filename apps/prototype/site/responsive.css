@@ -119,9 +119,13 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
    mobile-native); colour, border and shadow only, 150ms ease (skill: emil-design-eng). Colours come from the palette. */
 @media (hover: hover) and (pointer: fine) {
   /* Sidebar items: the selected-item background, lighter. */
-  #dc-root aside a:not([aria-current]):hover { background-color: #1A2740 !important; color: #FFFFFF !important; }
-  #dc-root aside a:not([aria-current]):hover svg { stroke: #C7D0DD; }
-  #dc-root aside button:hover { background-color: #1A2740 !important; }
+  /* Only the dark left sidebar (the first aside); right-hand panels such as Home's watchlist are light (owner, 16 Nov 2026). */
+  #dc-root > .sc-host > :first-child > aside a:not([aria-current]):hover { background-color: #1A2740 !important; color: #FFFFFF !important; }
+  #dc-root > .sc-host > :first-child > aside a:not([aria-current]):hover svg { stroke: #C7D0DD; }
+  #dc-root > .sc-host > :first-child > aside button:hover { background-color: #1A2740 !important; }
+  /* Rows in light side panels (watchlists): a soft grey fill with rounded corners; colours stay, the name turns emerald. */
+  #dc-root main aside a[style*="border-top: 1px solid rgb(237, 239, 242)"]:hover { background-color: #F3F5F7; border-radius: 10px; color: #0B192C; }
+  #dc-root main aside a[style*="border-top: 1px solid rgb(237, 239, 242)"]:hover > span:nth-child(2) > span:first-child { color: #047857; }
   /* Main buttons: navy goes one step lighter; emerald one step darker. */
   #dc-root main a[style*="background: rgb(11, 25, 44)"]:hover, #dc-root main button[style*="background: rgb(11, 25, 44)"]:hover,
   #dc-root > .sc-host > :first-child:not(:has(aside)) a[style*="background: rgb(11, 25, 44)"][style*="border-radius"]:hover { background-color: #22314A !important; color: #FFFFFF !important; }
