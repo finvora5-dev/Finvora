@@ -58,9 +58,12 @@ class Component extends DCLogic {
       const target = Math.max(0, Math.min(this.state.order.length - 1, idx + Math.round(dy / H)));
       if (target !== cur) { this.move(cur, target); cur = target; }
       this.setState({ drag: { i: cur, dy: dy - (cur - idx) * H } }); };
-    const up = () => { li.removeEventListener('pointermove', mv); li.removeEventListener('pointerup', up); li.removeEventListener('pointercancel', up); this.setState({ drag: null }); };
+    const up = (ev) => { li.removeEventListener('pointermove', mv); li.removeEventListener('pointerup', up); li.removeEventListener('pointercancel', up); this.setState({ drag: null }); if (!moved && ev && ev.type === 'pointerup') this.tap(idx); };
     li.addEventListener('pointermove', mv); li.addEventListener('pointerup', up); li.addEventListener('pointercancel', up);
   }
+  // Tap to swap (owner, 16 Nov 2026): tap a step to select it, tap another to swap them; tap the selected one to let go.
+  tap(idx) { const h = this.state.held; if (h === null) { this.setState({ held: idx, live: 'Selected. Tap another step to swap.' }); return; } if (h === idx) { this.setState({ held: null, live: 'Dropped' }); return; }
+    const o = this.state.order.slice(), x = o[h]; o[h] = o[idx]; o[idx] = x; this.setState({ order: o, held: null, live: 'Swapped' }); }
   key(e, idx) {
     if (this.state.res) return; const h = this.state.held;
     if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); this.setState({ held: h === idx ? null : idx, live: h === idx ? 'Dropped' : 'Picked up. Use the arrow keys to move.' }); return; }

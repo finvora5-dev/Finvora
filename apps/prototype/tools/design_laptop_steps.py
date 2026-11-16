@@ -12,7 +12,7 @@ STEPS = [('LessonInfoNavy', 'Lesson: read (laptop)'), ('LearnCompareNavy', 'Less
          ('LessonOrderNavy', 'Lesson: put in order (laptop)'), ('LessonMatchNavy', 'Lesson: match (laptop)'), ('LessonScenarioNavy', 'Lesson: scenario (laptop)'),
          ('LessonCalcNavy', 'Lesson: calculation (laptop)')]
 frame = open(os.path.join(M, 'LessonLaptopNavy.dc.html')).read()
-col_start = frame.index('<div style="max-width: 640px;'); col_open_end = frame.index('>', col_start) + 1
+col_start = frame.index('<div style="max-width: 640px;') if '<div style="max-width: 640px;' in frame else frame.index('<div style="width: 100%; margin: 20px 0 0;'); col_open_end = frame.index('>', col_start) + 1
 col_end = frame.index('</main>')
 def children(html):
     """Top-level elements of the phone board's root div."""
