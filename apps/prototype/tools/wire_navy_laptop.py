@@ -314,4 +314,34 @@ if MARK not in s:
     return { q: this.state.q, q0, onQ: (e) => this.setState({ q: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); location.href = 'SearchNavy.dc.html?q=' + encodeURIComponent(this.state.q); } },
       hasDym: !!dym, dymLabel: 'Did you mean ' + dym + '?', dymHref: zen ? 'CompanyLaptopNavy.dc.html?t=ZENITHBANK' : art ? 'ArticleNavy.dc.html?a=' + art.slug : 'SearchNavy.dc.html?q=' + encodeURIComponent(dym), askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent(q0) }; }""")
     wr('EmptyLaptopNavy', s)
+# Search (phone: SearchNavy). Companies are the ones the app has data for whose name, ticker or sector matches, with live
+# prices; guides come from the Library search; nothing found goes to No results; Ask carries the words.
+s = rd('SearchLaptopNavy')
+if MARK not in s:
+    s = sub1(s, 'aria-label="Search" value="bank"', 'aria-label="Search" value="{{q}}" onInput="{{onQ}}" onKeyDown="{{onKey}}"')
+    row = '<div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; min-height: 54px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; font-size: 14px">'
+    a = s.index(row); b = s.index('</section>', a)
+    s = s[:a] + ('<sc-for list="{{cos}}" as="c" hint-placeholder-count="4"><a href="{{c.href}}" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; min-height: 54px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; font-size: 14px; text-decoration: none; color: #0B192C">'
+        '<span style="text-align: left"><span style="display: flex; flex-direction: column"><span style="font-weight: 500">{{c.name}}</span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{c.t}}</span></span></span>'
+        '<span style="text-align: right"><span style="font-family: \'Geist Mono\', monospace">{{c.p}}</span></span><span style="text-align: right"><span style="font-family: \'Geist Mono\', monospace"><span style="color: {{c.fg}}">{{c.c}}</span></span></span></a></sc-for>'
+        '<sc-if value="{{noCos}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 16px 20px; border-top: 1px solid #EDEFF2; font-size: 14px; color: #5B6577">No companies match.</p></sc-if>') + s[b:]
+    g = '<div style="display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid #EDEFF2; font-size: 14px">'
+    a = s.index(g); b = s.index('</section>', a)
+    s = s[:a] + ('<sc-for list="{{guides}}" as="x" hint-placeholder-count="2"><a href="{{x.href}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid #EDEFF2; font-size: 14px; text-decoration: none">'
+        '<span style="color: #5B6577">{{x.t}}</span><span style="font-family: \'Geist Mono\', monospace">{{x.m}}</span></a></sc-for>') + s[b:]
+    s = sub1(s, '<a href="AskLaptopNavy.dc.html" style="background: #FFFFFF;', '<a href="{{askHref}}" style="background: #FFFFFF;')
+    s = sub1(s, 'Ask Finvora AI: "Which bank pays the best dividend?"</a>', 'Ask Finvora AI: "{{q0}}"</a>')
+    s = logic(s, """  constructor(p) { super(p); const m = /[?&]q=([^&]*)/.exec(location.search); this.state = { q: m ? decodeURIComponent(m[1].replace(/[+]/g, ' ')) : '' }; }
+  componentDidMount() { this.check(); }
+  cos(q) { const S = window.FV && window.FV.SIM; q = q.trim().toLowerCase(); if (!S || q.length < 2) return []; const bank = /bank/.test(q);
+    return S.COMPANIES.map((c) => S.company(c.t)).filter((c) => c && (c.name.toLowerCase().indexOf(q) >= 0 || c.t.toLowerCase().indexOf(q) >= 0 || (c.sector || '').toLowerCase().indexOf(q) >= 0 || (bank && c.sector === 'Banking'))); }
+  res() { const L = window.FV && window.FV.LIB; return L && this.state.q.trim() ? L.search(this.state.q) : { results: [] }; }
+  check() { const q = this.state.q.trim(); if (q.length < 2) return; if (!this.cos(q).length && !this.res().results.length) location.replace('EmptySearchNavy.dc.html?q=' + encodeURIComponent(q)); }
+  renderVals() { const S = window.FV && window.FV.SIM, L = window.FV && window.FV.LIB, c = this.cos(this.state.q), r = this.res(), q = this.state.q.trim();
+    return { q: this.state.q, q0: q || 'Ask anything about money', onQ: (e) => this.setState({ q: e.target.value }),
+      onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); location.href = 'SearchNavy.dc.html?q=' + encodeURIComponent(this.state.q.trim()); } },
+      cos: c.map((x) => { const ch = S.change(x.t); return { href: 'CompanyLaptopNavy.dc.html?t=' + x.t, name: x.name, t: x.t, p: '₦' + (S.price(x.t) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), c: (ch >= 0 ? '▲ ' : '▼ ') + Math.abs(ch).toFixed(1) + '%', fg: ch >= 0 ? '#047857' : '#B9473F' }; }),
+      noCos: !c.length, guides: (r.results || []).filter((x) => x.kind === 'article').slice(0, 6).map((x) => { const a = L.article(x.id); return { href: x.href.replace('UPArticle', 'ArticleNavy'), t: x.title, m: a ? L.minutes(a) + ' min' : '' }; }),
+      askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent(q) }; }""")
+    wr('SearchLaptopNavy', s)
 print('laptop wired')
