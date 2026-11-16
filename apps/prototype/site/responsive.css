@@ -42,7 +42,7 @@ html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
 #dc-root [style*="overflow-x: auto"][style*="margin: 0 -20px"] { scroll-snap-type: x mandatory; }
 #dc-root [style*="overflow-x: auto"] > * { scroll-snap-align: start; }
 /* Press feedback on touch and mouse, on press not release. */
-#dc-root button, #dc-root a[style*="border-radius"] { transition: transform 160ms var(--ease-out); }
+#dc-root button, #dc-root a[style*="border-radius"], #dc-root a[style*="border-top"], #dc-root a[style*="border-bottom"] { transition: transform 160ms var(--ease-out), background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease; }
 #dc-root button:active, #dc-root a[style*="border-radius"]:active { transform: scale(.97); }
 /* Safe areas: the pinned nav and bottom sheets clear the home indicator. */
 #dc-root nav[aria-label="Main"] { bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
@@ -115,3 +115,29 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 
 /* Filtered-out rows and inactive views (keeps each element's own layout when shown again). */
 #dc-root .fv-hide { display: none !important; }
+/* HOVER:start Hover states (owner, 16 Nov 2026). Mouse and trackpad only, so they never stick on touch (skill:
+   mobile-native); colour, border and shadow only, 150ms ease (skill: emil-design-eng). Colours come from the palette. */
+@media (hover: hover) and (pointer: fine) {
+  /* Sidebar items: the selected-item background, lighter. */
+  #dc-root aside a:not([aria-current]):hover { background-color: #1A2740 !important; color: #FFFFFF !important; }
+  #dc-root aside a:not([aria-current]):hover svg { stroke: #C7D0DD; }
+  #dc-root aside button:hover { background-color: #1A2740 !important; }
+  /* Main buttons: navy goes one step lighter; emerald one step darker. */
+  #dc-root main a[style*="background: rgb(11, 25, 44)"]:hover, #dc-root main button[style*="background: rgb(11, 25, 44)"]:hover,
+  #dc-root > .sc-host > :first-child:not(:has(aside)) a[style*="background: rgb(11, 25, 44)"][style*="border-radius"]:hover { background-color: #22314A !important; color: #FFFFFF !important; }
+  #dc-root a[style*="background: rgb(16, 185, 129)"]:hover, #dc-root button[style*="background: rgb(16, 185, 129)"]:hover { background-color: #047857 !important; }
+  /* Outlined buttons and chips: a light fill and a firmer border. */
+  #dc-root a[style*="border: 1px solid rgb(213, 217, 224)"]:hover, #dc-root button[style*="border: 1px solid rgb(213, 217, 224)"]:hover,
+  #dc-root button[style*="border: 1px solid rgb(229, 231, 235)"]:hover { background-color: #F3F5F7 !important; border-color: #C0C6D0 !important; }
+  /* Cards that are links: a firmer border and a soft shadow. */
+  #dc-root a[style*="border: 1px solid rgb(229, 231, 235)"][style*="border-radius"]:hover { border-color: #C0C6D0 !important; box-shadow: 0 4px 14px rgba(11, 25, 44, .06); }
+  /* List rows that are links: a light fill across the row. */
+  #dc-root a[style*="border-top: 1px solid rgb(237, 239, 242)"]:hover, #dc-root a[style*="border-bottom: 1px solid rgb(237, 239, 242)"]:hover { background-color: #F3F5F7; }
+  /* Tabs and segmented controls that are not selected: navy text. */
+  #dc-root [role="tab"][aria-selected="false"]:hover, #dc-root [role="tab"]:not([aria-selected]):hover { color: #0B192C !important; background-color: rgba(255, 255, 255, .6) !important; }
+  /* Answer options and radio cards. */
+  #dc-root button[role="radio"][aria-checked="false"]:hover { border-color: #0B192C !important; }
+  /* Disabled-looking actions never react. */
+  #dc-root [aria-disabled="true"]:hover { background-color: inherit; box-shadow: none; }
+}
+/* HOVER:end */
