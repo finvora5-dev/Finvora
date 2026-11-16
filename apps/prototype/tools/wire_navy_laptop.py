@@ -95,4 +95,52 @@ if s:
         href: s0 === 'locked' ? '#' : i === LS.length ? 'CourseReviewNavy.dc.html' : s0 === 'next' ? 'LessonInfoNavy.dc.html' : 'LessonInfoNavy.dc.html?l=' + LS[i].id })) };
   }""")
     wr('LearnLaptopNavy', s)
+# Lesson choice step (phone: LessonNavy). Widened to the progress bar (owner, 16 Nov 2026); the A-D options, the inline
+# result note and Continue follow the approved laptop board; question, options, answer and next step come from the lesson.
+s = todo('LessonLaptopNavy')
+if s:
+    s = sub1(s, 'max-width: 640px; width: 100%; margin: 20px auto 0;', 'width: 100%; margin: 20px 0 0;')
+    s = sub1(s, 'width: 60%; height: 100%; border-radius: 999px; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">3/5', 'width: {{pct}}; height: 100%; border-radius: 999px; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{nOf}}')
+    s = sub1(s, '>Budgeting · Question 3</span>', '>{{kicker}}</span>')
+    s = sub1(s, '>Ada earns ₦250,000 a month. Using the 50/30/20 rule, how much should she save?</h1>', '>{{q}}</h1>')
+    a = s.index('<button style="display: flex; align-items: center; gap: 12px; min-height: 58px;'); b = s.index('<p style="margin: 0; padding: 14px 16px;', a)
+    s = s[:a] + ('<div role="radiogroup" aria-label="Answers" style="display: flex; flex-direction: column; gap: 14px"><sc-for list="{{opts}}" as="o" hint-placeholder-count="4">'
+                 '<button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="cursor: {{o.cur}}; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 18px; border-radius: 12px; border: {{o.bd}}; background: {{o.bg}}; font: inherit; font-size: 16px; text-align: left; color: #0B192C">'
+                 '<span style="font-family: \'Geist Mono\', monospace; font-size: 13px; color: #5B6577; width: 16px">{{o.l}}</span><span style="flex: 1">{{o.t}}</span><strong style="font-size: 13px; color: {{o.mc}}">{{o.mark}}</strong></button></sc-for></div>') + s[b:]
+    s = sub1(s, '<p style="margin: 0; padding: 14px 16px; border-radius: 12px; background: #DDF3E6;', '<sc-if value="{{answered}}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; padding: 14px 16px; border-radius: 12px; background: {{noteBg}};')
+    s = sub1(s, '<strong style="color: #047857">Correct.</strong> 20% of ₦250,000 is ₦50,000.</p>', '<strong style="color: {{noteC}}">{{title}}.</strong> {{why}}</p></sc-if>')
+    s = sub1(s, '<a href="LessonDoneLaptopNavy.dc.html" style="height: 44px;', '<a href="{{ctaHref}}" aria-disabled="{{notAnswered}}" style="opacity: {{ctaOp}}; height: 44px;')
+    s = sub1(s, '>Continue</a></div></div>', '>{{cta}}</a></div></div>')
+    s = logic(s, """  F() { return window.FV; }
+  constructor(p) { super(p); this.state = { g: null }; }
+  renderVals() {
+    const F = this.F(), L = F ? F.lesson() : { title: '', c: null }, c = L.c, v = F ? F.flowVals('choice') : { fN: 3, fTotal: 5, nextHref: 'LessonDoneNavy.dc.html' }, n = +v.fN, t = +v.fTotal;
+    const O = c ? c.opts.map((o) => o[0]) : ['₦25,000', '₦50,000', '₦75,000', '₦125,000'], R = c ? c.right : 1, why = c ? c.opts.map((o) => o[1]) : [];
+    const g = this.state.g, done = g !== null, ok = g === R;
+    const pick = (i) => { if (done) return; if (F) F.answer('choice', i === R, i); this.setState({ g: i }); };
+    return { pct: (t ? Math.round(n / t * 100) : 0) + '%', nOf: n + '/' + t, kicker: L.title + ' · Question ' + n, q: c ? c.q : '',
+      opts: O.map((x, i) => { const right = done && i === R, wrong = g === i && !ok;
+        return { l: 'ABCD'[i] || '', t: x, on: String(g === i), pick: () => pick(i), cur: done ? 'default' : 'pointer', bd: right ? '1.5px solid #10B981' : wrong ? '1.5px solid #B9473F' : '1px solid #D5D9E0', bg: right ? '#DDF3E6' : wrong ? '#FCEDEB' : '#FFFFFF', mark: right ? 'Correct' : wrong ? 'Not quite' : '', mc: right ? '#047857' : '#B9473F' }; }),
+      answered: done, notAnswered: String(!done), noteBg: ok ? '#DDF3E6' : '#FCEDEB', noteC: ok ? '#047857' : '#B9473F', title: ok ? 'Correct' : 'Not quite',
+      why: ok ? (c ? c.rightText : '') : (((why[g] || '') + ' ' + (c ? c.rightText : '')).trim()),
+      cta: ok || !done ? 'Continue' : 'Got it, continue', ctaHref: done ? v.nextHref : '#', ctaOp: done ? '1' : '.5' };
+  }""")
+    wr('LessonLaptopNavy', s)
+# Lesson done (phone: LessonDoneNavy). Finishes the run, then shows its title, score, time, next lesson and takeaways.
+s = todo('LessonDoneLaptopNavy')
+if s:
+    s = sub1(s, '>Budgeting complete<', '>{{title}} complete<')
+    s = sub1(s, '>Lesson 3 of 6 in Money Foundations. Score 4/5 in 3:52.<', '>Lesson {{n}} of {{of}} in Money Foundations. Score {{score}} in {{time}}.<')
+    s = sub1(s, '<a href="LessonLaptopNavy.dc.html"', '<a href="{{nextHref}}"')
+    s = sub1(s, '>Next: Inflation · 5 min<', '>{{nextLabel}}<')
+    s = sub1(s, '>Key takeaways: plan every naira, split 50/30/20, review monthly.<', '>Key takeaways: {{takeaways}}<')
+    s = logic(s, """  constructor(p) { super(p); const F = window.FV; let r = F ? F.finishRun() : null; if (!r && F) r = F.lastRun(); this.state = { r }; }
+  renderVals() {
+    const F = window.FV, r = this.state.r, LS = F ? F.LESSONS : [], st = F ? F.get() : { done: 0 }, L = r ? r.lesson : (F ? F.lesson() : { title: 'Lesson', index: 0, c: null });
+    const c = L.c || (F ? F.lesson().c : null), nx = LS[st.done], secs = r ? r.secs : 0, learned = (c && c.learned) || [];
+    return { title: L.title, n: String((L.index || 0) + 1), of: String(LS.length || 6), score: r ? r.right + '/' + r.total : '0/0', time: Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0'),
+      nextHref: nx ? 'LessonInfoNavy.dc.html' : 'LearnLaptopNavy.dc.html', nextLabel: nx ? 'Next: ' + nx.title + ' · ' + nx.min + ' min' : 'Back to Learn',
+      takeaways: learned.map((t) => String(t).replace(/[.]$/, '')).join('; ').toLowerCase() || 'see the lesson summary' };
+  }""")
+    wr('LessonDoneLaptopNavy', s)
 print('laptop wired')

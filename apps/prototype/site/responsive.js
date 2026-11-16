@@ -10,7 +10,7 @@
     EmptySearchNavy: "EmptyLaptopNavy", ErrorNavy: "ErrorLaptopNavy", OfflineNavy: "OfflineLaptopNavy", GoalNavy: "GoalLaptopNavy", LessonNavy: "LessonLaptopNavy",
     LessonDoneNavy: "LessonDoneLaptopNavy", NotificationsNavy: "NotificationsLaptopNavy", PayFailedNavy: "PayFailedLaptopNavy", PaySuccessNavy: "PayLaptopNavy",
     PayPendingNavy: "PayPendingLaptopNavy", PlusNavy: "PlansLaptopNavy", PracticeNavy: "PracticeLaptopNavy", PracticeSellNavy: "SellLaptopNavy",
-    SettingsNavy: "SettingsLaptopNavy", SignInNavy: "SignInLaptopNavy", SignOutNavy: "SignOutLaptopNavy", UpgradeNavy: "UpgradeLaptopNavy", MainNavy: "WelcomeLaptopNavy" };
+    SettingsNavy: "SettingsLaptopNavy", LessonInfoNavy: "LessonInfoLaptopNavy", LearnCompareNavy: "LearnCompareLaptopNavy", LearnTermNavy: "LearnTermLaptopNavy", LearnStepsNavy: "LearnStepsLaptopNavy", LearnMarketNavy: "LearnMarketLaptopNavy", LearnMythNavy: "LearnMythLaptopNavy", LessonOrderNavy: "LessonOrderLaptopNavy", LessonMatchNavy: "LessonMatchLaptopNavy", LessonScenarioNavy: "LessonScenarioLaptopNavy", LessonCalcNavy: "LessonCalcLaptopNavy", SignInNavy: "SignInLaptopNavy", SignOutNavy: "SignOutLaptopNavy", UpgradeNavy: "UpgradeLaptopNavy", MainNavy: "WelcomeLaptopNavy" };
   var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
@@ -43,7 +43,7 @@
   })();
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   // Lesson steps get the 'step' transition type (slide), every other screen change cross-fades (skill: animate).
-  var STEP = /(Lesson(Info|Calc|Order|Scenario|Match)?|LearnMyth|LearnCompare|LessonDone|CourseReviewQ)Navy\.dc/;
+  var STEP = /(Lesson(Info|Calc|Order|Scenario|Match)?|Learn(Myth|Compare|Term|Steps|Market)|LessonDone|CourseReviewQ)(Laptop)?Navy\.dc/;
   window.addEventListener("pagereveal", function (e) {
     try { var from = navigation.activation && navigation.activation.from && navigation.activation.from.url;
       if (e.viewTransition && from && STEP.test(from) && STEP.test(location.pathname)) e.viewTransition.types.add("step"); } catch (x) {}

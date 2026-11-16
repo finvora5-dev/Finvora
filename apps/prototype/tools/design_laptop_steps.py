@@ -2,9 +2,11 @@
 Frame: the approved LessonLaptopNavy (sidebar, close, progress, 640px centred column, Continue on the right).
 Content: each phone step's approved board content, in order, with the phone's 24px side margins removed and its
 bottom action bar placed at the end of the column like the laptop lesson's Continue.
-Usage: python3 design_laptop_steps.py <mockups folder> <out folder>"""
+Usage: python3 design_laptop_steps.py <mockups folder> <out folder>            (canvas drafts)
+       python3 design_laptop_steps.py <mockups folder> <site folder> --site     (working screens: content and logic from the
+       wired phone boards in the site folder, frame from the mock-up, page head and scripts from the site)"""
 import os, re, sys
-M, OUT = sys.argv[1], sys.argv[2]
+M, OUT = sys.argv[1], sys.argv[2]; SITE_MODE = '--site' in sys.argv; SRC = OUT if SITE_MODE else M
 STEPS = [('LessonInfoNavy', 'Lesson: read (laptop)'), ('LearnCompareNavy', 'Lesson: compare (laptop)'), ('LearnTermNavy', 'Lesson: key term (laptop)'),
          ('LearnStepsNavy', 'Lesson: steps (laptop)'), ('LearnMarketNavy', 'Lesson: market example (laptop)'), ('LearnMythNavy', 'Lesson: myth or fact (laptop)'),
          ('LessonOrderNavy', 'Lesson: put in order (laptop)'), ('LessonMatchNavy', 'Lesson: match (laptop)'), ('LessonScenarioNavy', 'Lesson: scenario (laptop)'),
@@ -31,7 +33,7 @@ def children(html):
     return out
 made = []
 for name, title in STEPS:
-    s = open(os.path.join(M, name + '.dc.html')).read(); kids = children(s)
+    s = open(os.path.join(SRC, name + '.dc.html')).read(); kids = children(s)
     body = kids[1:]  # drop the phone top bar (close + progress), the laptop frame has its own
     fixed = []
     for k in body:
@@ -60,5 +62,17 @@ for name, title in STEPS:
     out = frame[:col_start] + col + ''.join(fixed) + '</div>\n  ' + frame[col_end:]
     out = out.replace('<title>Lesson (laptop)</title>', '<title>' + title + '</title>', 1)
     out = re.sub(r'href="LearnNavy\.dc\.html"', 'href="LearnLaptopNavy.dc.html"', out)
+    if SITE_MODE:
+        head = open(os.path.join(OUT, 'LessonLaptopNavy.dc.html')).read(); out = head[:head.index('<x-dc>')] + out[out.index('<x-dc>'):]
+        out = out.replace('<title>Lesson (laptop)</title>', '<title>' + title + '</title>', 1)
+        a = s.index('<script type="text/x-dc"'); b = s.index('</script>', a) + 9; fa = out.index('<script type="text/x-dc"'); fb = out.index('</script>', fa) + 9
+        js = s[a:b].replace('"width":390,"height":844', '"width":1440,"height":900')
+        # The laptop frame's progress bar shows the same lesson progress the phone step shows (n of total).
+        i = js.rindex('renderVals() {'); js = js[:i] + '_phoneVals() {' + js[i + len('renderVals() {'):]
+        k = js.rindex('}'); js = js[:k] + '''  renderVals() { const v = this._phoneVals() || {}, n = +(v.n || v.fN || 0), t = +(v.total || v.fTotal || 0);
+    return Object.assign(v, { lapPct: t ? Math.round(n / t * 100) + '%' : '0%', lapN: t ? n + '/' + t : '' }); }
+''' + js[k:]
+        out = out[:fa] + js + out[fb:]
+        out = out.replace('width: 60%; height: 100%; border-radius: 999px; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">3/5', 'width: {{lapPct}}; height: 100%; border-radius: 999px; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{lapN}}', 1)
     lap = name.replace('Navy', 'LaptopNavy'); open(os.path.join(OUT, lap + '.dc.html'), 'w').write(out); made.append((lap, title))
 print('\n'.join(a + ' | ' + b for a, b in made))
