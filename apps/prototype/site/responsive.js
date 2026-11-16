@@ -220,17 +220,18 @@
     return out.concat(real);
   }
   function draw(svg, pts, label) {
+    var vb = (svg.getAttribute("viewBox") || "0 0 350 180").split(/\s+/).map(Number), W = vb[2] || 350, H = vb[3] || 180;
     var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1, n = pts.length;
-    var xy = pts.map(function (v, i) { return [Math.round(i * 350 / Math.max(1, n - 1) * 10) / 10, Math.round((160 - (v - lo) / sp * 130) * 10) / 10]; });
+    var xy = pts.map(function (v, i) { return [Math.round(i * W / Math.max(1, n - 1) * 10) / 10, Math.round((H * 0.89 - (v - lo) / sp * H * 0.72) * 10) / 10]; });
     var line = "M" + xy.map(function (p) { return p[0] + " " + p[1]; }).join(" L");
     var paths = svg.querySelectorAll("path"); if (paths.length < 2) return;
-    paths[0].setAttribute("d", line + " L350 180 L0 180 Z"); paths[1].setAttribute("d", line);
+    paths[0].setAttribute("d", line + " L" + W + " " + H + " L0 " + H + " Z"); paths[1].setAttribute("d", line);
     var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", xy[n - 1][0]); c.setAttribute("cy", xy[n - 1][1]); }
     svg.setAttribute("aria-label", label);
   }
   function chart(range) {
     var tl = document.querySelector('[role="tablist"][aria-label="Chart range"]'); if (!tl) return;
-    var svg = tl.previousElementSibling; if (!svg || svg.tagName.toLowerCase() !== "svg") return;
+    var svg = tl.previousElementSibling && tl.previousElementSibling.tagName.toLowerCase() === "svg" ? tl.previousElementSibling : (tl.closest("section") || document).querySelector("svg[viewBox][role=img]"); if (!svg) return;
     var t = tkr(), S = F() && F().SIM; if (!S) return;
     var naira = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); };
     if (range === "1D") { var p = S.price(t); draw(svg, [p, p], "Today's price, " + naira(p)); toast("Prices update once a day"); return; }

@@ -372,4 +372,37 @@ if MARK not in s:
       hasEx: !!a.example, ex: a.example || '', showCo: /dividend/.test(a.slug), askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent('What is ' + a.title.toLowerCase() + '?'),
       rel: rel.map((x) => ({ t: x.title, href: 'ArticleNavy.dc.html?a=' + x.slug })) }); }""")
     wr('ArticleLaptopNavy', s)
+# Company (phone: CompanyNavy). The company from ?t=: name, ticker, sector, live price and change, watchlist, Ask, chart
+# ranges (shared code). Statistics, statements and news exist for Zenith only, so others say "Not available yet."
+s = rd('CompanyLaptopNavy')
+if MARK not in s:
+    s = re.sub(r'(<span[^>]*>/</span><span[^>]*>)Banking(</span><span[^>]*>/</span><span[^>]*>)Zenith Bank(<)', r'\1{{sector}}\2{{short}}\3', s, count=1)
+    s = re.sub(r'(<span[^>]*>)ZENITHBANK(</span><span[^>]*>)NGX · Banking · Lagos(<)', r'\1{{t}}\2NGX · {{sector}}\3', s, count=1)
+    s = re.sub(r'(<h1[^>]*>)Zenith Bank Plc(</h1>)', r'\1{{name}}\2', s, count=1)
+    s = sub1(s, '>₦48.20<', '>{{price}}<')
+    s = re.sub(r'(<span style=")([^"]*)(">)▲ 1\.58 \(3\.4%\)(<)', lambda m: m.group(1) + re.sub(r'color: #[0-9A-F]{6}', 'color: {{fg}}', m.group(2)) + m.group(3) + '{{chg}}' + m.group(4), s, count=1)
+    s = re.sub(r'<button([^>]*)>Add to watchlist</button>', r'<button type="button" aria-pressed="{{watched}}" onClick="{{toggleWatch}}"\1>{{watchLabel}}</button>', s, count=1)
+    s = sub1(s, '<a href="AskFinvoraNavy.dc.html"', '<a href="{{askHref}}"')
+    s = s.replace('Ask Finvora about Zenith</a>', 'Ask Finvora about {{short}}</a>', 1)
+    s = re.sub(r'<span([^>]*)><button([^>]*)>1D</button>', r'<span role="tablist" aria-label="Chart range"\1><button\2>1D</button>', s, count=1)
+    s = re.sub(r'<button([^>]*)>1Y</button>', r'<button aria-selected="true"\1>1Y</button>', s, count=1)
+    s = sub1(s, '<sc-for list="{{stats}}"', '<sc-if value="{{notZen}}" hint-placeholder-val="{{ false }}"><p style="margin: 8px 0 0; font-size: 14px; color: #5B6577">Not available yet.</p></sc-if><sc-for list="{{stats}}"')
+    s = sub1(s, '<sc-for list="{{fin}}"', '<sc-if value="{{notZen}}" hint-placeholder-val="{{ false }}"><p style="margin: 8px 0 0; font-size: 14px; color: #5B6577">Not available yet.</p></sc-if><sc-for list="{{fin}}"')
+    s = sub1(s, ">One of Nigeria's largest banks by assets. It earns mainly from interest on loans and investments, plus fees on payments, cards and transfers.<", '>{{about}}<')
+    a = s.index('<a href="#"', s.index('News and disclosures')); b = s.index('<p', a)
+    s = s[:a] + '<sc-if value="{{isZen}}" hint-placeholder-val="{{ true }}">' + s[a:b].replace('<a href="#"', '<a href="NotificationsNavy.dc.html"') + '</sc-if><sc-if value="{{notZen}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; color: #5B6577">Not available yet.</p></sc-if>' + s[b:]
+    s = logic(s, """  constructor(p) { super(p); this.state = { n: 0 }; }
+  tk() { const m = /[?&]t=([A-Z]+)/.exec(location.search); return m ? m[1] : 'ZENITHBANK'; }
+  renderVals() {
+    const ST = [['Market cap', '₦3.22tn'], ['P/E ratio', '3.1'], ['Dividend yield', '8.3%'], ['EPS', '₦15.40'], ['52-week high', '₦52.80'], ['52-week low', '₦32.10'], ['Volume', '28.4M'], ['Shares out', '66.8bn']];
+    const FI = [['Gross earnings', '1,312', '2,133', '3,172', '+49%'], ['Net interest income', '603', '1,101', '1,624', '+48%'], ['Operating expenses', '421', '612', '889', '+45%'], ['Profit before tax', '275', '676', '1,330', '+97%'], ['Profit after tax', '226', '565', '1,028', '+82%'], ['Earnings per share (₦)', '3.38', '8.46', '15.40', '+82%']];
+    const F = window.FV, S = F && F.SIM, t = this.tk(), zen = t === 'ZENITHBANK', co = S ? S.company(t) : { name: 'Zenith Bank', sector: 'Banking' }, d = (window.FVD && window.FVD.COMPANIES || []).filter((x) => x.ticker === t)[0] || {};
+    const p = S ? S.price(t) : 4820, q = S ? S.prev(t) : 4662, ch = S ? S.change(t) : 3.4, P = F && F.PLUS, w = P ? P.lists()[0].tickers.indexOf(t) >= 0 : false, nm = d.name || co.name || t;
+    return { t, name: nm, short: co.name || nm, sector: co.sector || d.sector || '', price: '₦' + (p / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      chg: (p >= q ? '▲ ' : '▼ ') + (Math.abs(p - q) / 100).toFixed(2) + ' (' + Math.abs(ch).toFixed(1) + '%)', fg: ch >= 0 ? '#047857' : '#B9473F',
+      watched: String(w), watchLabel: w ? 'Remove from watchlist' : 'Add to watchlist', toggleWatch: () => { if (P) P.toggle(0, t); this.setState({ n: this.state.n + 1 }); },
+      askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent('How does ' + (co.name || t) + ' make money?'), about: d.about || co.about || '',
+      isZen: zen, notZen: !zen, stats: zen ? ST.map(([k, v]) => ({ k, v })) : [], fin: zen ? FI.map(([k, a, b, c, y]) => ({ k, a, b, c, y })) : [] };
+  }""")
+    wr('CompanyLaptopNavy', s)
 print('laptop wired')
