@@ -344,4 +344,32 @@ if MARK not in s:
       noCos: !c.length, guides: (r.results || []).filter((x) => x.kind === 'article').slice(0, 6).map((x) => { const a = L.article(x.id); return { href: x.href.replace('UPArticle', 'ArticleNavy'), t: x.title, m: a ? L.minutes(a) + ' min' : '' }; }),
       askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent(q) }; }""")
     wr('SearchLaptopNavy', s)
+# Article (phone: ArticleNavy). The article opened (?a=) with its topic, reading time, definition, formula, why it matters,
+# example and related guides; Save and reading progress as on the phone; the NGX card shows on the dividend articles.
+s = rd('ArticleLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '<span>The Nigerian market</span><span>/</span><span>Dividend yield</span>', '<span>{{topic}}</span><span>/</span><span>{{title}}</span>') if '<span>The Nigerian market</span><span>/</span><span>Dividend yield</span>' in s else s
+    s = re.sub(r'(>)The Nigerian market(</span><span[^>]*>/</span><span[^>]*>)Dividend yield(<)', r'\1{{topic}}\2{{title}}\3', s, count=1)
+    s = sub1(s, '>The Nigerian market · 2 min read<', '>{{kicker}}<')
+    s = re.sub(r'(<h1[^>]*>)Dividend yield(</h1>)', r'\1{{title}}\2', s, count=1)
+    s = sub1(s, '>Dividend yield is the yearly dividend a company pays, shown as a share of its current price.<', '>{{def}}<')
+    s = re.sub(r'(<div[^>]*>)Yield = Dividend ÷ Price<br>₦4\.00 ÷ ₦50\.00 = <strong([^>]*)>8\.0%</strong></div>', r'<sc-if value="{{hasFig}}" hint-placeholder-val="{{ true }}">\1{{rule}}<br>{{calc}} = <strong\2>{{res}}</strong></div></sc-if>', s, count=1)
+    s = sub1(s, '>It shows how much cash a share returns while you hold it. A very high yield can also mean the price has fallen, so always check why before reading it as good news.<', '>{{why}}<')
+    s = re.sub(r'(<h2[^>]*>A worked example</h2>\\s*<p[^>]*>)Zenith Bank paid ₦4\.00 per share for FY2024\. At ₦48\.20 a share, that is a yield of about 8\.3%\.(</p>)', r'<sc-if value="{{hasEx}}" hint-placeholder-val="{{ true }}">\1{{ex}}\2</sc-if>', s, count=1)
+    s = re.sub(r'(<a href="CompanyLaptopNavy\.dc\.html\?t=ZENITHBANK")', r'<sc-if value="{{showCo}}" hint-placeholder-val="{{ true }}">\1', s, count=1)
+    s = re.sub(r'(Div yield 8\.3%</span></a>)', r'\1</sc-if>', s, count=1)
+    s = sub1(s, '<a href="AskLaptopNavy.dc.html"', '<a href="{{askHref}}"')
+    a = s.index('<a href="#"', s.index('>Related<')); b = s.index('</div>', a)
+    s = s[:a] + '<sc-for list="{{rel}}" as="r" hint-placeholder-count="3"><a href="{{r.href}}" style="font-size: 14px; text-decoration: none">{{r.t}}</a></sc-for>' + s[b:]
+    s = logic(s, """  componentDidMount() { const L = window.FV && window.FV.LIB; if (!L) return; const a = L.current(); L.setRead(a.slug, 10); const m = document.querySelector('main');
+    this.onScroll = () => { if (!m) return; L.setRead(a.slug, Math.min(100, Math.round((m.scrollTop + m.clientHeight) / Math.max(1, m.scrollHeight) * 100))); };
+    if (m) m.addEventListener('scroll', this.onScroll, { passive: true }); setTimeout(this.onScroll, 300); }
+  renderVals() { const L = window.FV ? window.FV.LIB : null; if (!L) return {}; const a = L.current(), f = a.deep && a.deep.formula, all = L.all();
+    let fig = { hasFig: false, rule: '', calc: '', res: '' };
+    if (f && f.rule && f.calc) { const k = String(f.calc).lastIndexOf('='); fig = { hasFig: true, rule: f.rule, calc: k > 0 ? f.calc.slice(0, k).trim() : f.calc, res: k > 0 ? f.calc.slice(k + 1).trim() : '' }; }
+    const rel = (a.related || []).map((sl) => all.filter((x) => x.slug === sl)[0]).filter(Boolean).concat(L.inTopic(L.topicOf(a).name).items.filter((x) => x.slug !== a.slug)).filter((x, i, arr) => arr.indexOf(x) === i).slice(0, 3);
+    return Object.assign(fig, { topic: L.topicOf(a).name, title: a.title, kicker: L.topicOf(a).name + ' · ' + L.minutes(a) + ' min read', def: a.definition, why: a.whyItMatters || (a.explanation || []).join(' '),
+      hasEx: !!a.example, ex: a.example || '', showCo: /dividend/.test(a.slug), askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent('What is ' + a.title.toLowerCase() + '?'),
+      rel: rel.map((x) => ({ t: x.title, href: 'ArticleNavy.dc.html?a=' + x.slug })) }); }""")
+    wr('ArticleLaptopNavy', s)
 print('laptop wired')
