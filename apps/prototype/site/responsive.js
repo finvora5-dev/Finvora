@@ -252,7 +252,7 @@
     var px = r.left - w.getBoundingClientRect().left + p[0] / f.W * r.width, py = r.top - w.getBoundingClientRect().top + p[1] / f.H * r.height;
     var tw = tip.offsetWidth, th = tip.offsetHeight, ww = w.clientWidth;
     tip.style.left = Math.max(4, Math.min(ww - tw - 4, px - tw / 2)) + "px";
-    tip.style.top = (py - th - 12 < 0 ? py + 12 : py - th - 12) + "px";
+    var top0 = r.top - w.getBoundingClientRect().top; tip.style.top = (py - th - 12 < top0 ? py + 12 : py - th - 12) + "px"; // stay inside the chart, never over the figures above it
   }
   function scrubInit(svg) {
     if (svg._fvOn) return; svg._fvOn = 1; svg.style.touchAction = "pan-y"; svg.style.cursor = "crosshair"; var down = false;
@@ -274,7 +274,7 @@
   function initChart() { if (document.querySelector('[role="tablist"][aria-label="Chart range"]') && F() && F().SIM) { var sel = document.querySelector('[aria-label="Chart range"] [aria-selected="true"]'); chart(sel ? sel.textContent.trim() : "1Y"); return true; } }
   var tries = 0, it = setInterval(function () { if (initChart() || ++tries > 60) clearInterval(it); }, 100);
   // Practice charts drawn from the simulated prices so a tap reads a real day (owner, 16 Nov 2026): last month (the 1M the board shows selected), 21 trading days.
-  // The laptop Practice board still shows fixed sample figures, so its chart is left as drawn until that board is wired.
+  // The range buttons under each chart (1D, 1W, 1M, 3M, 1Y, All) redraw it.
   function portfolioSeries(n) {
     var S = F().SIM, a = S.account(), d0 = S.day(), out = [], H = {}, P = {};
     a.holdings.forEach(function (h) { H[h.ticker] = h.quantity; });
@@ -287,11 +287,33 @@
   }
   function initPractice() {
     if (!F() || !F().SIM) return false; var done = false;
-    document.querySelectorAll('svg[aria-label^="Price chart"], svg[aria-label^="Portfolio value"]').forEach(function (svg) {
-      var pc = /^Price/.test(svg.getAttribute("aria-label")), pts = pc ? series(tkr(), 21) : portfolioSeries(21); if (pts.length < 2) return;
-      var nm = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); };
-      draw(svg, pts, (pc ? "One-month price chart" : "One-month portfolio value") + ", from " + nm(pts[0]) + " to " + nm(pts[pts.length - 1])); done = true; });
+    document.querySelectorAll('svg[aria-label^="Price chart"], svg[aria-label^="Portfolio value"], svg[aria-label^="Portfolio chart"]').forEach(function (svg) {
+      svg._pc = /^Price/.test(svg.getAttribute("aria-label")); var row = rangeRow(svg), sel = row && [].filter.call(row.children, function (b) { return b.getAttribute("aria-selected") === "true"; })[0];
+      practiceDraw(svg, sel ? sel.textContent.trim() : "1M"); done = true; });
     return done;
+  }
+  var PDAYS = { "1D": 2, "1W": 5, "1M": 21, "3M": 63, "1Y": 250 };
+  function practiceDraw(svg, range) {
+    var S = F().SIM, nm = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); }, n = PDAYS[range];
+    if (range === "All") { var tr = S.account().trades; n = svg._pc ? 250 : Math.max(5, tr.length ? S.day() - tr[0].day + 2 : 5); }
+    if (range === "1D") toast("Prices update once a day");
+    var pts = svg._pc ? series(tkr(), n) : portfolioSeries(n); if (pts.length < 2) return;
+    draw(svg, pts, range + (svg._pc ? " price chart" : " portfolio value") + ", from " + nm(pts[0]) + " to " + nm(pts[pts.length - 1]));
+  }
+  // The drawn range row sits right after the chart (or after its wrapper). It becomes a tab list; the drawn selected look moves with the choice.
+  function rangeRow(svg) {
+    var c = [svg.nextElementSibling, svg.parentElement && svg.parentElement.nextElementSibling], RX = /^(1D|1W|1M|3M|1Y|5Y|All)$/;
+    for (var k = 0; k < c.length; k++) { var el = c[k]; if (!el || !el.children.length || ![].every.call(el.children, function (x) { return RX.test(x.textContent.trim()); })) continue;
+      if (!el._fvRange) { el._fvRange = 1; el.setAttribute("role", "tablist"); el.setAttribute("aria-label", "Practice chart range");
+        var kids = [].slice.call(el.children), on = kids.filter(function (x) { return x.style.fontWeight === "600"; })[0] || kids[0], off = kids.filter(function (x) { return x !== on; })[0] || on;
+        var onS = { bg: on.style.background, c: on.style.color, w: on.style.fontWeight }, offS = { bg: off.style.background, c: off.style.color, w: off.style.fontWeight };
+        var pick = function (b) { kids.forEach(function (x) { var y = x === b, st = y ? onS : offS; x.style.background = st.bg; x.style.color = st.c; x.style.fontWeight = st.w; x.setAttribute("aria-selected", y ? "true" : "false"); x.tabIndex = y ? 0 : -1; }); };
+        kids.forEach(function (x) { x.setAttribute("role", "tab"); x.style.cursor = "pointer";
+          x.addEventListener("click", function () { pick(x); practiceDraw(svg, x.textContent.trim()); });
+          x.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); x.click(); } }); });
+        pick(on); }
+      return el; }
+    return null;
   }
   var tries2 = 0, it2 = setInterval(function () { if (initPractice() || ++tries2 > 60) clearInterval(it2); }, 100);
 

@@ -33,27 +33,43 @@
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start">
       <section style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px">
         <span style="font-size: 13px; color: #5B6577">Portfolio value</span>
-        <div style="display: flex; align-items: baseline; gap: 14px; margin-top: 4px"><span style="font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 500">₦1,051,750.00</span><span style="font-size: 14px; color: #047857">▲ ₦51,750.00 (5.18%)</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px; margin-top: 4px"><span style="font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 500">{{total}}</span><span style="font-size: 14px; color: {{plC}}">{{pl}}</span></div>
         <svg viewBox="0 0 760 200" width="100%" height="200" aria-label="Portfolio chart, rising" style="margin-top: 10px"><path d="M0 160 L60 152 L120 162 L180 138 L240 142 L300 120 L360 128 L420 100 L480 106 L540 80 L600 86 L660 58 L760 40" fill="none" stroke="#10B981" stroke-width="2"></path></svg>
       </section>
       <section style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px">
-        <h2 style="margin: 0; font-size: 15px; font-weight: 600">Buy Zenith Bank</h2>
-        <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #5B6577">Price</span><span style="font-family: 'Geist Mono', monospace">₦48.20</span></div>
-        <label style="font-size: 13px; font-weight: 500">Shares<input inputmode="numeric" enterkeyhint="done" aria-label="Shares" value="100" style="margin-top: 6px; width: 100%; box-sizing: border-box; height: 44px; border: 1px solid #D5D9E0; border-radius: 10px; padding: 0 12px; font: inherit; font-family: 'Geist Mono', monospace; font-size: 16px"></label>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 600"><span>Total incl. fees</span><span style="font-family: 'Geist Mono', monospace">₦4,892.30</span></div>
-        <a href="TradeNavy.dc.html" style="height: 46px; border-radius: 10px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px">Review order</a>
-        <span style="font-size: 12px; color: #5B6577">Cash available ₦412,600.00</span>
+        <h2 style="margin: 0; font-size: 15px; font-weight: 600">Buy {{name}}</h2>
+        <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #5B6577">Price</span><span style="font-family: 'Geist Mono', monospace">{{price}}</span></div>
+        <label style="font-size: 13px; font-weight: 500">Shares<input inputmode="numeric" enterkeyhint="done" aria-label="Shares" value="{{qIn}}" onInput="{{onQ}}" style="margin-top: 6px; width: 100%; box-sizing: border-box; height: 44px; border: 1px solid #D5D9E0; border-radius: 10px; padding: 0 12px; font: inherit; font-family: 'Geist Mono', monospace; font-size: 16px"></label>
+        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 600"><span>Total incl. fees</span><span style="font-family: 'Geist Mono', monospace">{{totBuy}}</span></div>
+        <a href="{{tradeHref}}" style="height: 46px; border-radius: 10px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 15px">Review order</a>
+        <span style="font-size: 12px; color: #5B6577">Cash available {{cash}}</span>
       </section>
     </div>
     <section style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden">
       <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; height: 40px; align-items: center; padding: 0 20px; font-size: 12px; color: #5B6577"><span>Holding</span><span style="text-align: right">Shares</span><span style="text-align: right">Value</span><span style="text-align: right">Return</span></div>
-      <a href="CompanyLaptopNavy.dc.html?t=ZENITHBANK" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; height: 56px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; text-decoration: none; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 500">Zenith Bank</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">ZENITHBANK</span></span><span style="font-family: 'Geist Mono', monospace; text-align: right">5,000</span><span style="font-family: 'Geist Mono', monospace; text-align: right">₦241,000.00</span><span style="font-family: 'Geist Mono', monospace; text-align: right"><span style="color: #047857">▲ 6.2%</span></span></a><a href="CompanyLaptopNavy.dc.html?t=DANGCEM" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; height: 56px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; text-decoration: none; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 500">Dangote Cement</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">DANGCEM</span></span><span style="font-family: 'Geist Mono', monospace; text-align: right">500</span><span style="font-family: 'Geist Mono', monospace; text-align: right">₦240,000.00</span><span style="font-family: 'Geist Mono', monospace; text-align: right"><span style="color: #047857">▲ 3.1%</span></span></a><a href="CompanyLaptopNavy.dc.html?t=MTNN" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; height: 56px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; text-decoration: none; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 500">MTN Nigeria</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">MTNN</span></span><span style="font-family: 'Geist Mono', monospace; text-align: right">700</span><span style="font-family: 'Geist Mono', monospace; text-align: right">₦158,150.00</span><span style="font-family: 'Geist Mono', monospace; text-align: right"><span style="color: #B9473F">▼ 1.4%</span></span></a>
+      
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="3"><a href="{{r.href}}" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; height: 56px; align-items: center; padding: 0 20px; border-top: 1px solid #EDEFF2; text-decoration: none; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 500">{{r.name}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #5B6577">{{r.t}}</span></span><span style="font-family: 'Geist Mono', monospace; text-align: right">{{r.qty}}</span><span style="font-family: 'Geist Mono', monospace; text-align: right">{{r.val}}</span><span style="font-family: 'Geist Mono', monospace; text-align: right"><span style="color: {{r.c}}">{{r.ch}}</span></span></a></sc-for>
     </section>
   </main>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
-class Component extends DCLogic { renderVals() { return {}; } }
+class Component extends DCLogic {
+/* practice-laptop */
+  S() { return window.FV && window.FV.SIM; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  tk() { const m = /[?&]t=([A-Z]+)/.exec(location.search); return m ? m[1] : 'ZENITHBANK'; }
+  constructor(p) { super(p); this.state = { q: '100' }; const S = this.S(); if (S && !S.valuation().positions.length && !S.get().trades.length) location.replace('PracticeEmptyLaptopNavy.dc.html'); }
+  renderVals() {
+    const S = this.S(); if (!S) return {}; const v = S.valuation(), a = S.get(), start = a.startingCashKobo, t = this.tk(), p = S.price(t);
+    const pct = start ? v.totalPlKobo / start * 100 : 0, q = Math.max(0, parseInt(this.state.q, 10) || 0), g = q * p, tot = q ? g + S.fee(g) : 0;
+    return { total: this.n(v.totalKobo), pl: (v.totalPlKobo >= 0 ? '▲ ' : '▼ ') + this.n(Math.abs(v.totalPlKobo)) + ' (' + Math.abs(pct).toFixed(2) + '%)', plC: v.totalPlKobo >= 0 ? '#047857' : '#B9473F',
+      name: S.company(t).name, price: this.n(p), qIn: this.state.q, onQ: (e) => this.setState({ q: e.target.value.replace(/\D/g, '').slice(0, 7) }),
+      totBuy: this.n(tot), tradeHref: 'TradeNavy.dc.html?t=' + t + '&q=' + Math.max(1, q), cash: this.n(v.cashKobo),
+      rows: v.positions.map((x) => { const r = x.costBasisKobo ? x.unrealizedPlKobo / x.costBasisKobo * 100 : 0;
+        return { href: 'CompanyLaptopNavy.dc.html?t=' + x.ticker, name: S.company(x.ticker).name, t: x.ticker, qty: x.quantity.toLocaleString('en-NG'), val: this.n(x.valueKobo), ch: (r >= 0 ? '▲ ' : '▼ ') + Math.abs(r).toFixed(1) + '%', c: r >= 0 ? '#047857' : '#B9473F' }; }) };
+  }
+}
 </script>
 </body>
 </html>

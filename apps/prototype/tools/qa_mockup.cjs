@@ -18,6 +18,8 @@ const LIMIT = +(process.env.FV_MOCKUP_LIMIT || 6); // percent of pixels allowed 
     await p.goto(MB + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(500); const a = await p.screenshot();
     const drawn = await p.evaluate(() => { const r = document.getElementById('dc-root'); return r ? r.innerText.trim().length : 0; });
     if (drawn < 20) { res.push({ board: name, differsPct: null, ok: true, note: 'mock-up file does not render, compare by eye' }); continue; }
+    // Practice screens need practice shares, or they open the empty Practice screen: place the mock-up's holdings once.
+    if (/^Practice(?!Empty)/.test(name)) { await p.goto(B + 'PracticeEmptyLaptopNavy.dc.html', { waitUntil: 'networkidle' }); await p.evaluate(() => { const S = window.FV && window.FV.SIM; if (S && !S.get().trades.length) { S.trade('buy', 'ZENITHBANK', 500, 'qa1'); S.trade('buy', 'DANGCEM', 50, 'qa2'); S.trade('buy', 'MTNN', 70, 'qa3'); } }); }
     await p.goto(B + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(700); const routed = !p.url().includes(name); const c = await p.screenshot();
     const pct = await p.evaluate(async ([x, y]) => {
       const load = (b64) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = 'data:image/png;base64,' + b64; });
