@@ -82,6 +82,7 @@ if s:
     s = sub1(s, '<a href="LessonNavy.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #0B192C;', '<a href="{{contHref}}" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #0B192C;')
     s = sub1(s, '>Continue: Budgeting · 4 min</a>', '>{{cont}}</a>')
     s = sub1(s, 'width: 33%; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">2/6</span>', 'width: {{donePct}}; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{doneN}}</span>')
+    s = s.replace('>2/6</span>', '>{{doneN}}</span>', 1)  # All courses: Money Foundations shows the same progress
     s = logic(s, """  renderVals() {
     const F = window.FV, st = F ? F.get() : { done: 2 }, done = st.done || 0, LS = F ? F.LESSONS : [];
     const L = LS.map((x, i) => [x.title, i < done ? 'done' : i === done ? 'next' : 'locked', x.min + ' min']).concat([['Course review', done >= LS.length ? 'next' : 'locked', '8 questions']]);
