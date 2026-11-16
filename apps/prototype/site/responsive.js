@@ -224,8 +224,8 @@
     var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1, n = pts.length;
     var xy = pts.map(function (v, i) { return [Math.round(i * W / Math.max(1, n - 1) * 10) / 10, Math.round((H * 0.89 - (v - lo) / sp * H * 0.72) * 10) / 10]; });
     var line = "M" + xy.map(function (p) { return p[0] + " " + p[1]; }).join(" L");
-    var paths = svg.querySelectorAll("path"); if (paths.length < 2) return;
-    paths[0].setAttribute("d", line + " L" + W + " " + H + " L0 " + H + " Z"); paths[1].setAttribute("d", line);
+    var paths = svg.querySelectorAll(":scope > path"); if (!paths.length) return;
+    if (paths.length < 2) paths[0].setAttribute("d", line); else { paths[0].setAttribute("d", line + " L" + W + " " + H + " L0 " + H + " Z"); paths[1].setAttribute("d", line); }
     var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", xy[n - 1][0]); c.setAttribute("cy", xy[n - 1][1]); }
     svg.setAttribute("aria-label", label);
     svg._fv = { pts: pts, xy: xy, W: W, H: H }; hideTip(svg); scrubInit(svg);
@@ -237,13 +237,14 @@
     while (n < back) { d.setUTCDate(d.getUTCDate() - 1); if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) n++; }
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }); }
   function hideTip(svg) { var w = svg.parentElement, tip = w && w.querySelector(".fvScrub"); if (tip) tip.remove();
-    var g = svg.querySelector(".fvScrubLine"); if (g) g.remove();
-    var f = svg._fv, c = svg.querySelector("circle"); if (f && c) { c.setAttribute("cx", f.xy[f.xy.length - 1][0]); c.setAttribute("cy", f.xy[f.xy.length - 1][1]); } }
+    svg.querySelectorAll(".fvScrubLine, .fvScrubDot").forEach(function (x) { x.remove(); }); }
   function showTip(svg, clientX) {
     var f = svg._fv; if (!f) return; var r = svg.getBoundingClientRect(), n = f.pts.length;
     var i = Math.max(0, Math.min(n - 1, Math.round((clientX - r.left) / r.width * (n - 1)))), p = f.xy[i];
-    var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); }
-    var g = svg.querySelector(".fvScrubLine"); if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "line"); g.setAttribute("class", "fvScrubLine"); g.setAttribute("stroke", "#5B6577"); g.setAttribute("stroke-dasharray", "3 3"); g.setAttribute("vector-effect", "non-scaling-stroke"); svg.insertBefore(g, c); }
+    var NS = "http://www.w3.org/2000/svg", g = svg.querySelector(".fvScrubLine"), c = svg.querySelector(".fvScrubDot");
+    if (!g) { g = document.createElementNS(NS, "line"); g.setAttribute("class", "fvScrubLine"); g.setAttribute("stroke", "#5B6577"); g.setAttribute("stroke-dasharray", "3 3"); g.setAttribute("vector-effect", "non-scaling-stroke"); svg.appendChild(g); }
+    if (!c) { var ln = svg.querySelectorAll(":scope > path"); c = document.createElementNS(NS, "circle"); c.setAttribute("class", "fvScrubDot"); c.setAttribute("r", "4"); c.setAttribute("stroke", "#FFFFFF"); c.setAttribute("stroke-width", "2"); c.setAttribute("fill", ln.length ? ln[ln.length - 1].getAttribute("stroke") || "#10B981" : "#10B981"); svg.appendChild(c); }
+    c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]);
     g.setAttribute("x1", p[0]); g.setAttribute("x2", p[0]); g.setAttribute("y1", 0); g.setAttribute("y2", f.H);
     var w = svg.parentElement; if (getComputedStyle(w).position === "static") w.style.position = "relative";
     var tip = w.querySelector(".fvScrub"); if (!tip) { tip = document.createElement("div"); tip.className = "fvScrub"; tip.setAttribute("aria-live", "polite"); w.appendChild(tip); }
@@ -272,6 +273,27 @@
   }
   function initChart() { if (document.querySelector('[role="tablist"][aria-label="Chart range"]') && F() && F().SIM) { var sel = document.querySelector('[aria-label="Chart range"] [aria-selected="true"]'); chart(sel ? sel.textContent.trim() : "1Y"); return true; } }
   var tries = 0, it = setInterval(function () { if (initChart() || ++tries > 60) clearInterval(it); }, 100);
+  // Practice charts drawn from the simulated prices so a tap reads a real day (owner, 16 Nov 2026): last month (the 1M the board shows selected), 21 trading days.
+  // The laptop Practice board still shows fixed sample figures, so its chart is left as drawn until that board is wired.
+  function portfolioSeries(n) {
+    var S = F().SIM, a = S.account(), d0 = S.day(), out = [], H = {}, P = {};
+    a.holdings.forEach(function (h) { H[h.ticker] = h.quantity; });
+    a.trades.forEach(function (t) { P[t.ticker] = 1; }); Object.keys(H).forEach(function (t) { P[t] = 1; });
+    var hist = {}; Object.keys(P).forEach(function (t) { hist[t] = S.history(t, n); });
+    for (var i = n - 1; i >= 0; i--) { var day = d0 - i, cash = a.cashKobo, q = Object.assign({}, H);
+      a.trades.forEach(function (t) { if (t.day > day) { cash += t.side === "buy" ? t.netKobo : -t.netKobo; q[t.ticker] = (q[t.ticker] || 0) + (t.side === "buy" ? -t.quantity : t.quantity); } });
+      var v = cash; Object.keys(q).forEach(function (t) { var h = hist[t], px = h[h.length - 1 - i]; if (q[t] > 0 && px) v += q[t] * px; }); out.push(v); }
+    return out;
+  }
+  function initPractice() {
+    if (!F() || !F().SIM) return false; var done = false;
+    document.querySelectorAll('svg[aria-label^="Price chart"], svg[aria-label^="Portfolio value"]').forEach(function (svg) {
+      var pc = /^Price/.test(svg.getAttribute("aria-label")), pts = pc ? series(tkr(), 21) : portfolioSeries(21); if (pts.length < 2) return;
+      var nm = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); };
+      draw(svg, pts, (pc ? "One-month price chart" : "One-month portfolio value") + ", from " + nm(pts[0]) + " to " + nm(pts[pts.length - 1])); done = true; });
+    return done;
+  }
+  var tries2 = 0, it2 = setInterval(function () { if (initPractice() || ++tries2 > 60) clearInterval(it2); }, 100);
 
   document.addEventListener("click", function (e) {
     var t = e.target.closest ? e.target : null; if (!t) return;
