@@ -303,3 +303,14 @@
     }
   });
 })();
+
+// Laptop sidebar profile card: the signed-in learner's initials, name and plan (phone twin: MeNavy header).
+(function () {
+  var n = 0, t = setInterval(function () {
+    var card = document.querySelector('#dc-root aside a[href^="MeLaptopNavy"]'); if (!card && ++n < 40) return; clearInterval(t); if (!card || !window.FV) return;
+    try { var a = window.FV.AUTH.get(), nm = a.name || (a.email ? a.email.split("@")[0] : "Ada Okafor"), plus = window.FV.billing().sub.plan === "plus";
+      var sp = card.querySelectorAll("span"); if (sp.length < 4) return;
+      sp[0].textContent = nm.split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase();
+      sp[2].textContent = nm; sp[3].textContent = plus ? "Plus plan" : "Free plan"; } catch (e) {}
+  }, 50);
+})();
