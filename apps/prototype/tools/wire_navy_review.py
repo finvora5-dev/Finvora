@@ -107,4 +107,11 @@ if 'fv.review.v1' not in s:
     s = sub1(s, "return { cont: cur ?", "return { contHref: cur ? 'LessonInfoNavy.dc.html' : 'CourseReviewNavy.dc.html', cont: passed ? 'Review the course again' : cur ?")
     s = sub1(s, '<a href="LessonInfoNavy.dc.html" style="height: 48px; border-radius: 12px; background: #0B192C;', '<a href="{{contHref}}" style="height: 48px; border-radius: 12px; background: #0B192C;')
     wr('LearnNavy', s)
+# Learn: finished lessons reopen (replay via ?l=), the next lesson and review open; long button text wraps with padding.
+s = rd('LearnNavy')
+if 'href: st ===' not in s:
+    s = sub1(s, "      t, s: st === 'done'", "      href: st === 'locked' ? '#' : i === LS.length ? 'CourseReviewNavy.dc.html' : st === 'next' ? 'LessonInfoNavy.dc.html' : 'LessonInfoNavy.dc.html?l=' + LS[i].id,\n      t, s: st === 'done'")
+    s = sub1(s, '<a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 54px; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: {{l.ink}}">', '<a href="{{l.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 54px; border-bottom: 1px solid #EDEFF2; text-decoration: none; color: {{l.ink}}">')
+    s = sub1(s, '<a href="{{contHref}}" style="height: 48px; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center;', '<a href="{{contHref}}" style="min-height: 48px; padding: 12px 16px; box-sizing: border-box; line-height: 1.3; text-align: center; border-radius: 12px; background: #0B192C; color: #FFFFFF; display: flex; align-items: center; justify-content: center;')
+    wr('LearnNavy', s)
 print('wired')
