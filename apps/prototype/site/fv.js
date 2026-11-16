@@ -156,12 +156,13 @@
     var a = null; try { a = JSON.parse(localStorage.getItem(ASK_KEY) || "null"); } catch (e) {}
     if (!a || !Array.isArray(a.msgs)) a = { usage: null, msgs: [] };
     // "Save Finvora AI chats" off: the conversation lives in this tab only and is gone when it closes.
-    if (!keepChats()) { a.msgs = []; try { a.msgs = JSON.parse(sessionStorage.getItem(ASK_KEY) || "[]"); } catch (e) {} }
+    if (!Array.isArray(a.past)) a.past = [];
+    if (!keepChats()) { a.msgs = []; a.past = []; try { var ss = JSON.parse(sessionStorage.getItem(ASK_KEY) || "[]"); if (Array.isArray(ss)) a.msgs = ss; else if (ss) { a.msgs = ss.msgs || []; a.past = ss.past || []; } } catch (e) {} }
     return a;
   }
   function askSave(a) {
     try { if (keepChats()) { localStorage.setItem(ASK_KEY, JSON.stringify(a)); return; }
-      sessionStorage.setItem(ASK_KEY, JSON.stringify(a.msgs)); localStorage.setItem(ASK_KEY, JSON.stringify({ usage: a.usage, msgs: [] })); } catch (e) {}
+      sessionStorage.setItem(ASK_KEY, JSON.stringify({ msgs: a.msgs, past: a.past || [] })); localStorage.setItem(ASK_KEY, JSON.stringify({ usage: a.usage, msgs: [], past: [] })); } catch (e) {}
   }
   var ASK = {
     status: function () { return D().canAsk(askLoad().usage, lagosDay(), D().entitlements(plan()).askFinDailyLimit); },
@@ -179,8 +180,18 @@
       a.msgs = a.msgs.concat([{ q: q, r: r, at: new Date().toISOString() }]).slice(-30); askSave(a);
       return r;
     },
-    clear: function () { var a = askLoad(); a.msgs = []; askSave(a); }
+    // Conversations (owner, 16 Nov 2026: history on laptop and phone). The open conversation is msgs; earlier ones are kept
+    // in past (newest first, at most 20), each named after its first question. Free questions are counted per day, not per chat.
+    clear: function () { var a = askLoad(); archive(a); askSave(a); },
+    history: function () { var a = askLoad(), out = [];
+      if (a.msgs.length) out.push({ id: "current", title: a.msgs[0].q, at: a.msgs[a.msgs.length - 1].at, n: a.msgs.length, current: true });
+      return out.concat(a.past.map(function (c) { return { id: c.id, title: c.title, at: c.at, n: c.msgs.length, current: false }; })); },
+    open: function (id) { var a = askLoad(), c = a.past.filter(function (x) { return x.id === id; })[0]; if (!c) return false;
+      a.past = a.past.filter(function (x) { return x.id !== id; }); archive(a); a.msgs = c.msgs; askSave(a); return true; },
+    remove: function (id) { var a = askLoad(); if (id === "current") a.msgs = []; else a.past = a.past.filter(function (x) { return x.id !== id; }); askSave(a); }
   };
+  function archive(a) { if (!a.msgs.length) return; var last = a.msgs[a.msgs.length - 1];
+    a.past = [{ id: "c" + Date.parse(a.msgs[0].at || new Date().toISOString()).toString(36) + a.past.length, title: a.msgs[0].q, at: last.at, msgs: a.msgs }].concat(a.past).slice(0, 20); a.msgs = []; }
 
   // ---- Simulated checkout (build-backlog B5). No card details, no real payment. Order rules come
   // from packages/domain: one order per purchase, retries reuse it, only our "server check" decides.

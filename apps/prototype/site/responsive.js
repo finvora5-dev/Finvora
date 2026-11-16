@@ -206,6 +206,9 @@
   }
   // Side panel (skills: gestures, animate). Slides in from the left with the drawer curve; follows the finger 1:1 on a
   // leftward drag and closes on a 80px drag or a quick flick; tap outside or Escape closes; reduced motion fades (CSS).
+  function whenLabel(at) { if (!at) return ""; var d = new Date(at), t = new Date(), y = new Date(t.getTime() - 86400000), same = function (a, b) { return a.toDateString() === b.toDateString(); };
+    return same(d, t) ? "Today" : same(d, y) ? "Yesterday" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }
+  window.fvWhen = whenLabel;
   function drawer(title, msgs, Q) {
     var host = document.getElementById("dc-root") || document.body, back = el("div", ""), d = el("aside", ""), opener = document.activeElement;
     back.className = "fv-drawer-back"; back.setAttribute("aria-hidden", "true"); d.className = "fv-drawer";
@@ -214,9 +217,13 @@
     var nb = el("button", "height:46px;flex:none;border-radius:12px;border:0;background:#10B981;color:#FFFFFF;font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px", "New conversation"); nb.type = "button";
     nb.onclick = function () { if (Q) Q.clear(); location.reload(); }; d.appendChild(nb);
     var list = el("div", "flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px"); d.appendChild(list);
-    if (!msgs.length) list.appendChild(el("p", "margin:8px;font-size:14px;color:#8E9AAE", "No questions yet."));
-    msgs.forEach(function (m) { var b = el("button", "flex:none;height:44px;padding:0 12px;border-radius:10px;border:0;background:transparent;color:#C7D0DD;font:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis", m.q); b.type = "button"; b.title = m.q;
-      b.onclick = function () { close(); var hit = [].slice.call(document.querySelectorAll("#chat *")).filter(function (x) { return x.children.length === 0 && x.textContent.trim() === m.q; })[0]; if (hit) hit.scrollIntoView({ block: "center" }); }; list.appendChild(b); });
+    // Saved conversations, newest first; the open one is marked. Tapping an earlier one opens it.
+    if (!msgs.length) list.appendChild(el("p", "margin:8px;font-size:14px;color:#8E9AAE", "No conversations yet."));
+    msgs.forEach(function (c) { var b = el("button", "flex:none;min-height:52px;padding:8px 12px;border-radius:10px;border:0;background:" + (c.current ? "#1A2740" : "transparent") + ";color:" + (c.current ? "#FFFFFF" : "#C7D0DD") + ";font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px");
+      b.type = "button"; b.title = c.title; if (c.current) b.setAttribute("aria-current", "true");
+      b.appendChild(el("span", "font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis", c.title));
+      b.appendChild(el("span", "font-size:12px;color:#8E9AAE", (c.current ? "Open now · " : "") + c.n + (c.n === 1 ? " question" : " questions") + " · " + whenLabel(c.at)));
+      b.onclick = function () { if (c.current) { close(); return; } if (Q && Q.open(c.id)) location.reload(); }; list.appendChild(b); });
     var gone = false, close = function () { if (gone) return; gone = true; d.style.transform = ""; d.classList.add("fv-leaving"); back.classList.add("fv-leaving"); document.removeEventListener("keydown", esc);
       setTimeout(function () { back.remove(); d.remove(); }, 220); if (opener && opener.focus) opener.focus(); };
     var esc = function (e) { if (e.key === "Escape") close(); };
@@ -387,7 +394,7 @@
     if (!t.closest('[role="dialog"]') && t.closest('[aria-label="Conversations"]')) { // the button, not the open panel (it has the same label)
       e.preventDefault(); var Q = F() && F().ASK, msgs = Q ? Q.messages().slice().reverse() : [];
       // Phone: a panel from the left, like the laptop sidebar (owner, 16 Nov 2026). Each question is listed once, newest first.
-      if (window.innerWidth < 1024) { var seenQ = {}; drawer("Conversations", msgs.filter(function (m) { if (seenQ[m.q]) return false; seenQ[m.q] = 1; return true; }), Q); return; }
+      if (window.innerWidth < 1024) { drawer("Conversations", Q ? Q.history() : [], Q); return; }
       sheet("Conversations", function (s, close) {
         var nb = el("button", "height:48px;border-radius:12px;border:0;background:#0B192C;color:#FFFFFF;font:inherit;font-size:15px;font-weight:600;cursor:pointer", "New conversation"); nb.type = "button";
         nb.onclick = function () { if (Q) Q.clear(); location.reload(); }; s.appendChild(nb);
