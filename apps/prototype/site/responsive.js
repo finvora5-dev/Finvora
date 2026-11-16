@@ -191,6 +191,7 @@
     requestAnimationFrame(function () { t.style.opacity = "1"; t.style.transform = "translate(-50%,0)"; });
     setTimeout(function () { t.style.opacity = "0"; t.style.transform = off; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
   }
+  window.fvToast = function (m) { toast(m); };
   function sheet(title, fill) {
     var host = document.getElementById("dc-root") || document.body, back = el("div", "position:fixed;inset:0;background:rgba(17,28,45,.45);z-index:50");
     back.setAttribute("aria-hidden", "true");

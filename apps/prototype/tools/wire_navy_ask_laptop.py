@@ -7,7 +7,7 @@ field scrolls with the page). Same answers, limits and rules as the phone (FV.AS
 Idempotent. Usage: wire_navy_ask_laptop.py <site>"""
 import os, sys
 SITE = sys.argv[1]; P = os.path.join(SITE, 'AskLaptopNavy.dc.html'); s = open(P).read()
-if '<!-- ask-laptop-v2 -->' in s: print('already wired'); sys.exit()
+if '<!-- ask-laptop-v2 -->' in s or '<!-- ask-laptop-focus -->' in s: print('already wired (replaced by wire_navy_ask_laptop_focus.py)'); sys.exit()
 MONO = "'Geist Mono', monospace"
 LABEL = 'font-size: 12px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em'
 LOGO = s[s.index('<span role="img" aria-label="Finvora"', s.index('<main')):]; LOGO = LOGO[:LOGO.index('</span>') + 7]
