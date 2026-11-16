@@ -405,4 +405,49 @@ if MARK not in s:
       isZen: zen, notZen: !zen, stats: zen ? ST.map(([k, v]) => ({ k, v })) : [], fin: zen ? FI.map(([k, a, b, c, y]) => ({ k, a, b, c, y })) : [] };
   }""")
     wr('CompanyLaptopNavy', s)
+# Markets (phone: MarketsNavy). Company rows show live price, change and a sparkline for companies the app has data for;
+# drawn rows for companies without data stay as drawn. Market cap and the indices stay as drawn (no live source).
+s = rd('MarketsLaptopNavy')
+if MARK not in s:
+    for t in ['ZENITHBANK', 'DANGCEM', 'MTNN', 'GTCO', 'AIRTELAFRI', 'SEPLAT', 'NESTLE', 'NB']:
+        m = re.search(r'(<a href="CompanyLaptopNavy\.dc\.html\?t=' + t + r'"(?:(?!</a>).)*?text-align: right">)₦[\d,.]+(</span><span[^>]*><span style=")color: #[0-9A-F]{6}(">)[^<]*(</span>(?:(?!</a>).)*?<path d=")[^"]*(" fill="none" stroke=")#[0-9A-F]{6}', s, flags=re.S)
+        if not m: continue
+        s = s[:m.start()] + m.group(1) + '{{p_' + t + '}}' + m.group(2) + 'color: {{fg_' + t + '}}' + m.group(3) + '{{c_' + t + '}}' + m.group(4) + '{{d_' + t + '}}' + m.group(5) + '{{fg_' + t + '}}' + s[m.end():]
+    s = logic(s, """  renderVals() { const S = window.FV && window.FV.SIM, v = {}; if (!S) return v;
+    S.COMPANIES.forEach((c) => { const t = c.t, ch = S.change(t), h = S.history(t, 20), lo = Math.min.apply(null, h), hi = Math.max.apply(null, h), sp = hi - lo || 1;
+      v['p_' + t] = '₦' + (S.price(t) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); v['c_' + t] = (ch > 0 ? '▲ ' : ch < 0 ? '▼ ' : '') + Math.abs(ch).toFixed(1) + '%';
+      v['fg_' + t] = ch > 0 ? '#047857' : ch < 0 ? '#B9473F' : '#5B6577'; v['d_' + t] = h.map((x, i) => (i ? 'L' : 'M') + Math.round(i * 88 / Math.max(1, h.length - 1)) + ' ' + Math.round(34 - (x - lo) / sp * 28)).join(' '); });
+    return v; }""")
+    wr('MarketsLaptopNavy', s)
+# Notifications (phone: NotificationsNavy, drawn content). Mark all read clears the unread dots and is remembered.
+s = rd('NotificationsLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '<a href="#" style="font-size: 14px; color: #047857; text-decoration: none">Mark all read</a>', '<a href="#" onClick="{{readAll}}" aria-disabled="{{allRead}}" style="font-size: 14px; color: #047857; text-decoration: none">Mark all read</a>')
+    s = s.replace('margin-top: 7px; flex: none; border-radius: 999px; background: #10B981"', 'margin-top: 7px; flex: none; border-radius: 999px; background: {{dot}}"')
+    s = logic(s, """  constructor(p) { super(p); let r = false; try { r = localStorage.getItem('fv.notifRead') === '1'; } catch (e) {} this.state = { read: r }; }
+  renderVals() { return { dot: this.state.read ? 'transparent' : '#10B981', allRead: String(this.state.read), readAll: (e) => { e.preventDefault(); try { localStorage.setItem('fv.notifRead', '1'); } catch (x) {} this.setState({ read: true }); } }; }""")
+    wr('NotificationsLaptopNavy', s)
+# Me (phone: MeNavy, HistoryNavy). Name, email, plan, streak, lessons, courses, Money Foundations progress, the Plus card
+# for Free learners only, and recent activity from the history log.
+s = rd('MeLaptopNavy')
+if MARK not in s:
+    s = re.sub(r'(<h1[^>]*>)Ada Okafor(</h1>)', r'\1{{name}}\2', s, count=1)
+    s = sub1(s, '>ada@example.com · Free plan<', '>{{email}} · {{plan}} plan<')
+    s = re.sub(r'(Days in a row</span><div[^>]*>)7(<)', r'\1{{days}}\2', s, count=1)
+    s = re.sub(r'(Lessons done</span><div[^>]*>)3/36(<)', r'\1{{lessons}}\2', s, count=1)
+    s = re.sub(r'(Courses done</span><div[^>]*>)0/6(<)', r'\1{{courses}}\2', s, count=1)
+    s = re.sub(r'(Money Foundations</span><span[^>]*>)3/6(</span></div><span[^>]*><span style="[^"]*?width: )\d+%', r'\1{{mf}}\2{{mfPct}}', s, count=1)
+    s = re.sub(r'(<section[^>]*>)(<span[^>]*>Finvora Plus</span>)', r'<sc-if value="{{isFree}}" hint-placeholder-val="{{ true }}">\1\2', s, count=1)
+    s = re.sub(r'(>See Plus</a></section>)', r'\1</sc-if>', s, count=1)
+    a = s.index('<div', s.index('>Recent</h2>')); b = s.index('</section>', a)
+    first = s[a:s.index('</div>', a) + 6]
+    tpl = re.sub(r'>Budgeting · lesson<', '>{{r.t}}<', first); tpl = re.sub(r'>Today<', '>{{r.when}}<', tpl)
+    s = s[:a] + '<sc-for list="{{recent}}" as="r" hint-placeholder-count="3">' + tpl + '</sc-for><sc-if value="{{noRecent}}" hint-placeholder-val="{{ false }}"><p style="margin: 8px 0 0; font-size: 14px; color: #5B6577">No activity yet.</p></sc-if>' + s[b:]
+    s = logic(s, """  renderVals() { const F = window.FV; if (!F) return {}; const a = F.AUTH.get(), plus = F.billing().sub.plan === 'plus', st = F.get(), LS = F.LESSONS, done = st.done || 0;
+    let rv = {}; try { rv = JSON.parse(localStorage.getItem('fv.review.v1') || 'null') || {}; } catch (e) {}
+    const map = { lesson: 'lesson', practice: 'lesson replay', daily: 'daily question', article: 'guide', review: 'lesson review' }, today = new Date(Date.now() + 3600000).toISOString().slice(0, 10);
+    const recent = (F.ME.log() || []).filter((e) => map[e.kind] && !/ [(]read[)]$/.test(e.title)).slice(0, 3).map((e) => ({ t: e.title + ' · ' + map[e.kind], when: e.day === today ? 'Today' : new Date(e.day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
+    return { name: a.name || 'Ada Okafor', email: a.email || 'Not signed in', plan: plus ? 'Plus' : 'Free', isFree: !plus, days: String(F.streak()), lessons: done + '/36', courses: ((rv.best || 0) >= 6 ? 1 : 0) + '/6',
+      mf: Math.min(done, LS.length || 6) + '/' + (LS.length || 6), mfPct: Math.round(Math.min(done, LS.length || 6) / (LS.length || 6) * 100) + '%', recent, noRecent: !recent.length }; }""")
+    wr('MeLaptopNavy', s)
 print('laptop wired')
