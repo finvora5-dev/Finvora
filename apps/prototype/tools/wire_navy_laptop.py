@@ -144,4 +144,38 @@ if s:
       takeaways: learned.map((t) => String(t).replace(/[.]$/, '')).join('; ').toLowerCase() || 'see the lesson summary' };
   }""")
     wr('LessonDoneLaptopNavy', s)
+# Home (phone: HomeNavy). Ask box and suggestion chips go to Ask with the question; Continue learning shows the next lesson
+# and progress; the watchlist shows your watchlist companies (or popular ones while it is empty) with live prices.
+s = rd('HomeLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '<input enterkeyhint="send" aria-label="Ask Finvora"', '<input enterkeyhint="send" aria-label="Ask Finvora" value="{{q}}" onInput="{{onQ}}" onKeyDown="{{onKey}}"')
+    s = sub1(s, '<a href="AskLaptopNavy.dc.html" aria-label="Send"', '<a href="{{askHref}}" aria-label="Send"')
+    for t in ['How did Zenith Bank do this year?', 'What is a P/E ratio?', 'Which sectors moved today?']:
+        s = sub1(s, '<a href="AskLaptopNavy.dc.html" style="height: 38px;', '<a href="AskLaptopNavy.dc.html?q=' + t.replace(' ', '%20').replace('?', '%3F').replace('/', '%2F') + '" style="height: 38px;')
+    s = sub1(s, '>Money Foundations · Budgeting</span>', '>{{contTitle}}</span>')
+    s = sub1(s, 'width: 33%; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">2/6</span>', 'width: {{donePct}}; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{doneN}}</span>')
+    a = s.index('<a href="CompanyLaptopNavy.dc.html?t=ZENITHBANK" style="display: flex; align-items: center; gap: 12px; min-height: 52px;'); b = s.index('</section>', a)
+    row = ('<sc-for list="{{wl}}" as="w" hint-placeholder-count="3"><a href="{{w.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid #EDEFF2; text-decoration: none">'
+           '<span style="width: 32px; height: 32px; flex: none; border-radius: 10px; background: #E8EBEF; display: flex; align-items: center; justify-content: center; font-family: \'Geist Mono\', monospace; font-size: 11px; font-weight: 500; color: #0B192C">{{w.ab}}</span>'
+           '<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{w.name}}</span><span style="font-family: \'Geist Mono\', monospace; font-size: 11px; color: #5B6577">{{w.t}}</span></span>'
+           '<svg width="56" height="24" viewBox="0 0 56 24" aria-hidden="true"><path d="{{w.d}}" fill="none" stroke="{{w.sc}}" stroke-width="1.6" stroke-linecap="round"></path></svg>'
+           '<span style="width: 78px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: \'Geist Mono\', monospace; font-size: 13px">{{w.p}}</span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; padding: 3px 6px; border-radius: 6px; background: {{w.bg}}; color: {{w.fg}}">{{w.c}}</span></span></a></sc-for>\n  ')
+    s = s[:a] + row + s[b:]
+    s = logic(s, """  constructor(p) { super(p); this.state = { q: '' }; }
+  renderVals() {
+    const F = window.FV, a = F ? F.AUTH.get() : {}, name = a.name || 'Ada', S = F && F.SIM, P = F && F.PLUS;
+    const day = new Date(Date.now() + 3600000).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+    const st = F ? F.get() : { done: 0 }, done = st.done || 0, LS = F ? F.LESSONS : [], cur = LS[done];
+    let T = P ? P.lists()[0].tickers.filter((t) => S && S.COMPANIES.some((c) => c.t === t)).slice(0, 5) : [];
+    if (!T.length) T = ['ZENITHBANK', 'GTCO', 'SEPLAT'];
+    const wl = S ? T.map((t) => { const ch = S.change(t), h = S.history(t, 12), lo = Math.min.apply(null, h), hi = Math.max.apply(null, h), sp = hi - lo || 1;
+      return { href: 'CompanyLaptopNavy.dc.html?t=' + t, ab: t.slice(0, 3), t, name: S.company(t).name, p: '₦' + (S.price(t) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        c: (ch >= 0 ? '▲ ' : '▼ ') + Math.abs(ch).toFixed(1) + '%', bg: ch >= 0 ? '#DDF3E6' : '#FCEDEB', fg: ch >= 0 ? '#047857' : '#B9473F', sc: ch >= 0 ? '#10B981' : '#B9473F',
+        d: h.map((v, i) => (i ? 'L' : 'M') + Math.round(i * 56 / Math.max(1, h.length - 1)) + ' ' + Math.round(20 - (v - lo) / sp * 16)).join(' ') }; }) : [];
+    const go = () => { const q = this.state.q.trim(); location.href = 'AskLaptopNavy.dc.html' + (q ? '?q=' + encodeURIComponent(q) : ''); };
+    return { name, today: day.replace(/^(\\w+) /, '$1, '), full: a.name ? a.name : 'Ada Okafor', q: this.state.q, onQ: (e) => this.setState({ q: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } },
+      askHref: 'AskLaptopNavy.dc.html' + (this.state.q.trim() ? '?q=' + encodeURIComponent(this.state.q.trim()) : ''),
+      contTitle: 'Money Foundations · ' + (cur ? cur.title : 'Course review'), donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6), wl };
+  }""")
+    wr('HomeLaptopNavy', s)
 print('laptop wired')
