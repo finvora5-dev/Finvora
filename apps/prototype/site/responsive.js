@@ -228,6 +228,38 @@
     paths[0].setAttribute("d", line + " L" + W + " " + H + " L0 " + H + " Z"); paths[1].setAttribute("d", line);
     var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", xy[n - 1][0]); c.setAttribute("cy", xy[n - 1][1]); }
     svg.setAttribute("aria-label", label);
+    svg._fv = { pts: pts, xy: xy, W: W, H: H }; hideTip(svg); scrubInit(svg);
+  }
+  // Tap or drag along the chart to read the price and date of any day (owner, 16 Nov 2026, from a Cowrywise reference).
+  // One point per trading day, counted back over weekdays from today in Lagos.
+  function dayOf(back) { var d = new Date(Date.now() + 3600000), n = 0; d.setUTCHours(12, 0, 0, 0);
+    while (d.getUTCDay() === 0 || d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() - 1);
+    while (n < back) { d.setUTCDate(d.getUTCDate() - 1); if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) n++; }
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }); }
+  function hideTip(svg) { var w = svg.parentElement, tip = w && w.querySelector(".fvScrub"); if (tip) tip.remove();
+    var g = svg.querySelector(".fvScrubLine"); if (g) g.remove();
+    var f = svg._fv, c = svg.querySelector("circle"); if (f && c) { c.setAttribute("cx", f.xy[f.xy.length - 1][0]); c.setAttribute("cy", f.xy[f.xy.length - 1][1]); } }
+  function showTip(svg, clientX) {
+    var f = svg._fv; if (!f) return; var r = svg.getBoundingClientRect(), n = f.pts.length;
+    var i = Math.max(0, Math.min(n - 1, Math.round((clientX - r.left) / r.width * (n - 1)))), p = f.xy[i];
+    var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); }
+    var g = svg.querySelector(".fvScrubLine"); if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "line"); g.setAttribute("class", "fvScrubLine"); g.setAttribute("stroke", "#5B6577"); g.setAttribute("stroke-dasharray", "3 3"); g.setAttribute("vector-effect", "non-scaling-stroke"); svg.insertBefore(g, c); }
+    g.setAttribute("x1", p[0]); g.setAttribute("x2", p[0]); g.setAttribute("y1", 0); g.setAttribute("y2", f.H);
+    var w = svg.parentElement; if (getComputedStyle(w).position === "static") w.style.position = "relative";
+    var tip = w.querySelector(".fvScrub"); if (!tip) { tip = document.createElement("div"); tip.className = "fvScrub"; tip.setAttribute("aria-live", "polite"); w.appendChild(tip); }
+    tip.innerHTML = '<span style="font-family: \'Geist Mono\', monospace; font-size: 14px; font-weight: 500; color: #FFFFFF">\u20a6' + (f.pts[i] / 100).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span><span style="font-size: 12px; color: #C7D0DD">' + dayOf(n - 1 - i) + '</span>';
+    var px = r.left - w.getBoundingClientRect().left + p[0] / f.W * r.width, py = r.top - w.getBoundingClientRect().top + p[1] / f.H * r.height;
+    var tw = tip.offsetWidth, th = tip.offsetHeight, ww = w.clientWidth;
+    tip.style.left = Math.max(4, Math.min(ww - tw - 4, px - tw / 2)) + "px";
+    tip.style.top = (py - th - 12 < 0 ? py + 12 : py - th - 12) + "px";
+  }
+  function scrubInit(svg) {
+    if (svg._fvOn) return; svg._fvOn = 1; svg.style.touchAction = "pan-y"; svg.style.cursor = "crosshair"; var down = false;
+    svg.addEventListener("pointerdown", function (e) { down = true; try { svg.setPointerCapture(e.pointerId); } catch (x) {} showTip(svg, e.clientX); });
+    svg.addEventListener("pointermove", function (e) { if (down || e.pointerType === "mouse") showTip(svg, e.clientX); });
+    ["pointerup", "pointercancel"].forEach(function (k) { svg.addEventListener(k, function () { down = false; }); });
+    svg.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") hideTip(svg); });
+    document.addEventListener("pointerdown", function (e) { if (!svg.contains(e.target)) hideTip(svg); }, true);
   }
   function chart(range) {
     var tl = document.querySelector('[role="tablist"][aria-label="Chart range"]'); if (!tl) return;
