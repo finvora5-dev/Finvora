@@ -18,6 +18,41 @@ if 'plC' not in t:
     t = t.replace(a, '<div style="font-size: 13px; color: {{plC}}">{{pl}}')
     b = "    return { total: this.n(v.totalKobo),"; assert t.count(b) == 1
     t = t.replace(b, "    return { plC: v.totalPlKobo < 0 ? '#F2A39C' : '#00E676', total: this.n(v.totalKobo),"); open(q, 'w').write(t)
+# Dialog boards over the laptop Practice page (Market closed, Reset practice): the page behind the dialog shows the same live
+# figures. Background values use bg* names so they never clash with the dialog's own values; the shares box is read-only there.
+for n in ('MarketClosedLaptopNavy', 'SimResetLaptopNavy'):
+    q = os.path.join(SITE, n + '.dc.html'); t = open(q).read()
+    if '/* practice-bg */' in t:
+        if 'delayed and illustrative' in t: open(q, 'w').write(t.replace('Simulated money. Prices delayed and illustrative.', 'Simulated money. Prices delayed.'))
+        continue
+    def r1(a, b):
+        global t
+        assert t.count(a) == 1, (n, a[:70]); t = t.replace(a, b)
+    r1('<span style="font-family: \'Geist Mono\', monospace; font-size: 36px; font-weight: 500">₦1,051,750.00</span><span style="font-size: 14px; color: #047857">▲ ₦51,750.00 (5.18%)</span>',
+       '<span style="font-family: \'Geist Mono\', monospace; font-size: 36px; font-weight: 500">{{bgTotal}}</span><span style="font-size: 14px; color: {{bgPlC}}">{{bgPl}}</span>')
+    r1('<h2 style="margin: 0; font-size: 15px; font-weight: 600">Buy Zenith Bank</h2>', '<h2 style="margin: 0; font-size: 15px; font-weight: 600">Buy {{bgName}}</h2>')
+    r1('<span style="font-family: \'Geist Mono\', monospace">₦48.20</span>', '<span style="font-family: \'Geist Mono\', monospace">{{bgPrice}}</span>')
+    r1('aria-label="Shares" value="100"', 'aria-label="Shares" value="100" readonly tabindex="-1"')
+    r1('<span style="font-family: \'Geist Mono\', monospace">₦4,892.30</span>', '<span style="font-family: \'Geist Mono\', monospace">{{bgTot}}</span>')
+    r1('Cash available ₦412,600.00', 'Cash available {{bgCash}}')
+    r1('Simulated money. Prices delayed and illustrative.', 'Simulated money. Prices delayed.')  # no Illustrative wording (owner, 15 Nov 2026); matches the Practice page
+    i = t.index('<a href="CompanyLaptopNavy.dc.html?t=ZENITHBANK"'); j = t.index('</section>', i); row = t[i:t.index('</a>', i) + 4]
+    row = row.replace('CompanyLaptopNavy.dc.html?t=ZENITHBANK', '{{r.href}}').replace('>Zenith Bank<', '>{{r.name}}<').replace('>ZENITHBANK<', '>{{r.t}}<') \
+             .replace('>5,000<', '>{{r.qty}}<').replace('>₦241,000.00<', '>{{r.val}}<').replace('<span style="color: #047857">▲ 6.2%</span>', '<span style="color: {{r.c}}">{{r.ch}}</span>')
+    assert '{{r.ch}}' in row, n
+    t = t[:i] + '\n      <sc-for list="{{bgRows}}" as="r" hint-placeholder-count="3">' + row + '</sc-for>\n    ' + t[j:]
+    r1('  renderVals() {', """  /* practice-bg */
+  bg() {
+    const S = this.S(); if (!S) return {}; const v = S.valuation(), a = S.get(), start = a.startingCashKobo, t = this.tk(), p = S.price(t), g = 100 * p;
+    const pct = start ? v.totalPlKobo / start * 100 : 0;
+    return { bgTotal: this.n(v.totalKobo), bgPl: (v.totalPlKobo >= 0 ? '▲ ' : '▼ ') + this.n(Math.abs(v.totalPlKobo)) + ' (' + Math.abs(pct).toFixed(2) + '%)', bgPlC: v.totalPlKobo >= 0 ? '#047857' : '#B9473F',
+      bgName: S.company(t).name, bgPrice: this.n(p), bgTot: this.n(g + S.fee(g)), bgCash: this.n(v.cashKobo),
+      bgRows: v.positions.map((x) => { const r = x.costBasisKobo ? x.unrealizedPlKobo / x.costBasisKobo * 100 : 0;
+        return { href: 'CompanyLaptopNavy.dc.html?t=' + x.ticker, name: S.company(x.ticker).name, t: x.ticker, qty: x.quantity.toLocaleString('en-NG'), val: this.n(x.valueKobo), ch: (r >= 0 ? '▲ ' : '▼ ') + Math.abs(r).toFixed(1) + '%', c: r >= 0 ? '#047857' : '#B9473F' }; }) };
+  }
+  renderVals() { return Object.assign(this.bg(), this.dlg()); }
+  dlg() {""")
+    open(q, 'w').write(t); print(n, 'background wired')
 if '/* practice-laptop */' in s: print('already wired'); sys.exit()
 def sub1(a, b):
     global s
