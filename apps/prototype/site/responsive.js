@@ -134,7 +134,8 @@
   var SECT = { "Banking": ["Banking"], "Telecoms": ["Telecoms"], "Consumer goods": ["Consumer goods", "Food"], "Consumer": ["Consumer goods", "Food"], "Industrial": ["Industrial goods"], "Oil and gas": ["Oil and gas", "Energy"] };
   function rowsNear(chip) {
     for (var box = chip.parentElement; box && box.id !== "dc-root"; box = box.parentElement) {
-      var rows = [].slice.call(box.querySelectorAll('a[href*="t="]')).filter(function (a) { return /[?&]t=[A-Z]+/.test(a.getAttribute("href")) && !a.contains(chip); });
+      // Company rows: links with a ticker, plus drawn company rows the app has no data for yet (no ticker).
+      var rows = [].slice.call(box.querySelectorAll('a[href*="t="], a[href="CompanyNavy.dc.html"], a[href="CompanyLaptopNavy.dc.html"]')).filter(function (a) { return !a.contains(chip) && (/[?&]t=[A-Z]+/.test(a.getAttribute("href")) || /[A-Z]{2,}/.test(a.textContent)) && !/Top (riser|faller)/.test(a.textContent); });
       if (rows.length > 2) return rows;
     }
     return [];
@@ -154,11 +155,12 @@
     var list = parent.__fvOrder.slice();
     if (S && (label === "Risers" || label === "Fallers")) list.sort(function (x, y) { var d = S.change(tk(y)) - S.change(tk(x)); return label === "Risers" ? d : -d; });
     list.forEach(function (r) {
-      var co = S && S.company ? S.company(tk(r)) : null, show = true;
+      var t0 = tk(r), co = t0 && S && S.company ? S.company(t0) : null, show = true;
+      if (co && co.t !== t0) co = null; // no data for this company yet
       if (SECT[label]) show = !!co && SECT[label].indexOf(co.sector) >= 0;
-      if (label === "Risers") show = !S || S.change(tk(r)) >= 0;
-      if (label === "Fallers") show = !S || S.change(tk(r)) < 0;
-      r.style.display = show ? "" : "none"; if (r.parentElement === parent) parent.appendChild(r);
+      if (label === "Risers") show = !!co && S.change(t0) >= 0;
+      if (label === "Fallers") show = !!co && S.change(t0) < 0;
+      r.classList.toggle("fv-hide", !show); if (r.parentElement === parent) parent.appendChild(r);
     });
   });
 })();
@@ -171,4 +173,133 @@
     var aside = b.closest("aside"), on = !aside.classList.contains("fv-collapsed"); set(aside, on); try { localStorage.setItem("fv.sidebar", on ? "1" : "0"); } catch (x) {}
   });
   var tries = 0, t = setInterval(function () { var a = document.querySelector("#dc-root aside"); if (a || ++tries > 40) { clearInterval(t); try { if (a && localStorage.getItem("fv.sidebar") === "1") set(a, true); } catch (x) {} } }, 50);
+})();
+
+// ---- Owner-approved control behaviours (16 Nov 2026): question box + and paperclip, Ask conversations, chart ranges,
+// statements, share, Markets tabs. Sheets reuse the canvas result-sheet look and its motion (responsive.css).
+(function () {
+  function el(tag, style, text) { var e = document.createElement(tag); if (style) e.setAttribute("style", style); if (text != null) e.textContent = text; return e; }
+  function toast(msg) {
+    var t = el("div", "position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);box-sizing:border-box;padding:12px 16px;border-radius:12px;background:#0B192C;color:#FFFFFF;font:500 14px 'Geist',system-ui,sans-serif;box-shadow:0 10px 24px rgba(17,28,45,.25);transition:opacity 400ms ease,transform 400ms ease", msg);
+    t.setAttribute("role", "status"); document.body.appendChild(t);
+    t.animate([{ opacity: 0, transform: "translate(-50%,12px)" }, { opacity: 1, transform: "translate(-50%,0)" }], { duration: 400, easing: "ease" });
+    setTimeout(function () { t.style.opacity = "0"; setTimeout(function () { t.remove(); }, 400); }, 2500); // toasts last 2.5 seconds (D22)
+  }
+  function sheet(title, fill) {
+    var host = document.getElementById("dc-root") || document.body, back = el("div", "position:fixed;inset:0;background:rgba(17,28,45,.45);z-index:50");
+    back.setAttribute("aria-hidden", "true");
+    var s = el("section", "position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:560px;margin:0 auto;max-height:80dvh;overflow-y:auto;overscroll-behavior:contain;background:#FFFFFF;color:#0B192C;border-radius:22px 22px 0 0;padding:10px 20px 28px;display:flex;flex-direction:column;gap:10px;font-family:'Geist',system-ui,sans-serif");
+    s.setAttribute("role", "dialog"); s.setAttribute("aria-modal", "true"); s.setAttribute("aria-label", title);
+    s.appendChild(el("span", "width:36px;height:4px;border-radius:999px;background:#D5D9E0;align-self:center;margin-bottom:6px"));
+    s.appendChild(el("h2", "margin:0;font-size:20px;font-weight:600", title));
+    var close = function () { back.remove(); s.remove(); document.removeEventListener("keydown", esc); if (opener && opener.focus) opener.focus(); };
+    var esc = function (e) { if (e.key === "Escape") close(); }, opener = document.activeElement;
+    back.addEventListener("click", close); document.addEventListener("keydown", esc);
+    fill(s, close); host.appendChild(back); host.appendChild(s);
+    var f = s.querySelector("button, a"); if (f) f.focus(); return close;
+  }
+  function rowBtn(text, sub) {
+    var b = el("button", "display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:52px;padding:10px 14px;border-radius:12px;border:1px solid #D5D9E0;background:#FFFFFF;color:#0B192C;font:inherit;font-size:15px;text-align:left;cursor:pointer");
+    b.type = "button"; b.appendChild(el("span", "", text)); if (sub) b.appendChild(el("span", "font-size:13px;color:#5B6577", sub)); return b;
+  }
+  function swapSel(btn) {
+    var list = btn.parentElement, cur = list.querySelector('[aria-selected="true"]');
+    if (cur && cur !== btn) { var a = cur.getAttribute("style"); cur.setAttribute("style", btn.getAttribute("style")); btn.setAttribute("style", a); cur.setAttribute("aria-selected", "false"); }
+    btn.setAttribute("aria-selected", "true");
+  }
+  var F = function () { return window.FV; }, D = function () { return window.FVD; };
+  function tkr() { var m = /[?&]t=([A-Z]+)/.exec(location.search); return m ? m[1] : "ZENITHBANK"; }
+
+  // 3. Chart ranges: redraw from the simulated daily prices; history before the simulation began is generated the same way.
+  var DAYS = { "1W": 5, "1M": 21, "1Y": 250, "5Y": 1250 };
+  function series(t, n) {
+    var S = F() && F().SIM; if (!S) return [];
+    var real = S.history(t, n); if (real.length >= n) return real;
+    var need = n - real.length, first = real.length ? real[0] : S.price(t), back = D().priceSeries(t + ":past", 100000, need + 1, 0.016), out = [];
+    for (var i = 1; i <= need; i++) out.unshift(Math.max(1, Math.round(first * back[i] / back[0])));
+    return out.concat(real);
+  }
+  function draw(svg, pts, label) {
+    var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1, n = pts.length;
+    var xy = pts.map(function (v, i) { return [Math.round(i * 350 / Math.max(1, n - 1) * 10) / 10, Math.round((160 - (v - lo) / sp * 130) * 10) / 10]; });
+    var line = "M" + xy.map(function (p) { return p[0] + " " + p[1]; }).join(" L");
+    var paths = svg.querySelectorAll("path"); if (paths.length < 2) return;
+    paths[0].setAttribute("d", line + " L350 180 L0 180 Z"); paths[1].setAttribute("d", line);
+    var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", xy[n - 1][0]); c.setAttribute("cy", xy[n - 1][1]); }
+    svg.setAttribute("aria-label", label);
+  }
+  function chart(range) {
+    var tl = document.querySelector('[role="tablist"][aria-label="Chart range"]'); if (!tl) return;
+    var svg = tl.previousElementSibling; if (!svg || svg.tagName.toLowerCase() !== "svg") return;
+    var t = tkr(), S = F() && F().SIM; if (!S) return;
+    var naira = function (k) { return "₦" + (k / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 }); };
+    if (range === "1D") { var p = S.price(t); draw(svg, [p, p], "Today's price, " + naira(p)); toast("Prices update once a day"); return; }
+    var pts = series(t, DAYS[range]); if (pts.length < 2) return;
+    draw(svg, pts, range + " price chart, from " + naira(pts[0]) + " to " + naira(pts[pts.length - 1]));
+  }
+  function initChart() { if (document.querySelector('[role="tablist"][aria-label="Chart range"]') && F() && F().SIM) { var sel = document.querySelector('[aria-label="Chart range"] [aria-selected="true"]'); chart(sel ? sel.textContent.trim() : "1Y"); return true; } }
+  var tries = 0, it = setInterval(function () { if (initChart() || ++tries > 60) clearInterval(it); }, 100);
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target : null; if (!t) return;
+    // 1. Question box: + opens the suggested questions; the paperclip says attaching comes later.
+    var add = t.closest('[aria-label="Add"]');
+    if (add && (add.closest("#dc-root") || 0)) {
+      e.preventDefault(); var A = F() && F().ASK, qs = A ? A.suggestions().slice(0, 6) : [];
+      sheet("Suggested questions", function (s) { qs.forEach(function (q) { var b = rowBtn(q); b.onclick = function () { location.href = (document.documentElement.clientWidth >= 1024 ? "AskLaptopNavy" : "AskFinvoraNavy") + ".dc.html?q=" + encodeURIComponent(q); }; s.appendChild(b); }); });
+      return;
+    }
+    if (t.closest('[aria-label="Attach a report"], [aria-label="Attach"]')) { e.preventDefault(); toast("Attaching reports is coming in a later version"); return; }
+    // 2. Conversations: your past questions in this browser, and a new conversation.
+    if (t.closest('[aria-label="Conversations"]')) {
+      e.preventDefault(); var Q = F() && F().ASK, msgs = Q ? Q.messages().slice().reverse() : [];
+      sheet("Conversations", function (s, close) {
+        var nb = el("button", "height:48px;border-radius:12px;border:0;background:#0B192C;color:#FFFFFF;font:inherit;font-size:15px;font-weight:600;cursor:pointer", "New conversation"); nb.type = "button";
+        nb.onclick = function () { if (Q) Q.clear(); location.reload(); }; s.appendChild(nb);
+        if (!msgs.length) s.appendChild(el("p", "margin:4px 0 0;font-size:14px;color:#5B6577", "No questions yet."));
+        msgs.forEach(function (m) { var b = rowBtn(m.q); b.onclick = function () { close(); var hit = [].slice.call(document.querySelectorAll("#chat *")).filter(function (x) { return x.children.length === 0 && x.textContent.trim() === m.q; })[0]; if (hit) hit.scrollIntoView({ block: "center" }); }; s.appendChild(b); });
+      });
+      return;
+    }
+    // 3. Chart range buttons.
+    var rb = t.closest('[role="tablist"][aria-label="Chart range"] > button');
+    if (rb) { swapSel(rb); chart(rb.textContent.trim()); return; }
+    // 4. Statements: only the income figures exist; the others say so instead of showing made-up numbers.
+    var sb = t.closest('[role="tablist"][aria-label="Statement"] > button');
+    if (sb) {
+      swapSel(sb); var table = sb.parentElement.nextElementSibling, note = sb.parentElement.parentElement.querySelector(".fv-na");
+      var inc = sb.textContent.trim() === "Income";
+      if (table) table.classList.toggle("fv-hide", !inc);
+      if (!inc && !note) { note = el("p", "margin:14px 0 4px;font-size:14px;color:#5B6577", "Not available yet."); note.className = "fv-na"; sb.parentElement.after(note); }
+      if (note) note.classList.toggle("fv-hide", inc);
+      return;
+    }
+    // 5. Share: the phone's share sheet, or copy the link.
+    if (t.closest('[aria-label="Share"]')) {
+      e.preventDefault(); var url = location.href, title = document.title;
+      var copy = function () { try { navigator.clipboard.writeText(url).then(function () { toast("Link copied"); }, function () { toast(url); }); } catch (x) { toast(url); } };
+      if (navigator.share) navigator.share({ title: title, url: url }).catch(function (x) { if (x && x.name !== "AbortError") copy(); }); else copy();
+      return;
+    }
+    // 6. Markets tabs: Stocks, Indices, Sectors, Watchlist.
+    var vt = t.closest('[role="tablist"][aria-label="View"] > button');
+    if (vt) {
+      swapSel(vt); var sec = vt.closest("section"), name = vt.textContent.trim(), S = F() && F().SIM;
+      var kids = [].slice.call(sec.children).filter(function (c) { return c !== vt.parentElement && !c.classList.contains("fv-view"); });
+      var old = sec.querySelector(".fv-view"); if (old) old.remove();
+      var rows = [].slice.call(sec.querySelectorAll('a[href*="t="]'));
+      kids.forEach(function (k) { k.classList.toggle("fv-hide", !(name === "Stocks" || name === "Watchlist")); });
+      var wl = F() && F().PLUS ? F().PLUS.lists()[0].tickers : [];
+      rows.forEach(function (r) { var m = /t=([A-Z]+)/.exec(r.getAttribute("href")); r.classList.toggle("fv-hide", name === "Watchlist" && !(m && wl.indexOf(m[1]) >= 0)); });
+      var view = el("div", "margin-top:12px;display:flex;flex-direction:column"); view.className = "fv-view";
+      var line = function (a, b, c, href) { var r = el(href ? "a" : "div", "display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;border-bottom:1px solid #EDEFF2;text-decoration:none;color:#0B192C;font-size:15px"); if (href) r.href = href; r.appendChild(el("span", "font-weight:500", a)); var right = el("span", "display:flex;gap:10px;align-items:center;font-family:'Geist Mono',monospace;font-size:14px", b); if (c) right.appendChild(el("span", "font-size:12px;color:" + (/▼/.test(c) ? "#B9473F" : "#047857"), c)); r.appendChild(right); return r; };
+      if (name === "Indices") [["NGX All-Share", "104,562.31", "▲ 0.7%"], ["NGX 30", "3,842.10", "▲ 0.5%"], ["NGX Banking", "1,092.44", "▲ 1.8%"], ["NGX Consumer Goods", "1,705.86", "▼ 0.4%"]].forEach(function (x) { view.appendChild(line(x[0], x[1], x[2])); });
+      if (name === "Sectors" && S) { var cnt = {}; S.COMPANIES.forEach(function (c) { var co = S.company(c.t); var k = co && co.sector; if (k) cnt[k] = (cnt[k] || 0) + 1; });
+        Object.keys(cnt).sort().forEach(function (k) { var r = line(k, cnt[k] + (cnt[k] === 1 ? " company" : " companies")); r.setAttribute("role", "button"); r.tabIndex = 0; r.style.cursor = "pointer";
+          r.onclick = function () { var st = [].slice.call(vt.parentElement.children).filter(function (b) { return b.textContent.trim() === "Stocks"; })[0]; if (st) st.click(); var chip = [].slice.call(sec.querySelectorAll("button")).filter(function (b) { var l = b.textContent.trim(); return l === k || (k === "Industrial goods" && l === "Industrial") || (k === "Food" && l === "Consumer goods") || (k === "Energy" && l === "Oil and gas"); })[0]; if (chip) chip.click(); };
+          view.appendChild(r); }); }
+      if (name === "Watchlist" && !rows.some(function (r) { return !r.classList.contains("fv-hide"); })) view.appendChild(el("p", "margin:8px 0;font-size:14px;color:#5B6577", "No companies in your watchlist yet."));
+      if (view.children.length) vt.parentElement.after(view);
+    }
+  });
 })();

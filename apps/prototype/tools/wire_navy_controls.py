@@ -39,12 +39,17 @@ s = rd('PayFailedNavy')
 if MARK not in s:
     s = s.replace('<a href="#" onClick="{{retry}}" aria-label="Close"', '<a href="PlusNavy.dc.html" aria-label="Close"', 1).replace('onClick="{{retry}}" onClick="{{retry}}"', 'onClick="{{retry}}"')
     s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1); wr('PayFailedNavy', s)
-# Laptop Markets: each company row opens that company (adds ?t=TICKER from the row's own ticker), which the chips filter by.
-s = rd('MarketsLaptopNavy')
-if MARK not in s:
+# Company links without a ticker open Zenith whatever you tapped. Give every company link on every screen its own
+# ticker (?t=TICKER, read from the ticker drawn inside the link), so it opens the right company and chips can filter it.
+import glob
+TICKERS = set(re.findall(r'ticker: "([A-Z]+)"', open(os.path.join(SITE, 'fvd.js')).read()))
+for f in glob.glob(os.path.join(SITE, '*Navy.dc.html')):
+    s = open(f).read(); o = s
     def tick(m):
-        t = re.search(r'>([A-Z]{2,12})<', m.group(2))
-        return '<a href="CompanyLaptopNavy.dc.html' + ('?t=' + t.group(1) if t else '') + '"' + m.group(1) + '>' + m.group(2) + '</a>'
-    s = re.sub(r'<a href="CompanyLaptopNavy\.dc\.html"([^>]*)>(.*?)</a>', tick, s, flags=re.S)
-    s = s.replace('class Component extends DCLogic {', 'class Component extends DCLogic {\n' + MARK, 1); wr('MarketsLaptopNavy', s)
+        NAMES = {'Zenith Bank': 'ZENITHBANK', 'Nestlé Nigeria': 'NESTLE', 'MTN Nigeria': 'MTNN', 'Dangote Cement': 'DANGCEM', 'Seplat Energy': 'SEPLAT', 'Airtel Africa': 'AIRTELAFRI', 'Nigerian Breweries': 'NB'}
+        found = [t for t in re.findall(r'>\s*([A-Z]{2,12})\s*<', m.group(3)) if t in TICKERS] + [NAMES[n] for n in re.findall(r'>\s*([^<>]{3,30}?)\s*<', m.group(3)) if n in NAMES]
+        if not found: return m.group(0)
+        return '<a href="' + m.group(1) + '.dc.html?t=' + found[0] + '"' + m.group(2) + '>' + m.group(3) + '</a>'
+    s = re.sub(r'<a href="(Company(?:Laptop)?Navy)\.dc\.html"([^>]*)>(.*?)</a>', tick, s, flags=re.S)
+    if s != o: open(f, 'w').write(s)
 print('controls wired')

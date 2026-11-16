@@ -106,3 +106,5 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 #dc-root aside.fv-collapsed > div:first-child { flex-direction: column; gap: 10px; }
 #dc-root aside.fv-collapsed > div:first-child > span > span:last-child { display: none; }
 #dc-root aside.fv-collapsed button[aria-label="Expand sidebar"] svg { transform: scaleX(-1); }
+/* Filtered-out rows and inactive views (keeps each element's own layout when shown again). */
+#dc-root .fv-hide { display: none !important; }
