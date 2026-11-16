@@ -55,7 +55,9 @@ for name, title in STEPS:
         elif re.match(r'<div[^>]*display: flex', last): fixed[-1] = re.sub(r'style="', 'style="justify-content: flex-end; ', last, count=1)
     fixed = [re.sub(r'<span style="width: 36px; height: 4px;[^"]*"></span>', '', k) for k in fixed]  # phone sheet drag handle
     fixed = [re.sub(r'(<a\b[^>]*style="[^"]*?)display: flex; align-items: center; justify-content: center; height: 44px; padding: 0 18px', r'\1display: flex; align-self: flex-end; align-items: center; justify-content: center; height: 44px; padding: 0 18px', k) for k in fixed]
-    out = frame[:col_open_end] + ''.join(fixed) + '</div>\n  ' + frame[col_end:]
+    # Owner, 16 Nov 2026: content spans the full length of the progress bar, not a centred 640px column.
+    col = frame[col_start:col_open_end].replace('max-width: 640px; width: 100%; margin: 20px auto 0;', 'width: 100%; margin: 20px 0 0;')
+    out = frame[:col_start] + col + ''.join(fixed) + '</div>\n  ' + frame[col_end:]
     out = out.replace('<title>Lesson (laptop)</title>', '<title>' + title + '</title>', 1)
     out = re.sub(r'href="LearnNavy\.dc\.html"', 'href="LearnLaptopNavy.dc.html"', out)
     lap = name.replace('Navy', 'LaptopNavy'); open(os.path.join(OUT, lap + '.dc.html'), 'w').write(out); made.append((lap, title))
