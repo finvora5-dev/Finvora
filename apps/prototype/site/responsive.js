@@ -10,7 +10,7 @@
     EmptySearchNavy: "EmptyLaptopNavy", ErrorNavy: "ErrorLaptopNavy", OfflineNavy: "OfflineLaptopNavy", GoalNavy: "GoalLaptopNavy", LessonNavy: "LessonLaptopNavy",
     LessonDoneNavy: "LessonDoneLaptopNavy", NotificationsNavy: "NotificationsLaptopNavy", PayFailedNavy: "PayFailedLaptopNavy", PaySuccessNavy: "PayLaptopNavy",
     PayPendingNavy: "PayPendingLaptopNavy", PlusNavy: "PlansLaptopNavy", PracticeNavy: "PracticeLaptopNavy", PracticeSellNavy: "SellLaptopNavy",
-    SettingsNavy: "SettingsLaptopNavy", LessonInfoNavy: "LessonInfoLaptopNavy", LearnCompareNavy: "LearnCompareLaptopNavy", LearnTermNavy: "LearnTermLaptopNavy", LearnStepsNavy: "LearnStepsLaptopNavy", LearnMarketNavy: "LearnMarketLaptopNavy", LearnMythNavy: "LearnMythLaptopNavy", LessonOrderNavy: "LessonOrderLaptopNavy", LessonMatchNavy: "LessonMatchLaptopNavy", LessonScenarioNavy: "LessonScenarioLaptopNavy", LessonCalcNavy: "LessonCalcLaptopNavy", SignInNavy: "SignInLaptopNavy", SignOutNavy: "SignOutLaptopNavy", UpgradeNavy: "UpgradeLaptopNavy", MainNavy: "WelcomeLaptopNavy" };
+    SettingsNavy: "SettingsLaptopNavy", LessonInfoNavy: "LessonInfoLaptopNavy", LearnCompareNavy: "LearnCompareLaptopNavy", LearnTermNavy: "LearnTermLaptopNavy", LearnStepsNavy: "LearnStepsLaptopNavy", LearnMarketNavy: "LearnMarketLaptopNavy", LearnMythNavy: "LearnMythLaptopNavy", LessonOrderNavy: "LessonOrderLaptopNavy", LessonMatchNavy: "LessonMatchLaptopNavy", LessonScenarioNavy: "LessonScenarioLaptopNavy", LessonCalcNavy: "LessonCalcLaptopNavy", TopicNavy: "TopicLaptopNavy", DictionaryNavy: "DictionaryLaptopNavy", ProgressNavy: "ProgressLaptopNavy", DailyNavy: "DailyLaptopNavy", CourseReviewNavy: "CourseReviewLaptopNavy", CourseReviewQNavy: "CourseReviewQLaptopNavy", CourseReviewDoneNavy: "CourseReviewDoneLaptopNavy", SignInNavy: "SignInLaptopNavy", SignOutNavy: "SignOutLaptopNavy", UpgradeNavy: "UpgradeLaptopNavy", MainNavy: "WelcomeLaptopNavy" };
   var BACK = {}; Object.keys(PAIRS).forEach(function (k) { BACK[PAIRS[k]] = k; });
   function route() {
     var m = location.pathname.match(/([A-Za-z]+)\.dc(\.html)?$/); if (!m) return false;
@@ -112,7 +112,7 @@
 // that letter's section, or the next letter that has terms. No animation: it follows the finger.
 (function () {
   function jump(nav, x, y) {
-    var el = document.elementFromPoint(nav.getBoundingClientRect().left + nav.offsetWidth / 2, y), a = el && el.closest && el.closest(".fv-index a");
+    var a = [].slice.call(nav.querySelectorAll("a")).filter(function (x) { var r = x.getBoundingClientRect(); return y >= r.top - 1 && y <= r.bottom + 1; })[0]; // by row, so narrow letters (I) are easy to hit
     if (!a || a === nav.__fvLast) return; nav.__fvLast = a;
     var L = a.textContent.trim(), hs = [].slice.call(document.querySelectorAll("main h2, #dc-root h2"));
     var h = hs.filter(function (x) { return x.textContent.trim().length === 1 && x.textContent.trim() >= L; })[0];
@@ -313,4 +313,14 @@
       sp[0].textContent = nm.split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase();
       sp[2].textContent = nm; sp[3].textContent = plus ? "Plus plan" : "Free plan"; } catch (e) {}
   }, 50);
+})();
+
+// Dictionary letter strip: letters with no terms are dimmed and marked unavailable (nothing to jump to).
+(function () {
+  var n = 0, t = setInterval(function () {
+    var nav = document.querySelector(".fv-index"); if (!nav && ++n < 40) return; clearInterval(t); if (!nav) return;
+    var have = {}; [].slice.call(document.querySelectorAll("#dc-root h2")).forEach(function (h) { var x = h.textContent.trim(); if (x.length === 1) have[x] = 1; });
+    if (!Object.keys(have).length) return;
+    [].slice.call(nav.querySelectorAll("a")).forEach(function (a) { if (!have[a.textContent.trim()]) { a.setAttribute("aria-disabled", "true"); a.style.opacity = ".35"; a.tabIndex = -1; } });
+  }, 60);
 })();

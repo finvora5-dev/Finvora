@@ -222,4 +222,28 @@ if MARK not in s:
       onDraft: (e) => this.setState({ draft: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.ask(this.state.draft); } }, send: () => this.ask(this.state.draft) };
   }""")
     wr('AskLaptopNavy', s)
+# Library (phone: LibraryNavy). Search goes to Search, A-Z to the dictionary, topics to their topic page, word of the day
+# and topic counts come from the Library; the drawn popular guides open their own articles.
+s = rd('LibraryLaptopNavy')
+if MARK not in s:
+    s = sub1(s, 'aria-label="Search the library" placeholder="Search any money word"', 'aria-label="Search the library" placeholder="Search any money word" value="{{q}}" onInput="{{onQ}}" onKeyDown="{{onKey}}"')
+    s = sub1(s, '<a href="#" style="font-size: 13px; font-weight: 600; text-decoration: none">A–Z</a>', '<a href="DictionaryNavy.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">A–Z</a>')
+    s = sub1(s, '<a href="ArticleLaptopNavy.dc.html" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px; text-decoration: none; display: flex; flex-direction: column; gap: 8px">', '<a href="{{wHref}}" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px; text-decoration: none; display: flex; flex-direction: column; gap: 8px">')
+    s = sub1(s, '>Dividend yield</span><span style="font-size: 15px; line-height: 1.55; color: #334155">The yearly dividend as a share of the price. A ₦50 share paying ₦4 a year yields 8%.</span>', '>{{wTitle}}</span><span style="font-size: 15px; line-height: 1.55; color: #334155">{{wDef}}</span>')
+    for i, (t, n) in enumerate([('Money basics', '4'), ('Investing', '5'), ('The Nigerian market', '3'), ('Companies and reports', '3')]):
+        s = sub1(s, '<a href="#" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px; padding: 16px 18px; text-decoration: none; display: flex; flex-direction: column; gap: 4px"><strong style="font-size: 15px; font-weight: 600">' + t + '</strong><span style="font-size: 12px; color: #5B6577">' + n + ' guides</span>',
+                    '<a href="TopicNavy.dc.html?t=' + t.replace(' ', '+') + '" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px 22px; padding: 16px 18px; text-decoration: none; display: flex; flex-direction: column; gap: 4px"><strong style="font-size: 15px; font-weight: 600">' + t + '</strong><span style="font-size: 12px; color: #5B6577">{{n' + str(i) + '}} guides</span>')
+    for i, t in enumerate(['Stock exchange', 'Inflation', 'Revenue and profit']):
+        s = re.sub(r'<a href="ArticleLaptopNavy\.dc\.html"(( style="display: flex; align-items: center; gap: 16px; height: 52px;[^"]*")>(?:(?!</a>).)*?>' + t + '<)', lambda m: '<a href="{{p' + str(i) + '}}"' + m.group(1), s, count=1, flags=re.S)
+    s = logic(s, """  constructor(p) { super(p); this.state = { q: '' }; }
+  renderVals() {
+    const L = window.FV ? window.FV.LIB : null; if (!L) return {}; const w = L.wordOfDay(), all = L.all(), v = {};
+    L.TOPICS.forEach((t, i) => { v['n' + i] = String(L.inTopic(t.name).items.length); });
+    const art = (title) => { const a = all.filter((x) => x.title.toLowerCase() === title.toLowerCase())[0]; return a ? 'ArticleNavy.dc.html?a=' + a.slug : 'SearchNavy.dc.html?q=' + encodeURIComponent(title); };
+    ['Stock exchange', 'Inflation', 'Revenue and profit'].forEach((t, i) => { v['p' + i] = art(t); });
+    const go = () => { const q = this.state.q.trim(); if (q) location.href = 'SearchNavy.dc.html?q=' + encodeURIComponent(q); };
+    return Object.assign(v, { q: this.state.q, onQ: (e) => this.setState({ q: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } },
+      wTitle: w.title, wDef: w.definition, wHref: 'ArticleNavy.dc.html?a=' + w.slug });
+  }""")
+    wr('LibraryLaptopNavy', s)
 print('laptop wired')

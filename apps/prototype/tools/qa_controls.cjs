@@ -30,7 +30,7 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'); c
           return { label: (e.getAttribute('aria-label') || e.innerText || e.getAttribute('href') || e.tagName).trim().replace(/\s+/g, ' ').slice(0, 40), covered, selected, disabled, sameHref: e.tagName === 'A' && e.href && e.href.split('#')[0] === location.href.split('#')[0] && e.getAttribute('href') !== '#' };
         });
         if (info.covered || info.selected || info.disabled || info.sameHref) continue;
-        const snap = () => p.evaluate(() => [document.getElementById('dc-root').innerHTML, JSON.stringify(localStorage), JSON.stringify(sessionStorage), location.href, Math.round(scrollY), document.querySelectorAll('[role=dialog],[role=status]').length].join('|'));
+        const snap = () => p.evaluate(() => [document.getElementById('dc-root').innerHTML, JSON.stringify(localStorage), JSON.stringify(sessionStorage), location.href, Math.round(scrollY), Math.round((document.querySelector('#dc-root main') || {}).scrollTop || 0), document.querySelectorAll('[role=dialog],[role=status]').length].join('|'));
         const before = await snap(); await el.click({ timeout: 2000, noWaitAfter: true }).catch(() => {}); await p.waitForTimeout(450);
         const after = await snap().catch(() => 'navigated');
         if (after === before) list.push(info.label);

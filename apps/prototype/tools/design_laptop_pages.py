@@ -4,7 +4,7 @@ Content: the phone page's approved content in order: its header title becomes th
 laptop boards), its bottom navigation is dropped (the sidebar replaces it), and its 24px side margins are removed so the
 content uses the full width. No new copy. Usage: python3 design_laptop_pages.py <mockups folder> <out folder> <batch>"""
 import os, re, sys
-M, OUT, BATCH = sys.argv[1], sys.argv[2], sys.argv[3]
+M, OUT, BATCH = sys.argv[1], sys.argv[2], sys.argv[3]; SITE_MODE = '--site' in sys.argv  # working screens: phone content and logic from the site
 BATCHES = {'learning': [('TopicNavy', 'LibraryLaptopNavy', 'Topic (laptop)'), ('DictionaryNavy', 'LibraryLaptopNavy', 'A to Z (laptop)'), ('ProgressNavy', 'LearnLaptopNavy', 'Progress (laptop)')]}
 TAG = re.compile(r'<(/?)(div|a|h1|h2|p|section|span|button|label|nav|main|header|sc-for|sc-if|ul|ol)\b[^>]*?(/?)>')
 def kids(html, a):
@@ -23,7 +23,7 @@ def kids(html, a):
     return out
 def text(h): return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'<svg.*?</svg>', '', h, flags=re.S))).strip()
 for name, frame_name, title in BATCHES[BATCH]:
-    s = open(os.path.join(M, name + '.dc.html')).read(); a = s.index('</helmet>'); a = s.index('>', s.index('<div', a)) + 1
+    s = open(os.path.join(OUT if SITE_MODE else M, name + '.dc.html')).read(); a = s.index('</helmet>'); a = s.index('>', s.index('<div', a)) + 1
     ks = kids(s, a); head, body = ks[0], [k for k in ks[1:] if 'aria-label="Main"' not in k[:200]]
     h1 = text(head)
     fixed = []
@@ -41,4 +41,9 @@ for name, frame_name, title in BATCHES[BATCH]:
     top = ('<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">' + h1 + '</h1>') if h1 else ''
     out = f[:ma] + '\n    ' + top + '<div style="display: flex; flex-direction: column; gap: 0; width: 100%">' + ''.join(joined) + '</div>\n  ' + f[mb:]
     out = re.sub(r'<title>[^<]*</title>', '<title>' + title + '</title>', out, count=1)
+    if SITE_MODE:
+        site_head = open(os.path.join(OUT, frame_name + '.dc.html')).read(); out = site_head[:site_head.index('<x-dc>')] + out[out.index('<x-dc>'):]
+        out = re.sub(r'<title>[^<]*</title>', '<title>' + title + '</title>', out, count=1)
+        a2 = s.index('<script type="text/x-dc"'); b2 = s.index('</script>', a2) + 9; fa = out.index('<script type="text/x-dc"'); fb = out.index('</script>', fa) + 9
+        out = out[:fa] + s[a2:b2].replace('"width":390,"height":844', '"width":1440,"height":900') + out[fb:]
     lap = name.replace('Navy', 'LaptopNavy'); open(os.path.join(OUT, lap + '.dc.html'), 'w').write(out); print(lap, '|', title, '| title:', h1 or '(from content)')
