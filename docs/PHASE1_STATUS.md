@@ -1,6 +1,6 @@
 # Phase 1 prototype: status and reviewer guide
 
-**Updated:** 16 Nov 2026 · **Branch:** `awesome-bardeen-2pkwcl` (Cloudflare deploys from it) · **Live:** https://finvora.ehigiatorpowell1.workers.dev
+**Updated:** 16 Nov 2026 (evening) · **Branch:** `awesome-bardeen-2pkwcl` (Cloudflare deploys from it) · **Live:** https://finvora.ehigiatorpowell1.workers.dev
 
 ## What changed on 15 Nov 2026
 
@@ -15,7 +15,7 @@ Every phone screen a visitor can reach now has its own laptop screen at 1440 px 
 *   **How they are built:** the `laptop-build` skill (`.claude/skills/laptop-build`). Canvas originals and the approved drafts are in `apps/prototype/mockups/`. Screens the canvas did not draw were drafted by `tools/design_laptop_steps.py` (lesson steps, Daily, Course review) and `tools/design_laptop_pages.py` (markets, practice, account, states, screens, codes, dialogs, learning). The owner approved each batch before it went live; `--site` builds the working versions.
 *   **Controls:** `tools/wire_navy_laptop.py` and `tools/wire_navy_controls.py` wire them like the phone versions. `responsive.js` sends a laptop to the laptop screen and adds the sidebar profile card, chip filters, sheets, toasts, chart ranges and the letter strip. Hover states and the collapsible sidebar live in `responsive.css`. The Courses/Library toggle was removed (owner). Put in order also works by tapping two items to swap them.
 *   **Checks run:** `qa_mockup.cjs` (matches the mock-up) and `qa_controls.cjs` (no dead controls) pass on every laptop screen. break-ui ran at 1440 with worst-case data (a long name and email, long Ask questions, 24 Ask messages, a Plus user). It found three faults, all fixed: Settings account rows showed fixed sample details instead of the signed-in user, a long name wrapped onto 2 to 3 lines in the sidebar (it now shows one line with an ellipsis and the full name on hover), and the sidebar sometimes said "Free plan" for a Plus user. Re-checked with no script errors and no sideways scrolling (`tools/break_ui/seed.cjs`).
-*   **Not done yet on laptop:** notifications are as drawn, Big moves is not wired, Error, Offline and Upgrade use plain links, most dialogs open over a fixed background page (Market closed and Reset practice now show the live Practice page behind them).
+*   **Not done yet on laptop:** notifications are as drawn, Big moves is not wired, Error, Offline and Upgrade use plain links, dialogs now open over the live page (Ask limit keeps its own page).
 *   **Motion on laptop:** reviewed with `/review-animations`, 16 Nov 2026. One finding, fixed: toasts now enter and leave on the same path with an interruptible transition, and reduced motion keeps the fade without the slide. Approved.
 
 ## Later changes on 16 Nov 2026 (owner requests)
@@ -27,6 +27,18 @@ Every phone screen a visitor can reach now has its own laptop screen at 1440 px 
 *   **Laptop Practice:** the page shows the live practice portfolio: value and return, the buy panel (price, shares, total with fees, cash; Review order carries the company and shares) and holdings. With no shares it opens the empty Practice screen. The Market closed and Reset practice dialogs show the same live page behind them.
 *   **Colours:** losses now show in red on the phone Practice header (#F2A39C, the navy down colour from the welcome board) and on the Practice company Return line.
 *   **Checks run:** `qa_mobile` passes on all 99 phone screens; `qa_mockup` and `qa_controls` pass on the changed laptop screens (`qa_mockup` now places the mock-up's holdings before checking Practice screens). Not yet checked on a real phone.
+
+## Changes on 16 Nov 2026, evening (owner requests and the logic audit)
+
+*   **Logic audit against the launch rules** (build-backlog B2, B5, B10): signed-out visitors only reach the welcome, sign-in and status screens; codes allow 5 wrong tries, a new code at most once a minute, and work once; onboarding is interest, then age (date of birth, under 18 blocked), then notifications; returning users go Home and an email change returns to Settings; checkout needs an 18+ date of birth; paying again after a failure reuses the order; a cancelled plan cannot be bought over and can be kept; renewals are recorded on the renewal date and an ended plan is Free; Plus prices follow the one price setting; delete account needs Plus cancelled and keeps payment records; indirect advice wording is refused (domain rule and tests); the Save chats switch is honoured; market status lines follow trading hours; queued-order results are shown; no trades or questions offline. Still simulated: any 6-digit code signs in (no email is sent) and there is no analytics to switch off.
+*   **Installable app:** a manifest, icons (the leaf mark on navy) and the Draw launch animation (client's choice) on the start page, once per visit; reduced motion fades. `tools/build_pwa.py`, `tools/build_pwa_icons.cjs`.
+*   **Library:** articles show their full written sections (key points, how-to steps, example, common mistake) and the read time is counted from the words on screen. Topic screens (phone and laptop) and the Library (phone and laptop) are redesigned from approved drafts (`mockups/drafts-library`): light header with read progress, guide cards, word of the day, continue reading, topic cards, popular this week. Phone Learn matches (light header, no "6 courses" line).
+*   **Ask Finvora:** saved conversations (history, newest first, at most 20) on phone and laptop. Laptop Ask rebuilt as direction A "Focus" (`mockups/drafts-ask`): history panel, New chat, the Home ask box, the chat scrolls on its own with the box pinned, source links, Copy, follow-ups, no company card next to a refusal. `tools/wire_navy_ask_laptop_focus.py`.
+*   **Laptop fixes:** content spans the full width on Settings, Notifications, Sell and Cancel Plus; charts fill their box and redraw on resize; lesson results (order, calculation, scenario, daily, course review) show as a tinted line with the button, like the multiple-choice question, not the phone sheet; answered options no longer flicker on hover; the sidebar Watchlist and Help open their pages; the watchlist hover is a soft grey row; dialogs (Sign out, Cancel Plus, Leave lesson, Locked, Rate, Review, Upgrade) open over the live page.
+*   **Phone fixes:** Me loses the Practice portfolio row; the Settings icon is a gear everywhere; the Market news switch is gone (no such feature); the conversations list opens as a side panel; A-Z on Library has a 44 px tap area.
+*   **Also:** Practice company change pill and laptop article Related links fixed. Checker `tools/break_ui/buttons.cjs` for button text.
+*   **Not reachable yet:** the lesson rating (Rate), app review (Review) and Suggest a topic screens exist and save to the admin inbox, but nothing opens them (build plan §4.6 says when they should appear).
+*   **Checks run:** `qa_mobile` passes on all 99 phone screens; `qa_controls` finds no dead controls on the changed screens (two false alarms: Clear on an empty calculation answer, and Great on the Rate dialog where it is already selected); browser tests for each flow above. The redesigned Library, Topic, Ask and Practice company screens now differ from their old canvas boards by design. Not yet checked on a real phone.
 
 ## What the prototype is
 
@@ -57,11 +69,11 @@ Checks: `node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/` and `no
 
 ## What works
 
-*   **Sign-in and onboarding:** as drawn on the board links; goal page with three options (Money basics, Investing, Nigerian market).
+*   **Sign-in and onboarding:** welcome, intro, sign-in with a 6-digit code (simulated), interest (Money basics, Investing, Nigerian market), date of birth (18+), notifications.
 *   **Learning:** Home, Learn, lessons with every step type (choice, compare, myth, order, match, calculation, scenario), course review (8 questions, pass mark 6 of 8), daily question, progress.
 *   **Lesson sounds** (approved 9 Nov 2026): right or wrong when an answer is checked, and a sound per pair in matching. No lesson-complete sound (owner, 15 Nov 2026). Off when Settings > Sound effects is off.
-*   **Library:** articles, search, saved items, dictionary with a tap-or-drag A to Z strip.
-*   **Ask Finvora:** scripted answers; refuses buy or sell advice.
+*   **Library:** full articles, topics with read progress, search, saved items, dictionary with a tap-or-drag A to Z strip.
+*   **Ask Finvora:** scripted answers with sources; refuses buy or sell advice, direct or indirect; saved conversations.
 *   **Practice market:** real NGX companies, ₦100,000 starting cash, trades by number of shares; Markets, company pages, compare, watchlist, inflation calculator.
 *   **Plus and checkout:** simulated Paystack checkout with pending, confirmed success and confirmed failed states (build-backlog §B5); receipt reads "Paid with Paystack".
 *   **Me and settings:** account, settings pages, saved, history, feedback (500 characters at most).
