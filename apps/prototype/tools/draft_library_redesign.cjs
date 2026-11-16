@@ -49,6 +49,28 @@ function libraryLaptop(T, wod, reading) {
     + '<div style="display:flex;flex-direction:column;gap:12px">' + label('Popular this week') + '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">' + pop + '</div></div>';
 }
 
+// Phone Library (owner, 16 Nov 2026: "the library design on laptop should match mobile"): the laptop sections, stacked.
+function libraryPhone(T, wod, reading) {
+  const all = Object.values(T).flat(), w = all.find((x) => x.slug === wod), r = all.find((x) => x.slug === reading);
+  const card = 'background:#FFFFFF;border:1px solid #E5E7EB;border-radius:16px';
+  const label = (t) => '<span style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B6577;padding:0 4px">' + t + '</span>';
+  const topics = Object.entries(T).map(([n, items]) => '<a style="' + card + ';padding:14px 16px;display:flex;align-items:center;gap:12px;text-decoration:none;color:#0B192C">'
+    + '<span style="width:40px;height:40px;flex:none;border-radius:12px;background:#E8EBEF;display:flex;align-items:center;justify-content:center">' + ico(n) + '</span>'
+    + '<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:600">' + n + '</span><span style="font-size:12px;color:#5B6577">' + items.length + ' guides · ' + items.reduce((a, x) => a + x.min, 0) + ' min</span>'
+    + '<span style="font-size:13px;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + items.slice(0, 3).map((x) => x.title).join(' · ') + '</span></span>' + chev + '</a>').join('');
+  const pop = [['stock-exchange', 'The Nigerian market'], ['inflation', 'Money basics'], ['revenue-and-profit', 'Companies and reports']].map(([s, t], i) => { const x = all.find((y) => y.slug === s);
+    return '<a style="' + card + ';padding:14px 16px;display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:#0B192C"><span style="font-family:' + mono + ';font-size:24px;line-height:1;color:#C0C6D0;width:16px">' + (i + 1) + '</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:600">' + x.title + '</span><span style="font-size:13px;line-height:1.45;color:#5B6577;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + x.def + '</span><span style="font-size:12px;color:#5B6577">' + t + ' · ' + x.min + ' min</span></span></a>'; }).join('');
+  // The Courses/Library switch stays: on phones it is the only way into Library (owner, 16 Nov 2026). Same look as on Learn.
+  const seg = '<div style="display:flex;background:#E8EBEF;border-radius:12px;padding:3px"><span style="flex:1;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:#5B6577">Courses</span><span style="flex:1;height:38px;border-radius:9px;background:#FFFFFF;box-shadow:0 1px 3px rgba(11,25,44,.12);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#0B192C">Library</span></div>';
+  return '<header style="padding:18px 20px 4px;display:flex;flex-direction:column;gap:12px">' + seg + '<div><h1 style="margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em">Library</h1><p style="margin:4px 0 0;font-size:14px;color:#5B6577">' + all.length + ' short guides in plain words.</p></div>'
+    + '<label style="height:48px;display:flex;align-items:center;gap:10px;padding:0 14px;' + card + ';border-radius:12px;color:#8E9AAE;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span style="flex:1">Search any money word</span><span style="font-family:' + mono + ';font-size:12px;padding:3px 8px;border-radius:6px;background:#F1F3F5;color:#334155">A–Z</span></label></header>'
+    + '<main style="padding:10px 16px 130px;display:flex;flex-direction:column;gap:12px">'
+    + '<a style="border-radius:20px;background:#0B192C;color:#FFFFFF;padding:20px;display:flex;flex-direction:column;gap:10px;text-decoration:none"><span style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#00E676">Word of the day</span><span style="font-size:24px;font-weight:600;letter-spacing:-.02em">' + w.title + '</span><span style="font-size:15px;line-height:1.5;color:#C7D0DD">' + w.def + '</span><span style="margin-top:4px;align-self:flex-start;height:40px;padding:0 16px;border-radius:10px;background:#10B981;color:#FFFFFF;font-weight:600;font-size:14px;display:flex;align-items:center">Read in ' + w.min + ' min</span></a>'
+    + '<a style="' + card + ';padding:16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:#0B192C"><span style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B6577">Continue reading</span><span style="font-size:17px;font-weight:600">' + r.title + '</span><span style="display:flex;align-items:center;gap:10px"><span style="flex:1;height:6px;border-radius:999px;background:#EDEFF2;overflow:hidden"><span style="display:block;height:100%;width:40%;background:#10B981"></span></span><span style="font-family:' + mono + ';font-size:12px;color:#5B6577">40%</span></span></a>'
+    + '<div style="margin-top:8px;display:flex;flex-direction:column;gap:10px">' + label('Browse by topic') + topics + '</div>'
+    + '<div style="margin-top:8px;display:flex;flex-direction:column;gap:10px">' + label('Popular this week') + pop + '</div></main>';
+}
+
 (async () => {
   const b = await chromium.launch();
   const seed = (c) => c.addInitScript(() => { try { localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada Okafor', goal: 'Investing', birth: '2001-03-14', asked: true })); } catch (e) {} });
@@ -58,6 +80,10 @@ function libraryLaptop(T, wod, reading) {
   await p.evaluate((h) => { const root = document.querySelector('#dc-root > .sc-host > :first-child'), nav = root.querySelector('nav[aria-label="Main"]');
     [...root.children].forEach((k) => { if (k !== nav) k.remove(); }); root.style.overflowY = 'auto'; root.insertAdjacentHTML('afterbegin', h); }, topicPhone('Investing', data.T.Investing, ['compound-interest', 'risk-and-return']));
   await p.waitForTimeout(300); await p.screenshot({ path: OUT + '/topic-phone-draft.png' });
+  await p.goto(B + 'LibraryNavy.dc.html'); await p.waitForTimeout(1300);
+  await p.evaluate((h) => { const root = document.querySelector('#dc-root > .sc-host > :first-child'), nav = root.querySelector('nav[aria-label="Main"]');
+    [...root.children].forEach((k) => { if (k !== nav) k.remove(); }); root.style.overflowY = 'auto'; root.insertAdjacentHTML('afterbegin', h); }, libraryPhone(data.T, data.wod, 'inflation'));
+  await p.waitForTimeout(300); await p.screenshot({ path: OUT + '/library-phone-draft.png' }); await p.screenshot({ path: OUT + '/library-phone-draft-full.png', fullPage: true });
   for (const W of [1440, 1920]) {
     const lc = await b.newContext({ viewport: { width: W, height: W > 1500 ? 1080 : 900 }, serviceWorkers: 'block' }); await seed(lc); const q = await lc.newPage();
     await q.goto(B + 'LibraryLaptopNavy.dc.html'); await q.waitForTimeout(1300);
