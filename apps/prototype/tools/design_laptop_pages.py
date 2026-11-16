@@ -13,6 +13,11 @@ BATCHES = {'markets': [MK('CompaniesNavy', 'Companies'), MK('CompareNavy', 'Comp
   'account': [AC('SavedNavy', 'Saved'), AC('HistoryNavy', 'History'), AC('HelpNavy', 'Help'), AC('YourPlanNavy', 'Your plan'), AC('PlanCompareNavy', 'Compare plans'), AC('ReceiptNavy', 'Receipt'),
     AC('SetEmailNavy', 'Email'), AC('SetGoalNavy', 'Interest'), AC('SetPrivacyNavy', 'Privacy and data'), AC('SetTermsNavy', 'Terms and privacy'), ('LessonPEDoneNavy', 'LearnLaptopNavy', 'Practice exercise result (laptop)')],
   'states': [AC('EmptyHistoryNavy', 'History: empty'), AC('EmptySavedNavy', 'Saved: empty'), AC('EmptyNotifNavy', 'Notifications: empty'), AC('PaySlowNavy', 'Payment: still checking'), AC('PayOfflineNavy', 'Payment: offline'), AC('PayAlreadyNavy', 'Payment: already on Plus')],
+  'screens': [AC('DeleteAccountNavy', 'Delete account'), AC('DeletedNavy', 'Account deleted'), ('ReportNavy', 'ArticleLaptopNavy', 'Report a mistake (laptop)'), ('SuggestNavy', 'LibraryLaptopNavy', 'Suggest a topic (laptop)'),
+    ('LoadingNavy', 'HomeLaptopNavy', 'Loading (laptop)'), ('CompanyLoadingNavy', 'MarketsLaptopNavy', 'Company loading (laptop)'), ('AgeCheckNavy', 'SignInLaptopNavy', 'Age check (laptop)'), ('IntroNavy', 'SignInLaptopNavy', 'Intro (laptop)'), ('NotifAskNavy', 'SignInLaptopNavy', 'Notifications prompt (laptop)')],
+  # Dialogs: the phone dialog's content as a centred card over the dimmed laptop page (pattern: approved AdminConfirmOffNavy).
+  'dialogs': [('LeaveLessonNavy', 'LessonLaptopNavy', 'Leave lesson (laptop)'), ('MarketClosedNavy', 'PracticeLaptopNavy', 'Market closed (laptop)'), ('SimResetNavy', 'PracticeLaptopNavy', 'Reset practice (laptop)'),
+    ('CancelPlanNavy', 'SettingsLaptopNavy', 'Cancel plan (laptop)'), ('LockedNavy', 'LearnLaptopNavy', 'Locked (laptop)'), ('RateNavy', 'LessonDoneLaptopNavy', 'Rate this lesson (laptop)'), ('ReviewNavy', 'HomeLaptopNavy', 'App review prompt (laptop)')],
   'learning': [('TopicNavy', 'LibraryLaptopNavy', 'Topic (laptop)'), ('DictionaryNavy', 'LibraryLaptopNavy', 'A to Z (laptop)'), ('ProgressNavy', 'LearnLaptopNavy', 'Progress (laptop)')]}
 TAG = re.compile(r'<(/?)(div|a|h1|h2|p|section|span|button|label|nav|main|header|sc-for|sc-if|ul|ol)\b[^>]*?(/?)>')
 def kids(html, a):
@@ -31,6 +36,27 @@ def kids(html, a):
     return out
 def text(h): return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'<svg.*?</svg>', '', h, flags=re.S))).strip()
 for name, frame_name, title in BATCHES[BATCH]:
+    if BATCH == 'dialogs':
+        s = open(os.path.join(OUT if SITE_MODE else M, name + '.dc.html')).read()
+        i = s.index('role="dialog"'); a = s.rindex('<', 0, i); tag = re.match(r'<(\w+)', s[a:]).group(1)
+        d, j = 0, a
+        for m in re.finditer(r'<(/?)' + tag + r'\b[^>]*>', s[a:]):
+            d += -1 if m.group(1) else 1
+            if d == 0: j = a + m.end(); break
+        dlg = s[a:j]
+        dlg = re.sub(r'^(<\w+[^>]*?style=")[^"]*"', r'\1width: 440px; max-width: calc(100% - 48px); background: #FFFFFF; border-radius: 18px; padding: 26px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 24px 60px rgba(11,11,15,.2); box-sizing: border-box"', dlg, count=1)
+        dlg = re.sub(r'<span style="[^"]*width: [34]\dpx; height: [45]px;[^"]*#D5D9E0[^"]*"></span>', '', dlg)  # phone sheet drag handle
+        f = open(os.path.join(M, frame_name + '.dc.html')).read(); root_end = f.rindex('</div>', 0, f.index('</x-dc>'))
+        overlay = '<div style="position: absolute; inset: 0; background: rgba(11,11,15,.45); display: flex; align-items: center; justify-content: center">' + dlg + '</div>'
+        out = f[:root_end] + overlay + f[root_end:]
+        out = out.replace('overflow: hidden">', 'overflow: hidden; position: relative">', 1) if 'position: relative' not in out[:out.index('<aside') if '<aside' in out else 2000] else out
+        out = re.sub(r'<title>[^<]*</title>', '<title>' + title + '</title>', out, count=1)
+        if SITE_MODE:
+            site_head = open(os.path.join(OUT, frame_name + '.dc.html')).read(); out = site_head[:site_head.index('<x-dc>')] + out[out.index('<x-dc>'):]
+            out = re.sub(r'<title>[^<]*</title>', '<title>' + title + '</title>', out, count=1)
+            a2 = s.index('<script type="text/x-dc"'); b2 = s.index('</script>', a2) + 9; fa = out.index('<script type="text/x-dc"'); fb = out.index('</script>', fa) + 9
+            out = out[:fa] + s[a2:b2].replace('"width":390,"height":844', '"width":1440,"height":900') + out[fb:]
+        lap = name.replace('Navy', 'LaptopNavy'); open(os.path.join(OUT, lap + '.dc.html'), 'w').write(out); print(lap, '|', title, '| dialog'); continue
     s = open(os.path.join(OUT if SITE_MODE else M, name + '.dc.html')).read(); a = s.index('</helmet>'); a = s.index('>', s.index('<div', a)) + 1
     ks = kids(s, a); head, body = ks[0], [k for k in ks[1:] if 'aria-label="Main"' not in k[:200]]
     # Title: the header's own heading (h1/h2); anything else the header holds (tags, stats, sender) stays as content.
@@ -41,7 +67,7 @@ for name, frame_name, title in BATCHES[BATCH]:
         if rest_text: body = [re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', rest, count=1, flags=re.S)] + body
     else:
         h1 = text(head) if text(head) not in ('Simulated',) and len(text(head)) < 30 and not re.search(r'<(span|div)[^>]*>[^<]{1,20}</(span|div)>\s*<(span|div)', head) else ''
-        if not h1 and text(head): body = [re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', head, count=1, flags=re.S)] + body
+        if not h1 and (text(head) or not re.search(r'aria-label="(Back|Close)', head)): body = [re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', head, count=1, flags=re.S)] + body
     fixed = []
     for k in body:
         k = re.sub(r'(margin|padding): (\d+px) 24px( (\d+px))?', lambda m: m.group(1) + ': ' + m.group(2) + ' 0' + (' ' + m.group(4) if m.group(4) else ''), k, count=1)
