@@ -6,6 +6,9 @@ import hashlib, os, sys, json
 SITE = sys.argv[1]
 files = sorted(f for f in os.listdir(SITE) if f.endswith(('.dc.html', '.js', '.css')) and f not in ('sw.js',))
 # Lesson sounds, so they also play offline.
+# The installable app's start page, manifest and icons, so it opens offline too.
+files += [f for f in ('index.html', 'manifest.json') if os.path.exists(os.path.join(SITE, f))]
+if os.path.isdir(os.path.join(SITE, 'icons')): files += sorted('icons/' + f for f in os.listdir(os.path.join(SITE, 'icons')) if f.endswith('.png'))
 if os.path.isdir(os.path.join(SITE, 'sfx')): files += sorted('sfx/' + f for f in os.listdir(os.path.join(SITE, 'sfx')) if f.endswith('.mp3'))
 h = hashlib.sha256()
 for f in files: h.update(open(os.path.join(SITE, f), 'rb').read())
