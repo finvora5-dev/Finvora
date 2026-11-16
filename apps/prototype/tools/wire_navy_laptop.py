@@ -71,4 +71,28 @@ if s:
   renderVals() { const T = ['Money basics', 'Investing', 'Nigerian market'], v = { save: () => { if (window.FV) window.FV.AUTH.setGoal(T[this.state.g]); } };
     T.forEach((t, k) => { const on = this.state.g === k; v['on' + k] = String(on); v['bd' + k] = on ? '1.5px solid #0B192C' : '1px solid #D5D9E0'; v['bg' + k] = on ? '#EEF0F3' : '#FFFFFF'; v['pick' + k] = () => this.setState({ g: k }); }); return v; }''')
     wr('GoalLaptopNavy', s)
+# Learn (phone: LearnNavy). Course progress, lesson rows and the Continue button come from the learner's progress.
+s = todo('LearnLaptopNavy')
+if s:
+    a = s.index('<a href="LessonNavy.dc.html" style="display: flex; align-items: center; gap: 14px; height: 56px;'); b = s.index('</section>', a)
+    row = ('<sc-for list="{{lessons}}" as="l" hint-placeholder-count="7"><a href="{{l.href}}" aria-disabled="{{l.locked}}" style="display: flex; align-items: center; gap: 14px; height: 56px; border-top: 1px solid #EDEFF2; text-decoration: none; color: {{l.ink}}">'
+           '<span style="width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: \'Geist Mono\', monospace; font-size: 12px; background: {{l.bg}}; color: {{l.fg}}; border: {{l.bd}}">{{l.mark}}</span>'
+           '<span style="flex: 1; font-size: 15px; font-weight: {{l.w}}">{{l.t}}</span><span style="font-size: 13px; color: #5B6577">{{l.s}}</span></a></sc-for>\n      ')
+    s = s[:a] + row + s[b:]
+    s = sub1(s, '<a href="LessonNavy.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #0B192C;', '<a href="{{contHref}}" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #0B192C;')
+    s = sub1(s, '>Continue: Budgeting · 4 min</a>', '>{{cont}}</a>')
+    s = sub1(s, 'width: 33%; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">2/6</span>', 'width: {{donePct}}; height: 100%; background: #10B981"></span></span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{doneN}}</span>')
+    s = logic(s, """  renderVals() {
+    const F = window.FV, st = F ? F.get() : { done: 2 }, done = st.done || 0, LS = F ? F.LESSONS : [];
+    const L = LS.map((x, i) => [x.title, i < done ? 'done' : i === done ? 'next' : 'locked', x.min + ' min']).concat([['Course review', done >= LS.length ? 'next' : 'locked', '8 questions']]);
+    let rv = {}; try { rv = JSON.parse(localStorage.getItem('fv.review.v1') || 'null') || {}; } catch (e) {}
+    const passed = (rv.best || 0) >= 6; if (passed) L[L.length - 1][1] = 'done'; const cur = LS[done];
+    return { contHref: cur ? 'LessonInfoNavy.dc.html' : 'CourseReviewNavy.dc.html', cont: passed ? 'Review the course again' : cur ? (done ? 'Continue: ' : 'Start: ') + cur.title + ' · ' + cur.min + ' min' : 'Start the course review',
+      donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6),
+      lessons: L.map(([t, s0, d], i) => ({ t, s: s0 === 'done' ? 'Completed · ' + d : s0 === 'next' ? 'Up next · ' + d : d, mark: s0 === 'done' ? '✓' : String(i + 1),
+        bg: s0 === 'done' ? '#DDF3E6' : s0 === 'next' ? '#0B192C' : '#FFFFFF', fg: s0 === 'done' ? '#047857' : s0 === 'next' ? '#FFFFFF' : '#5B6577', bd: s0 === 'locked' ? '1px solid #D5D9E0' : '0',
+        ink: s0 === 'locked' ? '#5B6577' : '#0B192C', w: s0 === 'next' ? '600' : '500', locked: String(s0 === 'locked'),
+        href: s0 === 'locked' ? '#' : i === LS.length ? 'CourseReviewNavy.dc.html' : s0 === 'next' ? 'LessonInfoNavy.dc.html' : 'LessonInfoNavy.dc.html?l=' + LS[i].id })) };
+  }""")
+    wr('LearnLaptopNavy', s)
 print('laptop wired')
