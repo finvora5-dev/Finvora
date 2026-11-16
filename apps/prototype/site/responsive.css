@@ -174,5 +174,5 @@ html:active-view-transition-type(step)::view-transition-new(root) { animation: v
 #dc-root :has(> button[role="radio"][style*="rgb(16, 185, 129)"], > button[role="radio"][style*="rgb(185, 71, 63)"]) > button[role="radio"]:active { transform: none; }
 
 /* Ask history panel (laptop): opens from its button, 160ms ease-out; reduced motion fades only (skill: animate). */
-#dc-root .fv-pop { transform-origin: top right; transition: transform 160ms var(--ease-out), opacity 160ms var(--ease-out); @starting-style { transform: scale(0.96); opacity: 0; } }
+#dc-root .fv-pop { transform-origin: calc(100% - 173px) 0; /* the History button, not the panel corner */ transition: transform 160ms var(--ease-out), opacity 160ms var(--ease-out); @starting-style { transform: scale(0.96); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #dc-root .fv-pop { transition: opacity 160ms var(--ease-out); @starting-style { transform: none; opacity: 0; } } }

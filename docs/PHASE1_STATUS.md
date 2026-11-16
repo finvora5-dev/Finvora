@@ -38,6 +38,8 @@ Every phone screen a visitor can reach now has its own laptop screen at 1440 px 
 *   **Phone fixes:** Me loses the Practice portfolio row; the Settings icon is a gear everywhere; the Market news switch is gone (no such feature); the conversations list opens as a side panel; A-Z on Library has a 44 px tap area.
 *   **Also:** Practice company change pill and laptop article Related links fixed. Checker `tools/break_ui/buttons.cjs` for button text.
 *   **Not reachable yet:** the lesson rating (Rate), app review (Review) and Suggest a topic screens exist and save to the admin inbox, but nothing opens them (build plan §4.6 says when they should appear).
+*   **Navigation:** Back and Close return to the page you came from (falling back to their own link); payment, sign-in, finished lessons and a placed trade keep fixed links. Closing a lesson part-way opens "Leave this lesson?" with the live count; Keep going returns to the same question.
+*   **Motion reviewed** with `/review-animations` (16 Nov 2026, evening): conversations panel, laptop History panel, result card scroll, launch animation, new hovers. One finding fixed (the History panel now grows from its button). Approved.
 *   **Checks run:** `qa_mobile` passes on all 99 phone screens; `qa_controls` finds no dead controls on the changed screens (two false alarms: Clear on an empty calculation answer, and Great on the Rate dialog where it is already selected); browser tests for each flow above. The redesigned Library, Topic, Ask and Practice company screens now differ from their old canvas boards by design. Not yet checked on a real phone.
 
 ## What the prototype is
