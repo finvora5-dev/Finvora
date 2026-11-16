@@ -246,4 +246,72 @@ if MARK not in s:
       wTitle: w.title, wDef: w.definition, wHref: 'ArticleNavy.dc.html?a=' + w.slug });
   }""")
     wr('LibraryLaptopNavy', s)
+# Money path (phones: PlusNavy, PayPendingNavy, PaySuccessNavy, PayFailedNavy; build-backlog B5). A failed response is
+# never a failed payment: only the simulated server check moves an order to success or failure; retries reuse the order.
+s = rd('PlansLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '<a href="PayLaptopNavy.dc.html"', '<a href="#" aria-disabled="true"')
+    s = sub1(s, '<a href="PayLaptopNavy.dc.html"', '<a href="#" onClick="{{payM}}"'); s = sub1(s, '<a href="PayLaptopNavy.dc.html"', '<a href="#" onClick="{{payY}}"')
+    s = logic(s, """  constructor(p) { super(p); if (window.FV && window.FV.PAY) window.FV.PAY.remember(); }
+  renderVals() { const go = (per) => (e) => { e.preventDefault(); const PAY = window.FV && window.FV.PAY; if (!PAY) return; const r = PAY.start(per);
+      if (r.ok || r.reason === 'pending') location.href = 'PayPendingNavy.dc.html?o=' + r.orderId; else location.href = 'YourPlanNavy.dc.html'; };
+    return { payM: go('monthly'), payY: go('yearly') }; }""")
+    wr('PlansLaptopNavy', s)
+s = rd('PayPendingLaptopNavy')
+if MARK not in s:
+    s = sub1(s, 'FV-24117 · ₦5,999', '{{orderNo}} · {{amt}}')
+    s = logic(s, """  P() { return window.FV && window.FV.PAY; }
+  o() { const P = this.P(); if (!P) return null; const m = /[?&]o=([\\w-]+)/.exec(location.search); const b = window.FV.billing(); return (m && b.orders.filter((x) => x.id === m[1])[0]) || P.current() || b.orders[0] || null; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
+  d(day) { return day ? new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; }
+  base() { const P = this.P(), o = this.o(); if (!P || !o) return { amt: '₦5,999', orderNo: 'FV-24117' }; return { amt: this.n(o.amountKobo), orderNo: P.orderNo(o) }; }
+  componentDidMount() { const P = this.P(), o = this.o(); if (!P || !o) return;
+    if (o.status === 'confirmedSuccess') { location.replace('PayAlreadyNavy.dc.html?o=' + o.id); return; }
+    if (o.status === 'confirmedFailed') { location.replace('PayFailedNavy.dc.html?o=' + o.id); return; }
+    this.t = setTimeout(() => { const r = P.check(o.id, /[?&]again=1/.test(location.search)); if (!r) return;
+      if (r.offline) location.replace('PayOfflineNavy.dc.html?o=' + o.id); else if (r.order.status === 'confirmedSuccess') location.replace('PaySuccessNavy.dc.html?o=' + o.id);
+      else if (r.order.status === 'confirmedFailed') location.replace('PayFailedNavy.dc.html?o=' + o.id); else location.replace('PaySlowNavy.dc.html?o=' + o.id); }, 1800); }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() { return this.base(); }""")
+    wr('PayPendingLaptopNavy', s)
+s = rd('PayLaptopNavy')
+if MARK not in s:
+    s = sub1(s, 'ada@example.com', '{{email}}'); s = sub1(s, 'FV-24117 · ₦5,999 · Renews 10 Dec', '{{orderNo}} · {{amt}} · Renews {{renews}}')
+    s = logic(s, """  P() { return window.FV && window.FV.PAY; }
+  o() { const P = this.P(); if (!P) return null; const m = /[?&]o=([\\w-]+)/.exec(location.search); const b = window.FV.billing(); return (m && b.orders.filter((x) => x.id === m[1])[0]) || P.current() || b.orders[0] || null; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
+  d(day) { return day ? new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; }
+  base() { const P = this.P(), o = this.o(); if (!P || !o) return { amt: '₦5,999', orderNo: 'FV-24117' }; return { amt: this.n(o.amountKobo), orderNo: P.orderNo(o) }; }
+  renderVals() { const F = window.FV, a = F ? F.AUTH.get() : {}, b = F ? F.billing() : { sub: {} }; return Object.assign(this.base(), { email: a.email || 'your email', renews: this.d(b.sub.renewsOn) }); }""")
+    wr('PayLaptopNavy', s)
+s = rd('PayFailedLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '>Order FV-24117<', '>Order {{orderNo}}<') if '>Order FV-24117<' in s else s.replace('FV-24117', '{{orderNo}}', 1)
+    s = sub1(s, '<a href="PlansLaptopNavy.dc.html"', '<a href="#" onClick="{{retry}}"'); s = sub1(s, '<a href="PlansLaptopNavy.dc.html"', '<a href="#" onClick="{{retry}}"')
+    s = logic(s, """  P() { return window.FV && window.FV.PAY; }
+  o() { const P = this.P(); if (!P) return null; const m = /[?&]o=([\\w-]+)/.exec(location.search); const b = window.FV.billing(); return (m && b.orders.filter((x) => x.id === m[1])[0]) || P.current() || b.orders[0] || null; }
+  n(k) { return '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); }
+  d(day) { return day ? new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; }
+  base() { const P = this.P(), o = this.o(); if (!P || !o) return { amt: '₦5,999', orderNo: 'FV-24117' }; return { amt: this.n(o.amountKobo), orderNo: P.orderNo(o) }; }
+  renderVals() { return Object.assign(this.base(), { retry: (e) => { e.preventDefault(); const P = this.P(), o = this.o(); if (!P || !o) { location.href = 'PlansLaptopNavy.dc.html'; return; } P.retry(o.id); location.href = 'PayPendingNavy.dc.html?o=' + o.id + '&again=1'; } }); }""")
+    wr('PayFailedLaptopNavy', s)
+# Sign out (phone: SignOutNavy): signs out, then the welcome screen as drawn.
+s = rd('SignOutLaptopNavy')
+if MARK not in s:
+    s = sub1(s, '<a href="WelcomeLaptopNavy.dc.html"', '<a href="WelcomeLaptopNavy.dc.html" onClick="{{out}}"')
+    s = logic(s, "  renderVals() { return { out: () => { if (window.FV) window.FV.AUTH.signOut(); } }; }"); wr('SignOutLaptopNavy', s)
+# No results (phone: EmptySearchNavy): the words searched, a suggestion when the Library has one, Ask with the words.
+s = rd('EmptyLaptopNavy')
+if MARK not in s:
+    s = sub1(s, 'aria-label="Search" value="zenit bnk"', 'aria-label="Search" value="{{q}}" onInput="{{onQ}}" onKeyDown="{{onKey}}"')
+    s = s.replace('zenit bnk', '{{q0}}')
+    s = sub1(s, '<a href="CompanyLaptopNavy.dc.html"', '<sc-if value="{{hasDym}}" hint-placeholder-val="{{ true }}"><a href="{{dymHref}}"')
+    s = sub1(s, '>Did you mean Zenith Bank?</a>', '>{{dymLabel}}</a></sc-if>')
+    s = sub1(s, '<a href="AskLaptopNavy.dc.html"', '<a href="{{askHref}}"')
+    s = logic(s, """  constructor(p) { super(p); const m = /[?&]q=([^&]*)/.exec(location.search); const q = m ? decodeURIComponent(m[1].replace(/[+]/g, ' ')) : ''; this.state = { q, q0: q }; }
+  renderVals() { const L = window.FV && window.FV.LIB, q0 = this.state.q0, d = L && q0 ? L.search(q0).didYouMean : null;
+    const zen = /zen|zenit/i.test(q0), art = d && L ? (L.article(String(d)) || L.all().filter((x) => x.title.toLowerCase() === String(d).toLowerCase())[0]) : null, dym = zen ? 'Zenith Bank' : art ? art.title : d ? String(d) : '';
+    return { q: this.state.q, q0, onQ: (e) => this.setState({ q: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); location.href = 'SearchNavy.dc.html?q=' + encodeURIComponent(this.state.q); } },
+      hasDym: !!dym, dymLabel: 'Did you mean ' + dym + '?', dymHref: zen ? 'CompanyLaptopNavy.dc.html?t=ZENITHBANK' : art ? 'ArticleNavy.dc.html?a=' + art.slug : 'SearchNavy.dc.html?q=' + encodeURIComponent(dym), askHref: 'AskLaptopNavy.dc.html?q=' + encodeURIComponent(q0) }; }""")
+    wr('EmptyLaptopNavy', s)
 print('laptop wired')

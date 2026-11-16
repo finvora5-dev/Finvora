@@ -12,7 +12,7 @@ BATCHES = {'markets': [MK('CompaniesNavy', 'Companies'), MK('CompareNavy', 'Comp
     PR('PracticeCrisisNavy', 'Practice: big moves'), PR('PracticeDoneNavy', 'Practice: order placed'), PR('PracticeEmptyNavy', 'Practice: empty')],
   'account': [AC('SavedNavy', 'Saved'), AC('HistoryNavy', 'History'), AC('HelpNavy', 'Help'), AC('YourPlanNavy', 'Your plan'), AC('PlanCompareNavy', 'Compare plans'), AC('ReceiptNavy', 'Receipt'),
     AC('SetEmailNavy', 'Email'), AC('SetGoalNavy', 'Interest'), AC('SetPrivacyNavy', 'Privacy and data'), AC('SetTermsNavy', 'Terms and privacy'), ('LessonPEDoneNavy', 'LearnLaptopNavy', 'Practice exercise result (laptop)')],
-  'states': [AC('EmptyHistoryNavy', 'History: empty'), AC('EmptySavedNavy', 'Saved: empty'), AC('EmptyNotifNavy', 'Notifications: empty')],
+  'states': [AC('EmptyHistoryNavy', 'History: empty'), AC('EmptySavedNavy', 'Saved: empty'), AC('EmptyNotifNavy', 'Notifications: empty'), AC('PaySlowNavy', 'Payment: still checking'), AC('PayOfflineNavy', 'Payment: offline'), AC('PayAlreadyNavy', 'Payment: already on Plus')],
   'learning': [('TopicNavy', 'LibraryLaptopNavy', 'Topic (laptop)'), ('DictionaryNavy', 'LibraryLaptopNavy', 'A to Z (laptop)'), ('ProgressNavy', 'LearnLaptopNavy', 'Progress (laptop)')]}
 TAG = re.compile(r'<(/?)(div|a|h1|h2|p|section|span|button|label|nav|main|header|sc-for|sc-if|ul|ol)\b[^>]*?(/?)>')
 def kids(html, a):
