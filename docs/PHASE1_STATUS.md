@@ -15,7 +15,17 @@ Every phone screen a visitor can reach now has its own laptop screen at 1440 px 
 *   **How they are built:** the `laptop-build` skill (`.claude/skills/laptop-build`). Canvas originals and the approved drafts are in `apps/prototype/mockups/`. Screens the canvas did not draw were drafted by `tools/design_laptop_steps.py` (lesson steps, Daily, Course review) and `tools/design_laptop_pages.py` (markets, practice, account, states, screens, codes, dialogs, learning). The owner approved each batch before it went live; `--site` builds the working versions.
 *   **Controls:** `tools/wire_navy_laptop.py` and `tools/wire_navy_controls.py` wire them like the phone versions. `responsive.js` sends a laptop to the laptop screen and adds the sidebar profile card, chip filters, sheets, toasts, chart ranges and the letter strip. Hover states and the collapsible sidebar live in `responsive.css`. The Courses/Library toggle was removed (owner). Put in order also works by tapping two items to swap them.
 *   **Checks run:** `qa_mockup.cjs` (matches the mock-up) and `qa_controls.cjs` (no dead controls) pass on every laptop screen. break-ui ran at 1440 with worst-case data (a long name and email, long Ask questions, 24 Ask messages, a Plus user). It found three faults, all fixed: Settings account rows showed fixed sample details instead of the signed-in user, a long name wrapped onto 2 to 3 lines in the sidebar (it now shows one line with an ellipsis and the full name on hover), and the sidebar sometimes said "Free plan" for a Plus user. Re-checked with no script errors and no sideways scrolling (`tools/break_ui/seed.cjs`).
-*   **Not done yet on laptop:** notifications are as drawn, Big moves is not wired, Error, Offline and Upgrade use plain links, dialogs open over a fixed background page, and `/review-animations` has not been run on the laptop screens.
+*   **Not done yet on laptop:** notifications are as drawn, Big moves is not wired, Error, Offline and Upgrade use plain links, most dialogs open over a fixed background page (Market closed and Reset practice now show the live Practice page behind them), and `/review-animations` has not been run on the laptop screens.
+
+## Later changes on 16 Nov 2026 (owner requests)
+
+*   **Phone navigation:** the bottom bar's Me tab is now **Practice** (the laptop sidebar's Practice market icon) and opens the Practice portfolio. Me is a button beside the notification bell on Home (a person in a circle, an icon nothing else uses). The short label keeps the four tabs even around the Ask button. On Me and History no tab is selected, and Practice pages have no bottom bar. `tools/wire_navy_nav_practice.py`.
+*   **Lessons:** finished lessons on the phone Learn page open again for replay (2 XP once a day, best score kept), as on laptop.
+*   **Buttons:** the Continue (Learn) and Next (lesson complete) buttons wrap long lesson titles inside padding, and "· 4 min" stays together. `tools/break_ui/buttons.cjs` checks every button on every screen for text that touches the edges, spills out or wraps in a fixed height; all phone (390 px) and laptop (1440 px) screens pass with normal and worst-case data.
+*   **Charts:** tap or drag along the Company, Practice company and Practice portfolio charts to read the price (or portfolio value) and date of any day, on phone and laptop. Practice charts are drawn from the simulated prices and their range buttons (1D, 1W, 1M, 3M, 1Y, All) work. Points are trading days counted back over weekends; public holidays are not skipped yet. The NGX All-Share chart stays as drawn until index data has a source.
+*   **Laptop Practice:** the page shows the live practice portfolio: value and return, the buy panel (price, shares, total with fees, cash; Review order carries the company and shares) and holdings. With no shares it opens the empty Practice screen. The Market closed and Reset practice dialogs show the same live page behind them.
+*   **Colours:** losses now show in red on the phone Practice header (#F2A39C, the navy down colour from the welcome board) and on the Practice company Return line.
+*   **Checks run:** `qa_mobile` passes on all 99 phone screens; `qa_mockup` and `qa_controls` pass on the changed laptop screens (`qa_mockup` now places the mock-up's holdings before checking Practice screens). Not yet checked on a real phone.
 
 ## What the prototype is
 
@@ -26,7 +36,7 @@ A browser-only prototype of Finvora, a money and investing education app for Nig
 | Path | What it holds |
 |---|---|
 | `apps/prototype/site` | The live site: the navy canvas boards (`*Navy.dc.html`) run by `support.js`, `responsive.js` (fits each screen, picks phone or laptop boards, screen transitions, lesson sounds), `responsive.css`, `fv.js` (browser state and glue), `fvd.js` (compiled domain rules), `sfx/` (lesson sounds), `sw.js` (offline cache). |
-| `apps/prototype/tools` | Wiring scripts (`wire_navy_*.py`), `build_sw.py` (always last), the laptop draft generators (`design_laptop_*.py`), and the checkers `qa_mobile.cjs`, `qa_responsive.cjs`, `qa_mockup.cjs`, `qa_controls.cjs` and `break_ui/seed.cjs`. |
+| `apps/prototype/tools` | Wiring scripts (`wire_navy_*.py`), `build_sw.py` (always last), the laptop draft generators (`design_laptop_*.py`), and the checkers `qa_mobile.cjs`, `qa_responsive.cjs`, `qa_mockup.cjs`, `qa_controls.cjs`, `break_ui/seed.cjs` and `break_ui/buttons.cjs`. |
 | `apps/prototype/mockups` | Canvas originals and approved laptop drafts that each laptop screen must match. |
 | `packages/domain`, `packages/engine`, `packages/sample-data` | Tested rules and data: money in integer kobo, checkout states (build-backlog §B5), companies, lessons. These carry into Phase 2. |
 | `wrangler.jsonc` | Cloudflare static-assets deploy of `apps/prototype/site`. |
@@ -64,7 +74,7 @@ Checks: `node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/` and `no
 *   Admin checks run in the browser and are not real security.
 *   Text under 12px drawn on the canvas (ticker badges, card labels) is kept as designed, and folded phones (280px) show the 390px design scaled, so controls render about 32px (owner, 15 Nov 2026; build plan §10).
 *   Not yet checked on a real phone: the on-screen keyboard, touch feel of drags and sheets, and sound on iPhone.
-*   Not wired yet: notifications are as drawn; Top riser and faller, Big moves and the index are static.
+*   Not wired yet: notifications are as drawn; Top riser and faller, Big moves and the NGX All-Share index are static (the index chart has no data source yet).
 *   Light mode only: dark mode was removed by the owner.
 *   Sound effects come from Mixkit (`apps/prototype/site/sfx`). Confirm the Mixkit licence (mixkit.co/license) before launch.
 *   Lesson and article content needs review by a finance educator.
