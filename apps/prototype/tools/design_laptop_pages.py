@@ -5,7 +5,15 @@ laptop boards), its bottom navigation is dropped (the sidebar replaces it), and 
 content uses the full width. No new copy. Usage: python3 design_laptop_pages.py <mockups folder> <out folder> <batch>"""
 import os, re, sys
 M, OUT, BATCH = sys.argv[1], sys.argv[2], sys.argv[3]; SITE_MODE = '--site' in sys.argv  # working screens: phone content and logic from the site
-BATCHES = {'learning': [('TopicNavy', 'LibraryLaptopNavy', 'Topic (laptop)'), ('DictionaryNavy', 'LibraryLaptopNavy', 'A to Z (laptop)'), ('ProgressNavy', 'LearnLaptopNavy', 'Progress (laptop)')]}
+MK = lambda n, t: (n, 'MarketsLaptopNavy', t + ' (laptop)'); PR = lambda n, t: (n, 'PracticeLaptopNavy', t + ' (laptop)'); AC = lambda n, t: (n, 'SettingsLaptopNavy', t + ' (laptop)')
+BATCHES = {'markets': [MK('CompaniesNavy', 'Companies'), MK('CompareNavy', 'Compare'), MK('ExchangeNavy', 'About the NGX'), MK('InflationToolNavy', 'Inflation calculator')],
+  'practice': [PR('PracticeMarketNavy', 'Practice: find a company'), PR('PracticeCompanyNavy', 'Practice: company'), PR('TradeNavy', 'Practice: buy'), PR('PracticeWatchlistNavy', 'Practice: watchlist'),
+    PR('PracticeHistoryNavy', 'Practice: trade history'), PR('PracticeDividendsNavy', 'Practice: dividends'), PR('PracticeMeasuresNavy', 'Practice: measures'), PR('PracticeTimeNavy', 'Practice: time'),
+    PR('PracticeCrisisNavy', 'Practice: big moves'), PR('PracticeDoneNavy', 'Practice: order placed'), PR('PracticeEmptyNavy', 'Practice: empty')],
+  'account': [AC('SavedNavy', 'Saved'), AC('HistoryNavy', 'History'), AC('HelpNavy', 'Help'), AC('YourPlanNavy', 'Your plan'), AC('PlanCompareNavy', 'Compare plans'), AC('ReceiptNavy', 'Receipt'),
+    AC('SetEmailNavy', 'Email'), AC('SetGoalNavy', 'Interest'), AC('SetPrivacyNavy', 'Privacy and data'), AC('SetTermsNavy', 'Terms and privacy'), ('LessonPEDoneNavy', 'LearnLaptopNavy', 'Practice exercise result (laptop)')],
+  'states': [AC('EmptyHistoryNavy', 'History: empty'), AC('EmptySavedNavy', 'Saved: empty'), AC('EmptyNotifNavy', 'Notifications: empty')],
+  'learning': [('TopicNavy', 'LibraryLaptopNavy', 'Topic (laptop)'), ('DictionaryNavy', 'LibraryLaptopNavy', 'A to Z (laptop)'), ('ProgressNavy', 'LearnLaptopNavy', 'Progress (laptop)')]}
 TAG = re.compile(r'<(/?)(div|a|h1|h2|p|section|span|button|label|nav|main|header|sc-for|sc-if|ul|ol)\b[^>]*?(/?)>')
 def kids(html, a):
     out, d, i, st = [], 0, a, None
@@ -25,7 +33,15 @@ def text(h): return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'<svg.*?
 for name, frame_name, title in BATCHES[BATCH]:
     s = open(os.path.join(OUT if SITE_MODE else M, name + '.dc.html')).read(); a = s.index('</helmet>'); a = s.index('>', s.index('<div', a)) + 1
     ks = kids(s, a); head, body = ks[0], [k for k in ks[1:] if 'aria-label="Main"' not in k[:200]]
-    h1 = text(head)
+    # Title: the header's own heading (h1/h2); anything else the header holds (tags, stats, sender) stays as content.
+    hm = re.search(r'<(h1|h2)\b[^>]*>(.*?)</\1>', head, flags=re.S)
+    if hm:
+        h1 = text(hm.group(2)); rest = head[:hm.start()] + head[hm.end():]
+        rest_text = re.sub(r'\s+', '', text(re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', rest, flags=re.S)))
+        if rest_text: body = [re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', rest, count=1, flags=re.S)] + body
+    else:
+        h1 = text(head) if text(head) not in ('Simulated',) and len(text(head)) < 30 and not re.search(r'<(span|div)[^>]*>[^<]{1,20}</(span|div)>\s*<(span|div)', head) else ''
+        if not h1 and text(head): body = [re.sub(r'<a [^>]*aria-label="(Back|Close)[^"]*"[^>]*>.*?</a>', '', head, count=1, flags=re.S)] + body
     fixed = []
     for k in body:
         k = re.sub(r'(margin|padding): (\d+px) 24px( (\d+px))?', lambda m: m.group(1) + ': ' + m.group(2) + ' 0' + (' ' + m.group(4) if m.group(4) else ''), k, count=1)
