@@ -178,4 +178,48 @@ if MARK not in s:
       contTitle: 'Money Foundations · ' + (cur ? cur.title : 'Course review'), donePct: Math.round(done / (LS.length || 6) * 100) + '%', doneN: done + '/' + (LS.length || 6), wl };
   }""")
     wr('HomeLaptopNavy', s)
+# Ask (phone: AskFinvoraNavy + AskLimitNavy). The conversation, sources and follow-ups come from FV.ASK; ?q= asks on
+# arrival; the drawn company card shows for a question that names a company the app has data for.
+s = rd('AskLaptopNavy')
+if MARK not in s:
+    a = s.index('<div style="align-self: flex-end; max-width: 520px;'); b = s.index('<span style="flex: 1"></span>', a)
+    convo = ('<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 15px; color: #5B6577">Ask about any NGX company, price or money idea.</p></sc-if>'
+      '<sc-for list="{{msgs}}" as="m" hint-placeholder-count="1"><div style="display: flex; flex-direction: column; gap: 20px">'
+      '<div style="align-self: flex-end; max-width: 520px; padding: 12px 16px; border-radius: 16px 16px 4px 16px; background: #E8EBEF; font-size: 15px; overflow-wrap: anywhere">{{m.q}}</div>'
+      '<div style="display: flex; gap: 12px"><span role="img" aria-label="Finvora" style="width: 28px; height: 28px; flex: none; border-radius: 6px; background: #0B192C; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="75 55 490 560" aria-hidden="true"><path fill="#FFFFFF" d="M242 604C170 561 66 398 140 241c12-12 29-26 29-24-8 41-11 82-11 121 33-48 91-70 198-99 76-18 126-33 168-52-20 70-62 106-108 138-100 50-200 30-260 20 3 90 33 170 87 235z"/><path fill="#00E676" d="M296 217c-19-1-58-6-64-8 17-21 46-41 82-53 80-27 170-50 247-97-30 110-120 166-265 158z"/></svg></span>'
+      '<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.6; color: #334155">'
+      '<sc-for list="{{m.paras}}" as="x" hint-placeholder-count="1"><p style="margin: 0">{{x.t}}</p></sc-for>'
+      '<sc-if value="{{m.hasCo}}" hint-placeholder-val="{{ false }}"><a href="{{m.coHref}}" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px 18px; text-decoration: none; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; color: #0B192C">'
+      '<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{m.coName}}</span><span style="font-family: \'Geist Mono\', monospace; font-size: 12px; color: #5B6577">{{m.coT}}</span></span>'
+      '<span style="display: flex; flex-direction: column"><span style="font-size: 12px; color: #5B6577">Price</span><span style="font-family: \'Geist Mono\', monospace">{{m.coP}}</span></span>'
+      '<span style="display: {{m.zenShow}}; flex-direction: column"><span style="font-size: 12px; color: #5B6577">EPS FY2024</span><span style="font-family: \'Geist Mono\', monospace">₦15.40</span></span>'
+      '<span style="display: {{m.zenShow}}; flex-direction: column"><span style="font-size: 12px; color: #5B6577">P/E</span><span style="font-family: \'Geist Mono\', monospace">3.1</span></span></a></sc-if>'
+      '<span style="font-size: 12px; color: #5B6577">{{m.src}}</span></div></div></div></sc-for>'
+      '<sc-if value="{{limited}}" hint-placeholder-val="{{ false }}"><div role="status" style="padding: 16px 18px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 8px">'
+      '<strong style="font-size: 16px; color: #0B192C">You have used today\'s 5 questions</strong><span style="font-size: 14px; color: #5B6577">Free includes 5 Finvora AI questions a day. More tomorrow at 00:00, or get unlimited with Plus.</span>'
+      '<a href="PlansLaptopNavy.dc.html" style="align-self: flex-start; height: 40px; padding: 0 16px; border-radius: 10px; background: #0B192C; color: #FFFFFF; display: inline-flex; align-items: center; text-decoration: none; font-weight: 600; font-size: 14px">See Plus</a></div></sc-if>\n      ')
+    s = s[:a] + convo + s[b:]
+    i = s.index('<div style="display: flex; gap: 8px"><button style="height: 36px;'); j = s.index('</div>', i) + 6
+    s = s[:i] + ('<div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{chips}}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{c.go}}" style="cursor: pointer; height: 36px; padding: 0 14px; border: 1px solid #E5E7EB; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; color: #0B192C">{{c.t}}</button></sc-for></div>') + s[j:]
+    s = sub1(s, '<input enterkeyhint="send" aria-label="Ask a follow-up" placeholder="Ask a follow-up"', '<input id="ask" enterkeyhint="send" aria-label="{{ph}}" placeholder="{{ph}}" value="{{draft}}" onInput="{{onDraft}}" onKeyDown="{{onKey}}"')
+    s = sub1(s, '<button aria-label="Send" style="width: 44px;', '<button type="button" aria-label="Send" aria-disabled="{{noDraft}}" onClick="{{send}}" style="cursor: pointer; width: 44px;')
+    s = s.replace('<span style="flex: 1"></span>\n      <div style="display: flex; gap: 8px; flex-wrap: wrap">', '<span style="flex: 1"></span>\n      <span style="font-size: 12px; color: #5B6577">{{left}}</span>\n      <div style="display: flex; gap: 8px; flex-wrap: wrap">', 1)
+    s = logic(s, """  A() { return window.FV && window.FV.ASK; }
+  constructor(p) { super(p); this.state = { draft: '', n: 0, limited: false }; }
+  componentDidMount() { const m = /[?&]q=([^&]+)/.exec(location.search); if (m) { history.replaceState(null, '', location.pathname); this.ask(decodeURIComponent(m[1].replace(/\\+/g, ' '))); } this.bottom(); }
+  bottom() { setTimeout(() => { const el = document.querySelector('main'); if (el) el.scrollTop = el.scrollHeight; }, 30); }
+  ask(q) { const A = this.A(); q = String(q || '').trim(); if (!A || !q) return; if (!A.status().allowed) { this.setState({ limited: true, draft: '' }); return; } A.ask(q); this.setState({ draft: '', n: this.state.n + 1, limited: false }); this.bottom(); }
+  renderVals() {
+    const A = this.A(), S = window.FV && window.FV.SIM, msgs = A ? A.messages() : [], st = A ? A.status() : { remaining: 5 }, lim = A ? A.limit() : 5;
+    const co = (q) => { if (!S) return null; const ql = q.toLowerCase(); return S.COMPANIES.map((c) => S.company(c.t)).filter((c) => c && (ql.indexOf(c.name.toLowerCase().split(' ')[0].toLowerCase()) >= 0 || ql.indexOf(c.t.toLowerCase()) >= 0))[0] || null; };
+    const last = msgs[msgs.length - 1], fol = last ? (last.r.choices || []).map((c) => c.title).concat(last.r.followUps || []).slice(0, 3) : (A ? A.suggestions().slice(0, 3) : []);
+    return { empty: !msgs.length && !this.state.limited, limited: this.state.limited,
+      msgs: msgs.map((m) => { const c = co(m.q); return { q: m.q, paras: String(m.r.answer || '').split(/\\n\\n+/).map((t) => ({ t })),
+        src: (m.r.citations || []).length ? 'Sources: ' + m.r.citations.map((x) => x.title).join(', ') + '. Not financial advice.' : 'Not financial advice.',
+        hasCo: !!c, coHref: c ? 'CompanyLaptopNavy.dc.html?t=' + c.t : '#', coName: c ? c.name : '', coT: c ? c.t : '', coP: c ? '₦' + (S.price(c.t) / 100).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '', zenShow: c && c.t === 'ZENITHBANK' ? 'flex' : 'none' }; }),
+      chips: fol.map((t) => ({ t, go: () => this.ask(t) })), ph: msgs.length ? 'Ask a follow-up' : 'Ask Finvora a question', draft: this.state.draft, noDraft: String(!this.state.draft.trim()),
+      left: lim === null ? 'Unlimited questions with Plus' : st.remaining + ' of ' + lim + ' free questions left today',
+      onDraft: (e) => this.setState({ draft: e.target.value }), onKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.ask(this.state.draft); } }, send: () => this.ask(this.state.draft) };
+  }""")
+    wr('AskLaptopNavy', s)
 print('laptop wired')
