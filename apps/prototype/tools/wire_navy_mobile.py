@@ -27,7 +27,7 @@ for n in names:
     s = re.sub(r'(aria-label="(?:Add|Attach a report|Send)"[^>]*?)width: 40px; height: 40px', r'\1width: 44px; height: 44px', s)
     HIT = 'display: inline-block; padding: 14px 8px; margin: -14px -8px; '
     for t in ['{{resendLabel}}</a>', 'Change email</a>', '‹ Tasks</a>']:
-        s = re.sub(r'(<a [^>]*style=")(?!display: inline-block; padding: 14px)([^"]*">)' + re.escape(t), lambda m: m.group(1) + HIT + m.group(2) + t, s)
+        s = re.sub(r'(<a [^>]*style=")(?!display: inline-block; padding: 14px)(?![^"]*height: 52px)([^"]*">)' + re.escape(t), lambda m: m.group(1) + HIT + m.group(2) + t, s)
     # Dictionary letter index: a strip you can tap or drag along (responsive.js), wider to the screen edge.
     s = s.replace('aria-label="Letters" style="width: 28px; padding: 14px 6px 0 0;', 'aria-label="Letters" class="fv-index" style="width: 36px; padding: 14px 6px 0 0; touch-action: none;')
     # Viewport baseline (§ Baseline): the keyboard resizes the layout on Android so bottom-pinned inputs stay visible.
