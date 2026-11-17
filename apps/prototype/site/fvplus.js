@@ -112,6 +112,19 @@
   var REPORTS = { "Zenith Bank FY2024": ["₦2.4tn", "₦0.9tn", "₦1.5tn", "₦0.7tn", "₦1.3tn", "₦1.0tn", "₦33.23"], "Zenith Bank FY2023": ["₦1.4tn", "₦0.4tn", "₦1.0tn", "₦0.5tn", "₦0.8tn", "₦0.7tn", "₦21.70"],
     "GTCO FY2024": ["₦1.3tn", "₦0.3tn", "₦1.0tn", "₦0.4tn", "₦1.2tn", "₦1.0tn", "₦35.02"], "GTCO FY2023": ["₦0.8tn", "₦0.2tn", "₦0.6tn", "₦0.3tn", "₦0.6tn", "₦0.5tn", "₦19.21"],
     "Access Holdings FY2024": ["₦3.5tn", "₦2.0tn", "₦1.5tn", "₦1.1tn", "₦0.9tn", "₦0.6tn", "₦17.12"] };
+  /* break-ui (dev only, ?data=worst|empty|one|huge): worst realistic data at the same boundary as the demo data. */
+  var MODE = (/[?&]data=(worst|empty|one|huge)\b/.exec(location.search) || [])[1] || "";
+  if (MODE) {
+    var W = [["Guaranty Trust Holding Company Plc", "₦58.80", "+0.4%", "4.6", "7.7%", "Alert at ₦60"], ["UBA", "₦28.40", "−12.5%", "2.9", "8.8%", ""], ["Stanbic IBTC Holdings", "₦1,250.00", "+10.0%", "—", "0.0%", "Alert at ₦1,300.50"], ["FBN Holdings", "₦23.10", "0.0%", "3.0", "—", ""], ["Nestlé Nigeria", "₦1,050.00", "−1.9%", "24.0", "3.9%", ""]];
+    var huge = []; for (var h = 0; h < 156; h++) huge.push([W[h % 5][0] + (h > 4 ? " " + (h + 1) : ""), W[h % 5][1], W[h % 5][2], W[h % 5][3], W[h % 5][4], ""]);
+    LISTS["Banks · 4"] = MODE === "worst" ? W : MODE === "empty" ? [] : MODE === "one" ? [W[1]] : huge;
+    REPORTS["Stanbic IBTC Holdings FY2024"] = ["₦12.84tn", "₦11.9tn", "₦0.94tn", "₦1.27tn", "−₦0.33tn", "−₦0.31tn", "−₦2.41"];
+  }
+  function devToggle() { if (!MODE && !/[?&]data=demo\b/.test(location.search)) return; if (document.getElementById("fv-data")) return;
+    var bar = document.createElement("div"); bar.id = "fv-data"; bar.setAttribute("style", "position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:999;display:flex;gap:2px;padding:3px;border-radius:10px;background:#E5E7EB;font:12px system-ui,sans-serif");
+    ["demo", "worst", "empty", "one", "huge"].forEach(function (m) { var a = document.createElement("a"); a.textContent = { demo: "Demo data", worst: "Worst case", empty: "Empty", one: "One", huge: "156 rows" }[m]; a.href = location.pathname + "?data=" + m;
+      a.setAttribute("style", "padding:6px 10px;border-radius:8px;text-decoration:none;color:#111;" + ((MODE || "demo") === m ? "background:#fff" : "")); bar.appendChild(a); });
+    document.body.appendChild(bar); }
   var LINES = ["Interest income", "Interest expense", "Net interest income", "Operating costs", "Profit before tax", "Profit after tax", "Earnings a share"];
   function reports() {
     var pk = byText("#dc-root main span", /^(Zenith Bank FY2024|GTCO FY2024)▾$/); if (pk.length !== 2 || pk[0]._fv) return; pk[0]._fv = 1;
@@ -126,6 +139,6 @@
     draw();
   }
 
-  function run() { section(); scenarios(); crisis(); history(); watchlists(); reports(); }
+  function run() { devToggle(); section(); scenarios(); crisis(); history(); watchlists(); reports(); }
   var tries = 0, it = setInterval(function () { if (document.querySelector("#dc-root main")) { run(); if (++tries > 3) clearInterval(it); } else if (++tries > 80) clearInterval(it); }, 150);
 })();
