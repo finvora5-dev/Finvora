@@ -5,7 +5,7 @@
 // Laptops (>= 1024px): the laptop board is used when one exists; 1440px boards fill the window.
 (function () {
   var DESK = 1024;
-  var PAIRS = { HomeNavy: "HomeLaptopNavy", MarketsNavy: "MarketsLaptopNavy", CompanyNavy: "CompanyLaptopNavy", AskFinvoraNavy: "AskLaptopNavy",
+  var PAIRS = { PlusScenariosNavy: "PlusScenariosLaptopNavy", PlusCrisisNavy: "PlusCrisisLaptopNavy", PlusReportsNavy: "PlusReportsLaptopNavy", PlusHistoryNavy: "PlusHistoryLaptopNavy", PlusAnalysisNavy: "PlusAnalysisLaptopNavy", PlusPortfolioNavy: "PlusPortfolioLaptopNavy", PlusWatchlistsNavy: "PlusWatchlistsLaptopNavy", PlusDividendsNavy: "PlusDividendsLaptopNavy", PlusRiskNavy: "PlusRiskLaptopNavy", HomeNavy: "HomeLaptopNavy", MarketsNavy: "MarketsLaptopNavy", CompanyNavy: "CompanyLaptopNavy", AskFinvoraNavy: "AskLaptopNavy",
     LearnNavy: "LearnLaptopNavy", LibraryNavy: "LibraryLaptopNavy", MeNavy: "MeLaptopNavy", ArticleNavy: "ArticleLaptopNavy", SearchNavy: "SearchLaptopNavy",
     EmptySearchNavy: "EmptyLaptopNavy", ErrorNavy: "ErrorLaptopNavy", OfflineNavy: "OfflineLaptopNavy", GoalNavy: "GoalLaptopNavy", LessonNavy: "LessonLaptopNavy",
     LessonDoneNavy: "LessonDoneLaptopNavy", NotificationsNavy: "NotificationsLaptopNavy", PayFailedNavy: "PayFailedLaptopNavy", PaySuccessNavy: "PayLaptopNavy",

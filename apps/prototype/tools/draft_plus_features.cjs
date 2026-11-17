@@ -4,7 +4,7 @@
 const { chromium, devices } = require('playwright');
 const fs = require('fs'), path = require('path');
 const [B, OUT] = process.argv.slice(2);
-fs.mkdirSync(OUT, { recursive: true });
+if (require.main === module) fs.mkdirSync(OUT, { recursive: true });
 
 const C = { navy: '#0B192C', em: '#047857', em2: '#10B981', emBg: '#E7F6EF', red: '#B9473F', redBg: '#FBEDEC', mute: '#5B6577', line: '#E3E6EB', card: '#FFFFFF', soft: '#EEF0F3' };
 const mono = "font-family:'Geist Mono',monospace";
@@ -109,7 +109,8 @@ F['9-interactive-scenarios'] = () => {
   return { phone: [head, ctl, out, h('More scenarios'), more, nfa], laptop: [head, `<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;align-items:start"><div style="display:flex;flex-direction:column;gap:16px">${ctl}${h('More scenarios')}${more}</div>${out}</div>`, nfa] };
 };
 
-(async () => {
+module.exports = { F, C };
+if (require.main === module) (async () => {
   const b = await chromium.launch();
   const auth = () => { try { localStorage.setItem('fv.auth.v1', JSON.stringify({ email: 'ada@example.com', name: 'Ada', goal: 'Investing', birth: '2001-03-14', asked: true })); } catch (x) {} };
   const shots = [];

@@ -97,3 +97,21 @@ Checks: `node apps/prototype/tools/qa_mobile.cjs http://127.0.0.1:8790/` and `no
 ## Phase 2 (not in this build)
 
 Real backend and accounts, Paystack payments confirmed by our server, the market-data provider, live AI, notifications, analytics and staff roles. Open Phase 2 questions are in `docs/open-questions.md`.
+
+## Plus features (17 Nov 2026)
+
+Built from the approved drafts (`apps/prototype/mockups/drafts-plus`), phone and laptop, by `tools/build_plus_features.cjs` with the parts you can use in `site/fvplus.js`. All figures are simulated.
+
+| Feature | Screen | Opens from | What works |
+|---|---|---|---|
+| Finvora Risk Signals | PlusRisk | Company, Plus tools | Signals with levels; "Learn what this means" opens Ask Finvora |
+| Dividend and cash flow tracker | PlusDividends | Practice, Plus tools | Upcoming payouts, cash against dividends chart |
+| Advanced watchlists | PlusWatchlists | Watchlist, Plus tools | Switch between lists |
+| Portfolio intelligence | PlusPortfolio | Practice, Plus tools | Return, yield, sector mix, against the market, tips |
+| Advanced company analysis | PlusAnalysis | Company, Plus tools | Ratios against the bank average, strengths and watch-outs |
+| Historical comparisons | PlusHistory | Company, Plus tools | Switch revenue, profit, dividend, share price |
+| Financial report comparisons | PlusReports | Company, Plus tools | Choose any two of five reports |
+| Market crisis simulator | PlusCrisis | Practice, Plus tools | Three downturns, month by month, a choice each month, results at the end |
+| Interactive financial scenarios | PlusScenarios | Learn, Plus tools | Sliders worked out in kobo, three ready-made scenarios |
+
+Not yet: Free users are not locked out (locked views are Phase 2); the figures do not come from the practice portfolio or real reports.
