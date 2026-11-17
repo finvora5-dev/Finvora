@@ -300,6 +300,24 @@
     for (var i = 1; i <= need; i++) out.unshift(Math.max(1, Math.round(first * back[i] / back[0])));
     return out.concat(real);
   }
+  // Owner rule (17 Nov 2026): every trend line is red when it falls and emerald when it rises, judged by the line itself
+  // (first point against last), so a list's small charts never show a falling line in green. Icons have too few points to match.
+  function trendColours() {
+    document.querySelectorAll('#dc-root svg path[stroke]').forEach(function (pa) {
+      var st = pa.getAttribute("stroke") || ""; if (!/^#(10B981|047857|B9473F)$/i.test(st)) return;
+      var f = pa.getAttribute("fill"); if (f && f !== "none") return;
+      var m = (pa.getAttribute("d") || "").match(/[ML]\s*-?[\d.]+[ ,]-?[\d.]+/g); if (!m || m.length < 5) return;
+      var y = function (t) { return +t.replace(/^[ML]\s*/, "").split(/[ ,]/)[1]; }, y0 = y(m[0]), y1 = y(m[m.length - 1]);
+      var fall = y1 > y0 + 0.5; if (fall === /^#B9473F$/i.test(st)) return; var want = fall ? "#B9473F" : "#10B981";
+      pa.setAttribute("stroke", want);
+      var area = pa.previousElementSibling; if (area && area.tagName.toLowerCase() === "path" && /^#(10B981|B9473F)$/i.test(area.getAttribute("fill") || "")) area.setAttribute("fill", want);
+      var dot = pa.parentNode.querySelector("circle"); if (dot && /^#(10B981|B9473F)$/i.test(dot.getAttribute("fill") || "")) dot.setAttribute("fill", want);
+    });
+  }
+  (function () { var q = 0, run = function () { q = 0; trendColours(); };
+    var start = function () { var r = document.getElementById("dc-root"); if (!r) return setTimeout(start, 100); run();
+      new MutationObserver(function () { if (!q) q = requestAnimationFrame(run); }).observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ["d", "stroke"] }); };
+    start(); })();
   window.fvDraw = function (g, p, l) { draw(g, p, l); };
   function draw(svg, pts, label) {
     var vb = (svg.getAttribute("viewBox") || "0 0 350 180").split(/\s+/).map(Number), W = vb[2] || 350, H = vb[3] || 180;
@@ -313,6 +331,10 @@
     var paths = svg.querySelectorAll(":scope > path"); if (!paths.length) return;
     if (paths.length < 2) paths[0].setAttribute("d", line); else { paths[0].setAttribute("d", line + " L" + W + " " + H + " L0 " + H + " Z"); paths[1].setAttribute("d", line); }
     var c = svg.querySelector("circle"); if (c) { c.setAttribute("cx", xy[n - 1][0]); c.setAttribute("cy", xy[n - 1][1]); }
+    // Owner rule (17 Nov 2026): a chart that falls is red, one that rises or stays level is emerald. Grey charts keep their colour.
+    var col = pts[n - 1] < pts[0] ? "#B9473F" : "#10B981", isCol = function (v) { return /^#(10B981|B9473F)$/i.test(v || ""); };
+    paths.forEach(function (pp) { if (isCol(pp.getAttribute("stroke"))) pp.setAttribute("stroke", col); if (isCol(pp.getAttribute("fill"))) pp.setAttribute("fill", col); });
+    if (c && isCol(c.getAttribute("fill"))) c.setAttribute("fill", col);
     svg.setAttribute("aria-label", label);
     svg._fv = { pts: pts, xy: xy, W: W, H: H }; hideTip(svg); scrubInit(svg);
   }
