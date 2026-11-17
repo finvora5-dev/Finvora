@@ -20,15 +20,16 @@ const seg = (opts, on = 0) => `<div style="display:flex;background:${C.soft};bor
 const row = (a, b, c = '', bold) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid ${C.line};font-size:14px"><span style="${bold ? 'font-weight:600' : ''}">${a}</span><span style="display:flex;gap:12px;align-items:center;${mono};font-size:13px">${b}${c ? `<span style="min-width:56px;text-align:right">${c}</span>` : ''}</span></div>`;
 const up = (t) => `<span style="color:${C.em}">▲ ${t}</span>`, dn = (t) => `<span style="color:${C.red}">▼ ${t}</span>`;
 const level = (l) => l === 'High' ? tag('High', C.redBg, C.red) : l === 'Medium' ? tag('Medium', '#E8ECF3', C.navy) : tag('Low', C.emBg, C.em);
-const bars = (vals, labels, color = C.em2, h2 = 120, second) => { const mx = Math.max(...vals, ...(second || [0])); const n = vals.length;
+const bars = (vals, labels, color = C.em2, h2 = 120, second) => { if (!second && vals[vals.length - 1] < vals[0]) color = C.red; const mx = Math.max(...vals, ...(second || [0])); const n = vals.length;
   const svg = `<svg viewBox="0 0 300 ${h2}" width="100%" height="${h2 + 30}" preserveAspectRatio="none" style="display:block">${vals.map((v, i) => { const x = i * 300 / n + 300 / n * 0.18, bw = 300 / n * 0.64 / (second ? 2 : 1);
     return `<rect x="${x}" y="${h2 - v / mx * h2}" width="${bw}" height="${v / mx * h2}" fill="${color}"/>` + (second ? `<rect x="${x + bw + 1}" y="${h2 - second[i] / mx * h2}" width="${bw - 1}" height="${second[i] / mx * h2}" fill="${C.navy}"/>` : ''); }).join('')}</svg>`;
   return svg + `<div style="display:flex;margin-top:6px">${labels.map((l) => `<span style="flex:1;text-align:center;font-size:11px;color:${C.mute}">${l}</span>`).join('')}</div>`; };
 const line = (a, b, h2 = 110) => { const mx = Math.max(...a, ...(b || a)), mn = Math.min(...a, ...(b || a)); const pt = (v, i, n) => `${i * 300 / (n - 1)},${8 + (1 - (v - mn) / (mx - mn || 1)) * (h2 - 16)}`;
-  return `<svg viewBox="0 0 300 ${h2}" width="100%" preserveAspectRatio="none" style="display:block"><polyline fill="none" stroke="${C.em2}" stroke-width="2.5" points="${a.map((v, i) => pt(v, i, a.length)).join(' ')}"/>${b ? `<polyline fill="none" stroke="${C.navy}" stroke-width="2" stroke-dasharray="4 4" points="${b.map((v, i) => pt(v, i, b.length)).join(' ')}"/>` : ''}</svg>`; };
+  return `<svg viewBox="0 0 300 ${h2}" width="100%" preserveAspectRatio="none" style="display:block"><polyline fill="none" stroke="${a[a.length - 1] < a[0] ? C.red : C.em2}" stroke-width="2.5" points="${a.map((v, i) => pt(v, i, a.length)).join(' ')}"/>${b ? `<polyline fill="none" stroke="${C.navy}" stroke-width="2" stroke-dasharray="4 4" points="${b.map((v, i) => pt(v, i, b.length)).join(' ')}"/>` : ''}</svg>`; };
 const legend = (items) => `<div style="display:flex;gap:14px;font-size:12px;color:${C.mute}">${items.map(([c, t, d]) => `<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:${d ? 0 : 3}px;border-top:${d ? `2px dashed ${c}` : 'none'};background:${d ? 'none' : c};border-radius:2px"></span>${t}</span>`).join('')}</div>`;
 const stack = (parts) => `<div style="display:flex;height:12px;border-radius:999px;overflow:hidden">${parts.map(([p, c]) => `<span style="width:${p}%;background:${c}"></span>`).join('')}</div>`;
 
+// Owner rule (17 Nov 2026): a falling chart (a crash, a loss, money losing value) is drawn in red; rising stays emerald.
 // Each feature: phone body (one column) and laptop body (grid). Both made from the same blocks.
 const F = {};
 F['1-risk-signals'] = () => {
