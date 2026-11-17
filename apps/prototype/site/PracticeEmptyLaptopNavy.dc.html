@@ -11,7 +11,7 @@
 <script src="./fvd.js"></script>
 <script src="./fv.js"></script>
 </head>
-<body>
+<body data-fv-section="">
 <x-dc>
 <helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
@@ -39,5 +39,6 @@ class Component extends DCLogic {
   renderVals() { const D = window.FVD; return { start: D ? '₦' + (D.CONFIG.SIM_STARTING_CASH_KOBO / 100).toLocaleString('en-NG') : '₦100,000' }; }
 }
 </script>
+<script src="fvplus.js"></script>
 </body>
 </html>

@@ -234,6 +234,31 @@
     if (t.hasAttribute("data-fv-run")) { FV.SIM.setScenario(document.querySelector('[data-fv-panel="crisis"]')._pick); reload("crisis"); return; }
     if (t.hasAttribute("data-fv-reset")) { FV.SIM.clearScenario(); reload(document.body.getAttribute("data-fv-tab") || "holdings"); }
   });
-  function run() { ptabs(); portfolioTabs(); devToggle(); section(); scenarios(); crisis(); history(); watchlists(); reports(); }
+  /* break-ui (dev only, ?seed=worst|empty|one|huge on the practice screen): realistic worst-case practice accounts, made with
+     the simulator's own trade rules. Your own account is saved first and comes back with "Demo data" (?seed=demo). */
+  function seedPractice() {
+    var m = (/[?&]seed=(demo|worst|empty|one|huge)\b/.exec(location.search) || [])[1]; if (!m || !window.FV || !FV.SIM || !/Practice(Empty)?(Laptop)?Navy/.test(location.pathname)) return; var home = location.pathname.replace("PracticeEmpty", "Practice");
+    var S = FV.SIM, K = "fv.sim.v1", ls = localStorage;
+    if (ls.getItem("fv.seeded") !== m) {
+      if (ls.getItem("fv.sim.v1.real") === null) ls.setItem("fv.sim.v1.real", ls.getItem(K) || "");
+      S.clearScenario(); ls.removeItem(K); ls.removeItem(K + ".last");
+      if (m === "demo") { var r = ls.getItem("fv.sim.v1.real"); if (r) ls.setItem(K, r); ls.removeItem("fv.sim.v1.real"); ls.removeItem("fv.seeded"); location.replace(home); return; }
+      ls.setItem("fv.sim.shift", "-400"); var n = 0, buy = function (t, q, side) { return S.trade(side || "buy", t, q, "seed" + (n++)).ok; };
+      if (m === "one") buy("NB", 1);
+      if (m === "empty") { buy("GTCO", 10); buy("GTCO", 10, "sell"); }
+      if (m === "worst" || m === "huge") { [["ZENITHBANK", 333], ["GTCO", 222], ["MTNN", 37], ["NESTLE", 11], ["AIRTELAFRI", 2], ["SEPLAT", 1], ["NB", 401], ["DANGCEM", 10]].forEach(function (x) { buy(x[0], x[1]); }); buy("DANGCEM", 10, "sell");
+        var p = S.price("ZENITHBANK"), q = Math.floor(S.get().cashKobo / (p * 1.03)); if (q > 0) buy("ZENITHBANK", q); }
+      ls.setItem("fv.sim.shift", "0"); S.settle();
+      if (m === "huge") { var a = S.get(), d = a.dividends || []; for (var i = 0; i < 60; i++) d.push({ id: "old" + i, ticker: ["ZENITHBANK", "GTCO", "MTNN", "NESTLE"][i % 4], qualDay: 1, payDay: 1, shares: 333, grossKobo: 66600, taxKobo: 6660, netKobo: 59940 }); a.dividends = d; ls.setItem(K, JSON.stringify(a)); }
+      if (m === "worst") S.setScenario("naira");
+      ls.setItem("fv.seeded", m); location.replace(home + "?seed=" + m); return;
+    }
+    if (document.getElementById("fv-seed")) return;
+    if (location.pathname !== home) { location.replace(home + "?seed=" + m); return; }
+    var bar = document.createElement("div"); bar.id = "fv-seed"; bar.setAttribute("style", "position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:999;display:flex;gap:2px;padding:3px;border-radius:10px;background:#E5E7EB;font:12px system-ui,sans-serif");
+    [["demo", "Demo data"], ["worst", "Worst case"], ["empty", "Empty"], ["one", "One"], ["huge", "60 payouts"]].forEach(function (x) { var a = document.createElement("a"); a.textContent = x[1]; a.href = location.pathname + "?seed=" + x[0]; a.setAttribute("style", "padding:6px 10px;border-radius:8px;text-decoration:none;color:#111;" + (m === x[0] ? "background:#fff" : "")); bar.appendChild(a); });
+    document.body.appendChild(bar);
+  }
+  function run() { seedPractice(); ptabs(); portfolioTabs(); devToggle(); section(); scenarios(); crisis(); history(); watchlists(); reports(); }
   var tries = 0, it = setInterval(function () { if (document.querySelector("#dc-root > *")) { run(); if (++tries > 3) clearInterval(it); } else if (++tries > 80) clearInterval(it); }, 150);
 })();
