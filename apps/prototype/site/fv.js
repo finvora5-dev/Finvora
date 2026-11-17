@@ -103,6 +103,17 @@
       if (r.ok && !r.duplicate) { simSave(r.account); try { localStorage.setItem(SIM_KEY + ".last", JSON.stringify(r.trade)); } catch (e) {} }
       return r;
     },
+    /** Dividends paid up to today go into cash once, net of the 10% tax worked out in packages/domain (never taxed again). */
+    settle: function () { if (!localStorage.getItem(SIM_KEY)) return []; var r = D().settleDividends(simLoad(), simDay()); if (r.credited.length) simSave(r.account); return r.credited; },
+    /** Crisis scenarios (client review, 17 Nov 2026): run one on a copy of the portfolio and return to the real one any time.
+        Only what the practice screen shows changes; trades always use real prices. */
+    scenario: function () { try { return D().scenarioById(localStorage.getItem("fv.sim.scenario") || ""); } catch (e) { return null; } },
+    setScenario: function (id) { try { localStorage.setItem("fv.sim.scenario", id); var t = JSON.parse(localStorage.getItem("fv.sim.tried") || "[]"); if (t.indexOf(id) < 0) t.push(id); localStorage.setItem("fv.sim.tried", JSON.stringify(t)); } catch (e) {} },
+    clearScenario: function () { try { localStorage.removeItem("fv.sim.scenario"); } catch (e) {} },
+    tried: function () { try { return JSON.parse(localStorage.getItem("fv.sim.tried") || "[]"); } catch (e) { return []; } },
+    viewPrice: function (t, sc) { return D().scenarioPrice(SIM.price(t), SIM.company(t).sector, sc === undefined ? SIM.scenario() : sc); },
+    viewValuation: function (sc) { if (sc === undefined) sc = SIM.scenario(); return D().valuePortfolio(simLoad(), function (t) { return SIM.viewPrice(t, sc); }, function (t) { return D().scenarioPrice(SIM.prev(t), SIM.company(t).sector, sc); }); },
+    cutOf: function (t, sc) { return D().scenarioCut(sc === undefined ? SIM.scenario() : sc, SIM.company(t).sector); },
     last: function () { try { return JSON.parse(localStorage.getItem(SIM_KEY + ".last") || "null"); } catch (e) { return null; } },
     reset: function () { try { localStorage.removeItem(SIM_KEY); localStorage.removeItem(SIM_KEY + ".last"); localStorage.removeItem(SIM_KEY + ".queue"); } catch (e) {} },
     /** The practice market follows trading hours from packages/domain config (weekdays, Lagos time). */
@@ -859,6 +870,7 @@
   };
   FV.PLUS = PLUS;
   window.FV = FV;
+  try { SIM.settle(); } catch (e) {} // dividends paid since the last visit
   try { settlePlan(); } catch (e) {}
   // Signed-out visitors only see the welcome, sign-in and status screens (B10). Staff pages have their own sign-in.
   (function () { var m = /\/(\w+)\.dc(\.html)?$/.exec(location.pathname), n = m ? m[1] : "";

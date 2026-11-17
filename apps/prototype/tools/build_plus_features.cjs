@@ -80,17 +80,24 @@ for (const f of ['PracticeEmptyNavy.dc.html', 'PracticeEmptyLaptopNavy.dc.html']
 const TABS = [['holdings', 'Holdings'], ['insights', 'Insights'], ['dividends', 'Dividends'], ['crisis', 'Crisis']];
 const tablist = (pad) => '<div data-fv-ptabs role="tablist" aria-label="Portfolio" style="' + pad + 'display:flex;background:#EEF0F3;border-radius:10px;padding:3px">' + TABS.map(([k, t], i) => '<button type="button" role="tab" data-fv-ptab="' + k + '" aria-selected="' + (i === 0) + '" style="flex:1;min-height:40px;border:0;border-radius:8px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation;' + (i === 0 ? 'background:#FFFFFF;color:#0B192C;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)' : 'background:transparent;color:#5B6577') + '">' + t + '</button>').join('') + '</div>';
 const intro = { insights: 'What you own, how spread out it is, and how it moves compared with the market.', dividends: 'Upcoming payouts from your practice portfolio, and whether each company makes enough cash to keep paying.', crisis: 'Replay a real NGX downturn with ₦100,000, one month at a time, and choose what to do.' };
-const panels = (lap) => [['insights', '4-portfolio-intelligence'], ['dividends', '2-dividend-cashflow'], ['crisis', '8-market-crisis-simulator']].map(([k, key]) => '<div data-fv-panel="' + k + '" role="tabpanel" style="display:flex;flex-direction:column;gap:16px;margin-top:16px;font-family:Geist,system-ui,sans-serif;color:#0B192C"><p style="margin:0;font-size:14px;line-height:1.5;color:#5B6577">' + intro[k] + '</p>' + linkify(F[key]()[lap ? 'laptop' : 'phone'].slice(1).join('')) + '</div>').join('');
+const panels = () => ['insights', 'dividends', 'crisis'].map((k) => '<div data-fv-panel="' + k + '" role="tabpanel" style="display:flex;flex-direction:column;gap:16px;margin-top:16px;font-family:Geist,system-ui,sans-serif;color:#0B192C"></div>').join(''); // filled from the practice account by fvplus.js
+// Holdings (client review, 17 Nov 2026): the scenario view when one is running, average purchase price and the gain or loss in naira.
+const holdingsDetail = (f, s) => {
+  s = s.replace("const S = this.S(); if (!S) return {}; const v = S.valuation(),", "const S = this.S(); if (!S) return {}; const v = S.viewValuation ? S.viewValuation() : S.valuation(),");
+  if (f === 'PracticeNavy.dc.html') s = s.replace("qty: p.quantity.toLocaleString('en-NG') + (p.quantity === 1 ? ' share' : ' shares'), val: this.n(p.valueKobo), ch: this.ch(r),", "qty: p.quantity.toLocaleString('en-NG') + (p.quantity === 1 ? ' share' : ' shares') + ' · avg ' + this.n(p.avgCostKobo), val: this.n(p.valueKobo), ch: (p.unrealizedPlKobo >= 0 ? '▲ ' : '▼ ') + this.n(Math.abs(p.unrealizedPlKobo)) + ' (' + Math.abs(r).toFixed(1) + '%)',");
+  else s = s.replace("qty: x.quantity.toLocaleString('en-NG'), val: this.n(x.valueKobo), ch: (r >= 0 ? '▲ ' : '▼ ') + Math.abs(r).toFixed(1) + '%',", "qty: x.quantity.toLocaleString('en-NG') + ' · avg ' + this.n(x.avgCostKobo), val: this.n(x.valueKobo), ch: (x.unrealizedPlKobo >= 0 ? '▲ ' : '▼ ') + this.n(Math.abs(x.unrealizedPlKobo)) + ' (' + Math.abs(r).toFixed(1) + '%)',").replace('>Shares</span>', '>Shares · avg price</span>').replace('>Return</span>', '>Gain or loss</span>');
+  return s;
+};
 { // phone: the tabs sit above Holdings, inside the holdings section
   let s = strip(read('PracticeNavy.dc.html')).replace(/<div data-fv-ptabs[\s\S]*?<!--\/fv-ptabs-->/, '').replace(/<div data-fv-panel=[\s\S]*?<!--\/fv-panels-->/, '').replace(/<div data-fv-holdings>([\s\S]*?)<\/div><!--\/fv-holdings-->/, '$1');
   const i = s.search(/<div[^>]*><h2[^>]*>Holdings<\/h2>/), j = s.indexOf('</section>', i);
-  s = s.slice(0, i) + tablist('margin:0 0 16px;') + '<!--/fv-ptabs--><div data-fv-holdings>' + s.slice(i, j) + '</div><!--/fv-holdings-->' + panels(false) + '<!--/fv-panels-->' + s.slice(j);
-  write('PracticeNavy.dc.html', addScript(s, ''));
+  s = s.slice(0, i) + tablist('margin:0 0 16px;') + '<!--/fv-ptabs--><div data-fv-holdings>' + s.slice(i, j) + '</div><!--/fv-holdings-->' + panels() + '<!--/fv-panels-->' + s.slice(j);
+  write('PracticeNavy.dc.html', addScript(holdingsDetail('PracticeNavy.dc.html', s), ''));
 }
 { // laptop: the tabs sit above the holdings table
   let s = strip(read('PracticeLaptopNavy.dc.html')).replace(/<div data-fv-ptabs[\s\S]*?<!--\/fv-ptabs-->/, '').replace(/<div data-fv-panel=[\s\S]*?<!--\/fv-panels-->/, '').replace(' data-fv-holdings', '');
   const m = /<section([^>]*)>\s*<div[^>]*><span[^>]*>Holding<\/span>/.exec(s); const end = s.indexOf('</section>', m.index) + 10;
-  s = s.slice(0, m.index) + tablist('margin:24px 0 0;max-width:520px;') + '<!--/fv-ptabs-->' + s.slice(m.index, end).replace('<section', '<section data-fv-holdings') + panels(true) + '<!--/fv-panels-->' + s.slice(end);
-  write('PracticeLaptopNavy.dc.html', addScript(s, ''));
+  s = s.slice(0, m.index) + tablist('margin:24px 0 0;max-width:520px;') + '<!--/fv-ptabs-->' + s.slice(m.index, end).replace('<section', '<section data-fv-holdings') + panels() + '<!--/fv-panels-->' + s.slice(end);
+  write('PracticeLaptopNavy.dc.html', addScript(holdingsDetail('PracticeLaptopNavy.dc.html', s), ''));
 }
 console.log('built', pairs.length * 2, 'boards; practice tabs added');

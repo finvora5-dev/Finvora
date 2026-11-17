@@ -13,3 +13,4 @@ export * from "./search";
 export * from "./feedback";
 export * from "./review";
 export * from "./plus";
+export * from "./portfolio";

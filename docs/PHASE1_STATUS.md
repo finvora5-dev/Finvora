@@ -117,3 +117,13 @@ Built from the approved drafts (`apps/prototype/mockups/drafts-plus`), phone and
 Owner, 17 Nov 2026: portfolio intelligence, dividends and the crisis simulator live inside the practice portfolio as tabs (Holdings, Insights, Dividends, Crisis), not as their own screens.
 
 Not yet: Free users are not locked out (locked views are Phase 2); the figures do not come from the practice portfolio or real reports.
+
+### Practice portfolio, live (client review, 17 Nov 2026)
+
+Holdings is the source; the other tabs are worked out from the real practice account with tested rules in `packages/domain/src/portfolio.ts` (11 tests).
+
+- **Holdings:** shares, average purchase price, current value, gain or loss in naira and per cent.
+- **Insights:** sector concentration, dependence on one dividend payer, what is driving the gain or loss, cash share. Written from the holdings.
+- **Dividends:** expected payouts and dates from each company's simulated schedule, 10% tax taken once (the net shown as expected is exactly what enters cash; tested), this year received against still expected, who pays most, dividends received, and whether each company can keep paying (payout from profit and cash cover, explained).
+- **Crisis:** stock market crash, inflation surge, naira depreciation and interest rate increase, run on a copy of the portfolio. While one runs, Holdings, Insights and Dividends all show it; "Return to my portfolio" puts everything back and keeps which ones were tried. Real trades always use real prices.
+- Dividend amounts, company figures and scenario moves are simulated.
