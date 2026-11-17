@@ -5,7 +5,7 @@
 // Laptops (>= 1024px): the laptop board is used when one exists; 1440px boards fill the window.
 (function () {
   var DESK = 1024;
-  var PAIRS = { PlusScenariosNavy: "PlusScenariosLaptopNavy", PlusCrisisNavy: "PlusCrisisLaptopNavy", PlusReportsNavy: "PlusReportsLaptopNavy", PlusHistoryNavy: "PlusHistoryLaptopNavy", PlusAnalysisNavy: "PlusAnalysisLaptopNavy", PlusPortfolioNavy: "PlusPortfolioLaptopNavy", PlusWatchlistsNavy: "PlusWatchlistsLaptopNavy", PlusDividendsNavy: "PlusDividendsLaptopNavy", PlusRiskNavy: "PlusRiskLaptopNavy", HomeNavy: "HomeLaptopNavy", MarketsNavy: "MarketsLaptopNavy", CompanyNavy: "CompanyLaptopNavy", AskFinvoraNavy: "AskLaptopNavy",
+  var PAIRS = { PlusScenariosNavy: "PlusScenariosLaptopNavy", PlusReportsNavy: "PlusReportsLaptopNavy", PlusHistoryNavy: "PlusHistoryLaptopNavy", PlusAnalysisNavy: "PlusAnalysisLaptopNavy", PlusWatchlistsNavy: "PlusWatchlistsLaptopNavy", PlusRiskNavy: "PlusRiskLaptopNavy", HomeNavy: "HomeLaptopNavy", MarketsNavy: "MarketsLaptopNavy", CompanyNavy: "CompanyLaptopNavy", AskFinvoraNavy: "AskLaptopNavy",
     LearnNavy: "LearnLaptopNavy", LibraryNavy: "LibraryLaptopNavy", MeNavy: "MeLaptopNavy", ArticleNavy: "ArticleLaptopNavy", SearchNavy: "SearchLaptopNavy",
     EmptySearchNavy: "EmptyLaptopNavy", ErrorNavy: "ErrorLaptopNavy", OfflineNavy: "OfflineLaptopNavy", GoalNavy: "GoalLaptopNavy", LessonNavy: "LessonLaptopNavy",
     LessonDoneNavy: "LessonDoneLaptopNavy", NotificationsNavy: "NotificationsLaptopNavy", PayFailedNavy: "PayFailedLaptopNavy", PaySuccessNavy: "PayLaptopNavy",
@@ -304,13 +304,13 @@
   // (first point against last), so a list's small charts never show a falling line in green. Icons have too few points to match.
   function trendColours() {
     document.querySelectorAll('#dc-root svg path[stroke]').forEach(function (pa) {
-      var st = pa.getAttribute("stroke") || ""; if (!/^#(10B981|047857|B9473F)$/i.test(st)) return;
+      var st = pa.getAttribute("stroke") || "", dark = /^#(00E676|F2A39C)$/i.test(st); if (!dark && !/^#(10B981|047857|B9473F)$/i.test(st)) return; // dark: the light pair used on navy headers
       var f = pa.getAttribute("fill"); if (f && f !== "none") return;
       var m = (pa.getAttribute("d") || "").match(/[ML]\s*-?[\d.]+[ ,]-?[\d.]+/g); if (!m || m.length < 5) return;
       var y = function (t) { return +t.replace(/^[ML]\s*/, "").split(/[ ,]/)[1]; }, y0 = y(m[0]), y1 = y(m[m.length - 1]);
-      var fall = y1 > y0 + 0.5; if (fall === /^#B9473F$/i.test(st)) return; var want = fall ? "#B9473F" : "#10B981";
+      var fall = y1 > y0 + 0.5; if (fall === /^#(B9473F|F2A39C)$/i.test(st)) return; var want = dark ? (fall ? "#F2A39C" : "#00E676") : (fall ? "#B9473F" : "#10B981");
       pa.setAttribute("stroke", want);
-      var area = pa.previousElementSibling; if (area && area.tagName.toLowerCase() === "path" && /^#(10B981|B9473F)$/i.test(area.getAttribute("fill") || "")) area.setAttribute("fill", want);
+      var area = pa.previousElementSibling; if (area && area.tagName.toLowerCase() === "path" && /^#(10B981|B9473F|00E676|F2A39C)$/i.test(area.getAttribute("fill") || "")) area.setAttribute("fill", want);
       var dot = pa.parentNode.querySelector("circle"); if (dot && /^#(10B981|B9473F)$/i.test(dot.getAttribute("fill") || "")) dot.setAttribute("fill", want);
     });
   }

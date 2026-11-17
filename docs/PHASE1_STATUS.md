@@ -105,13 +105,15 @@ Built from the approved drafts (`apps/prototype/mockups/drafts-plus`), phone and
 | Feature | Screen | Opens from | What works |
 |---|---|---|---|
 | Finvora Risk Signals | PlusRisk | Company, Plus tools | Signals with levels; "Learn what this means" opens Ask Finvora |
-| Dividend and cash flow tracker | PlusDividends | Practice, Plus tools | Upcoming payouts, cash against dividends chart |
+| Dividend and cash flow tracker | Practice, Dividends tab | Practice portfolio | Upcoming payouts, cash against dividends chart |
 | Advanced watchlists | PlusWatchlists | Watchlist, Plus tools | Switch between lists |
-| Portfolio intelligence | PlusPortfolio | Practice, Plus tools | Return, yield, sector mix, against the market, tips |
+| Portfolio intelligence | Practice, Insights tab | Practice portfolio | Return, yield, sector mix, against the market, tips |
 | Advanced company analysis | PlusAnalysis | Company, Plus tools | Ratios against the bank average, strengths and watch-outs |
 | Historical comparisons | PlusHistory | Company, Plus tools | Switch revenue, profit, dividend, share price |
 | Financial report comparisons | PlusReports | Company, Plus tools | Choose any two of five reports |
-| Market crisis simulator | PlusCrisis | Practice, Plus tools | Three downturns, month by month, a choice each month, results at the end |
+| Market crisis simulator | Practice, Crisis tab | Practice portfolio | Three downturns, month by month, a choice each month, results at the end |
 | Interactive financial scenarios | PlusScenarios | Learn, Plus tools | Sliders worked out in kobo, three ready-made scenarios |
+
+Owner, 17 Nov 2026: portfolio intelligence, dividends and the crisis simulator live inside the practice portfolio as tabs (Holdings, Insights, Dividends, Crisis), not as their own screens.
 
 Not yet: Free users are not locked out (locked views are Phase 2); the figures do not come from the practice portfolio or real reports.

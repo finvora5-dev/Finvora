@@ -7,13 +7,10 @@ const SITE = process.argv[2];
 const { F } = require('./draft_plus_features.cjs');
 const FEAT = [ // draft key, board, title, section, back (phone)
   ['1-risk-signals', 'PlusRisk', 'Risk Signals', 'Markets', 'CompanyNavy.dc.html'],
-  ['2-dividend-cashflow', 'PlusDividends', 'Dividends and cash flow', 'Practice', 'PracticeNavy.dc.html'],
   ['3-advanced-watchlists', 'PlusWatchlists', 'Watchlists', 'Watchlist', 'PracticeWatchlistNavy.dc.html'],
-  ['4-portfolio-intelligence', 'PlusPortfolio', 'Portfolio intelligence', 'Practice', 'PracticeNavy.dc.html'],
   ['5-advanced-company-analysis', 'PlusAnalysis', 'Company analysis', 'Markets', 'CompanyNavy.dc.html'],
   ['6-historical-comparisons', 'PlusHistory', 'Historical comparisons', 'Markets', 'CompanyNavy.dc.html'],
   ['7-financial-report-comparisons', 'PlusReports', 'Compare reports', 'Markets', 'CompanyNavy.dc.html'],
-  ['8-market-crisis-simulator', 'PlusCrisis', 'Market crisis simulator', 'Practice', 'PracticeNavy.dc.html'],
   ['9-interactive-scenarios', 'PlusScenarios', 'Financial scenarios', 'Learn', 'LearnNavy.dc.html'],
 ];
 const read = (n) => fs.readFileSync(path.join(SITE, n), 'utf8');
@@ -56,7 +53,6 @@ const tools = (items, pad) => '<div data-fv-plus-tools style="' + pad + 'display
 const WAYS = [
   ['CompanyNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Analysis'], ['PlusHistoryNavy.dc.html', 'History'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:16px 0 4px;padding:0 20px;'],
   ['CompanyLaptopNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Analysis'], ['PlusHistoryNavy.dc.html', 'History'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:0 0 20px;'],
-  ['PracticeNavy.dc.html', /<h2[^>]*>Holdings<\/h2>/, [['PlusPortfolioNavy.dc.html', 'Portfolio intelligence'], ['PlusDividendsNavy.dc.html', 'Dividends'], ['PlusCrisisNavy.dc.html', 'Crisis simulator']], 'margin:0 0 20px;'],
   ['LearnNavy.dc.html', /<h2[^>]*>Next courses<\/h2>/, [['PlusScenariosNavy.dc.html', 'Financial scenarios']], 'margin:0 0 20px;'],
   ['LearnLaptopNavy.dc.html', /<h2[^>]*>All courses<\/h2>/, [['PlusScenariosNavy.dc.html', 'Financial scenarios']], 'margin:0 0 20px;'],
 ];
@@ -69,9 +65,32 @@ for (const [f, re, items, pad] of WAYS) {
   s = s.slice(0, at) + tools(items, pad) + s.slice(at); write(f, s); console.log('ways in:', f);
 }
 // Laptop practice and watchlist pages: the row goes at the end of the main column.
-for (const [f, items] of [['PracticeLaptopNavy.dc.html', [['PlusPortfolioNavy.dc.html', 'Portfolio intelligence'], ['PlusDividendsNavy.dc.html', 'Dividends'], ['PlusCrisisNavy.dc.html', 'Crisis simulator']]], ['PracticeEmptyLaptopNavy.dc.html', [['PlusCrisisNavy.dc.html', 'Crisis simulator']]], ['PracticeEmptyNavy.dc.html', [['PlusCrisisNavy.dc.html', 'Crisis simulator']]], ['PracticeWatchlistNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]], ['PracticeWatchlistLaptopNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]]]) {
+for (const [f, items] of [['PracticeWatchlistNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]], ['PracticeWatchlistLaptopNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]]]) {
   let s = read(f); if (s.includes('data-fv-plus-tools')) continue;
   let k = s.indexOf('</main>'); if (k < 0) k = s.indexOf('<p style="margin: 14px 20px 0; font-size: 12px; color: #5B6577">Simulated money. Prices delayed.</p>'); if (k < 0) k = s.indexOf('<div style="margin-top: auto; padding: 16px 24px 28px;'); if (k < 0) { console.log('no place in', f); continue; }
   s = s.slice(0, k) + tools(items, /Laptop/.test(f) ? 'margin:20px 0 0;padding:0 0 24px;' : f === 'PracticeEmptyNavy.dc.html' ? 'margin:20px 0 0;padding:0 24px;' : 'margin:16px 0 0;padding:0 20px;') + s.slice(k); write(f, s); console.log('ways in:', f);
 }
-console.log('built', pairs.length * 2, 'boards');
+
+// Owner, 17 Nov 2026: portfolio intelligence, dividends and the crisis simulator live in the practice portfolio, as tabs
+// (Holdings, Insights, Dividends, Crisis), not as their own screens.
+for (const old of ['PlusPortfolio', 'PlusDividends', 'PlusCrisis']) for (const sfx of ['Navy', 'LaptopNavy']) { const f = path.join(SITE, old + sfx + '.dc.html'); if (fs.existsSync(f)) fs.unlinkSync(f); }
+r = read('responsive.js').replace(/(PlusPortfolio|PlusDividends|PlusCrisis)Navy: "[A-Za-z]+", /g, ''); write('responsive.js', r);
+const strip = (t) => t.replace(/<div data-fv-plus-tools[\s\S]*?<\/a><\/div><\/div>/g, '');
+for (const f of ['PracticeEmptyNavy.dc.html', 'PracticeEmptyLaptopNavy.dc.html']) write(f, strip(read(f)));
+const TABS = [['holdings', 'Holdings'], ['insights', 'Insights'], ['dividends', 'Dividends'], ['crisis', 'Crisis']];
+const tablist = (pad) => '<div data-fv-ptabs role="tablist" aria-label="Portfolio" style="' + pad + 'display:flex;background:#EEF0F3;border-radius:10px;padding:3px">' + TABS.map(([k, t], i) => '<button type="button" role="tab" data-fv-ptab="' + k + '" aria-selected="' + (i === 0) + '" style="flex:1;min-height:40px;border:0;border-radius:8px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation;' + (i === 0 ? 'background:#FFFFFF;color:#0B192C;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)' : 'background:transparent;color:#5B6577') + '">' + t + '</button>').join('') + '</div>';
+const intro = { insights: 'What you own, how spread out it is, and how it moves compared with the market.', dividends: 'Upcoming payouts from your practice portfolio, and whether each company makes enough cash to keep paying.', crisis: 'Replay a real NGX downturn with ₦100,000, one month at a time, and choose what to do.' };
+const panels = (lap) => [['insights', '4-portfolio-intelligence'], ['dividends', '2-dividend-cashflow'], ['crisis', '8-market-crisis-simulator']].map(([k, key]) => '<div data-fv-panel="' + k + '" role="tabpanel" style="display:flex;flex-direction:column;gap:16px;margin-top:16px;font-family:Geist,system-ui,sans-serif;color:#0B192C"><p style="margin:0;font-size:14px;line-height:1.5;color:#5B6577">' + intro[k] + '</p>' + linkify(F[key]()[lap ? 'laptop' : 'phone'].slice(1).join('')) + '</div>').join('');
+{ // phone: the tabs sit above Holdings, inside the holdings section
+  let s = strip(read('PracticeNavy.dc.html')).replace(/<div data-fv-ptabs[\s\S]*?<!--\/fv-ptabs-->/, '').replace(/<div data-fv-panel=[\s\S]*?<!--\/fv-panels-->/, '').replace(/<div data-fv-holdings>([\s\S]*?)<\/div><!--\/fv-holdings-->/, '$1');
+  const i = s.search(/<div[^>]*><h2[^>]*>Holdings<\/h2>/), j = s.indexOf('</section>', i);
+  s = s.slice(0, i) + tablist('margin:0 0 16px;') + '<!--/fv-ptabs--><div data-fv-holdings>' + s.slice(i, j) + '</div><!--/fv-holdings-->' + panels(false) + '<!--/fv-panels-->' + s.slice(j);
+  write('PracticeNavy.dc.html', addScript(s, ''));
+}
+{ // laptop: the tabs sit above the holdings table
+  let s = strip(read('PracticeLaptopNavy.dc.html')).replace(/<div data-fv-ptabs[\s\S]*?<!--\/fv-ptabs-->/, '').replace(/<div data-fv-panel=[\s\S]*?<!--\/fv-panels-->/, '').replace(' data-fv-holdings', '');
+  const m = /<section([^>]*)>\s*<div[^>]*><span[^>]*>Holding<\/span>/.exec(s); const end = s.indexOf('</section>', m.index) + 10;
+  s = s.slice(0, m.index) + tablist('margin:24px 0 0;max-width:520px;') + '<!--/fv-ptabs-->' + s.slice(m.index, end).replace('<section', '<section data-fv-holdings') + panels(true) + '<!--/fv-panels-->' + s.slice(end);
+  write('PracticeLaptopNavy.dc.html', addScript(s, ''));
+}
+console.log('built', pairs.length * 2, 'boards; practice tabs added');
