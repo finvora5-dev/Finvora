@@ -40,7 +40,7 @@ class Component extends DCLogic {
   tick() { clearTimeout(this.t); this.t = setTimeout(() => { if (this.A() && this.A().resendIn() > 0) { this.setState({ n: Date.now() }); this.tick(); } }, 1000); }
   resendLabel() { const A = this.A(), r = A ? A.resendIn() : 0; return r > 0 ? 'Resend in 0:' + String(r).padStart(2, '0') : 'Resend code'; }
   check(code) {
-    const A = this.A(); if (!A || code.length < 6) return; { const a = A.get(); if (!a.sentAt || a.pending !== this.state.email.trim().toLowerCase()) { this.setState({ code: '' }); this.send(); return; } }
+    const A = this.A(); if (!A || code.length < 6) return; { const a = A.get(); if (!a.sentAt || a.pending !== this.state.email.trim().toLowerCase()) { if (!A.validEmail(this.state.email)) { this.setState({ tried: true, code: '' }); return; } A.sendCode(this.state.email); } }
     const r = A.verify(code);
     if (r === 'ok') { location.href = A.next(); return; }
     try { sessionStorage.setItem('fv.lastCode', code); } catch (e) {}
