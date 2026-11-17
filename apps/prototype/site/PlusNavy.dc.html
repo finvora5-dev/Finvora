@@ -21,17 +21,15 @@
   <div style="margin: -10px -24px 0; padding: 10px 24px 0"><a href="MeNavy.dc.html" aria-label="Close" style="width: 44px; height: 44px; margin-left: -12px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a></div>
   <span style="margin-top: 16px; font-size: 12px; color: #047857; font-weight: 600; text-transform: uppercase; letter-spacing: .06em">Finvora Plus</span>
   <h1 style="margin: 8px 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2">Go deeper on every company</h1>
-  <ul style="margin: 24px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; font-size: 15px">
-    <sc-for list="{{f}}" as="x" hint-placeholder-count="5"><li style="display: flex; gap: 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B192C" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none"><path d="m5 12 5 5 9-10"></path></svg>{{x.t}}</li></sc-for>
-  </ul>
-  <div role="radiogroup" aria-label="Plan" style="margin-top: 28px; display: flex; flex-direction: column; gap: 10px">
+  <ul style="margin: 20px -24px 0; padding: 0 24px; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 15px; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain"><sc-for list="{{f}}" as="x" hint-placeholder-count="10"><li style="display: flex; flex-direction: column; gap: 10px"><span style="display: {{x.hd}}; margin-top: 8px; font-size: 12px; font-weight: 600; color: #5B6577; text-transform: uppercase; letter-spacing: .06em">{{x.h}}</span><span style="display: flex; gap: 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none"><path d="m5 12 5 5 9-10"></path></svg>{{x.t}}</span></li></sc-for></ul>
+  <div role="radiogroup" aria-label="Plan" style="margin-top: 20px; flex: none; display: flex; flex-direction: column; gap: 10px">
     <sc-for list="{{plans}}" as="p" hint-placeholder-count="2">
       <button role="radio" aria-checked="{{p.on}}" onClick="{{p.pick}}" style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding: 0 16px; border-radius: 14px; border: {{p.bd}}; background: {{p.bg}}; font: inherit; cursor: pointer; color: #0B192C; text-align: left">
         <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">{{p.t}}</span><span style="font-size: 12px; color: #5B6577">{{p.s}}</span></span><span style="font-family: 'Geist Mono', monospace; font-size: 16px">{{p.pr}}</span>
       </button>
     </sc-for>
   </div>
-  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+  <div style="margin-top: 20px; flex: none; display: flex; flex-direction: column; gap: 10px">
     <a href="#" onClick="{{pay}}" style="height: 52px; border-radius: 12px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; text-decoration: none; background-color: #0B192C">Continue to payment</a>
     <p style="margin: 0; text-align: center; font-size: 12px; color: #5B6577">Paid with Paystack. Cancel anytime in Settings.</p>
   </div>
@@ -47,7 +45,7 @@ class Component extends DCLogic {
     const PR = (window.FV && window.FV.PAY) ? window.FV.PAY.PRICE : { monthly: 599900, yearly: 6598900 }, nn = (k) => '₦' + (k / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 }); /* live-prices */
     const P = [['Monthly', 'Billed every month', nn(PR.monthly)], ['Yearly', 'One month free · 11 × ' + nn(PR.monthly), nn(PR.yearly)]];
     return { pay,
-      f: ['Unlimited Finvora AI questions', 'Compare companies side by side', 'Dividend history for every company', 'Full 5-year financial statements', 'Price alerts on your watchlist'].map(t => ({ t })),
+      f: [{ t: 'Unlimited Finvora AI questions', h: '' }, { t: 'Advanced company analysis', h: 'Company analysis' }, { t: 'Historical comparisons', h: '' }, { t: 'Financial report comparisons', h: '' }, { t: 'Finvora Risk Signals', h: 'Investment intelligence' }, { t: 'Dividend and cash flow tracker', h: '' }, { t: 'Advanced watchlists', h: '' }, { t: 'Portfolio intelligence', h: '' }, { t: 'Market crisis simulator', h: 'Financial education' }, { t: 'Interactive financial scenarios', h: '' }].map(x => ({ t: x.t, h: x.h, hd: x.h ? 'block' : 'none' })),
       plans: P.map(([t, s, pr], i) => { const on = this.state.g === i; return { t, s, pr, on: String(on), pick: () => this.setState({ g: i }), bd: on ? '1.5px solid #0B192C' : '1px solid #D5D9E0', bg: on ? '#EEF0F3' : '#FFFFFF' }; })
     };
   }
