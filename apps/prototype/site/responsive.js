@@ -406,7 +406,9 @@
     if (range === "All") { var tr = S.account().trades; n = svg._pc ? 250 : Math.max(5, tr.length ? S.day() - tr[0].day + 2 : 5); }
     if (range === "1D") toast("Prices update once a day");
     var pts = svg._pc ? series(tkr(), n) : portfolioSeries(n); if (pts.length < 2) return;
-    draw(svg, pts, range + (svg._pc ? " price chart" : " portfolio value") + ", from " + nm(pts[0]) + " to " + nm(pts[pts.length - 1]));
+    // A running crisis scenario (owner, 17 Nov 2026) ends the portfolio line at its simulated value, so the drop shows.
+    var scn = !svg._pc && S.scenario && S.scenario(); if (scn) pts = pts.concat([S.viewValuation().totalKobo]);
+    draw(svg, pts, range + (svg._pc ? " price chart" : " portfolio value") + ", from " + nm(pts[0]) + " to " + nm(pts[pts.length - 1]) + (scn ? " after the " + scn.title.toLowerCase() : ""));
   }
   // The drawn range row sits right after the chart (or after its wrapper). It becomes a tab list; the drawn selected look moves with the choice.
   function rangeRow(svg) {
