@@ -53,11 +53,20 @@ for (const [a, b] of pairs) if (!r.includes(a + ': "')) r = r.replace('var PAIRS
 write('responsive.js', r);
 
 // Ways in: a "Plus tools" row on the pages each feature belongs to.
-const chip = (href, t) => '<a href="' + href + '" style="height:36px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;background:#E7F6EF;color:#047857;text-decoration:none;white-space:nowrap">' + t + '</a>';
-const tools = (items, pad) => '<div data-fv-plus-tools style="' + pad + 'display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;font-weight:600;color:#5B6577;text-transform:uppercase;letter-spacing:.06em">Plus tools</span><div style="display:flex;gap:8px;flex-wrap:wrap">' + items.map(([h, t]) => chip(h, t)).join('') + '</div></div>';
+// Plus tools (owner, 18 Nov 2026, option B): one list card, no title; each row has an icon, the name, a short line and an arrow.
+const TOOL = {
+  'PlusRiskNavy.dc.html': ['<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/>', 'Flags from the latest report'],
+  'PlusAnalysisNavy.dc.html': ['<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', 'Key ratios against similar companies'],
+  'PlusHistoryNavy.dc.html': ['<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 'Five years at a glance'],
+  'PlusReportsNavy.dc.html': ['<rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/>', 'Two statements side by side'],
+  'PlusWatchlistsNavy.dc.html': ['<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', 'Lists, numbers side by side, alerts'],
+  'PlusScenariosNavy.dc.html': ['<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>', 'What if inflation or rates change?'],
+};
+const tools = (items, pad) => '<div data-fv-plus-tools style="' + pad + '"><div style="background:#FFFFFF;border:1px solid #E3E6EB;border-radius:16px;overflow:hidden">' + items.map(([h, t], i) => { const [ic, d] = TOOL[h] || ['', ''];
+  return '<a href="' + h + '" style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px;box-sizing:border-box;' + (i ? 'border-top:1px solid #EEF0F3;' : '') + 'text-decoration:none;color:#0B192C"><span aria-hidden="true" style="width:36px;height:36px;border-radius:10px;background:#E7F6EF;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ic + '</svg></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600;display:flex;gap:8px;align-items:center">' + t + (i === 0 ? '<span style="font-size:10px;font-weight:600;color:#047857;background:#E7F6EF;border-radius:999px;padding:2px 7px">Plus</span>' : '') + '</span><span style="font-size:13px;color:#5B6577">' + d + '</span></span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA3B2" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="m9 6 6 6-6 6"/></svg></a>'; }).join('') + '</div></div>';
 const WAYS = [
-  ['CompanyNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Analysis'], ['PlusHistoryNavy.dc.html', 'History'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:16px 0 4px;padding:0 20px;'],
-  ['CompanyLaptopNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Analysis'], ['PlusHistoryNavy.dc.html', 'History'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:0 0 20px;'],
+  ['CompanyNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Company analysis'], ['PlusHistoryNavy.dc.html', 'Historical comparisons'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:16px 0 4px;padding:0 20px;'],
+  ['CompanyLaptopNavy.dc.html', /<h2[^>]*>Key statistics<\/h2>/, [['PlusRiskNavy.dc.html', 'Risk Signals'], ['PlusAnalysisNavy.dc.html', 'Company analysis'], ['PlusHistoryNavy.dc.html', 'Historical comparisons'], ['PlusReportsNavy.dc.html', 'Compare reports']], 'margin:0 0 20px;'],
   ['LearnNavy.dc.html', /<h2[^>]*>Next courses<\/h2>/, [['PlusScenariosNavy.dc.html', 'Financial scenarios']], 'margin:0 0 20px;'],
   ['LearnLaptopNavy.dc.html', /<h2[^>]*>All courses<\/h2>/, [['PlusScenariosNavy.dc.html', 'Financial scenarios']], 'margin:0 0 20px;'],
 ];
@@ -71,7 +80,7 @@ for (const [f, re, items, pad] of WAYS) {
 }
 // Laptop practice and watchlist pages: the row goes at the end of the main column.
 for (const [f, items] of [['PracticeWatchlistNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]], ['PracticeWatchlistLaptopNavy.dc.html', [['PlusWatchlistsNavy.dc.html', 'Watchlists']]]]) {
-  let s = read(f); if (s.includes('data-fv-plus-tools')) continue;
+  let s = read(f).replace(/<div data-fv-plus-tools[\s\S]*?<\/a><\/div><\/div>/, '');
   let k = s.indexOf('</main>'); if (k < 0) k = s.indexOf('<p style="margin: 14px 20px 0; font-size: 12px; color: #5B6577">Simulated money. Prices delayed.</p>'); if (k < 0) k = s.indexOf('<div style="margin-top: auto; padding: 16px 24px 28px;'); if (k < 0) { console.log('no place in', f); continue; }
   s = s.slice(0, k) + tools(items, /Laptop/.test(f) ? 'margin:20px 0 0;padding:0 0 24px;' : f === 'PracticeEmptyNavy.dc.html' ? 'margin:20px 0 0;padding:0 24px;' : 'margin:16px 0 0;padding:0 20px;') + s.slice(k); write(f, s); console.log('ways in:', f);
 }
