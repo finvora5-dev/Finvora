@@ -68,9 +68,11 @@ export function settleDividends<A extends AccountLite>(account: A, today: number
 /** Dividends due to be paid in the next `horizon` days. Already qualified payments use the shares held then. */
 export function expectedDividends(account: AccountLite, today: number, horizon = QUARTER_DAYS, cutBpsOf: (t: string) => number = () => 0, facts = DIVIDEND_FACTS) {
   const items: (ReturnType<typeof dividendEvents>[number] & { shares: number; qualified: boolean; grossKobo: number; taxKobo: number; netKobo: number })[] = [];
-  for (const t of tickersOf(account)) for (const e of dividendEvents(t, today, today + horizon, cutBpsOf(t), facts)) {
-    const shares = e.qualDay <= today ? sharesAtClose(account.trades, t, e.qualDay) : (account.holdings.find((h) => h.ticker === t)?.quantity || 0);
-    if (shares > 0) items.push({ ...e, shares, qualified: e.qualDay <= today, ...withholding(shares * e.perShareKobo) });
+  for (const t of tickersOf(account)) for (const e0 of dividendEvents(t, today, today + horizon, 0, facts)) {
+    // A payment already qualified for is not cut by a scenario: a declared dividend is still paid.
+    const qualified = e0.qualDay <= today, e = qualified ? e0 : { ...e0, perShareKobo: divRoundHalfUp(e0.perShareKobo * (10_000 - cutBpsOf(t)), 10_000) };
+    const shares = qualified ? sharesAtClose(account.trades, t, e.qualDay) : (account.holdings.find((h) => h.ticker === t)?.quantity || 0);
+    if (shares > 0) items.push({ ...e, shares, qualified, ...withholding(shares * e.perShareKobo) });
   }
   items.sort((a, b) => a.payDay - b.payDay);
   const sum = (k: "grossKobo" | "taxKobo" | "netKobo") => items.reduce((s, i) => s + i[k], 0);

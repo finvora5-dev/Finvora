@@ -722,10 +722,12 @@ function settleDividends(account, today, facts = DIVIDEND_FACTS) {
 function expectedDividends(account, today, horizon = QUARTER_DAYS, cutBpsOf = () => 0, facts = DIVIDEND_FACTS) {
     const items = [];
     for (const t of tickersOf(account))
-        for (const e of dividendEvents(t, today, today + horizon, cutBpsOf(t), facts)) {
-            const shares = e.qualDay <= today ? sharesAtClose(account.trades, t, e.qualDay) : (account.holdings.find((h) => h.ticker === t)?.quantity || 0);
+        for (const e0 of dividendEvents(t, today, today + horizon, 0, facts)) {
+            // A payment already qualified for is not cut by a scenario: a declared dividend is still paid.
+            const qualified = e0.qualDay <= today, e = qualified ? e0 : { ...e0, perShareKobo: divRoundHalfUp(e0.perShareKobo * (10_000 - cutBpsOf(t)), 10_000) };
+            const shares = qualified ? sharesAtClose(account.trades, t, e.qualDay) : (account.holdings.find((h) => h.ticker === t)?.quantity || 0);
             if (shares > 0)
-                items.push({ ...e, shares, qualified: e.qualDay <= today, ...withholding(shares * e.perShareKobo) });
+                items.push({ ...e, shares, qualified, ...withholding(shares * e.perShareKobo) });
         }
     items.sort((a, b) => a.payDay - b.payDay);
     const sum = (k) => items.reduce((s, i) => s + i[k], 0);

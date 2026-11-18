@@ -31,6 +31,11 @@ describe("scenarios", () => {
     expectedDividends(a, 0, 250, (t) => scenarioCut(crash, "Banking")); expect(JSON.stringify(a)).toBe(before);
   });
   it("dividend cuts lower expected income", () => { const crash = SCENARIOS[0]!; expect(expectedDividends(acct(), 0, 250, () => scenarioCut(crash, "Banking")).netKobo).toBeLessThan(expectedDividends(acct(), 0, 250).netKobo); });
+  it("never cuts a payment already qualified for", () => {
+    const a = acct(), full = expectedDividends(a, 25, 63).items.find((i) => i.ticker === "ZENITHBANK")!, cut = expectedDividends(a, 25, 63, () => 5000).items.find((i) => i.ticker === "ZENITHBANK")!;
+    expect(full.qualified).toBe(true); expect(cut.netKobo).toBe(full.netKobo);
+    const later = expectedDividends(a, 0, 250, () => 5000).items.find((i) => i.ticker === "ZENITHBANK" && !i.qualified)!; expect(later.perShareKobo).toBe(100);
+  });
   it("covers the four events the client asked for", () => expect(SCENARIOS.map((s) => s.id)).toEqual(["crash", "inflation", "naira", "rates"]));
 });
 
