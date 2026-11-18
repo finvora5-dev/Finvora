@@ -16,7 +16,12 @@ const FEAT = [ // draft key, board, title, section, back (phone)
 const read = (n) => fs.readFileSync(path.join(SITE, n), 'utf8');
 const write = (n, s) => fs.writeFileSync(path.join(SITE, n), s);
 function replaceMain(s, inner) { const i = s.indexOf('<main'), j = s.indexOf('>', i) + 1, k = s.indexOf('</main>', j); return s.slice(0, j) + inner + s.slice(k); }
+// Phone (owner, 18 Nov 2026: "the content is narrow"): sections run edge to edge with the 20px gutter instead of sitting in
+// bordered cards inside the page padding, so rows get the full screen width. Laptop keeps its cards.
+const PHONE_CSS = '<style data-fv-plus-css>@media (max-width: 640px){.fv-plus{padding:8px 0 110px !important;gap:12px !important}.fv-plus>:not([style*="border-radius: 16px"]){margin-left:20px;margin-right:20px}.fv-plus>div[style*="border-radius: 16px"]{border-radius:0 !important;border-left:0 !important;border-right:0 !important;padding:16px 20px !important}}</style>';
 function addScript(s, section) {
+  s = s.replace(/<style data-fv-plus-css>[\s\S]*?<\/style>/, '');
+  if (s.includes('class="fv-plus"')) s = s.replace('</head>', PHONE_CSS + '</head>');
   s = s.replace(/<body([^>]*)>/, (m, a) => '<body' + a.replace(/ data-fv-section="[^"]*"/, '') + ' data-fv-section="' + section + '">');
   if (!s.includes('src="fvplus.js"')) s = s.replace('</body>', '<script src="fvplus.js"></script>\n</body>');
   return s;
@@ -24,7 +29,7 @@ function addScript(s, section) {
 // Links inside the drafts: "Learn what this means" and "Ask Finvora" open Ask Finvora; nothing else is a control.
 const linkify = (h) => h.replace(/<span style="([^"]*)">Learn what this means<\/span>/g, '<a href="AskFinvoraNavy.dc.html" style="$1;text-decoration:none;display:inline-block;padding:12px 0;margin:-12px 0;align-self:flex-start">Learn what this means</a>')
   .replace(/<span style="([^"]*)">Ask Finvora<\/span>/g, '<a href="AskFinvoraNavy.dc.html" style="$1;text-decoration:none;display:inline-block;padding:14px 8px;margin:-14px -8px">Ask Finvora</a>');
-const wrap = (html, lap) => '<div style="display:flex;flex-direction:column;gap:16px;' + (lap ? 'padding:32px 40px 40px;max-width:1120px' : 'padding:8px 16px 110px') + ';font-family:Geist,system-ui,sans-serif;color:#0B192C">' + linkify(html) + '</div>';
+const wrap = (html, lap) => '<div class="fv-plus" style="display:flex;flex-direction:column;gap:16px;' + (lap ? 'padding:32px 40px 40px;max-width:1120px' : 'padding:8px 16px 110px') + ';font-family:Geist,system-ui,sans-serif;color:#0B192C">' + linkify(html) + '</div>';
 
 const home = read('HomeNavy.dc.html'), homeLap = read('HomeLaptopNavy.dc.html');
 const BACK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>';
