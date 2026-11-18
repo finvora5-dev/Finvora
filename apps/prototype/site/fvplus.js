@@ -132,8 +132,12 @@
   function reports() {
     var pk = byText("#dc-root span", /^(Zenith Bank FY2024|GTCO FY2024)▾$/); if (pk.length !== 2 || pk[0]._fv) return; pk[0]._fv = 1;
     var table = cardOf(byText("#dc-root span", /^Income statement$/)[0]), sel = [];
-    pk[0].parentElement.style.flexWrap = "wrap"; pk.forEach(function (p, i) { var s = document.createElement("select"); s.setAttribute("aria-label", i ? "Second report" : "First report");
-      s.setAttribute("style", "flex:1 1 170px;min-width:0;height:44px;border-radius:12px;border:1px solid #D5D9E0;background:#fff;padding:0 12px;font:inherit;font-size:16px;color:" + NAVY);
+    var row = pk[0].parentElement; row.classList.add("fv-pick"); // the two pickers with a round "vs" between (owner, 18 Nov 2026)
+    if (!document.getElementById("fv-pick-css")) { var pc = document.createElement("style"); pc.id = "fv-pick-css";
+      pc.textContent = ".fv-pick{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}.fv-pick>span{width:36px;height:36px;border-radius:50%;background:#EEF0F3;color:#5B6577;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}.fv-pick>select{width:100%}@media (max-width:640px){.fv-pick{grid-template-columns:minmax(0,1fr);gap:0}.fv-pick>span{justify-self:center;margin:-10px 0;position:relative;z-index:1;border:4px solid #F8F9FA;box-sizing:content-box}}";
+      document.head.appendChild(pc); }
+    pk.forEach(function (p, i) { var s = document.createElement("select"); s.setAttribute("aria-label", i ? "Second report" : "First report");
+      s.setAttribute("style", "min-width:0;height:48px;border-radius:12px;border:1px solid #D5D9E0;background:#fff;padding:0 12px;font:inherit;font-size:16px;color:" + NAVY);
       Object.keys(REPORTS).forEach(function (k) { var o = document.createElement("option"); o.textContent = k; s.appendChild(o); }); s.value = i ? "GTCO FY2024" : "Zenith Bank FY2024"; p.replaceWith(s); sel.push(s); s.addEventListener("change", draw); });
     var short = function (k) { return k.replace(" Holdings", "").replace(" Bank", ""); };
     var grid = "display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;padding:11px 0;border-top:1px solid " + LINE + ";font-size:14px;align-items:center";
