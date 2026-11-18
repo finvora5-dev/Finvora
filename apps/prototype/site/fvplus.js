@@ -112,23 +112,33 @@
   }
 
   /* Financial report comparisons: choose the two reports. */
-  var REPORTS = { "Zenith Bank FY2024": ["₦2.4tn", "₦0.9tn", "₦1.5tn", "₦0.7tn", "₦1.3tn", "₦1.0tn", "₦33.23"], "Zenith Bank FY2023": ["₦1.4tn", "₦0.4tn", "₦1.0tn", "₦0.5tn", "₦0.8tn", "₦0.7tn", "₦21.70"],
-    "GTCO FY2024": ["₦1.3tn", "₦0.3tn", "₦1.0tn", "₦0.4tn", "₦1.2tn", "₦1.0tn", "₦35.02"], "GTCO FY2023": ["₦0.8tn", "₦0.2tn", "₦0.6tn", "₦0.3tn", "₦0.6tn", "₦0.5tn", "₦19.21"],
-    "Access Holdings FY2024": ["₦3.5tn", "₦2.0tn", "₦1.5tn", "₦1.1tn", "₦0.9tn", "₦0.6tn", "₦17.12"] };
+  // Kobo; null where a figure is missing.
+  var REPORTS = { "Zenith Bank FY2024": [240000000000000, 90000000000000, 150000000000000, 70000000000000, 130000000000000, 100000000000000, 3323], "Zenith Bank FY2023": [140000000000000, 40000000000000, 100000000000000, 50000000000000, 80000000000000, 70000000000000, 2170],
+    "GTCO FY2024": [130000000000000, 30000000000000, 100000000000000, 40000000000000, 120000000000000, 100000000000000, 3502], "GTCO FY2023": [80000000000000, 20000000000000, 60000000000000, 30000000000000, 60000000000000, 50000000000000, 1921],
+    "Access Holdings FY2024": [350000000000000, 200000000000000, 150000000000000, 110000000000000, 90000000000000, 60000000000000, 1712] };
   /* break-ui (dev only, ?data=worst|empty|one|huge): worst realistic data at the same boundary as the demo data. */
   var MODE = (/[?&]data=(worst|empty|one|huge)\b/.exec(location.search) || [])[1] || "";
   if (MODE) {
     var W = [["Guaranty Trust Holding Company Plc", "₦58.80", "+0.4%", "4.6", "7.7%", "Alert at ₦60"], ["UBA", "₦28.40", "−12.5%", "2.9", "8.8%", ""], ["Stanbic IBTC Holdings", "₦1,250.00", "+10.0%", "—", "0.0%", "Alert at ₦1,300.50"], ["FBN Holdings", "₦23.10", "0.0%", "3.0", "—", ""], ["Nestlé Nigeria", "₦1,050.00", "−1.9%", "24.0", "3.9%", ""]];
     var huge = []; for (var h = 0; h < 156; h++) huge.push([W[h % 5][0] + (h > 4 ? " " + (h + 1) : ""), W[h % 5][1], W[h % 5][2], W[h % 5][3], W[h % 5][4], ""]);
     LISTS["Banks · 4"] = MODE === "worst" ? W : MODE === "empty" ? [] : MODE === "one" ? [W[1]] : huge;
-    REPORTS["Stanbic IBTC Holdings FY2024"] = ["₦12.84tn", "₦11.9tn", "₦0.94tn", "₦1.27tn", "−₦0.33tn", "−₦0.31tn", "−₦2.41"];
-    REPORTS["Guaranty Trust Holding Company FY2024"] = ["₦12,840.55bn", "₦3,301.12bn", "₦9,539.43bn", "₦4,118.90bn", "₦5,420.53bn", "₦4,876.00bn", "—"];
+    REPORTS["Stanbic IBTC Holdings FY2024"] = [1284000000000000, 1190000000000000, 94000000000000, 127000000000000, -33000000000000, -31000000000000, -241];
+    REPORTS["Guaranty Trust Holding Company FY2024"] = [1284055000000000, 330112000000000, 953943000000000, 411890000000000, 542053000000000, 487600000000000, null];
   }
   function devToggle() { if (!MODE && !/[?&]data=demo\b/.test(location.search)) return; if (document.getElementById("fv-data")) return;
     var bar = document.createElement("div"); bar.id = "fv-data"; bar.setAttribute("style", "position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:999;display:flex;gap:2px;padding:3px;border-radius:10px;background:#E5E7EB;font:12px system-ui,sans-serif");
     ["demo", "worst", "empty", "one", "huge"].forEach(function (m) { var a = document.createElement("a"); a.textContent = { demo: "Demo data", worst: "Worst case", empty: "Empty", one: "One", huge: "156 rows" }[m]; a.href = location.pathname + "?data=" + m;
       a.setAttribute("style", "padding:6px 10px;border-radius:8px;text-decoration:none;color:#111;" + ((MODE || "demo") === m ? "background:#fff" : "")); bar.appendChild(a); });
     document.body.appendChild(bar); }
+  var SHORT = { "Zenith Bank": "Zenith", "GTCO": "GTCO", "Guaranty Trust Holding Company": "GTCO", "Stanbic IBTC Holdings": "Stanbic IBTC", "Access Holdings": "Access" };
+  var reportName = function (k) { var m = /^(.*) (FY\d{4})$/.exec(k); return m ? (SHORT[m[1]] || m[1]) + " " + m[2] : k; };
+  var reportType = function () { return "bank"; }; // every practice report is a bank's; only reports of the same type are compared
+  /* One unit per row so figures compare at a glance: trillions once the row reaches ₦1tn, else billions. Earnings a share in naira. */
+  function fmtRow(vals, perShare) {
+    if (perShare) return vals.map(function (v) { return v === null ? "—" : (v < 0 ? "−" : "") + "₦" + (Math.abs(v) / 100).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); });
+    var big = Math.max.apply(null, vals.map(function (v) { return Math.abs(v || 0); })) >= 1e14, div = big ? 1e14 : 1e11, u = big ? "tn" : "bn";
+    return vals.map(function (v) { return v === null ? "—" : (v < 0 ? "−" : "") + "₦" + (Math.abs(v) / div).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + u; });
+  }
   var LINES = ["Interest income", "Interest expense", "Net interest income", "Operating costs", "Profit before tax", "Profit after tax", "Earnings a share"];
   function reports() {
     var pk = byText("#dc-root span", /^(Zenith Bank FY2024|GTCO FY2024)▾$/); if (pk.length !== 2 || pk[0]._fv) return; pk[0]._fv = 1;
@@ -139,18 +149,19 @@
       document.head.appendChild(pc); }
     pk.forEach(function (p, i) { var s = document.createElement("select"); s.setAttribute("aria-label", i ? "Second report" : "First report");
       s.setAttribute("style", "min-width:0;height:48px;border-radius:12px;border:1px solid #D5D9E0;background:#fff;padding:0 12px;font:inherit;font-size:16px;color:" + NAVY);
-      Object.keys(REPORTS).forEach(function (k) { var o = document.createElement("option"); o.textContent = k; s.appendChild(o); }); s.value = i ? "GTCO FY2024" : "Zenith Bank FY2024"; p.replaceWith(s); sel.push(s); s.addEventListener("change", draw); });
-    var short = function (k) { return k.replace(" Holdings", "").replace(" Bank", ""); };
+      Object.keys(REPORTS).forEach(function (k) { var o = document.createElement("option"); o.value = k; o.textContent = reportName(k); o.title = k; s.appendChild(o); }); s.value = i ? "GTCO FY2024" : "Zenith Bank FY2024"; p.replaceWith(s); sel.push(s); s.addEventListener("change", draw); });
+    var short = reportName;
+    var sameType = function () { Array.prototype.forEach.call(sel[1].options, function (o) { o.disabled = reportType(o.value) !== reportType(sel[0].value); }); };
     var grid = "display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;padding:11px 0;border-top:1px solid " + LINE + ";font-size:14px;align-items:center";
     var take = cardOf(byText("#dc-root h2", /^What stands out$/)[0]);
-    var num = function (v) { var m = /([−-])?₦([\d.,]+)(tn|bn)?/.exec(v); if (!m) return 0; var n = parseFloat(m[2].replace(/,/g, "")) * (m[3] === "bn" ? 0.001 : 1); return m[1] ? -n : n; };
+    var num = function (v) { return v || 0; };
     var cell = function (v) { return /^[−-]/.test(v) ? '<span style="color:' + RED + '">' + v + "</span>" : v; };
-    function draw() { var a = REPORTS[sel[0].value], b = REPORTS[sel[1].value];
-      table.innerHTML = '<div style="' + grid + ';border-top:0;font-size:12px;color:' + MUTE + '"><span>Income statement</span><span style="text-align:right">' + short(sel[0].value) + '</span><span style="text-align:right">' + short(sel[1].value) + "</span></div>" + LINES.map(function (l, i) { return '<div style="' + grid + (i === 5 ? ";font-weight:600" : "") + '"><span>' + l + '</span><span style="' + mono + ';text-align:right">' + cell(a[i]) + '</span><span style="' + mono + ';text-align:right">' + cell(b[i]) + "</span></div>"; }).join("");
+    function draw() { sameType(); var a = REPORTS[sel[0].value], b = REPORTS[sel[1].value];
+      table.innerHTML = '<div style="' + grid + ';border-top:0;font-size:12px;color:' + MUTE + '"><span>Income statement</span><span style="text-align:right">' + short(sel[0].value) + '</span><span style="text-align:right">' + short(sel[1].value) + "</span></div>" + LINES.map(function (l, i) { var f = fmtRow([a[i], b[i]], i === 6); return '<div style="' + grid + (i === 5 ? ";font-weight:600" : "") + '"><span>' + l + '</span><span style="' + mono + ';text-align:right">' + cell(f[0]) + '</span><span style="' + mono + ';text-align:right">' + cell(f[1]) + "</span></div>"; }).join("");
       if (take) { var na = short(sel[0].value), nb = short(sel[1].value), pts = [];
         if (sel[0].value === sel[1].value) pts.push("You picked the same report twice. Choose another to compare.");
         else { var ia = num(a[0]), ib = num(b[0]), pa = num(a[5]), pb = num(b[5]), ma = ia ? pa / ia : 0, mb = ib ? pb / ib : 0;
-          pts.push(ia === ib ? na + " and " + nb + " earn about the same interest." : (ia > ib ? na : nb) + " earns more interest income.");
+          pts.push(Math.abs(ia - ib) <= 0.02 * Math.max(Math.abs(ia), Math.abs(ib)) ? na + " and " + nb + " earn about the same interest income." : (ia > ib ? na : nb) + " earns more interest income.");
           if (pa < 0 || pb < 0) pts.push(pa < 0 && pb < 0 ? "Both made a loss." : (pa < 0 ? na : nb) + " made a loss after tax.");
           else pts.push(Math.abs(ma - mb) < 0.02 ? "Both keep a similar share of their interest income as profit." : (ma > mb ? na : nb) + " keeps more of its interest income as profit."); }
         take.innerHTML = '<h2 style="margin:0;font-size:15px;font-weight:600">What stands out</h2>' + pts.map(function (t) { return '<div style="padding:10px 0;border-top:1px solid ' + LINE + ';font-size:14px;line-height:1.5">' + t + "</div>"; }).join(""); } }
