@@ -122,6 +122,7 @@
     var huge = []; for (var h = 0; h < 156; h++) huge.push([W[h % 5][0] + (h > 4 ? " " + (h + 1) : ""), W[h % 5][1], W[h % 5][2], W[h % 5][3], W[h % 5][4], ""]);
     LISTS["Banks · 4"] = MODE === "worst" ? W : MODE === "empty" ? [] : MODE === "one" ? [W[1]] : huge;
     REPORTS["Stanbic IBTC Holdings FY2024"] = ["₦12.84tn", "₦11.9tn", "₦0.94tn", "₦1.27tn", "−₦0.33tn", "−₦0.31tn", "−₦2.41"];
+    REPORTS["Guaranty Trust Holding Company FY2024"] = ["₦12,840.55bn", "₦3,301.12bn", "₦9,539.43bn", "₦4,118.90bn", "₦5,420.53bn", "₦4,876.00bn", "—"];
   }
   function devToggle() { if (!MODE && !/[?&]data=demo\b/.test(location.search)) return; if (document.getElementById("fv-data")) return;
     var bar = document.createElement("div"); bar.id = "fv-data"; bar.setAttribute("style", "position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:999;display:flex;gap:2px;padding:3px;border-radius:10px;background:#E5E7EB;font:12px system-ui,sans-serif");
